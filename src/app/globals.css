@@ -5,27 +5,6 @@
   --foreground: #333333;
 }
 
-/* Mode manuel sombre */
-.dark {
-  --background: #EDEAE5;
-  --foreground: #333333;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-/* Mode système sombre */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #EDEAE5;
-    --foreground: #333333;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);

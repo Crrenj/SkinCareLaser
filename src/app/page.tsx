@@ -46,6 +46,38 @@ export default function Home() {
           <p className="text-gray-700">// …contenu des avis des clients…</p>
         </section>
         {/* --------------------------------------------------------------- */}
+
+        {/* Section Horaires & Contact */}
+        <section className="mt-12 flex flex-col lg:flex-row gap-6">
+          {/* Infos à gauche */}
+          <div className="flex-1 space-y-2">
+            <h2 className="text-xl font-semibold">Horaires & Contact</h2>
+            <p><strong>Horaires:</strong> Lundi - Vendredi : 6h30 - 17h00</p>
+            <p><strong>Adresse:</strong> Calle Jesus de Galindez Esq. Calle 3, Cerros de Gurabo, Santiago, République Dominicaine</p>
+            <p>
+              <strong>Téléphone:</strong>{' '}
+              <a href="tel:+18097243940" className="text-blue-500">+1 809 724 3940</a>
+            </p>
+            <p>
+              <strong>Email:</strong>{' '}
+              <a href="mailto:skin@skinlacercenter.net" className="text-blue-500">
+                skin@skinlacercenter.net
+              </a>
+            </p>
+          </div>
+          {/* Plan Google Maps à droite */}
+          <div className="flex-1 h-64">
+            <iframe
+              src="https://maps.google.com/maps?q=Calle%20Jesus%20de%20Galindez%20Esq%20Calle%203%20Cerros%20de%20Gurabo%20Santiago%20República%20Dominicana&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </section>
       </main>
 
       <Footer />
