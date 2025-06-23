@@ -50,12 +50,18 @@ export default function Footer() {
             <li>Taches</li>
           </ul>
         </div>
-        {/* Colonne 4 : SERVICE */}
+        {/* Colonne 4 : SERVICE + MARQUE */}
         <div>
           <h3 className="font-semibold mb-2">SERVICE</h3>
           <ul className="space-y-1 text-sm">
-            <li>Contact</li>                   {/* ajouté */}
-            <li>Nos points de vente</li>       {/* ajouté */}
+            <li>Contact</li>
+            <li>Nos points de vente</li>
+          </ul>
+          <h3 className="font-semibold mt-4 mb-2">MARQUE</h3>
+          <ul className="space-y-1 text-sm">
+            <li>À propos de nous</li>
+            <li>Nos valeurs</li>
+            <li>Notre équipe</li>
           </ul>
         </div>
       </div>
