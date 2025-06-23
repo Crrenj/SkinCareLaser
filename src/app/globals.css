@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #EDEAE5;      /* Fond principal */
-  --foreground: #333333;      /* Texte par défaut (plus lisible) */
-  /* Vous pouvez ajouter d'autres variables si nécessaire */
+  --background: #EDEAE5;
+  --foreground: #333333;
+}
+
+/* Mode manuel sombre */
+.dark {
+  --background: #EDEAE5;
+  --foreground: #333333;
 }
 
 @theme inline {
@@ -13,11 +18,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Mode sombre pour un contraste adapté */
+/* Mode système sombre */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #222222;
-    --foreground: #f0f0f0;
+    --background: #EDEAE5;
+    --foreground: #333333;
   }
 }
 

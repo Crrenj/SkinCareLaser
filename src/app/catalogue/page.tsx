@@ -3,13 +3,6 @@ import Image from 'next/image'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 
-type Product = {
-  id: string
-  name: string
-  price_dop: number
-  image_url: string | null
-}
-
 export default async function Catalogue() {
   const { data: products, error } = await supabase
     .from('products')
@@ -22,9 +15,9 @@ export default async function Catalogue() {
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
-      <main className="p-6" style={{ backgroundColor: '#EDEAE5' }}>
+      <main className="flex-grow p-6">
         <h1 className="text-2xl font-bold mb-4">Catalogue de produits</h1>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
           {products?.map((p) => (
@@ -43,6 +36,6 @@ export default async function Catalogue() {
         </div>
       </main>
       <Footer />
-    </>
+    </div>
   )
 }
