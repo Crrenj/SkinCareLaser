@@ -6,7 +6,13 @@ import Footer from '@/components/Footer'
 export default async function Catalogue() {
   const { data: products, error } = await supabase
     .from('products')
-    .select('id,name,price_dop,image_url')
+    .select(`
+      id,
+      name,
+      price,
+      currency,
+      product_images ( url, alt )
+    `)
     .limit(12)
 
   if (error) {
@@ -23,14 +29,14 @@ export default async function Catalogue() {
           {products?.map((p) => (
             <article key={p.id} className="border rounded-lg p-3">
               <Image
-                src={p.image_url ?? '/placeholder.png'}
-                alt={p.name}
+                src={p.product_images?.[0]?.url ?? '/placeholder.png'}
+                alt={p.product_images?.[0]?.alt ?? p.name}
                 width={300}
                 height={300}
                 className="w-full h-40 object-cover rounded"
               />
-              <h2 className="mt-2 text-sm font-semibold">{p.name}</h2>
-              <p className="text-primary font-bold">{p.price_dop} DOP</p>
+              <h2 className="mt-2 font-semibold">{p.name}</h2>
+              <p className="text-lg">{p.price} {p.currency}</p>
             </article>
           ))}
         </div>
