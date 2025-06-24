@@ -2,6 +2,8 @@ import { supabase } from '@/lib/supabaseClient'
 import Image from 'next/image'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
+import ProductCard from '@/components/ProductCard'
+import { Search } from 'lucide-react' // ajout icône loupe
 
 export default async function Catalogue() {
   const { data: products, error } = await supabase
@@ -24,21 +26,27 @@ export default async function Catalogue() {
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
       <main className="flex-grow p-6">
-        <h1 className="text-2xl font-bold mb-4">Catalogue de produits</h1>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products?.map((p) => (
-            <article key={p.id} className="border rounded-lg p-3">
-              <Image
-                src={p.product_images?.[0]?.url ?? '/placeholder.png'}
-                alt={p.product_images?.[0]?.alt ?? p.name}
-                width={300}
-                height={300}
-                className="w-full h-40 object-cover rounded"
-              />
-              <h2 className="mt-2 font-semibold">{p.name}</h2>
-              <p className="text-lg">{p.price} {p.currency}</p>
-            </article>
-          ))}
+        {/* Ligne 1 : barre de recherche */}
+        <div className="flex justify-center mb-6">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20}/>
+            <input
+              type="text"
+              placeholder="Rechercher un produit…"
+              className="pl-10 pr-3 py-2 w-full border rounded-lg focus:outline-none"
+            />
+          </div>
+        </div>
+        {/* Ligne 2 : filtre + produits */}
+        <div className="flex gap-6">
+          <aside className="w-1/5">
+            {/* ...filtres (checkboxes, select, etc.)... */}
+          </aside>
+          <section className="w-4/5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+            {products?.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </section>
         </div>
       </main>
       <Footer />
