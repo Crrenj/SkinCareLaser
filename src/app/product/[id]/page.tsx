@@ -3,6 +3,8 @@ import { PlusCircle } from 'lucide-react'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabaseClient'
+import ProductDetailCard from '@/components/ProductDetailCard'
+import Link from 'next/link'
 
 type Product = {
   id: string
@@ -11,12 +13,13 @@ type Product = {
   price: number
   currency: string
   product_images?: { url: string; alt: string }[]
+  product_tags?: { tag: { name: string; tag_type: string } }[]
 }
 
 export default async function ProductPage(
   { params: { id } }: { params: { id: string } }
 ) {
-  // fetch réel du produit
+  // fetch réel du produit avec images + tags
   const { data: product, error } = await supabase
     .from('products')
     .select(`
@@ -25,7 +28,8 @@ export default async function ProductPage(
       description,
       price,
       currency,
-      product_images ( url, alt )
+      product_images ( url, alt ),
+      product_tags ( tag:tags(name,tag_type) )
     `)
     .eq('id', id)
     .single()
@@ -33,35 +37,36 @@ export default async function ProductPage(
     console.error(error)
     return <p className="p-6">Produit non trouvé</p>
   }
+
+  // extraire et grouper les tags
+  const tags = product.product_tags?.map(pt => pt.tag).flat() ?? []
+  const tagsByType: Record<string,string[]> = {}
+  tags.forEach(t => {
+    tagsByType[t.tag_type] ||= []
+    tagsByType[t.tag_type].push(t.name)
+  })
+
   const images = product.product_images
 
   return (
     <>
       <NavBar />
+      {/* Breadcrumb avec marge accrue */}
+      <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto px-4 text-sm text-gray-500 mt-8">
+        <ol className="flex space-x-2">
+          <li><Link href="/">Accueil</Link></li>
+          <li>/</li>
+          <li><Link href="/catalogue">Catalogue</Link></li>
+          <li>/</li>
+          <li aria-current="page" className="text-gray-700">{product.name}</li>
+        </ol>
+      </nav>
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* colonne image */}
-          <div className="flex justify-center">
-            <Image
-              src={images?.[0]?.url || '/placeholder.png'}
-              alt={images?.[0]?.alt || product.name}
-              width={500}
-              height={500}
-              className="object-contain"
-            />
-          </div>
-          {/* colonne détails */}
-          <div className="flex flex-col justify-center space-y-6">
-            <h1 className="text-2xl font-semibold">{product.name}</h1>
-            <p className="text-gray-600">{product.description}</p>
-            <p className="text-xl font-bold">
-              {product.price.toFixed(2)} {product.currency}
-            </p>
-            <button className="flex items-center justify-center px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-dark">
-              <PlusCircle className="mr-2" size={20} /> Add to cart
-            </button>
-          </div>
-        </div>
+        <ProductDetailCard
+          product={product}
+          images={images}
+          tagsByType={tagsByType}
+        />
       </div>
       <Footer />
     </>

@@ -22,7 +22,7 @@ export default function ProductCard({ product }: Props) {
         alt={product.images?.[0]?.alt ?? product.name}
         width={400}
         height={400}
-        className="w-full h-60 object-cover rounded"
+        className="w-full aspect-square object-cover rounded"
       />
       <h2 className="mt-2 text-xl font-semibold text-center">{product.name}</h2>
       {product.description && (
@@ -31,7 +31,11 @@ export default function ProductCard({ product }: Props) {
         </p>
       )}
       <div className="mt-auto flex justify-between items-center">
-        <button className="text-primary">
+        <button
+          type="button"
+          aria-label="Ajouter au panier"
+          className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+        >
           <PlusCircle size={24} />
         </button>
         <p className="text-lg font-bold">{price} {product.currency}</p>
