@@ -30,8 +30,14 @@ export default function NavBar() {
         </div>
 
         {/* logo centré (z-index inférieur) */}
-        <div className="absolute inset-x-0 flex justify-center">
-          <Image src="/image/logo_trans.png" alt="Logo" width={100} height={100} />
+        <div className="absolute inset-x-0 -top-2 flex justify-center">
+          <Image
+            src="/image/logo_trans.png"
+            alt="Logo"
+            width={140}
+            height={140}
+            className="w-36 h-36 object-contain"
+          />
         </div>
 
         {/* icônes + texte à droite */}
@@ -44,10 +50,10 @@ export default function NavBar() {
       </div>
 
       {/* ligne 2 */}
-      <nav className="flex justify-center gap-6 h-12 items-center text-sm text-gray-600">
-        <a href="/">Accueil</a>
-        <a href="/catalogue">Catalogue</a>
-        <a href="#">Prendre RDV</a>
+      <nav className="flex justify-center gap-6 h-16 items-center text-lg text-gray-700">
+        <a href="/" className="hover:text-gray-900">Accueil</a>
+        <a href="/catalogue" className="hover:text-gray-900">Catalogue</a>
+        <a href="/rdv" className="hover:text-gray-900">Prendre RDV</a>
       </nav>
     </header>
   )
