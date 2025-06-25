@@ -30,7 +30,7 @@ export default function NavBar() {
         </div>
 
         {/* logo centré (z-index inférieur) */}
-        <div className="absolute inset-x-0 -top-2 flex justify-center">
+        <div className="absolute inset-x-0 -top-4 flex justify-center">
           <Image
             src="/image/logo_trans.png"
             alt="Logo"
@@ -50,7 +50,7 @@ export default function NavBar() {
       </div>
 
       {/* ligne 2 */}
-      <nav className="flex justify-center gap-6 h-16 items-center text-lg text-gray-700">
+      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-gray-700">
         <a href="/" className="hover:text-gray-900">Accueil</a>
         <a href="/catalogue" className="hover:text-gray-900">Catalogue</a>
         <a href="/rdv" className="hover:text-gray-900">Prendre RDV</a>
