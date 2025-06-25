@@ -34,21 +34,6 @@ export default async function Catalogue() {
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
       <main className="flex-grow p-6">
-        {/* Recherche */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-full max-w-md">
-            <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Rechercher un produit…"
-              className="pl-10 pr-3 py-2 w-full border rounded-lg focus:outline-none"
-            />
-          </div>
-        </div>
-
         <CatalogueClient
           initialProducts={products ?? []}
           itemsByType={itemsByType}

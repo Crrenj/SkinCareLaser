@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo } from 'react'
+import { Search } from 'lucide-react'
 import Filters from './Filters'
 import SortSelector from './SortSelector'
 import ProductCard from './ProductCard'
@@ -20,44 +21,63 @@ type Props = {
 }
 
 export default function CatalogueClient({ initialProducts, itemsByType }: Props) {
+  const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Record<string,string[]>>({})
 
   const filtered = useMemo(() => {
-    return initialProducts.filter(p =>
-      Object.entries(filters).every(([key, vals]) => {
-        if (!vals.length) return true
-        const tags = p.product_tags
-          .map(pt => pt.tag)
-          .flat()
-          .filter(t => t.tag_type === key)
-          .map(t => t.name)
-        return vals.some(v => tags.includes(v))
-      })
-    )
-  }, [initialProducts, filters])
+    return initialProducts
+      .filter(p => 
+        p.name.toLowerCase().includes(search.toLowerCase())
+      )
+      .filter(p =>
+        Object.entries(filters).every(([key, vals]) => {
+          if (!vals.length) return true
+          const tags = p.product_tags
+            .map(pt => pt.tag)
+            .flat()
+            .filter(t => t.tag_type === key)
+            .map(t => t.name)
+          return vals.some(v => tags.includes(v))
+        })
+      )
+  }, [initialProducts, search, filters])
 
   return (
-    <div className="flex gap-6 items-start">
-      <Filters itemsByType={itemsByType} onChange={setFilters} />
-      <section className="flex-1">
-        <div className="flex justify-end mb-4">
-          <SortSelector />
+    <div className="flex flex-col gap-6 items-start">
+      <div className="flex justify-center w-full mb-4">
+        <div className="relative w-full max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20}/>
+          <input
+            type="text"
+            placeholder="Rechercher un produit…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="pl-10 pr-3 py-2 w-full border rounded-lg focus:outline-none"
+          />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filtered.map(p => (
-            <ProductCard
-              key={p.id}
-              product={{
-                id: p.id,
-                name: p.name,
-                price: p.price,
-                currency: p.currency,
-                images: p.product_images
-              }}
-            />
-          ))}
-        </div>
-      </section>
+      </div>
+      <div className="flex gap-6 items-start">
+        <Filters itemsByType={itemsByType} onChange={setFilters} />
+        <section className="flex-1">
+          <div className="flex justify-end mb-4">
+            <SortSelector />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {filtered.map(p => (
+              <ProductCard
+                key={p.id}
+                product={{
+                  id: p.id,
+                  name: p.name,
+                  price: p.price,
+                  currency: p.currency,
+                  images: p.product_images
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

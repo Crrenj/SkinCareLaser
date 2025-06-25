@@ -22,13 +22,13 @@ export default function Filters({ itemsByType, onChange }: Props) {
   const toggleSection = (key: string) =>
     setOpen(prev => ({ ...prev, [key]: !prev[key] }))
 
-  const toggleItem = (key: string, item: string) => {
+  const toggleItem = (tagType: string, item: string) => {
     setSelected(prev => {
-      const list = prev[key] ?? []
+      const list = prev[tagType] ?? []
       const next = list.includes(item)
         ? list.filter(i => i !== item)
         : [...list, item]
-      return { ...prev, [key]: next }
+      return { ...prev, [tagType]: next }
     })
   }
 
@@ -54,8 +54,8 @@ export default function Filters({ itemsByType, onChange }: Props) {
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={selected[key]?.includes(item) || false}
-                      onChange={() => toggleItem(key, item)}
+                      checked={selected[tagType]?.includes(item) || false}
+                      onChange={() => toggleItem(tagType, item)}
                       className="mr-2"
                     />
                     {item}
