@@ -15,6 +15,8 @@ type Product = {
   currency: string
   product_images: { url: string; alt: string }[]
   product_tags: { tag: Tag[] }[]
+  brand?: string
+  range?: string
 }
 
 type Props = {
@@ -82,20 +84,28 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
         <Filters itemsByType={itemsByType} onChange={setFilters} />
         <section className="flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
-            {paginated.map(p => (
-              <Link key={p.id} href={`/product/${p.id}`} className="block h-full">
-                <ProductCard
-                  product={{
-                    id: p.id,
-                    name: p.name,
-                    description: p.description,
-                    price: p.price,
-                    currency: p.currency,
-                    images: p.product_images
-                  }}
-                />
-              </Link>
-            ))}
+            {paginated.map(p => {
+              const allTags = p.product_tags.flatMap(pt => pt.tag)
+              const brandTag = allTags.find(t => t.tag_type === 'brand')?.name
+              const rangeTag = allTags.find(t => t.tag_type === 'range')?.name
+
+              return (
+                <Link key={p.id} href={`/product/${p.id}`} className="block h-full">
+                  <ProductCard
+                    product={{
+                      id: p.id,
+                      name: p.name,
+                      description: p.description,
+                      price: p.price,
+                      currency: p.currency,
+                      images: p.product_images,
+                      brand: brandTag,
+                      range: rangeTag
+                    }}
+                  />
+                </Link>
+              )
+            })}
           </div>
           {/* Pagination */}
           <nav className="w-full mt-6">

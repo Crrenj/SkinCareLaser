@@ -57,7 +57,10 @@ export default async function ProductPage() {
     name: string
     price: number
     currency: string
-    product_images?: { url: string; alt: string }[]
+    description?: string
+    images?: { url: string; alt: string }[]
+    brand?: string
+    range?: string
   }[] = []
   if (rangeTag) {
     const { data: allProds, error: simError } = await supabase
@@ -66,6 +69,7 @@ export default async function ProductPage() {
         id,
         name,
         price,
+        description,
         currency,
         product_images ( url, alt ),
         product_tags ( tag:tags(name,tag_type) )
@@ -74,16 +78,27 @@ export default async function ProductPage() {
     similarProducts = (allProds ?? [])
       .filter(p =>
         p.id !== id &&
-        p.product_tags?.some(pt => pt.tag && 'name' in pt.tag && pt.tag.name === rangeTag)
+        p.product_tags?.some(pt => {
+          const tag = pt.tag as unknown as { name: string; tag_type: string };
+          return tag.name === rangeTag;
+        })
       )
       .slice(0, 5)
-      .map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        currency: p.currency,
-        product_images: p.product_images
-      }))
+      .map(p => {
+        const tags = p.product_tags?.map(pt => pt.tag).flat() ?? []
+        const brand = tags.find(t => t.tag_type === 'brand')?.name
+        const range = tags.find(t => t.tag_type === 'range')?.name
+        return {
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          currency: p.currency,
+          description: p.description,
+          images: p.product_images,
+          brand,
+          range
+        }
+      })
   }
 
   return (
@@ -122,18 +137,10 @@ export default async function ProductPage() {
       <section className="max-w-6xl mx-auto px-4 py-8">
         <h2 className="text-2xl font-semibold mb-4">Produits similaires</h2>
         {similarProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {similarProducts.map(p => (
               <Link key={p.id} href={`/product/${p.id}`} className="block h-full">
-                <ProductCard
-                  product={{
-                    id: p.id,
-                    name: p.name,
-                    price: p.price,
-                    currency: p.currency,
-                    images: p.product_images
-                  }}
-                />
+                <ProductCard product={p}/>
               </Link>
             ))}
           </div>

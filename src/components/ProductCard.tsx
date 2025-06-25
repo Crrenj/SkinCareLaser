@@ -9,6 +9,8 @@ type Product = {
   price: number
   currency: string
   images?: ProductImage[]
+  brand?: string
+  range?: string
 }
 
 type Props = { product: Product }
@@ -24,6 +26,13 @@ export default function ProductCard({ product }: Props) {
         height={400}
         className="w-full aspect-square object-cover rounded"
       />
+      {/* affichage de la marque et de la gamme */}
+      {product.brand && (
+        <p className="mt-2 text-sm text-gray-500">{product.brand}</p>
+      )}
+      {product.range && (
+        <p className="text-xs uppercase text-gray-500">{product.range}</p>
+      )}
       <h2 className="mt-2 text-xl font-semibold text-center">{product.name}</h2>
       {product.description && (
         <p className="mt-4 mb-4 text-sm text-gray-600 text-center">
