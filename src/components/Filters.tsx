@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 
 const FILTER_SECTIONS = [
   { key: 'brands',     title: 'MARQUES',     tagType: 'brand' },
+  { key: 'skinType',   title: 'TYPE DE PEAU',tagType: 'skin_type' },
   { key: 'types',      title: 'TYPES',       tagType: 'category' },
   { key: 'needs',      title: 'BESOINS',     tagType: 'need' },
   { key: 'ranges',     title: 'GAMMES',      tagType: 'range' },

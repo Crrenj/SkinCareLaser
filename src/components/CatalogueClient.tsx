@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
+import Link from 'next/link'
 import Filters from './Filters'
 import SortSelector from './SortSelector'
 import ProductCard from './ProductCard'
@@ -80,19 +81,20 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
       <div className="flex gap-6 items-start">
         <Filters itemsByType={itemsByType} onChange={setFilters} />
         <section className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
             {paginated.map(p => (
-              <ProductCard
-                key={p.id}
-                product={{
-                  id: p.id,
-                  name: p.name,
-                  description: p.description,
-                  price: p.price,
-                  currency: p.currency,
-                  images: p.product_images
-                }}
-              />
+              <Link key={p.id} href={`/product/${p.id}`} className="block h-full">
+                <ProductCard
+                  product={{
+                    id: p.id,
+                    name: p.name,
+                    description: p.description,
+                    price: p.price,
+                    currency: p.currency,
+                    images: p.product_images
+                  }}
+                />
+              </Link>
             ))}
           </div>
           {/* Pagination */}
