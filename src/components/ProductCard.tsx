@@ -34,7 +34,7 @@ export default function ProductCard({ product }: Props) {
         <button
           type="button"
           aria-label="Ajouter au panier"
-          className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors"
+          className="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors"
         >
           <PlusCircle size={24} />
         </button>

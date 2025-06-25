@@ -4,6 +4,7 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { supabase } from '@/lib/supabaseClient'
 import ProductDetailCard from '@/components/ProductDetailCard'
+import ProductCard from '@/components/ProductCard'
 import Link from 'next/link'
 
 type Product = {
@@ -16,9 +17,10 @@ type Product = {
   product_tags?: { tag: { name: string; tag_type: string } }[]
 }
 
-export default async function ProductPage(
-  { params: { id } }: { params: { id: string } }
-) {
+export default async function ProductPage() {  
+  const { params } = arguments[0]  
+  const id = params.id
+
   // fetch réel du produit avec images + tags
   const { data: product, error } = await supabase
     .from('products')
@@ -48,6 +50,42 @@ export default async function ProductPage(
 
   const images = product.product_images
 
+  // fetch similaires par même gamme (premier range)
+  const rangeTag = tagsByType.range?.[0]
+  let similarProducts: {
+    id: string
+    name: string
+    price: number
+    currency: string
+    product_images?: { url: string; alt: string }[]
+  }[] = []
+  if (rangeTag) {
+    const { data: allProds, error: simError } = await supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        price,
+        currency,
+        product_images ( url, alt ),
+        product_tags ( tag:tags(name,tag_type) )
+      `)
+    if (simError) console.error(simError)
+    similarProducts = (allProds ?? [])
+      .filter(p =>
+        p.id !== id &&
+        p.product_tags?.some(pt => pt.tag && 'name' in pt.tag && pt.tag.name === rangeTag)
+      )
+      .slice(0, 5)
+      .map(p => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        currency: p.currency,
+        product_images: p.product_images
+      }))
+  }
+
   return (
     <>
       <NavBar />
@@ -68,6 +106,41 @@ export default async function ProductPage(
           tagsByType={tagsByType}
         />
       </div>
+
+      {/* Mode d'emploi */}
+      <section className="max-w-6xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-semibold mb-4">Mode d'emploi</h2>
+        <p className="text-slate-700">
+          {/* Remplacez ce texte par le contenu réel */}
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+          Ut accumsan, justo at venenatis commodo, urna mi cursus urna, 
+          et fringilla libero metus nec sapien.
+        </p>
+      </section>
+
+      {/* Produits similaires */}
+      <section className="max-w-6xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-semibold mb-4">Produits similaires</h2>
+        {similarProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
+            {similarProducts.map(p => (
+              <Link key={p.id} href={`/product/${p.id}`} className="block h-full">
+                <ProductCard
+                  product={{
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    currency: p.currency,
+                    images: p.product_images
+                  }}
+                />
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p>Aucun produit similaire trouvé.</p>
+        )}
+      </section>
       <Footer />
     </>
   )
