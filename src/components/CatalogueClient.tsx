@@ -23,9 +23,10 @@ type Props = {
 export default function CatalogueClient({ initialProducts, itemsByType }: Props) {
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Record<string,string[]>>({})
+  const [sort, setSort] = useState('az')  // <-- add sort state
 
-  const filtered = useMemo(() => {
-    return initialProducts
+  const processed = useMemo(() => {
+    let list = initialProducts
       .filter(p => 
         p.name.toLowerCase().includes(search.toLowerCase())
       )
@@ -40,7 +41,18 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
           return vals.some(v => tags.includes(v))
         })
       )
-  }, [initialProducts, search, filters])
+    // Apply sorting based on `sort`
+    return list.sort((a, b) => {
+      switch (sort) {
+        case 'az':          return a.name.localeCompare(b.name)
+        case 'za':          return b.name.localeCompare(a.name)
+        case 'price-asc':   return a.price - b.price
+        case 'price-desc':  return b.price - a.price
+        case 'trending':    return b.product_tags.length - a.product_tags.length
+        default:            return 0
+      }
+    })
+  }, [initialProducts, search, filters, sort])  // <-- include sort
 
   return (
     <div className="flex flex-col gap-6 items-start">
@@ -60,10 +72,10 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
         <Filters itemsByType={itemsByType} onChange={setFilters} />
         <section className="flex-1">
           <div className="flex justify-end mb-4">
-            <SortSelector />
+            <SortSelector sort={sort} onChange={setSort} />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map(p => (
+            {processed.map(p => (
               <ProductCard
                 key={p.id}
                 product={{
