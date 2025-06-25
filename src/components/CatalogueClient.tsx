@@ -9,6 +9,7 @@ type Tag = { name: string; tag_type: string }
 type Product = {
   id: string
   name: string
+  description?: string
   price: number
   currency: string
   product_images: { url: string; alt: string }[]
@@ -24,6 +25,8 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Record<string,string[]>>({})
   const [sort, setSort] = useState('az')  // <-- add sort state
+  const [page, setPage] = useState(1)
+  const pageSize = 20
 
   const processed = useMemo(() => {
     let list = initialProducts
@@ -54,6 +57,9 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
     })
   }, [initialProducts, search, filters, sort])  // <-- include sort
 
+  const totalPages = Math.ceil(processed.length / pageSize)
+  const paginated = processed.slice((page - 1) * pageSize, page * pageSize)
+
   return (
     <div className="flex flex-col gap-6 items-start">
       <div className="flex justify-center w-full mb-4">
@@ -68,19 +74,20 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
           />
         </div>
       </div>
+      <div className="flex justify-end w-full">
+        <SortSelector sort={sort} onChange={setSort} />
+      </div>
       <div className="flex gap-6 items-start">
         <Filters itemsByType={itemsByType} onChange={setFilters} />
         <section className="flex-1">
-          <div className="flex justify-end mb-4">
-            <SortSelector sort={sort} onChange={setSort} />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {processed.map(p => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {paginated.map(p => (
               <ProductCard
                 key={p.id}
                 product={{
                   id: p.id,
                   name: p.name,
+                  description: p.description,
                   price: p.price,
                   currency: p.currency,
                   images: p.product_images
@@ -88,6 +95,32 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
               />
             ))}
           </div>
+          {/* Pagination */}
+          <nav className="w-full mt-6">
+            <ul className="flex items-center justify-center space-x-4">
+              <li>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+              </li>
+              <li className="text-sm text-gray-600">
+                Page {page} sur {totalPages}
+              </li>
+              <li>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                >
+                  Suivant
+                </button>
+              </li>
+            </ul>
+          </nav>
         </section>
       </div>
     </div>

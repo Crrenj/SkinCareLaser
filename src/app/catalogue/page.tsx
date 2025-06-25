@@ -8,7 +8,11 @@ export default async function Catalogue() {
   const { data: products, error: pErr } = await supabase
     .from('products')
     .select(`
-      id, name, price, currency,
+      id,
+      name,
+      description,
+      price,
+      currency,
       product_images ( url, alt ),
       product_tags ( tag:tags(name,tag_type) )
     `)
