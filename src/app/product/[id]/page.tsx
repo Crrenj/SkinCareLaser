@@ -1,12 +1,13 @@
-import Image from 'next/image'
-import { PlusCircle } from 'lucide-react'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
-import { supabase } from '@/lib/supabaseClient'
 import ProductDetailCard from '@/components/ProductDetailCard'
 import ProductCard from '@/components/ProductCard'
+import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
+import Image from 'next/image'
+import { PlusCircle } from 'lucide-react'
 
+type Tag = { name: string; tag_type: string }
 type Product = {
   id: string
   name: string
@@ -14,97 +15,102 @@ type Product = {
   price: number
   currency: string
   product_images?: { url: string; alt: string }[]
-  product_tags?: { tag: { name: string; tag_type: string } }[]
+  product_tags?: { tag: Tag }[]
 }
 
-export default async function ProductPage() {  
-  const { params } = arguments[0]  
-  const id = params.id
+// 1) utilitaire pour construire Map<tag_type, Set<name>>
+function buildTagMap(tags: Tag[]): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>()
+  tags.forEach(t => {
+    const type = t.tag_type
+    const name = t.name.toLowerCase()
+    if (!map.has(type)) map.set(type, new Set())
+    map.get(type)!.add(name)
+  })
+  return map
+}
 
-  // fetch réel du produit avec images + tags
+type PageProps = { params: Promise<{ id: string }> }
+export default async function ProductPage({ params }: PageProps) {
+  // 1️⃣ récupérer l’ID dynamique
+  const { id } = await params
+
+  // fetch du produit principal
   const { data: product, error } = await supabase
     .from('products')
     .select(`
-      id,
-      name,
-      description,
-      price,
-      currency,
-      product_images ( url, alt ),
-      product_tags ( tag:tags(name,tag_type) )
+      id,name,description,price,currency,
+      product_images(url,alt),
+      product_tags(tag:tags(name,tag_type))
     `)
     .eq('id', id)
     .single()
-  if (error || !product) {
-    console.error(error)
-    return <p className="p-6">Produit non trouvé</p>
-  }
+  if (error || !product) return <p className="p-6">Produit non trouvé</p>
 
-  // extraire et grouper les tags
-  const tags = product.product_tags?.map(pt => pt.tag).flat() ?? []
-  const tagsByType: Record<string,string[]> = {}
-  tags.forEach(t => {
-    tagsByType[t.tag_type] ||= []
-    tagsByType[t.tag_type].push(t.name)
-  })
+  // construire tagsByType pour le principal
+  const mainTags = product.product_tags?.map(pt => pt.tag).flat() ?? []
+  const tagsByType = buildTagMap(mainTags)
+  const rangeTags = tagsByType.get('range') ?? new Set()
 
-  const images = product.product_images
+  // fetch de tous les autres produits
+  const { data: allProds, error: simError } = await supabase
+    .from('products')
+    .select(`
+      id,name,description,price,currency,
+      product_images(url,alt),
+      product_tags(tag:tags(name,tag_type))
+    `)
+  if (simError) console.error(simError)
 
-  // fetch similaires par même gamme (premier range)
-  const rangeTag = tagsByType.range?.[0]
-  let similarProducts: {
-    id: string
-    name: string
-    price: number
-    currency: string
-    description?: string
-    images?: { url: string; alt: string }[]
-    brand?: string
-    range?: string
-  }[] = []
-  if (rangeTag) {
-    const { data: allProds, error: simError } = await supabase
-      .from('products')
-      .select(`
-        id,
-        name,
-        price,
-        description,
-        currency,
-        product_images ( url, alt ),
-        product_tags ( tag:tags(name,tag_type) )
-      `)
-    if (simError) console.error(simError)
-    similarProducts = (allProds ?? [])
-      .filter(p =>
-        p.id !== id &&
-        p.product_tags?.some(pt => {
-          const tag = pt.tag as unknown as { name: string; tag_type: string };
-          return tag.name === rangeTag;
-        })
-      )
-      .slice(0, 5)
-      .map(p => {
-        const tags = p.product_tags?.map(pt => pt.tag).flat() ?? []
-        const brand = tags.find(t => t.tag_type === 'brand')?.name
-        const range = tags.find(t => t.tag_type === 'range')?.name
-        return {
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          currency: p.currency,
-          description: p.description,
-          images: p.product_images,
-          brand,
-          range
-        }
+  const others = (allProds ?? []).filter(p => p.id !== id)
+
+  // A) produits même gamme (max 3)
+  const sameRange = others
+    .filter(p =>
+      (p.product_tags ?? [])
+        .map(pt => pt.tag)
+        .flat()
+        .some(tag =>
+          tag.tag_type === 'range' &&
+          rangeTags.has(tag.name.toLowerCase())
+        )
+    )
+    .slice(0, 3)
+
+  // B) produits partageant skin_type, category et need (max 2)
+  const otherMatches = others
+    .filter(p => !sameRange.includes(p))
+    .filter(p => {
+      const tags = p.product_tags?.map(pt => pt.tag).flat() ?? []
+      const m = buildTagMap(tags)
+      return ['skin_type','category','need'].every(cat => {
+        const source = tagsByType.get(cat) ?? new Set()
+        const target = m.get(cat) ?? new Set()
+        return [...source].some(v => target.has(v))
       })
-  }
+    })
+    .slice(0, 2)
+
+  // C) combiner et formater pour ProductCard
+  const similarProducts = [...sameRange, ...otherMatches]
+    .map(p => {
+      const tags = p.product_tags?.map(pt => pt.tag).flat() ?? []
+      return {
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        currency: p.currency,
+        images: p.product_images,
+        brand: tags.find(t => t.tag_type === 'brand')?.name,
+        range: tags.find(t => t.tag_type === 'range')?.name
+      }
+    })
 
   return (
     <>
       <NavBar />
-      {/* Breadcrumb avec marge accrue */}
+      {/* breadcrumb */}
       <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto px-4 text-sm text-gray-500 mt-8">
         <ol className="flex space-x-2">
           <li><Link href="/">Accueil</Link></li>
@@ -114,11 +120,15 @@ export default async function ProductPage() {
           <li aria-current="page" className="text-gray-700">{product.name}</li>
         </ol>
       </nav>
+
+      {/* détail produit */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <ProductDetailCard
           product={product}
-          images={images}
-          tagsByType={tagsByType}
+          images={product.product_images}
+          tagsByType={Object.fromEntries(
+            Array.from(tagsByType.entries()).map(([k,v])=>[k, Array.from(v)])
+          )}
         />
       </div>
 
@@ -140,7 +150,7 @@ export default async function ProductPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {similarProducts.map(p => (
               <Link key={p.id} href={`/product/${p.id}`} className="block h-full">
-                <ProductCard product={p}/>
+                <ProductCard product={p} />
               </Link>
             ))}
           </div>

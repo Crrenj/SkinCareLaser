@@ -18,7 +18,10 @@ type Props = { product: Product }
 export default function ProductCard({ product }: Props) {
   const price = product.price.toFixed(2)
   return (
-    <article className="border rounded-lg p-3 bg-white flex flex-col h-full">
+    <article
+      className="rounded-lg p-3 bg-white flex flex-col h-full
+                 shadow-md hover:shadow-lg transition-shadow"
+    >
       <Image
         src={product.images?.[0]?.url ?? '/placeholder.png'}
         alt={product.images?.[0]?.alt ?? product.name}
