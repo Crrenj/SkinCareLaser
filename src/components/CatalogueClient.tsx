@@ -27,6 +27,7 @@ type Props = {
 export default function CatalogueClient({ initialProducts, itemsByType }: Props) {
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState<Record<string,string[]>>({})
+  const hasFilters = Object.values(filters).some(vals => vals.length > 0)
   const [sort, setSort] = useState('az')  // <-- add sort state
   const [page, setPage] = useState(1)
   const pageSize = 20
@@ -65,23 +66,49 @@ export default function CatalogueClient({ initialProducts, itemsByType }: Props)
 
   return (
     <div className="flex flex-col gap-6 items-start">
-      <div className="flex justify-center w-full mb-4">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={20}/>
-          <input
-            type="text"
-            placeholder="Rechercher un produit…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="pl-10 pr-3 py-2 w-full border rounded-lg focus:outline-none"
-          />
+      <div className="relative w-full mb-4">
+        {/* breadcrumb */}
+        <nav
+          aria-label="Breadcrumb"
+          className="absolute left-0 top-1/2 transform -translate-y-1/2 text-sm text-gray-500"
+        >
+          <ol className="flex space-x-2">
+            <li><Link href="/">Accueil</Link></li>
+            <li>/</li>
+            <li aria-current="page" className="text-gray-700">Catalogue</li>
+          </ol>
+        </nav>
+        {/* barre de recherche centrée */}
+        <div className="flex justify-center">
+          <div className="relative w-full max-w-md">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+              size={20}
+            />
+            <input
+              type="text"
+              placeholder="Rechercher un produit…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 pr-3 py-2 w-full border rounded-lg focus:outline-none"
+            />
+          </div>
         </div>
       </div>
       <div className="flex justify-end w-full">
         <SortSelector sort={sort} onChange={setSort} />
       </div>
-      <div className="flex gap-6 items-start">
-        <Filters itemsByType={itemsByType} onChange={setFilters} />
+      <div className="flex gap-6 items-start w-full">
+        <div className="flex flex-col items-start">
+          <button
+            onClick={() => setFilters({})}
+            disabled={!hasFilters}
+            className="self-start text-sm underline bg-transparent p-0 text-gray-700 hover:text-gray-900 disabled:opacity-50"
+          >
+            Clear Filters
+          </button>
+          <Filters itemsByType={itemsByType} onChange={setFilters} />
+        </div>
         <section className="flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-stretch">
             {paginated.map(p => {

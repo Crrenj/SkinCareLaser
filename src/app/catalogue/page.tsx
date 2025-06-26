@@ -2,7 +2,6 @@ import { supabase } from '@/lib/supabaseClient'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import CatalogueClient from '@/components/CatalogueClient'
-import { Search } from 'lucide-react'
 
 export default async function Catalogue() {
   const { data: products, error: pErr } = await supabase
