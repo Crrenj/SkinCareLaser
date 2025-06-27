@@ -29,12 +29,17 @@ export default function ProductCard({ product }: Props) {
         height={400}
         className="w-full aspect-square object-cover rounded"
       />
-      {/* affichage de la marque et de la gamme */}
+      {/* Brand badge */}
       {product.brand && (
-        <p className="mt-2 text-sm text-gray-500">{product.brand}</p>
+        <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full mt-2">
+          {product.brand}
+        </span>
       )}
+      {/* Range badge */}
       {product.range && (
-        <p className="text-xs uppercase text-gray-500">{product.range}</p>
+        <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full mt-1">
+          {product.range}
+        </span>
       )}
       <h2 className="mt-2 text-xl font-semibold text-center">{product.name}</h2>
       {product.description && (

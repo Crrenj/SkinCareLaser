@@ -1,7 +1,6 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { PlusCircle } from 'lucide-react'
 
 type ProductImage = { url: string; alt: string }
@@ -12,10 +11,17 @@ type Product = {
   price: number
   currency: string
 }
-type Props = {
+interface Props {
   product: Product
   images?: ProductImage[]
-  tagsByType?: Record<string,string[]>
+  brand?: string
+  range?: string
+  tagsByType: {
+    category: string[]
+    need: string[]
+    skin_type: string[]
+    ingredient: string[]
+  }
 }
 
 const SECTION_TITLES: Record<string,string> = {
@@ -25,9 +31,16 @@ const SECTION_TITLES: Record<string,string> = {
   ingredient: 'Ingrédients'
 }
 
-export default function ProductDetailCard({ product, images, tagsByType }: Props) {
+export default function ProductDetailCard({
+  product,
+  images,
+  brand,
+  range,
+  tagsByType,
+}: Props) {
   const [quantity, setQuantity] = useState(1)
   const price = product.price.toFixed(2)
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 bg-white rounded-lg shadow-lg">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -47,22 +60,16 @@ export default function ProductDetailCard({ product, images, tagsByType }: Props
         <div className="flex flex-col h-full md:col-span-3">
           {/* Marques + Gamme sans titre */}
           <div className="mb-6 flex flex-wrap gap-2">
-            {tagsByType?.brand?.map(item => (
-              <span
-                key={item}
-                className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full"
-              >
-                {item}
+            {brand && (
+              <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full">
+                {brand}
               </span>
-            ))}
-            {tagsByType?.range?.map(item => (
-              <span
-                key={item}
-                className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full"
-              >
-                {item}
+            )}
+            {range && (
+              <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full">
+                {range}
               </span>
-            ))}
+            )}
           </div>
 
           {/* Nom et Description */}
@@ -75,25 +82,23 @@ export default function ProductDetailCard({ product, images, tagsByType }: Props
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* colonne gauche : sections tags groupées */}
             <div className="space-y-6">
-              {Object.entries(tagsByType || {})
-                .filter(([type]) => type !== 'range' && type !== 'brand')
-                .map(([type, list]) => (
-                  <div key={type}>
-                    <h4 className="font-semibold uppercase mb-2">
-                      {SECTION_TITLES[type] ?? type.replace('_', ' ')}
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {list.map(tag => (
-                        <span
-                          key={tag}
-                          className="bg-slate-100 text-sm px-2 py-1 rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
+              {Object.entries(tagsByType).map(([type, list]) => (
+                <div key={type}>
+                  <h4 className="font-semibold uppercase mb-2">
+                    {SECTION_TITLES[type] ?? type.replace('_', ' ')}
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {list.map(tag => (
+                      <span
+                        key={tag}
+                        className="bg-slate-100 text-sm px-2 py-1 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
-                ))}
+                </div>
+              ))}
             </div>
 
             {/* colonne droite : prix + quantité + bouton */}
