@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { PlusCircle } from 'lucide-react'
+import { useCart } from '@/contexts/CartContext'
 
 type ProductImage = { url: string; alt: string }
 type Product = {
@@ -17,7 +18,14 @@ type Product = {
 type Props = { product: Product }
 
 export default function ProductCard({ product }: Props) {
+  const { addToCart } = useCart()
   const price = product.price.toFixed(2)
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault() // Empêcher la navigation vers la page produit
+    addToCart(product, 1)
+  }
+
   return (
     <Link href={`/product/${product.id}`} className="block h-full group" prefetch={false}>
       <article
@@ -52,8 +60,8 @@ export default function ProductCard({ product }: Props) {
           <button
             type="button"
             aria-label="Ajouter au panier"
-            className="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors"
-            onClick={e => { e.preventDefault(); /* TODO panier */ }}
+            className="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors hover:scale-110"
+            onClick={handleAddToCart}
           >
             <PlusCircle size={24} />
           </button>

@@ -1,7 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import ProductCard from '@/components/ProductCard'
+import { useCart } from '@/contexts/CartContext'
 
 export type MappedProduct = {
   id: string
@@ -24,6 +25,9 @@ export default function ProductClient({
   product,
   similarProducts,
 }: ProductClientProps) {
+  const [quantity, setQuantity] = useState(1)
+  const { addToCart } = useCart()
+
   // Vérification des données
   if (!product) {
     return (
@@ -32,6 +36,18 @@ export default function ProductClient({
       </div>
     )
   }
+
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity >= 1 && newQuantity <= 99) {
+      setQuantity(newQuantity)
+    }
+  }
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity)
+  }
+
+  const totalPrice = product.price * quantity
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -43,7 +59,7 @@ export default function ProductClient({
             {product.images && product.images.length > 0 ? (
               <div className="space-y-4">
                 {/* Image principale */}
-                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                   <img 
                     src={product.images[0].url} 
                     alt={product.images[0].alt || product.name} 
@@ -55,7 +71,7 @@ export default function ProductClient({
                 {product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
                     {product.images.slice(1).map((img, i) => (
-                      <div key={i} className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      <div key={i} className="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                         <img 
                           src={img.url} 
                           alt={img.alt || product.name} 
@@ -131,10 +147,42 @@ export default function ProductClient({
               </div>
             )}
 
+            {/* Section quantité */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-gray-900">Quantité</h3>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center border border-gray-300 rounded-lg">
+                  <button
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    disabled={quantity <= 1}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    -
+                  </button>
+                  <span className="px-4 py-2 border-x border-gray-300 min-w-[60px] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                    disabled={quantity >= 99}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="text-sm text-gray-600">
+                  Prix total: <span className="font-semibold text-blue-600">{totalPrice.toFixed(2)} {product.currency.toUpperCase()}</span>
+                </div>
+              </div>
+            </div>
+
             {/* Bouton d'action */}
             <div className="pt-4">
-              <button className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg">
-                Ajouter au panier
+              <button 
+                onClick={handleAddToCart}
+                className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg"
+              >
+                Ajouter au panier ({quantity})
               </button>
             </div>
           </div>
