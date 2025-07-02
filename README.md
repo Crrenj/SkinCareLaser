@@ -37,3 +37,42 @@ Voir **[DOCUMENTATION_COMPLETE.md](DOCUMENTATION_COMPLETE.md)** pour la document
 - Vitest + Playwright
 
 **Résumé persistant** : README simple avec démarrage rapide. Documentation complète dans DOCUMENTATION_COMPLETE.md.
+
+## Optimisations et stratégies de mise en cache
+
+L'application intègre plusieurs stratégies pour des performances optimales :
+
+- **Rendu statique de la page catalogue** avec revalidation toutes les 60 secondes
+- **Mise en cache des requêtes API** avec Next.js `unstable_cache`
+- **Stratégie de revalidation incrémentale** pour les pages produits
+- **Prefetching et chargement progressif des images** avec Next.js Image
+- **Compression et optimisation automatique** des assets avec Next.js
+
+Ces optimisations permettent d'obtenir de très bonnes performances web vitals, notamment sur les métriques LCP, FID et CLS.
+
+## Migration de la base de données
+
+Pour ajouter les nouveaux champs au formulaire d'inscription (prénom, nom, téléphone, date de naissance), vous devez exécuter la migration suivante :
+
+### Option 1 : Via l'interface Supabase
+1. Connectez-vous à votre dashboard Supabase
+2. Allez dans l'éditeur SQL
+3. Copiez et exécutez le contenu du fichier `db/add_profile_fields.sql`
+
+### Option 2 : Via la ligne de commande
+```bash
+# Si vous avez Supabase CLI installé
+supabase db push db/add_profile_fields.sql --db-url <YOUR_DATABASE_URL>
+```
+
+### Option 3 : Via le script Node.js
+```bash
+# Assurez-vous d'avoir les variables d'environnement configurées
+node scripts/migrate_profiles.js
+```
+
+Les champs ajoutés sont :
+- `first_name` (TEXT) - Prénom de l'utilisateur
+- `last_name` (TEXT) - Nom de famille
+- `phone` (TEXT) - Numéro de téléphone
+- `birth_date` (DATE) - Date de naissance

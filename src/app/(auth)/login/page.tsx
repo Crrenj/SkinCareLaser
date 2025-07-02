@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
+import { Mail, Lock, User, ArrowRight } from 'lucide-react'
 
 /**
  * Page de connexion
@@ -122,93 +123,150 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Connexion à votre compte
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Ou{' '}
-            <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-              créez un nouveau compte
-            </Link>
-          </p>
-        </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-              {error}
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EDEAE5' }}>
+      <div className="w-full max-w-md mx-4">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          {/* En-tête avec couleur du navbar */}
+          <div className="px-8 py-6" style={{ backgroundColor: '#CCC5BD' }}>
+            <div className="flex items-center justify-center mb-2">
+              <User className="w-12 h-12 text-gray-700" />
             </div>
-          )}
+            <h2 className="text-center text-2xl font-bold text-gray-800">
+              Connexion à votre compte
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-700">
+              Bienvenue chez FARMAU
+            </p>
+          </div>
 
-          {redirecting && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
-              Connexion réussie ! Redirection en cours...
-            </div>
-          )}
+          {/* Formulaire */}
+          <form className="px-8 py-6 space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
 
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Adresse email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Adresse email"
-                disabled={redirecting}
-              />
+            {redirecting && (
+              <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                <p className="text-sm text-green-700">Connexion réussie ! Redirection en cours...</p>
+              </div>
+            )}
+
+            <div className="space-y-5">
+              {/* Email */}
+              <div className="relative">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Adresse email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    placeholder="votre@email.com"
+                    disabled={redirecting}
+                  />
+                </div>
+              </div>
+
+              {/* Mot de passe */}
+              <div className="relative">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Mot de passe
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    placeholder="••••••••"
+                    disabled={redirecting}
+                  />
+                </div>
+              </div>
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">
-                Mot de passe
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Mot de passe"
-                disabled={redirecting}
-              />
+              <button
+                type="submit"
+                disabled={loading || redirecting}
+                className="w-full flex items-center justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  backgroundColor: '#CCC5BD'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B8B1A8'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#CCC5BD'}
+              >
+                {loading ? (
+                  'Connexion...'
+                ) : redirecting ? (
+                  'Redirection...'
+                ) : (
+                  <>
+                    Se connecter
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Lien mot de passe oublié */}
+            <div className="text-center">
+              <Link href="#" className="text-sm text-gray-600 hover:text-gray-800 transition-colors">
+                Mot de passe oublié ?
+              </Link>
+            </div>
+          </form>
+
+          {/* Séparateur */}
+          <div className="px-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500">Nouveau client ?</span>
+              </div>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading || redirecting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Lien inscription */}
+          <div className="px-8 py-6">
+            <Link 
+              href="/signup" 
+              className="w-full flex items-center justify-center py-3 px-4 border-2 border-[#CCC5BD] text-[#CCC5BD] font-medium rounded-lg hover:bg-[#CCC5BD] hover:text-white transition-all duration-200"
             >
-              {loading ? 'Connexion...' : redirecting ? 'Redirection...' : 'Se connecter'}
-            </button>
+              Créer un compte
+            </Link>
           </div>
-        </form>
+        </div>
 
-        <div className="text-center text-sm text-gray-500 mt-4">
+        {/* Liens de debug (temporaires) */}
+        <div className="text-center text-sm text-gray-600 mt-6">
           <p>Problème de redirection ?</p>
           <a 
             href="/admin/dashboard" 
-            className="text-blue-600 hover:text-blue-500 underline font-medium"
+            className="text-[#CCC5BD] hover:text-[#B8B1A8] underline font-medium"
           >
             Accéder directement au dashboard admin
           </a>
           <p className="mt-2">ou essayez la</p>
           <a 
             href="/login-debug" 
-            className="text-blue-600 hover:text-blue-500 underline font-medium"
+            className="text-[#CCC5BD] hover:text-[#B8B1A8] underline font-medium"
           >
             Page de connexion DEBUG
           </a>
