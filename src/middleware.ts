@@ -1,26 +1,125 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 /**
- * Middleware TEMPORAIRE - Protection désactivée pour debug
+ * Middleware d'authentification corrigé
+ * Gère correctement la synchronisation des cookies Supabase
  */
 export async function middleware(request: NextRequest) {
-  console.log('🔍 Middleware appelé pour:', request.nextUrl.pathname)
+  const { pathname } = request.nextUrl
+
+  // Routes à exclure du middleware
+  const publicRoutes = ['/login', '/signup', '/login-debug', '/test-redirect', '/auth/callback']
+  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
   
-  // TEMPORAIRE : Désactiver la protection pour tester
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    console.log('⚠️  ATTENTION : Protection admin désactivée temporairement pour debug')
-    console.log('✅ Autorisation de passage vers:', request.nextUrl.pathname)
+  // Routes API et assets à ignorer
+  if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname.includes('.')) {
+    return NextResponse.next()
   }
   
-  // Laisser passer toutes les requêtes
-  return NextResponse.next({
-    request,
+  // Si c'est une route publique, laisser passer
+  if (isPublicRoute) {
+    return NextResponse.next()
+  }
+
+  // Si ce n'est pas une route admin, laisser passer
+  if (!pathname.startsWith('/admin')) {
+    return NextResponse.next()
+  }
+
+  console.log('🔒 Protection route admin:', pathname)
+
+  // Créer une réponse
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   })
+
+  // Créer le client Supabase avec la bonne gestion des cookies
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+            sameSite: 'lax' as const,
+            secure: process.env.NODE_ENV === 'production'
+          })
+        },
+        remove(name: string, options: CookieOptions) {
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+            sameSite: 'lax' as const,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 0
+          })
+        },
+      },
+    }
+  )
+
+  try {
+    // Récupérer la session actuelle
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      console.error('❌ Erreur session:', error)
+    }
+
+    // Pas de session = redirection vers login
+    if (!session) {
+      console.log('❌ Pas de session, redirection vers login')
+      const redirectUrl = new URL('/login', request.url)
+      redirectUrl.searchParams.set('redirectedFrom', pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    console.log('✅ Session trouvée pour:', session.user.email)
+
+    // Vérifier si l'utilisateur est admin
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', session.user.id)
+      .single()
+
+    if (profileError) {
+      console.error('❌ Erreur profil:', profileError)
+    }
+
+    // Si pas admin, rediriger avec erreur
+    if (!profile?.is_admin) {
+      console.log('❌ Utilisateur non admin')
+      const redirectUrl = new URL('/login', request.url)
+      redirectUrl.searchParams.set('error', 'unauthorized')
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    console.log('✅ Accès admin autorisé')
+    
+  } catch (error) {
+    console.error('❌ Erreur middleware:', error)
+    const redirectUrl = new URL('/login', request.url)
+    redirectUrl.searchParams.set('error', 'middleware_error')
+    return NextResponse.redirect(redirectUrl)
+  }
+
+  // Retourner la réponse avec les cookies mis à jour
+  return response
 }
 
-// Routes à protéger (mais temporairement désactivé)
+// Routes à protéger
 export const config = {
   matcher: ['/admin/:path*']
 } 

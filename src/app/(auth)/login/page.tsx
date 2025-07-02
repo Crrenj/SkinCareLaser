@@ -37,6 +37,8 @@ export default function LoginPage() {
     if (redirectedFrom) {
       sessionStorage.setItem('redirect_to', redirectedFrom)
     }
+
+
   }, [redirectedFrom, errorParam])
 
   /**
@@ -101,20 +103,10 @@ export default function LoginPage() {
           : sessionStorage.getItem('redirect_to') || '/'
 
         console.log('Redirection vers:', redirectPath)
-        console.log('URL complète:', window.location.origin + redirectPath)
 
-        // FORCE : Utiliser l'URL complète avec le bon port
-        const fullUrl = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '3000'}${redirectPath}`
-        console.log('Tentative de redirection vers:', fullUrl)
-        
-        // Méthode 1 : Redirection immédiate avec l'URL complète
-        window.location.href = fullUrl
-
-        // Méthode 2 : Si ça ne marche pas, forcer après un délai
-        setTimeout(() => {
-          console.log('Forçage de la redirection...')
-          window.location.assign(fullUrl)
-        }, 500)
+        // Rediriger vers la page de callback qui gérera la suite
+        console.log('Redirection vers la page de callback...')
+        window.location.href = '/auth/callback'
 
         // Nettoyer sessionStorage
         if (!isAdmin) {
