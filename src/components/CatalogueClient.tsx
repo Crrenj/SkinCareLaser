@@ -1,8 +1,7 @@
 'use client'
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import ProductCard from '@/components/ProductCard'
 import Filters from '@/components/Filters'
-import SortSelector from '@/components/SortSelector'
 
 interface TagItem { label: string; category: string }
 interface Product {
@@ -26,24 +25,17 @@ export default function CatalogueClient({
 }: CatalogueClientProps) {
   // États pour la recherche et le tri
   const [searchTerm, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState('az')
+  const [sortBy, setSortBy] = useState('bestsellers')
 
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const productsPerPage = 12 // 3 produits par ligne × 4 lignes
+  const productsPerPage = 18 // 3 produits par ligne × 6 lignes
 
   // listes dynamiques
   const brands = useMemo(
     () =>
       Array.from(
         new Set(products.map(p => p.brand).filter((b): b is string => !!b))
-      ).sort(),
-    [products]
-  )
-  const ranges = useMemo(
-    () =>
-      Array.from(
-        new Set(products.map(p => p.range).filter((r): r is string => !!r))
       ).sort(),
     [products]
   )
@@ -69,8 +61,8 @@ export default function CatalogueClient({
   }, [products])
 
   // états des filtres
-  const [selectedBrand, setSelectedBrand] = useState('')
-  const [selectedRange, setSelectedRange] = useState('')
+  const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set())
+  const [selectedRanges, setSelectedRanges] = useState<Set<string>>(new Set())
   const [selectedTags, setSelectedTags] = useState<Record<string, Set<string>>>(
     () =>
       Object.fromEntries(
@@ -78,46 +70,182 @@ export default function CatalogueClient({
       )
   )
 
-  const handleTagToggle = (cat: string, tag: string) => {
+  const handleTagToggle = useCallback((cat: string, tag: string) => {
     setSelectedTags(prev => {
       const s = new Set(prev[cat])
-      s.has(tag) ? s.delete(tag) : s.add(tag)
+      if (s.has(tag)) {
+        s.delete(tag)
+      } else {
+        s.add(tag)
+      }
       return { ...prev, [cat]: s }
     })
-  }
+  }, [])
+
+  // Handler pour toggle une marque
+  const handleBrandToggle = useCallback((brand: string) => {
+    setSelectedBrands(prev => {
+      const newBrands = new Set(prev)
+      if (newBrands.has(brand)) {
+        newBrands.delete(brand)
+      } else {
+        newBrands.add(brand)
+      }
+      return newBrands
+    })
+    setCurrentPage(1)
+  }, [])
+
+  // Handler pour toggle une gamme
+  const handleRangeToggle = useCallback((range: string) => {
+    setSelectedRanges(prev => {
+      const newRanges = new Set(prev)
+      if (newRanges.has(range)) {
+        newRanges.delete(range)
+      } else {
+        newRanges.add(range)
+      }
+      return newRanges
+    })
+    setCurrentPage(1)
+  }, [])
+
+  // Handler pour sélectionner/désélectionner toutes les gammes d'une marque
+  const handleBrandSelectAll = useCallback((brand: string, select: boolean) => {
+    const brandRanges = rangesByBrand[brand] || []
+    setSelectedRanges(prev => {
+      const newRanges = new Set(prev)
+      if (select) {
+        brandRanges.forEach(range => newRanges.add(range))
+      } else {
+        brandRanges.forEach(range => newRanges.delete(range))
+      }
+      return newRanges
+    })
+    setCurrentPage(1)
+  }, [rangesByBrand])
 
   // Fonction pour réinitialiser tous les filtres
-  const clearAllFilters = () => {
+  const clearAllFilters = useCallback(() => {
     setSearchTerm('')
-    setSelectedBrand('')
-    setSelectedRange('')
+    setSelectedBrands(new Set())
+    setSelectedRanges(new Set())
     setSelectedTags(
       Object.fromEntries(
         Object.keys(itemsByType).map(key => [key, new Set<string>()])
       )
     )
     setCurrentPage(1)
-  }
+  }, [itemsByType])
 
-  // Réinitialiser la gamme quand la marque change
-  const handleBrandChange = (brand: string) => {
-    setSelectedBrand(brand)
-    setSelectedRange('') // Réinitialiser la gamme sélectionnée
-    setCurrentPage(1)
-  }
+  // Fonction de recherche optimisée
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+    setCurrentPage(1) // Réinitialiser la pagination lors de la recherche
+  }, [])
 
-  // application des filtres et recherche
-  const filtered = useMemo(
-    () => {
-      let filteredProducts = products.filter(p => {
+  // Préparer les données pour le composant Filters
+  const availableCategories = itemsByType['category'] || []
+  const availableNeeds = itemsByType['need'] || []
+  const availableSkinTypes = itemsByType['skin_type'] || []
+  const availableIngredients = itemsByType['ingredient'] || []
+
+  // Calculer les compteurs de produits pour chaque filtre
+  const productCounts = useMemo(() => {
+    const counts = {
+      brands: {} as Record<string, number>,
+      ranges: {} as Record<string, number>,
+      needs: {} as Record<string, number>,
+      skinTypes: {} as Record<string, number>,
+      categories: {} as Record<string, number>,
+      ingredients: {} as Record<string, number>,
+    }
+
+    // Filtrer les produits en fonction des critères actuels SAUF le filtre qu'on est en train de compter
+    const getFilteredProductsExcept = (excludeType: string, excludeBrand = false, excludeRange = false) => {
+      return products.filter(p => {
         // Filtre par recherche
         if (searchTerm && !p.name.toLowerCase().includes(searchTerm.toLowerCase())) {
           return false
         }
         
         // Filtres existants
-        if (selectedBrand && p.brand !== selectedBrand) return false
-        if (selectedRange && p.range !== selectedRange) return false
+        if (!excludeBrand && selectedBrands.size > 0 && !selectedBrands.has(p.brand || '')) return false
+        if (!excludeRange && selectedRanges.size > 0 && !selectedRanges.has(p.range || '')) return false
+        
+        // Filtres par tags (en excluant le type qu'on compte)
+        for (const [cat, setTags] of Object.entries(selectedTags)) {
+          if (cat !== excludeType && setTags.size > 0) {
+            const labels =
+              p.tags?.filter(t => t.category === cat).map(t => t.label) ?? []
+            if (![...setTags].some(t => labels.includes(t))) return false
+          }
+        }
+        return true
+      })
+    }
+
+    // Compter les produits pour chaque marque
+    brands.forEach(brand => {
+      const filtered = getFilteredProductsExcept('', true, false)
+      counts.brands[brand] = filtered.filter(p => p.brand === brand).length
+    })
+
+    // Compter les produits pour chaque gamme
+    Object.values(rangesByBrand).flat().forEach(range => {
+      const filtered = getFilteredProductsExcept('', false, true)
+      counts.ranges[range] = filtered.filter(p => p.range === range).length
+    })
+
+    // Compter les produits pour chaque besoin
+    availableNeeds.forEach(need => {
+      const filtered = getFilteredProductsExcept('need')
+      counts.needs[need] = filtered.filter(p => 
+        p.tags?.some(t => t.category === 'need' && t.label === need)
+      ).length
+    })
+
+    // Compter les produits pour chaque type de peau
+    availableSkinTypes.forEach(skinType => {
+      const filtered = getFilteredProductsExcept('skin_type')
+      counts.skinTypes[skinType] = filtered.filter(p => 
+        p.tags?.some(t => t.category === 'skin_type' && t.label === skinType)
+      ).length
+    })
+
+    // Compter les produits pour chaque catégorie
+    availableCategories.forEach(category => {
+      const filtered = getFilteredProductsExcept('category')
+      counts.categories[category] = filtered.filter(p => 
+        p.tags?.some(t => t.category === 'category' && t.label === category)
+      ).length
+    })
+
+    // Compter les produits pour chaque ingrédient
+    availableIngredients.forEach(ingredient => {
+      const filtered = getFilteredProductsExcept('ingredient')
+      counts.ingredients[ingredient] = filtered.filter(p => 
+        p.tags?.some(t => t.category === 'ingredient' && t.label === ingredient)
+      ).length
+    })
+
+    return counts
+  }, [products, searchTerm, selectedBrands, selectedRanges, selectedTags, availableNeeds, availableSkinTypes, availableCategories, availableIngredients, brands, rangesByBrand])
+
+  // application des filtres et recherche
+  const filtered = useMemo(
+    () => {
+      const filteredProducts = products.filter(p => {
+        // Filtre par recherche
+        if (searchTerm && !p.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+          return false
+        }
+        
+        // Filtres existants
+        if (selectedBrands.size > 0 && !selectedBrands.has(p.brand || '')) return false
+        if (selectedRanges.size > 0 && !selectedRanges.has(p.range || '')) return false
+        
+        // Filtres par tags
         for (const [cat, setTags] of Object.entries(selectedTags)) {
           if (setTags.size > 0) {
             const labels =
@@ -128,20 +256,20 @@ export default function CatalogueClient({
         return true
       })
 
-      // Tri
+      // Tri optimisé
       filteredProducts.sort((a, b) => {
         switch (sortBy) {
+          case 'bestsellers':
+            // Pour l'instant, tri par nom (à adapter selon vos besoins)
+            return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
           case 'az':
-            return a.name.localeCompare(b.name)
+            return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' })
           case 'za':
-            return b.name.localeCompare(a.name)
+            return b.name.localeCompare(a.name, 'fr', { sensitivity: 'base' })
           case 'price-asc':
             return a.price - b.price
           case 'price-desc':
             return b.price - a.price
-          case 'trending':
-            // Pour l'instant, tri par nom (à adapter selon vos besoins)
-            return a.name.localeCompare(b.name)
           default:
             return 0
         }
@@ -149,20 +277,30 @@ export default function CatalogueClient({
 
       return filteredProducts
     },
-    [products, searchTerm, selectedBrand, selectedRange, selectedTags, sortBy]
+    [products, searchTerm, selectedBrands, selectedRanges, selectedTags, sortBy]
   )
 
-  // Pagination
+  // Pagination optimisée
   const totalPages = Math.ceil(filtered.length / productsPerPage)
   const startIndex = (currentPage - 1) * productsPerPage
   const endIndex = startIndex + productsPerPage
   const currentProducts = filtered.slice(startIndex, endIndex)
 
-  // Préparer les données pour le composant Filters
-  const availableCategories = itemsByType['category'] || []
-  const availableNeeds = itemsByType['need'] || []
-  const availableSkinTypes = itemsByType['skin_type'] || []
-  const availableIngredients = itemsByType['ingredient'] || []
+  // Gestionnaires de pagination
+  const handlePreviousPage = useCallback(() => {
+    setCurrentPage(prev => Math.max(prev - 1, 1))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
+
+  const handleNextPage = useCallback(() => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [totalPages])
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
 
   return (
     <div className="catalogue max-w-7xl mx-auto">
@@ -173,14 +311,16 @@ export default function CatalogueClient({
             type="text"
             placeholder="Rechercher un produit..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            onChange={handleSearchChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+            aria-label="Rechercher un produit"
           />
           <svg
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -192,35 +332,34 @@ export default function CatalogueClient({
         </div>
       </div>
 
-      {/* Ligne 2: Bouton trier à droite */}
-      <div className="mb-6 flex justify-end">
-        <SortSelector sort={sortBy} onChange={setSortBy} />
-      </div>
-
-      {/* Ligne 3: Filtres à gauche et produits à droite */}
+      {/* Ligne 2: Filtres à gauche et produits à droite */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
         {/* Colonne des filtres */}
         <div className="lg:col-span-1">
           <Filters
+            sortOption={sortBy}
+            onSortChange={setSortBy}
             availableBrands={brands}
             rangesByBrand={rangesByBrand}
             availableCategories={availableCategories}
             availableNeeds={availableNeeds}
             availableSkinTypes={availableSkinTypes}
             availableIngredients={availableIngredients}
-            selectedBrand={selectedBrand}
-            selectedRange={selectedRange}
+            selectedBrands={selectedBrands}
+            selectedRanges={selectedRanges}
             selectedCategories={selectedTags['category'] || new Set()}
             selectedNeeds={selectedTags['need'] || new Set()}
             selectedSkinTypes={selectedTags['skin_type'] || new Set()}
             selectedIngredients={selectedTags['ingredient'] || new Set()}
-            onBrandChange={handleBrandChange}
-            onRangeChange={setSelectedRange}
+            onBrandToggle={handleBrandToggle}
+            onRangeToggle={handleRangeToggle}
+            onBrandSelectAll={handleBrandSelectAll}
             onCategoryToggle={(cat) => handleTagToggle('category', cat)}
             onNeedToggle={(need) => handleTagToggle('need', need)}
             onSkinTypeToggle={(skinType) => handleTagToggle('skin_type', skinType)}
             onIngredientToggle={(ingredient) => handleTagToggle('ingredient', ingredient)}
             onClearFilters={clearAllFilters}
+            productCounts={productCounts}
           />
         </div>
 
@@ -234,19 +373,26 @@ export default function CatalogueClient({
           
           {currentProducts.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-              Aucun produit trouvé avec les critères sélectionnés.
+              <p>Aucun produit trouvé avec les critères sélectionnés.</p>
+              <button
+                onClick={clearAllFilters}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none"
+              >
+                Réinitialiser les filtres
+              </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Ligne 4: Pagination */}
+      {/* Ligne 3: Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center space-x-2">
+        <nav className="flex justify-center items-center space-x-2" aria-label="Pagination">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={handlePreviousPage}
             disabled={currentPage === 1}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors focus:outline-none"
+            aria-label="Page précédente"
           >
             Précédent
           </button>
@@ -254,25 +400,28 @@ export default function CatalogueClient({
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}
-              onClick={() => setCurrentPage(page)}
-              className={`px-4 py-2 border rounded-lg ${
+              onClick={() => handlePageChange(page)}
+              className={`px-4 py-2 border rounded-lg transition-colors focus:outline-none ${
                 currentPage === page
                   ? 'bg-blue-500 text-white border-blue-500'
                   : 'hover:bg-gray-50'
               }`}
+              aria-label={`Page ${page}`}
+              aria-current={currentPage === page ? 'page' : undefined}
             >
               {page}
             </button>
           ))}
           
           <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={handleNextPage}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors focus:outline-none"
+            aria-label="Page suivante"
           >
             Suivant
           </button>
-        </div>
+        </nav>
       )}
     </div>
   )

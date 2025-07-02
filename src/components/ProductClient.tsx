@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import ProductCard from '@/components/ProductCard'
-import { useCart } from '@/contexts/CartContext'
+import { useCart } from '@/hooks/useCart'
 
 export type MappedProduct = {
   id: string
@@ -43,8 +43,12 @@ export default function ProductClient({
     }
   }
 
-  const handleAddToCart = () => {
-    addToCart(product, quantity)
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(product.id, quantity)
+    } catch (error) {
+      console.error('Erreur ajout au panier:', error)
+    }
   }
 
   const totalPrice = product.price * quantity

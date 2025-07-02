@@ -18,6 +18,7 @@ export default async function Home() {
           fill
           priority
           className="object-cover"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/30" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
@@ -26,7 +27,7 @@ export default async function Home() {
           </h1>
           <p className="mt-4 max-w-2xl text-lg sm:text-xl text-white drop-shadow-sm">
             Première pharmacie 100 % dermatologique de République Dominicaine,
-            FARMAU met l’expertise médicale au service de votre peau.
+            FARMAU met l&apos;expertise médicale au service de votre peau.
             Nos pharmaciens-dermatologues vous accompagnent avec des conseils
             personnalisés et une sélection rigoureuse de soins cliniquement prouvés.
           </p>
@@ -40,7 +41,7 @@ export default async function Home() {
         <section className="mt-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Produits Populaires</h2>
-            <button className="text-primary font-semibold hover:underline">
+            <button className="text-primary font-semibold hover:underline focus:outline-none rounded">
               Voir la tendance
             </button>
           </div>
@@ -75,6 +76,7 @@ export default async function Home() {
             width={600}
             height={240}
             className="object-cover rounded-lg"
+            sizes="(max-width: 768px) 100vw, 600px"
           />
           <p className="mt-4 text-center text-lg max-w-2xl">
             Nos pharmaciens-dermatologues, formés en Europe et aux États-Unis,
@@ -88,7 +90,7 @@ export default async function Home() {
         <section className="mt-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Avis sur la Pharmacie</h2>
-            <button className="text-primary font-semibold hover:underline">
+            <button className="text-primary font-semibold hover:underline focus:outline-none rounded">
               Voir plus
             </button>
           </div>
@@ -126,6 +128,7 @@ export default async function Home() {
               width={500}
               height={400}
               className="rounded-lg object-cover"
+              sizes="(max-width: 768px) 100vw, 500px"
             />
           </div>
           <div className="flex-1">
@@ -150,19 +153,19 @@ export default async function Home() {
             </p>
             <p>
               <strong>Téléphone :</strong>{' '}
-              <a href="tel:+18097243940" className="text-blue-600">
+              <a href="tel:+18097243940" className="text-blue-600 hover:text-blue-800 transition-colors">
                 +1 809 724 3940
               </a>
             </p>
             <p>
               <strong>WhatsApp Commandes :</strong>{' '}
-              <a href="https://wa.me/18094122468" className="text-blue-600">
+              <a href="https://wa.me/18094122468" className="text-blue-600 hover:text-blue-800 transition-colors" target="_blank" rel="noopener noreferrer">
                 +1 809 412 2468
               </a>
             </p>
             <p>
               <strong>Email :</strong>{' '}
-              <a href="mailto:skin@skinlacercenter.net" className="text-blue-600">
+              <a href="mailto:skin@skinlacercenter.net" className="text-blue-600 hover:text-blue-800 transition-colors">
                 skin@skinlacercenter.net
               </a>
             </p>
@@ -178,6 +181,7 @@ export default async function Home() {
               loading="lazy"
               allowFullScreen
               referrerPolicy="no-referrer-when-downgrade"
+              title="Localisation FARMAU"
             />
           </div>
         </section>

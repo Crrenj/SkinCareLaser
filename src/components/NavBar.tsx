@@ -1,13 +1,74 @@
 'use client'
-import React, { useState } from 'react'
-import { Mail, ShoppingCart, User, ChevronDown, Check } from 'lucide-react'
+import React, { useState, useCallback, useEffect } from 'react'
+import { Mail, User, ChevronDown, Shield } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCart } from '@/contexts/CartContext'
+import { CartIcon } from './CartIcon'
+import { CartDrawer } from './CartDrawer'
+import { supabase } from '@/lib/supabaseClient'
+import { useRouter } from 'next/navigation'
 
 export default function NavBar() {
   const [open, setOpen] = useState(false)
-  const { getTotalItems, showPopup, popupProduct, hidePopup } = useCart()
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [user, setUser] = useState<any>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    // Vérifier l'utilisateur connecté
+    checkUser()
+
+    // Écouter les changements d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        checkUser()
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    setUser(session?.user || null)
+
+    if (session?.user) {
+      // Vérifier si l'utilisateur est admin
+      const isAdminFromMeta = session.user.app_metadata?.role === 'admin'
+      
+      if (!isAdminFromMeta) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', session.user.id)
+          .single()
+
+        setIsAdmin(profile?.is_admin === true)
+      } else {
+        setIsAdmin(true)
+      }
+    } else {
+      setIsAdmin(false)
+    }
+  }
+
+  const handleLanguageToggle = useCallback(() => {
+    setOpen(prev => !prev)
+  }, [])
+
+  const handleCartOpen = useCallback(() => {
+    setIsCartOpen(true)
+  }, [])
+
+  const handleCartClose = useCallback(() => {
+    setIsCartOpen(false)
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+  }
 
   return (
     <header className="h-32 relative" style={{ backgroundColor: '#CCC5BD' }}>
@@ -17,87 +78,107 @@ export default function NavBar() {
         <div className="relative z-30">
           <button
             type="button"
-            onClick={() => setOpen(prev => !prev)}
-            className="bg-transparent text-gray-600 p-2 cursor-pointer flex items-center"
+            onClick={handleLanguageToggle}
+            className="bg-transparent text-gray-600 p-2 cursor-pointer flex items-center hover:text-gray-800 transition-colors focus:outline-none rounded"
+            aria-expanded={open}
+            aria-haspopup="true"
+            aria-label="Sélectionner la langue"
           >
             Langue
-            <ChevronDown className="w-4 h-4 ml-1 text-gray-600" />
+            <ChevronDown className={`w-4 h-4 ml-1 text-gray-600 transition-transform ${open ? 'rotate-180' : ''}`} />
           </button>
-          <ul
-            className={`${open ? 'block' : 'hidden'} absolute left-0 top-full mt-2 bg-white shadow rounded text-sm z-30`}
-          >
-            <li className="px-3 py-1 hover:bg-gray-100 cursor-pointer">Français</li>
-            <li className="px-3 py-1 hover:bg-gray-100 cursor-pointer">English</li>
-            <li className="px-3 py-1 hover:bg-gray-100 cursor-pointer">Español</li>
-          </ul>
+          {open && (
+            <ul
+              className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg text-sm z-30 min-w-[120px] border border-gray-200"
+              role="menu"
+            >
+              <li role="menuitem" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-t-lg">Français</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">English</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-b-lg">Español</li>
+            </ul>
+          )}
         </div>
 
         {/* logo centré (z-index inférieur) */}
         <div className="absolute inset-x-0 -top-4 flex justify-center">
-          <Image
-            src="/image/logo_trans.png"
-            alt="Logo"
-            width={140}
-            height={140}
-            className="w-36 h-36 object-contain"
-          />
+          <Link href="/" aria-label="Accueil FARMAU" className="focus:outline-none">
+            <Image
+              src="/image/logo_trans.png"
+              alt="Logo FARMAU"
+              width={140}
+              height={140}
+              className="w-36 h-36 object-contain"
+              priority
+            />
+          </Link>
         </div>
 
         {/* icônes + texte à droite */}
         <div className="absolute right-4 flex items-center gap-4">
-          <Mail className="w-6 h-6 cursor-pointer text-gray-600" />
-          <Link href="/cart" className="relative">
-            <ShoppingCart className="w-6 h-6 cursor-pointer text-gray-600 hover:text-gray-800 transition-colors" />
-            {/* Badge pour le nombre d'articles */}
-            {getTotalItems() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {getTotalItems()}
-              </span>
-            )}
-          </Link>
-          <User className="w-6 h-6 cursor-pointer text-gray-600" />
-          <span className="text-gray-600">Se connecter</span>
+          <button
+            className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
+            aria-label="Contact par email"
+          >
+            <Mail className="w-6 h-6" />
+          </button>
+          
+          {/* Nouveau CartIcon avec ouverture du drawer */}
+          <CartIcon 
+            onClick={handleCartOpen}
+            className="relative"
+          />
+          
+          {user ? (
+            <>
+              {isAdmin && (
+                <Link 
+                  href="/admin/dashboard"
+                  className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
+                  aria-label="Dashboard admin"
+                >
+                  <Shield className="w-6 h-6" />
+                </Link>
+              )}
+              <button
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded px-2 py-1"
+                aria-label="Se déconnecter"
+              >
+                Se déconnecter
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
+                aria-label="Se connecter"
+              >
+                <User className="w-6 h-6" />
+              </Link>
+              <Link 
+                href="/login"
+                className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded"
+              >
+                Se connecter
+              </Link>
+            </>
+          )}
         </div>
       </div>
 
       {/* ligne 2 */}
-      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-gray-700">
-        <a href="/" className="hover:text-gray-900">Accueil</a>
-        <a href="/catalogue" className="hover:text-gray-900">Catalogue</a>
-        <a href="/rdv" className="hover:text-gray-900">Prendre RDV</a>
+      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-gray-700" role="navigation" aria-label="Navigation principale">
+        <Link href="/" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
+        <Link href="/catalogue" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
+        <Link href="/rdv" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Prendre RDV</Link>
       </nav>
 
-      {/* Popup de confirmation d'ajout au panier */}
-      {showPopup && popupProduct && (
-        <div className="fixed top-20 right-4 z-50 animate-in slide-in-from-top-2 duration-300">
-          <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 max-w-sm">
-            <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <Check className="w-5 h-5 text-green-600" />
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">
-                  Ajouté au panier !
-                </p>
-                <p className="text-sm text-gray-600 truncate">
-                  {popupProduct.name}
-                </p>
-                <p className="text-sm font-semibold text-blue-600">
-                  {popupProduct.price.toFixed(2)} {popupProduct.currency.toUpperCase()}
-                </p>
-              </div>
-              <button
-                onClick={hidePopup}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* CartDrawer */}
+      <CartDrawer 
+        isOpen={isCartOpen}
+        onClose={handleCartClose}
+      />
     </header>
   )
 }

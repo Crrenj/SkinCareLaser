@@ -3,10 +3,248 @@
 :root {
   --background: #EDEAE5;
   --foreground: #333333;
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --gray-light: #F3F4F6;
+  --gray-medium: #9CA3AF;
+  --gray-dark: #374151;
+}
+
+/* Optimisations de base */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Optimisations d'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible pour l'accessibilité */
+.focus-visible:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Optimisations de performance pour les images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Optimisations pour les liens */
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary);
+}
+
+/* Optimisations pour les boutons */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Optimisations pour les inputs */
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* Optimisations de scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-medium);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-dark);
+}
+
+/* Optimisations pour les sélections */
+::selection {
+  background: var(--primary);
+  color: white;
+}
+
+/* Optimisations pour les placeholders */
+::placeholder {
+  color: var(--gray-medium);
+  opacity: 1;
+}
+
+/* Optimisations pour les listes */
+ul,
+ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Optimisations pour les titres */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Optimisations pour les paragraphes */
+p {
+  margin: 0;
+}
+
+/* Optimisations pour les conteneurs */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Optimisations pour les grilles */
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Optimisations pour les flexbox */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Optimisations pour les espacements */
+.space-y > * + * {
+  margin-top: 1rem;
+}
+
+.space-x > * + * {
+  margin-left: 1rem;
+}
+
+/* Optimisations pour les transitions */
+.transition {
+  transition: all 0.2s ease;
+}
+
+.transition-colors {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.transition-transform {
+  transition: transform 0.2s ease;
+}
+
+/* Optimisations pour les ombres */
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Optimisations pour les bordures arrondies */
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+/* Optimisations pour les états de focus */
+.focus\:outline-none:focus {
+  outline: none;
+}
+
+.focus\:ring-2:focus {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.focus\:ring-blue-500:focus {
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* Optimisations pour les états de hover */
+.hover\:bg-gray-50:hover {
+  background-color: var(--gray-light);
+}
+
+.hover\:bg-blue-700:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Optimisations pour les états disabled */
+.disabled\:opacity-50:disabled {
+  opacity: 0.5;
+}
+
+.disabled\:cursor-not-allowed:disabled {
+  cursor: not-allowed;
 }

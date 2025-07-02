@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { PlusCircle } from 'lucide-react'
-import { useCart } from '@/contexts/CartContext'
+import { AddToCartButton } from './AddToCartButton'
 
 type ProductImage = { url: string; alt: string }
 type Product = {
@@ -18,18 +17,13 @@ type Product = {
 type Props = { product: Product }
 
 export default function ProductCard({ product }: Props) {
-  const { addToCart } = useCart()
   const price = product.price.toFixed(2)
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault() // Empêcher la navigation vers la page produit
-    addToCart(product, 1)
-  }
 
   return (
     <Link href={`/product/${product.id}`} className="block h-full group" prefetch={false}>
       <article
         className="rounded-lg p-3 bg-white flex flex-col h-full shadow-md hover:shadow-lg transition-shadow group-hover:ring-2 group-hover:ring-blue-400"
+        data-testid="product-card"
       >
         <Image
           src={product.images?.[0]?.url ?? '/placeholder.png'}
@@ -57,14 +51,13 @@ export default function ProductCard({ product }: Props) {
           </p>
         )}
         <div className="mt-auto flex justify-between items-center">
-          <button
-            type="button"
-            aria-label="Ajouter au panier"
-            className="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors hover:scale-110"
-            onClick={handleAddToCart}
-          >
-            <PlusCircle size={24} />
-          </button>
+          <AddToCartButton
+            productId={product.id}
+            productName={product.name}
+            variant="ghost"
+            size="sm"
+            className="p-2 rounded-full hover:bg-gray-200 transition-colors hover:scale-110"
+          />
           <p className="text-lg font-bold">{price} {product.currency}</p>
         </div>
       </article>

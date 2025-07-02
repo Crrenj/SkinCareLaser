@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
-import { PlusCircle } from 'lucide-react'
+import { AddToCartButton } from './AddToCartButton'
 
 type ProductImage = { url: string; alt: string }
 type Product = {
@@ -124,16 +124,15 @@ export default function ProductDetailCard({
                   +
                 </button>
               </div>
-              <button
-                aria-label="Ajouter au panier"
-                className="group bg-blue-500 text-white px-6 py-3 rounded-md w-full md:w-auto flex items-center justify-center transition-colors hover:bg-blue-600"
-              >
-                <PlusCircle
-                  size={20}
-                  className="mr-2 transition-transform group-hover:rotate-90"
-                />
-                Add to cart
-              </button>
+              
+              {/* Nouveau AddToCartButton avec quantité */}
+              <AddToCartButton
+                productId={product.id}
+                productName={product.name}
+                variant="default"
+                size="lg"
+                className="w-full md:w-auto"
+              />
             </div>
           </div>
         </div>

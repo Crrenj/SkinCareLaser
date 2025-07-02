@@ -1,0 +1,79 @@
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+
+/**
+ * Middleware pour protéger les routes admin
+ * Vérifie si l'utilisateur est connecté et s'il a le rôle admin
+ */
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value)
+          )
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Récupérer la session
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // Si l'utilisateur essaie d'accéder aux routes admin
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    // Pas de session = redirection vers login
+    if (!session) {
+      const url = new URL('/login', request.url)
+      url.searchParams.set('redirectedFrom', request.nextUrl.pathname)
+      return NextResponse.redirect(url)
+    }
+
+    // Vérifier si l'utilisateur est admin
+    // D'abord vérifier dans app_metadata
+    const isAdminFromMeta = session.user.app_metadata?.role === 'admin'
+    
+    // Si pas dans app_metadata, vérifier dans la table profiles
+    if (!isAdminFromMeta) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', session.user.id)
+        .single()
+
+      const isAdminFromProfile = profile?.is_admin === true
+
+      // Si pas admin, rediriger vers login
+      if (!isAdminFromProfile) {
+        const url = new URL('/login', request.url)
+        url.searchParams.set('redirectedFrom', request.nextUrl.pathname)
+        url.searchParams.set('error', 'unauthorized')
+        return NextResponse.redirect(url)
+      }
+    }
+  }
+
+  return supabaseResponse
+}
+
+// Routes à protéger
+export const config = {
+  matcher: ['/admin/:path*']
+} 
