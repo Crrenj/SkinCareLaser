@@ -71,7 +71,7 @@ describe('Authentication Tests', () => {
       })
     })
 
-    it('redirige vers /admin/dashboard pour un utilisateur admin (app_metadata)', async () => {
+    it('redirige vers /admin/overview pour un utilisateur admin (app_metadata)', async () => {
       // Mock d'un utilisateur admin via app_metadata
       const mockSession = {
         user: {
@@ -96,11 +96,11 @@ describe('Authentication Tests', () => {
 
       // Vérifier la redirection vers le dashboard admin
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/admin/dashboard')
+        expect(mockReplace).toHaveBeenCalledWith('/admin/overview')
       })
     })
 
-    it('redirige vers /admin/dashboard pour un utilisateur admin (table profiles)', async () => {
+    it('redirige vers /admin/overview pour un utilisateur admin (table profiles)', async () => {
       // Mock d'un utilisateur admin via la table profiles
       const mockSession = {
         user: {
@@ -144,7 +144,7 @@ describe('Authentication Tests', () => {
 
       // Vérifier la redirection vers le dashboard admin
       await waitFor(() => {
-        expect(mockReplace).toHaveBeenCalledWith('/admin/dashboard')
+        expect(mockReplace).toHaveBeenCalledWith('/admin/overview')
       })
     })
 

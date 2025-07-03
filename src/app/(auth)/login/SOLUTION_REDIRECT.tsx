@@ -65,7 +65,7 @@ export default function LoginPageAlternative() {
           .single()
 
         const isAdmin = profile?.is_admin === true
-        const redirectPath = isAdmin ? '/admin/dashboard' : '/'
+        const redirectPath = isAdmin ? '/admin/overview' : '/'
 
         // Stocker la destination dans localStorage
         localStorage.setItem('redirect_after_login', redirectPath)
@@ -160,7 +160,7 @@ export default function LoginPageAlternative() {
         <div className="text-center text-sm text-gray-500">
           <p>Si la redirection ne fonctionne pas :</p>
           <a 
-            href="/admin/dashboard" 
+            href="/admin/overview" 
             className="text-blue-600 hover:text-blue-500 underline"
           >
             Cliquez ici pour accéder au dashboard admin

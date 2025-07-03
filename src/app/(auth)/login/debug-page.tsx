@@ -104,7 +104,7 @@ export default function LoginDebugPage() {
           const isAdmin = profile?.is_admin === true
           addDebug(`Est admin: ${isAdmin}`)
 
-          const redirectPath = isAdmin ? '/admin/dashboard' : '/'
+          const redirectPath = isAdmin ? '/admin/overview' : '/'
           addDebug(`Tentative de redirection vers: ${redirectPath}`)
 
           // Essayer différentes méthodes
@@ -197,10 +197,10 @@ export default function LoginDebugPage() {
 
             <div className="mt-4 space-y-2">
               <a 
-                href="/admin/dashboard" 
+                href="/admin/overview" 
                 className="block text-center text-blue-600 hover:text-blue-500 underline"
               >
-                Accès direct admin/dashboard
+                Accès direct admin/overview
               </a>
               <a 
                 href="/debug" 

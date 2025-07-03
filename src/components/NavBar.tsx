@@ -132,7 +132,7 @@ export default function NavBar() {
             <>
               {isAdmin && (
                 <Link 
-                  href="/admin/dashboard"
+                  href="/admin/overview"
                   className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
                   aria-label="Dashboard admin"
                 >

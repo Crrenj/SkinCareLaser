@@ -12,32 +12,32 @@ export default function TestRedirectPage() {
   }
 
   const testNextRouter = () => {
-    addStatus('Test router.push("/admin/dashboard")...')
-    router.push('/admin/dashboard')
+    addStatus('Test router.push("/admin/overview")...')
+    router.push('/admin/overview')
     addStatus('router.push() exécuté')
   }
 
   const testWindowLocation = () => {
     addStatus('Test window.location.href...')
-    window.location.href = '/admin/dashboard'
+    window.location.href = '/admin/overview'
     addStatus('window.location.href exécuté (ne devrait pas s\'afficher)')
   }
 
   const testWindowReplace = () => {
     addStatus('Test window.location.replace()...')
-    window.location.replace('/admin/dashboard')
+    window.location.replace('/admin/overview')
     addStatus('window.location.replace() exécuté (ne devrait pas s\'afficher)')
   }
 
   const testWindowAssign = () => {
     addStatus('Test window.location.assign()...')
-    window.location.assign('/admin/dashboard')
+    window.location.assign('/admin/overview')
     addStatus('window.location.assign() exécuté (ne devrait pas s\'afficher)')
   }
 
   const testRouterReplace = () => {
     addStatus('Test router.replace()...')
-    router.replace('/admin/dashboard')
+    router.replace('/admin/overview')
     addStatus('router.replace() exécuté')
   }
 
@@ -46,19 +46,19 @@ export default function TestRedirectPage() {
     
     // 1. router.push
     addStatus('1. router.push()')
-    router.push('/admin/dashboard')
+    router.push('/admin/overview')
     
     // 2. Attendre un peu puis window.location
     setTimeout(() => {
       addStatus('2. window.location.href (après 500ms)')
-      window.location.href = '/admin/dashboard'
+      window.location.href = '/admin/overview'
     }, 500)
   }
 
   const forceRedirect = () => {
     addStatus('Redirection forcée dans 1 seconde...')
     setTimeout(() => {
-      window.location.href = window.location.origin + '/admin/dashboard'
+      window.location.href = window.location.origin + '/admin/overview'
     }, 1000)
   }
 
@@ -137,7 +137,7 @@ export default function TestRedirectPage() {
           <li>Vider le cache du navigateur</li>
           <li>Utiliser une fenêtre privée</li>
           <li>Vérifier la console pour des erreurs</li>
-          <li>Accéder directement à <a href="/admin/dashboard" className="text-blue-500 underline">/admin/dashboard</a></li>
+          <li>Accéder directement à <a href="/admin/overview" className="text-blue-500 underline">/admin/overview</a></li>
         </ul>
       </div>
     </div>

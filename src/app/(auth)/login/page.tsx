@@ -100,7 +100,7 @@ export default function LoginPage() {
 
         // Déterminer l'URL de redirection
         const redirectPath = isAdmin 
-          ? '/admin/dashboard'
+          ? '/admin/overview'
           : sessionStorage.getItem('redirect_to') || '/'
 
         console.log('Redirection vers:', redirectPath)
@@ -258,7 +258,7 @@ export default function LoginPage() {
         <div className="text-center text-sm text-gray-600 mt-6">
           <p>Problème de redirection ?</p>
           <a 
-            href="/admin/dashboard" 
+            href="/admin/overview" 
             className="text-[#CCC5BD] hover:text-[#B8B1A8] underline font-medium"
           >
             Accéder directement au dashboard admin

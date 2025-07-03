@@ -36,7 +36,7 @@ export default function AuthCallbackPage() {
           let redirectPath = '/'
           
           if (profile?.is_admin) {
-            redirectPath = '/admin/dashboard'
+            redirectPath = '/admin/overview'
           } else {
             const savedRedirect = sessionStorage.getItem('redirect_to')
             if (savedRedirect) {
