@@ -12,7 +12,11 @@ import {
   UsersIcon,
   ChartBarIcon,
   CogIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
+  ArchiveBoxIcon,
+  TagIcon,
+  ShoppingBagIcon,
+  MegaphoneIcon
 } from '@heroicons/react/24/outline'
 
 export default function AdminLayout({
@@ -30,6 +34,10 @@ export default function AdminLayout({
   const navigation = [
     { name: 'Vue d\'ensemble', href: '/admin/overview', icon: HomeIcon },
     { name: 'Produits', href: '/admin/product', icon: CubeIcon },
+    { name: 'Stock', href: '/admin/stock', icon: ArchiveBoxIcon },
+    { name: 'Tags', href: '/admin/tags', icon: TagIcon },
+    { name: 'Commandes', href: '/admin/commande', icon: ShoppingBagIcon },
+    { name: 'Annonces', href: '/admin/annonce', icon: MegaphoneIcon },
     { name: 'Mon équipe', href: '/admin/my-team', icon: UsersIcon },
     { name: 'Statistiques', href: '/admin/statistics', icon: ChartBarIcon },
     { name: 'Paramètres', href: '/admin/settings', icon: CogIcon },
