@@ -1,17 +1,42 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { Mail, Lock, User, ArrowRight } from 'lucide-react'
 
 /**
- * Page de connexion
- * Gère la connexion des utilisateurs et les redirige selon leur rôle
- * @returns Page de connexion avec formulaire
+ * ⚠️ ATTENTION - PAGE DE LOGIN PRINCIPALE ⚠️
+ * 
+ * Cette page gère la connexion utilisateur avec des corrections spéciales.
+ * 
+ * 🚨 NE PAS MODIFIER SANS AUTORISATION 🚨
+ * 
+ * Problèmes résolus :
+ * - Redirection directe (pas via callback)
+ * - Gestion des ports (3000 vs 3001)
+ * - Sessions perdues après connexion
+ * - Erreurs de navigation privée
+ * - Vérification du statut admin
+ * 
+ * Fonctionnalités :
+ * - Détection automatique du port
+ * - Redirection intelligente
+ * - Gestion des erreurs
+ * - Support navigation privée limité
+ * 
+ * Si vous devez modifier ce code :
+ * 1. Demandez l'autorisation
+ * 2. Testez en navigation normale ET privée
+ * 3. Vérifiez les redirections admin/user
+ * 4. Testez avec différents ports
  */
-export default function LoginPage() {
+
+/**
+ * Composant de connexion avec gestion des search params
+ */
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
@@ -27,7 +52,16 @@ export default function LoginPage() {
   useEffect(() => {
     // Log l'URL actuelle pour debug
     console.log('URL actuelle:', window.location.href)
-    console.log('Port utilisé:', window.location.port || '3000')
+    console.log('Port utilisé:', window.location.port || 'default')
+    
+    // Vérifier si on est sur le bon port
+    if (window.location.port === '3000' && window.location.hostname === 'localhost') {
+      console.log('✅ Port correct (3000)')
+    } else if (window.location.port === '3001') {
+      console.log('⚠️ Port 3001 détecté - redirection vers 3000')
+      window.location.href = 'http://localhost:3000/login'
+      return
+    }
     
     // Afficher l'erreur d'autorisation si présente
     if (errorParam === 'unauthorized') {
@@ -38,7 +72,6 @@ export default function LoginPage() {
     if (redirectedFrom) {
       sessionStorage.setItem('redirect_to', redirectedFrom)
     }
-
 
   }, [redirectedFrom, errorParam])
 
@@ -105,9 +138,14 @@ export default function LoginPage() {
 
         console.log('Redirection vers:', redirectPath)
 
-        // Rediriger vers la page de callback qui gérera la suite
-        console.log('Redirection vers la page de callback...')
-        window.location.href = '/auth/callback'
+        // Rediriger directement vers la destination finale
+        console.log('Redirection vers:', redirectPath)
+        
+        // Attendre un peu pour que la session se stabilise
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Rediriger directement
+        router.push(redirectPath)
 
         // Nettoyer sessionStorage
         if (!isAdmin) {
@@ -273,5 +311,16 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * Page de connexion avec Suspense boundary
+ */
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 } 

@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'same-origin',
           },
         ],
       },
@@ -39,18 +39,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
-        pathname: '/**',     // toutes les tailles /seed/...
-      },
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        pathname: '/**',           // toutes les tailles / chemins
-      },
-      {
-        protocol: 'https',
-        hostname: '*.supabase.co', // (facultatif) Storage public Supabase
-        pathname: '/storage/v1/object/public/**',
+        hostname: '**',
+        pathname: '/**',
       },
     ],
     // Optimisations de performance pour les images

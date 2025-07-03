@@ -33,6 +33,7 @@ export default function AdminLayout({
     { name: 'Mon équipe', href: '/admin/my-team', icon: UsersIcon },
     { name: 'Statistiques', href: '/admin/statistics', icon: ChartBarIcon },
     { name: 'Paramètres', href: '/admin/settings', icon: CogIcon },
+    { name: 'Configuration', href: '/admin/setup', icon: CogIcon },
   ]
 
   useEffect(() => {

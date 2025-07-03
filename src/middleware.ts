@@ -3,6 +3,32 @@ import type { NextRequest } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 /**
+ * ⚠️ ATTENTION - MIDDLEWARE D'AUTHENTIFICATION CRITIQUE ⚠️
+ * 
+ * Ce middleware protège les routes admin et gère l'authentification.
+ * 
+ * 🚨 NE PAS MODIFIER SANS AUTORISATION 🚨
+ * 
+ * Problèmes résolus :
+ * - Synchronisation des cookies Supabase
+ * - Redirections infinies
+ * - Sessions perdues entre les pages
+ * - Gestion des erreurs d'authentification
+ * 
+ * Fonctionnalités :
+ * - Protection des routes /admin/*
+ * - Vérification du statut admin
+ * - Gestion des cookies sécurisés
+ * - Redirections appropriées
+ * 
+ * Si vous devez modifier ce code :
+ * 1. Demandez l'autorisation
+ * 2. Testez toutes les routes protégées
+ * 3. Vérifiez les redirections
+ * 4. Testez avec différents types d'utilisateurs
+ */
+
+/**
  * Middleware d'authentification corrigé
  * Gère correctement la synchronisation des cookies Supabase
  */
@@ -31,7 +57,7 @@ export async function middleware(request: NextRequest) {
   console.log('🔒 Protection route admin:', pathname)
 
   // Créer une réponse
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },

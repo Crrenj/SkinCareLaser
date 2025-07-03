@@ -1,9 +1,12 @@
-import { supabase } from '@/lib/supabaseClient'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import CatalogueClient from '@/components/CatalogueClient'
 
 export default async function Catalogue() {
+  // Créer le client Supabase pour le serveur
+  const supabase = await createSupabaseServerClient()
+  
   /* 1. Produits + marques/gammes + tags ---------------------------------- */
   const { data: products, error: pErr } = await supabase
     .from('products')
