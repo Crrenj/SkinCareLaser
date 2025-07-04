@@ -105,8 +105,8 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     
-    // Extraire brand_id et range_id du body
-    const { brand_id, range_id, imageFile, ...productData } = body
+    // Extraire brand_id, range_id, selectedTags et imageFile du body
+    const { brand_id, range_id, selectedTags, imageFile, ...productData } = body
     
     let imageUrl = null
     let brandName = ''
@@ -194,6 +194,18 @@ export async function POST(req: NextRequest) {
           url: imageUrl,
           alt: `Image de ${productData.name}`
         })
+    }
+
+    // Ajouter les tags si fournis
+    if (product && selectedTags && Array.isArray(selectedTags) && selectedTags.length > 0) {
+      const productTagsData = selectedTags.map(tagId => ({
+        product_id: product.id,
+        tag_id: tagId
+      }))
+      
+      await supabaseAdmin
+        .from('product_tags')
+        .insert(productTagsData)
     }
     
     return NextResponse.json(product, { status: 201 })

@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const { data: tags, error } = await supabase
       .from('tags')
       .select('*')
-      .order('tag_type', { ascending: true })
+      .order('tag_type_id', { ascending: true })
       .order('name', { ascending: true })
 
     if (error) {
@@ -41,23 +41,20 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
 
-    const { name, slug, tag_type } = body
+    const { name, slug, tag_type_id } = body
 
     // Valider les données
-    if (!name || !slug || !tag_type) {
-      return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
+    if (!name || !slug || !tag_type_id) {
+      return NextResponse.json({ error: 'Données manquantes (nom, slug, et type requis)' }, { status: 400 })
     }
 
-    // Valider le type de tag
-    const validTypes = ['category', 'need', 'skin_type', 'ingredient']
-    if (!validTypes.includes(tag_type)) {
-      return NextResponse.json({ error: 'Type de tag invalide' }, { status: 400 })
-    }
+    // Préparer les données
+    const tagData = { name, slug, tag_type_id }
 
     // Créer le tag
     const { data, error } = await supabase
       .from('tags')
-      .insert({ name, slug, tag_type })
+      .insert(tagData)
       .select()
       .single()
 

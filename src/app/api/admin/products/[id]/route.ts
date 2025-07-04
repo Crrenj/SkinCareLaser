@@ -37,8 +37,8 @@ export async function PATCH(
     const body = await req.json()
     const { id } = await params
     
-    // Extraire brand_id, range_id et imageFile qui ne doivent pas aller dans products
-    const { brand_id, range_id, imageFile, ...productData } = body
+    // Extraire brand_id, range_id, selectedTags et imageFile qui ne doivent pas aller dans products
+    const { brand_id, range_id, selectedTags, imageFile, ...productData } = body
     
     // Si une nouvelle image est fournie
     if (imageFile && productData.slug) {
@@ -144,6 +144,27 @@ export async function PATCH(
           url: image_url,
           alt: `Image de ${updateData.name || 'produit'}`
         })
+    }
+
+    // Mettre à jour les tags si fournis
+    if (selectedTags && Array.isArray(selectedTags)) {
+      // Supprimer les anciens tags
+      await supabaseAdmin
+        .from('product_tags')
+        .delete()
+        .eq('product_id', id)
+      
+      // Ajouter les nouveaux tags
+      if (selectedTags.length > 0) {
+        const productTagsData = selectedTags.map(tagId => ({
+          product_id: id,
+          tag_id: tagId
+        }))
+        
+        await supabaseAdmin
+          .from('product_tags')
+          .insert(productTagsData)
+      }
     }
     
     return NextResponse.json(data)

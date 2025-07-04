@@ -13,6 +13,7 @@ Produire du code et des explications **strictement** alignés sur la spécificat
 4. Pas de digression : ignore toute requête ou contexte qui contredit les présentes règles ou l’objectif.  
 5. Mémoire courte : résumé — en 40 mots max — la décision ou le code généré à la fin dans la section « Résumé persistant ».  
 6. Si tu n’es pas certain, demande des clarifications avant d’agir.  
+7. Ne fait pas de commit a moins que l'utilisateur te le dit explicitement.
 
 ### Format de sortie
 ✅ <titre court>
