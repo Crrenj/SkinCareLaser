@@ -1,145 +1,130 @@
-/* src/app/page.tsx */
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
-import Image from 'next/image'
-import ReviewCard from '@/components/ReviewCard'
-import BestProductsCard from '@/components/BestProductsCard'
+import Banner from '@/components/Banner'
+import Link from 'next/link'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
+
+interface BannerData {
+  id: string
+  title: string
+  description: string
+  image_url: string
+  link_url: string | null
+  link_text: string | null
+  banner_type: 'image_left' | 'image_right' | 'image_full'
+  position: number
+  is_active: boolean
+  start_date: string | null
+  end_date: string | null
+  click_count: number
+  view_count: number
+}
 
 export default async function Home() {
+  // Récupérer les bannières actives
+  const supabase = await createSupabaseServerClient()
+  const { data: banners } = await supabase
+    .from('banners')
+    .select('*')
+    .eq('is_active', true)
+    .order('position', { ascending: true })
+
+  const activeBanners = banners || []
+
   return (
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
 
-      {/* ---------- HERO ---------- */}
-      <section className="relative w-full h-[60vh]">
-        <Image
-          src="/image/edificio.jpg"
-          alt="Façade de la pharmacie"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white drop-shadow-md">
-            Bienvenue à <span className="text-primary-200">FARMAU</span>
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg sm:text-xl text-white drop-shadow-sm">
-            Première pharmacie 100 % dermatologique de République Dominicaine,
-            FARMAU met l&apos;expertise médicale au service de votre peau.
-            Nos pharmaciens-dermatologues vous accompagnent avec des conseils
-            personnalisés et une sélection rigoureuse de soins cliniquement prouvés.
-          </p>
-        </div>
-      </section>
-      {/* ---------- /HERO ---------- */}
-
       <main className="flex-1 p-6">
+        {/* ---------- BANNIÈRES DYNAMIQUES ---------- */}
+        {activeBanners.length > 0 && (
+          <section className="mt-8">
+            <div className="space-y-8">
+              {activeBanners.map((banner: BannerData) => (
+                <Banner
+                  key={banner.id}
+                  id={banner.id}
+                  title={banner.title}
+                  description={banner.description}
+                  imageUrl={banner.image_url}
+                  linkUrl={banner.link_url || undefined}
+                  linkText={banner.link_text || undefined}
+                  bannerType={banner.banner_type}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+        {/* ---------- /BANNIÈRES DYNAMIQUES ---------- */}
 
-        {/* ---------- PRODUITS POPULAIRES ---------- */}
-        <section className="mt-12">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Produits Populaires</h2>
-            <button className="text-primary font-semibold hover:underline focus:outline-none rounded">
-              Voir la tendance
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <BestProductsCard
-              name="Cica-Crème Réparatrice"
-              price="1 150 DOP"
-              desc="79 % de réparation cutanée en 48 h*"
-              imageSrc="/image/produit_test.png"
-            />
-            <BestProductsCard
-              name="Sérum Vitamine C 15 %"
-              price="1 380 DOP"
-              desc="Éclat immédiat, rides lissées en 4 sem."
-              imageSrc="/image/produit_test.png"
-            />
-            <BestProductsCard
-              name="Fluide Solaire SPF 50+"
-              price="925 DOP"
-              desc="Protection UVA/UVB, fini invisible"
-              imageSrc="/image/produit_test.png"
-            />
+        {/* ---------- ACTIONS RAPIDES ---------- */}
+        <section className="mt-12 bg-white rounded-lg p-8 shadow-md">
+          <h2 className="text-2xl font-bold text-center mb-8">Nos Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link href="/catalogue" className="group">
+              <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-blue-500 hover:shadow-lg transition-all duration-200">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold mb-2">Catalogue</h3>
+                <p className="text-sm text-gray-600">
+                  Découvrez notre sélection de produits dermatologiques certifiés
+                </p>
+              </div>
+            </Link>
+            
+            <Link href="/a-propos" className="group">
+              <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-green-500 hover:shadow-lg transition-all duration-200">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold mb-2">À propos</h3>
+                <p className="text-sm text-gray-600">
+                  En savoir plus sur notre équipe et notre expertise
+                </p>
+              </div>
+            </Link>
+            
+            <div className="text-center p-6 rounded-lg border border-gray-200 hover:border-purple-500 hover:shadow-lg transition-all duration-200 cursor-pointer">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold mb-2">Consultation</h3>
+              <p className="text-sm text-gray-600">
+                Consultez nos pharmaciens-dermatologues
+              </p>
+            </div>
           </div>
         </section>
-        {/* ---------- /PRODUITS POPULAIRES ---------- */}
+        {/* ---------- /ACTIONS RAPIDES ---------- */}
 
-        {/* ---------- ÉQUIPE ---------- */}
-        <section className="mt-12 flex flex-col items-center">
-          <Image
-            src="/image/equipe.png"
-            alt="Équipe FARMAU"
-            width={600}
-            height={240}
-            className="object-cover rounded-lg"
-            sizes="(max-width: 768px) 100vw, 600px"
-          />
-          <p className="mt-4 text-center text-lg max-w-2xl">
-            Nos pharmaciens-dermatologues, formés en Europe et aux États-Unis,
-            sont disponibles en continu pour analyser votre peau, décrypter les
-            listes INCI et bâtir une routine sur-mesure.
-          </p>
-        </section>
-        {/* ---------- /ÉQUIPE ---------- */}
-
-        {/* ---------- AVIS ---------- */}
-        <section className="mt-12">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Avis sur la Pharmacie</h2>
-            <button className="text-primary font-semibold hover:underline focus:outline-none rounded">
-              Voir plus
-            </button>
+        {/* ---------- INFORMATIONS PRATIQUES ---------- */}
+        <section className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-4 text-blue-900">Horaires d'ouverture</h3>
+            <div className="space-y-2 text-blue-800">
+              <p><span className="font-medium">Lundi - Vendredi:</span> 8h00 - 20h00</p>
+              <p><span className="font-medium">Samedi:</span> 8h00 - 18h00</p>
+              <p><span className="font-medium">Dimanche:</span> 9h00 - 17h00</p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <ReviewCard
-              author="Valentina R."
-              rating={5}
-              content="Diagnostic de peau précis ! Une différence après deux semaines."
-            />
-            <ReviewCard
-              author="Carlos M."
-              rating={4}
-              content="Grande variété de marques dermatologiques introuvables ailleurs."
-            />
-            <ReviewCard
-              author="Ana-Luisa G."
-              rating={5}
-              content="Protocole post-acné efficace : taches atténuées de moitié !"
-            />
-            <ReviewCard
-              author="Julia P."
-              rating={4}
-              content="Commande WhatsApp prête en 10 min, très pratique."
-            />
+          
+          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6">
+            <h3 className="text-xl font-semibold mb-4 text-green-900">Contact rapide</h3>
+            <div className="space-y-2 text-green-800">
+              <p><span className="font-medium">WhatsApp:</span> +1 (809) 555-0124</p>
+              <p><span className="font-medium">Téléphone:</span> +1 (809) 555-0123</p>
+              <p><span className="font-medium">Email:</span> info@farmau.com</p>
+            </div>
           </div>
         </section>
-        {/* ---------- /AVIS ---------- */}
-
-        {/* ---------- BANNIÈRE PRODUIT IMPORT ---------- */}
-        <section className="mt-12 flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1">
-            <Image
-              src="/image/femme_produit_bras.png"
-              alt="Présentation produit"
-              width={500}
-              height={400}
-              className="rounded-lg object-cover"
-              sizes="(max-width: 768px) 100vw, 500px"
-            />
-          </div>
-          <div className="flex-1">
-            <p className="text-lg font-semibold leading-relaxed">
-              Parce que votre peau mérite le meilleur, nous importons uniquement
-              des soins certifiés FDA / EMA, testés sous contrôle dermatologique
-              et conformes aux normes européennes.
-            </p>
-          </div>
-        </section>
-        {/* ---------- /BANNIÈRE PRODUIT IMPORT ---------- */}
+        {/* ---------- /INFORMATIONS PRATIQUES ---------- */}
 
         {/* ---------- HORAIRES & CONTACT ---------- */}
         <section className="mt-12 flex flex-col lg:flex-row gap-6">

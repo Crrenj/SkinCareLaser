@@ -171,6 +171,7 @@ export default function NavBar() {
       <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-gray-700" role="navigation" aria-label="Navigation principale">
         <Link href="/" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
         <Link href="/catalogue" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
+        <Link href="/a-propos" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">À propos</Link>
         <Link href="/rdv" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Prendre RDV</Link>
       </nav>
 

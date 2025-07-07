@@ -25,14 +25,14 @@ export default async function Catalogue() {
         )
       ),
       product_tags (
-        tag:tags ( name, tag_type )
+        tag:tags_with_types ( name, tag_type )
       )
     `)
     .limit(100)
 
   /* 2. Liste complète des tags (hors brand/range) ------------------------ */
   const { data: tags, error: tErr } = await supabase
-    .from('tags')
+    .from('tags_with_types')
     .select('name, tag_type')
 
   if (pErr || tErr) {

@@ -16,7 +16,8 @@ import {
   ArchiveBoxIcon,
   TagIcon,
   ShoppingBagIcon,
-  MegaphoneIcon
+  MegaphoneIcon,
+  BuildingStorefrontIcon
 } from '@heroicons/react/24/outline'
 
 export default function AdminLayout({
@@ -34,6 +35,7 @@ export default function AdminLayout({
   const navigation = [
     { name: 'Vue d\'ensemble', href: '/admin/overview', icon: HomeIcon },
     { name: 'Produits', href: '/admin/product', icon: CubeIcon },
+    { name: 'Marques', href: '/admin/marques', icon: BuildingStorefrontIcon },
     { name: 'Stock', href: '/admin/stock', icon: ArchiveBoxIcon },
     { name: 'Tags', href: '/admin/tags', icon: TagIcon },
     { name: 'Commandes', href: '/admin/commande', icon: ShoppingBagIcon },

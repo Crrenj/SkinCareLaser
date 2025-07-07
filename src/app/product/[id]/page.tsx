@@ -64,7 +64,7 @@ export default async function ProductPage({
         )
       ),
       product_tags (
-        tag:tags ( name, tag_type )
+        tag:tags_with_types ( name, tag_type )
       )
     `)
     .eq('id', id)
@@ -117,7 +117,7 @@ export default async function ProductPage({
             )
           ),
           product_tags (
-            tag:tags ( name, tag_type )
+            tag:tags_with_types ( name, tag_type )
           )
         `)
         .eq('product_ranges.range_id', rangeId)
@@ -142,7 +142,7 @@ export default async function ProductPage({
         )
       ),
       product_tags (
-        tag:tags ( name, tag_type )
+        tag:tags_with_types ( name, tag_type )
       )
     `)
     .neq('id', id)
