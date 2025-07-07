@@ -130,31 +130,54 @@ export default async function AProposPage() {
           </div>
         </section>
 
-        <section className="mt-12 bg-white rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Horaires & Contact</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold mb-2">Horaires d'ouverture</h3>
-              <div className="space-y-1 text-sm">
-                <p><span className="font-medium">Lundi - Vendredi:</span> 8h00 - 20h00</p>
-                <p><span className="font-medium">Samedi:</span> 8h00 - 18h00</p>
-                <p><span className="font-medium">Dimanche:</span> 9h00 - 17h00</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Contact</h3>
-              <div className="space-y-1 text-sm">
-                <p><span className="font-medium">Téléphone:</span> +1 (809) 555-0123</p>
-                <p><span className="font-medium">WhatsApp:</span> +1 (809) 555-0124</p>
-                <p><span className="font-medium">Email:</span> info@farmau.com</p>
-                <p><span className="font-medium">Adresse:</span> Av. Winston Churchill, Santo Domingo</p>
-              </div>
-            </div>
+        {/* ---------- HORAIRES & CONTACT ---------- */}
+        <section className="mt-12 flex flex-col lg:flex-row gap-6">
+          <div className="flex-1 space-y-2">
+            <h2 className="text-xl font-semibold">Horaires & Contact</h2>
+            <p><strong>Horaires :</strong> Lundi – Vendredi : 6 h 30 – 17 h 00</p>
+            <p>
+              <strong>Adresse :</strong>{' '}
+              Calle Jesus de Galindez Esq. Calle 3, Cerros de Gurabo,
+              Santiago, R.D.
+            </p>
+            <p>
+              <strong>Téléphone :</strong>{' '}
+              <a href="tel:+18097243940" className="text-blue-600 hover:text-blue-800 transition-colors">
+                +1 809 724 3940
+              </a>
+            </p>
+            <p>
+              <strong>WhatsApp Commandes :</strong>{' '}
+              <a href="https://wa.me/18094122468" className="text-blue-600 hover:text-blue-800 transition-colors" target="_blank" rel="noopener noreferrer">
+                +1 809 412 2468
+              </a>
+            </p>
+            <p>
+              <strong>Email :</strong>{' '}
+              <a href="mailto:skin@skinlacercenter.net" className="text-blue-600 hover:text-blue-800 transition-colors">
+                skin@skinlacercenter.net
+              </a>
+            </p>
+          </div>
+
+          {/* Carte Google Maps */}
+          <div className="flex-1 h-64">
+            <iframe
+              src="https://maps.google.com/maps?q=Calle%20Jesus%20de%20Galindez%20Esq%20Calle%203%20Cerros%20de%20Gurabo%20Santiago%20República%20Dominicana&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Localisation FARMAU"
+            />
           </div>
         </section>
+        {/* ---------- /HORAIRES & CONTACT ---------- */}
 
         <section className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8">
-          <h2 className="text-2xl font-bold text-center mb-6">Notre Mission</h2>
+          <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">Nos Valeurs</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -162,22 +185,24 @@ export default async function AProposPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold mb-2">Expertise Médicale</h3>
+              <h3 className="font-semibold mb-2">Qualité Certifiée</h3>
               <p className="text-sm text-gray-600">
-                Nos pharmaciens-dermatologues certifiés vous garantissent des conseils professionnels et personnalisés.
+                Produits approuvés FDA/EMA, testés cliniquement pour votre sécurité.
               </p>
             </div>
+            
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
-              <h3 className="font-semibold mb-2">Soins de Qualité</h3>
+              <h3 className="font-semibold mb-2">Expertise Médicale</h3>
               <p className="text-sm text-gray-600">
-                Sélection rigoureuse de produits certifiés FDA/EMA, testés cliniquement pour votre sécurité.
+                Pharmaciens-dermatologues formés en Europe et États-Unis.
               </p>
             </div>
+            
             <div className="text-center">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

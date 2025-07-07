@@ -104,73 +104,9 @@ export default async function Home() {
         </section>
         {/* ---------- /ACTIONS RAPIDES ---------- */}
 
-        {/* ---------- INFORMATIONS PRATIQUES ---------- */}
-        <section className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 text-blue-900">Horaires d'ouverture</h3>
-            <div className="space-y-2 text-blue-800">
-              <p><span className="font-medium">Lundi - Vendredi:</span> 8h00 - 20h00</p>
-              <p><span className="font-medium">Samedi:</span> 8h00 - 18h00</p>
-              <p><span className="font-medium">Dimanche:</span> 9h00 - 17h00</p>
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4 text-green-900">Contact rapide</h3>
-            <div className="space-y-2 text-green-800">
-              <p><span className="font-medium">WhatsApp:</span> +1 (809) 555-0124</p>
-              <p><span className="font-medium">Téléphone:</span> +1 (809) 555-0123</p>
-              <p><span className="font-medium">Email:</span> info@farmau.com</p>
-            </div>
-          </div>
-        </section>
-        {/* ---------- /INFORMATIONS PRATIQUES ---------- */}
 
-        {/* ---------- HORAIRES & CONTACT ---------- */}
-        <section className="mt-12 flex flex-col lg:flex-row gap-6">
-          <div className="flex-1 space-y-2">
-            <h2 className="text-xl font-semibold">Horaires & Contact</h2>
-            <p><strong>Horaires :</strong> Lundi – Vendredi : 6 h 30 – 17 h 00</p>
-            <p>
-              <strong>Adresse :</strong>{' '}
-              Calle Jesus de Galindez Esq. Calle 3, Cerros de Gurabo,
-              Santiago, R.D.
-            </p>
-            <p>
-              <strong>Téléphone :</strong>{' '}
-              <a href="tel:+18097243940" className="text-blue-600 hover:text-blue-800 transition-colors">
-                +1 809 724 3940
-              </a>
-            </p>
-            <p>
-              <strong>WhatsApp Commandes :</strong>{' '}
-              <a href="https://wa.me/18094122468" className="text-blue-600 hover:text-blue-800 transition-colors" target="_blank" rel="noopener noreferrer">
-                +1 809 412 2468
-              </a>
-            </p>
-            <p>
-              <strong>Email :</strong>{' '}
-              <a href="mailto:skin@skinlacercenter.net" className="text-blue-600 hover:text-blue-800 transition-colors">
-                skin@skinlacercenter.net
-              </a>
-            </p>
-          </div>
 
-          {/* Carte Google Maps */}
-          <div className="flex-1 h-64">
-            <iframe
-              src="https://maps.google.com/maps?q=Calle%20Jesus%20de%20Galindez%20Esq%20Calle%203%20Cerros%20de%20Gurabo%20Santiago%20República%20Dominicana&output=embed"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Localisation FARMAU"
-            />
-          </div>
-        </section>
-        {/* ---------- /HORAIRES & CONTACT ---------- */}
+
 
       </main>
 

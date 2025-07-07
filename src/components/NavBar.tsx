@@ -115,12 +115,13 @@ export default function NavBar() {
 
         {/* icônes + texte à droite */}
         <div className="absolute right-4 flex items-center gap-4">
-          <button
+          <Link
+            href="/contact"
             className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
             aria-label="Contact par email"
           >
             <Mail className="w-6 h-6" />
-          </button>
+          </Link>
           
           {/* Nouveau CartIcon avec ouverture du drawer */}
           <CartIcon 
@@ -172,7 +173,7 @@ export default function NavBar() {
         <Link href="/" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
         <Link href="/catalogue" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
         <Link href="/a-propos" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">À propos</Link>
-        <Link href="/rdv" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Prendre RDV</Link>
+        <Link href="/rdv" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Clinic</Link>
       </nav>
 
       {/* CartDrawer */}

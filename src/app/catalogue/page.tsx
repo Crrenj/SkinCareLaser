@@ -30,7 +30,7 @@ export default async function Catalogue() {
     `)
     .limit(100)
 
-  /* 2. Liste complète des tags (hors brand/range) ------------------------ */
+  /* 2. Récupérer TOUS les tags disponibles dans la base ------------------- */
   const { data: tags, error: tErr } = await supabase
     .from('tags_with_types')
     .select('name, tag_type')
@@ -40,11 +40,18 @@ export default async function Catalogue() {
     return <p className="p-6">Erreur de chargement</p>
   }
 
-  /* 3. Regrouper les tags par catégorie ---------------------------------- */
+  /* 3. Regrouper TOUS les tags par type ----------------------------------- */
   const itemsByType: Record<string, string[]> = {}
   tags?.forEach(t => {
-    itemsByType[t.tag_type] ||= []
+    if (!itemsByType[t.tag_type]) {
+      itemsByType[t.tag_type] = []
+    }
     itemsByType[t.tag_type].push(t.name)
+  })
+
+  // Trier les tags dans chaque type
+  Object.keys(itemsByType).forEach(tagType => {
+    itemsByType[tagType].sort()
   })
 
   /* 4. Mapper les produits pour le front --------------------------------- */
@@ -72,7 +79,6 @@ export default async function Catalogue() {
       <NavBar />
       <main className="flex-grow p-6">
         <CatalogueClient
-          /** <-- adapte ici le nom des props attendues par CatalogueClient */
           products={mappedProducts}
           itemsByType={itemsByType}
         />

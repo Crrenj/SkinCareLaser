@@ -60,7 +60,7 @@ export default function CatalogueClient({
     return grouped
   }, [products])
 
-  // états des filtres
+  // États des filtres dynamiques basés sur itemsByType
   const [selectedBrands, setSelectedBrands] = useState<Set<string>>(new Set())
   const [selectedRanges, setSelectedRanges] = useState<Set<string>>(new Set())
   const [selectedTags, setSelectedTags] = useState<Record<string, Set<string>>>(
@@ -70,16 +70,17 @@ export default function CatalogueClient({
       )
   )
 
-  const handleTagToggle = useCallback((cat: string, tag: string) => {
+  const handleTagToggle = useCallback((tagType: string, tagName: string) => {
     setSelectedTags(prev => {
-      const s = new Set(prev[cat])
-      if (s.has(tag)) {
-        s.delete(tag)
+      const s = new Set(prev[tagType])
+      if (s.has(tagName)) {
+        s.delete(tagName)
       } else {
-        s.add(tag)
+        s.add(tagName)
       }
-      return { ...prev, [cat]: s }
+      return { ...prev, [tagType]: s }
     })
+    setCurrentPage(1)
   }, [])
 
   // Handler pour toggle une marque
@@ -144,25 +145,16 @@ export default function CatalogueClient({
     setCurrentPage(1) // Réinitialiser la pagination lors de la recherche
   }, [])
 
-  // Préparer les données pour le composant Filters
-  const availableCategories = itemsByType['category'] || []
-  const availableNeeds = itemsByType['need'] || []
-  const availableSkinTypes = itemsByType['skin_type'] || []
-  const availableIngredients = itemsByType['ingredient'] || []
-
-  // Calculer les compteurs de produits pour chaque filtre
+  // Calculer les compteurs de produits pour chaque filtre de manière dynamique
   const productCounts = useMemo(() => {
     const counts = {
       brands: {} as Record<string, number>,
       ranges: {} as Record<string, number>,
-      needs: {} as Record<string, number>,
-      skinTypes: {} as Record<string, number>,
-      categories: {} as Record<string, number>,
-      ingredients: {} as Record<string, number>,
+      tags: {} as Record<string, Record<string, number>>, // tags[tagType][tagName] = count
     }
 
     // Filtrer les produits en fonction des critères actuels SAUF le filtre qu'on est en train de compter
-    const getFilteredProductsExcept = (excludeType: string, excludeBrand = false, excludeRange = false) => {
+    const getFilteredProductsExcept = (excludeTagType?: string, excludeBrand = false, excludeRange = false) => {
       return products.filter(p => {
         // Filtre par recherche
         if (searchTerm && !p.name.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -174,10 +166,9 @@ export default function CatalogueClient({
         if (!excludeRange && selectedRanges.size > 0 && !selectedRanges.has(p.range || '')) return false
         
         // Filtres par tags (en excluant le type qu'on compte)
-        for (const [cat, setTags] of Object.entries(selectedTags)) {
-          if (cat !== excludeType && setTags.size > 0) {
-            const labels =
-              p.tags?.filter(t => t.category === cat).map(t => t.label) ?? []
+        for (const [tagType, setTags] of Object.entries(selectedTags)) {
+          if (tagType !== excludeTagType && setTags.size > 0) {
+            const labels = p.tags?.filter(t => t.category === tagType).map(t => t.label) ?? []
             if (![...setTags].some(t => labels.includes(t))) return false
           }
         }
@@ -187,52 +178,32 @@ export default function CatalogueClient({
 
     // Compter les produits pour chaque marque
     brands.forEach(brand => {
-      const filtered = getFilteredProductsExcept('', true, false)
+      const filtered = getFilteredProductsExcept(undefined, true, false)
       counts.brands[brand] = filtered.filter(p => p.brand === brand).length
     })
 
     // Compter les produits pour chaque gamme
     Object.values(rangesByBrand).flat().forEach(range => {
-      const filtered = getFilteredProductsExcept('', false, true)
+      const filtered = getFilteredProductsExcept(undefined, false, true)
       counts.ranges[range] = filtered.filter(p => p.range === range).length
     })
 
-    // Compter les produits pour chaque besoin
-    availableNeeds.forEach(need => {
-      const filtered = getFilteredProductsExcept('need')
-      counts.needs[need] = filtered.filter(p => 
-        p.tags?.some(t => t.category === 'need' && t.label === need)
-      ).length
-    })
-
-    // Compter les produits pour chaque type de peau
-    availableSkinTypes.forEach(skinType => {
-      const filtered = getFilteredProductsExcept('skin_type')
-      counts.skinTypes[skinType] = filtered.filter(p => 
-        p.tags?.some(t => t.category === 'skin_type' && t.label === skinType)
-      ).length
-    })
-
-    // Compter les produits pour chaque catégorie
-    availableCategories.forEach(category => {
-      const filtered = getFilteredProductsExcept('category')
-      counts.categories[category] = filtered.filter(p => 
-        p.tags?.some(t => t.category === 'category' && t.label === category)
-      ).length
-    })
-
-    // Compter les produits pour chaque ingrédient
-    availableIngredients.forEach(ingredient => {
-      const filtered = getFilteredProductsExcept('ingredient')
-      counts.ingredients[ingredient] = filtered.filter(p => 
-        p.tags?.some(t => t.category === 'ingredient' && t.label === ingredient)
-      ).length
+    // Compter dynamiquement pour chaque type de tag
+    Object.entries(itemsByType).forEach(([tagType, tagNames]) => {
+      counts.tags[tagType] = {}
+      
+      tagNames.forEach(tagName => {
+        const filtered = getFilteredProductsExcept(tagType)
+        counts.tags[tagType][tagName] = filtered.filter(p => 
+          p.tags?.some(t => t.category === tagType && t.label === tagName)
+        ).length
+      })
     })
 
     return counts
-  }, [products, searchTerm, selectedBrands, selectedRanges, selectedTags, availableNeeds, availableSkinTypes, availableCategories, availableIngredients, brands, rangesByBrand])
+  }, [products, searchTerm, selectedBrands, selectedRanges, selectedTags, itemsByType, brands, rangesByBrand])
 
-  // application des filtres et recherche
+  // Application des filtres et recherche
   const filtered = useMemo(
     () => {
       const filteredProducts = products.filter(p => {
@@ -245,11 +216,10 @@ export default function CatalogueClient({
         if (selectedBrands.size > 0 && !selectedBrands.has(p.brand || '')) return false
         if (selectedRanges.size > 0 && !selectedRanges.has(p.range || '')) return false
         
-        // Filtres par tags
-        for (const [cat, setTags] of Object.entries(selectedTags)) {
+        // Filtres par tags dynamiques
+        for (const [tagType, setTags] of Object.entries(selectedTags)) {
           if (setTags.size > 0) {
-            const labels =
-              p.tags?.filter(t => t.category === cat).map(t => t.label) ?? []
+            const labels = p.tags?.filter(t => t.category === tagType).map(t => t.label) ?? []
             if (![...setTags].some(t => labels.includes(t))) return false
           }
         }
@@ -341,23 +311,15 @@ export default function CatalogueClient({
             onSortChange={setSortBy}
             availableBrands={brands}
             rangesByBrand={rangesByBrand}
-            availableCategories={availableCategories}
-            availableNeeds={availableNeeds}
-            availableSkinTypes={availableSkinTypes}
-            availableIngredients={availableIngredients}
+            // Passer les données dynamiques
+            itemsByType={itemsByType}
             selectedBrands={selectedBrands}
             selectedRanges={selectedRanges}
-            selectedCategories={selectedTags['category'] || new Set()}
-            selectedNeeds={selectedTags['need'] || new Set()}
-            selectedSkinTypes={selectedTags['skin_type'] || new Set()}
-            selectedIngredients={selectedTags['ingredient'] || new Set()}
+            selectedTags={selectedTags}
             onBrandToggle={handleBrandToggle}
             onRangeToggle={handleRangeToggle}
             onBrandSelectAll={handleBrandSelectAll}
-            onCategoryToggle={(cat) => handleTagToggle('category', cat)}
-            onNeedToggle={(need) => handleTagToggle('need', need)}
-            onSkinTypeToggle={(skinType) => handleTagToggle('skin_type', skinType)}
-            onIngredientToggle={(ingredient) => handleTagToggle('ingredient', ingredient)}
+            onTagToggle={handleTagToggle}
             onClearFilters={clearAllFilters}
             productCounts={productCounts}
           />

@@ -10,38 +10,35 @@ interface FiltersProps {
   // Filter options
   availableBrands: string[]
   rangesByBrand: Record<string, string[]>
-  availableCategories: string[]
-  availableNeeds: string[]
-  availableSkinTypes: string[]
-  availableIngredients: string[]
+  itemsByType: Record<string, string[]> // Données dynamiques des tags
   
   // Selected filters
   selectedBrands: Set<string>
   selectedRanges: Set<string>
-  selectedCategories: Set<string>
-  selectedNeeds: Set<string>
-  selectedSkinTypes: Set<string>
-  selectedIngredients: Set<string>
+  selectedTags: Record<string, Set<string>> // Sélections dynamiques des tags
   
   // Handlers
   onBrandToggle: (brand: string) => void
   onRangeToggle: (range: string) => void
   onBrandSelectAll: (brand: string, select: boolean) => void
-  onCategoryToggle: (category: string) => void
-  onNeedToggle: (need: string) => void
-  onSkinTypeToggle: (skinType: string) => void
-  onIngredientToggle: (ingredient: string) => void
+  onTagToggle: (tagType: string, tagName: string) => void // Handler générique pour tous les tags
   onClearFilters: () => void
   
   // Product counts per filter (optional)
   productCounts?: {
     brands?: Record<string, number>
     ranges?: Record<string, number>
-    needs?: Record<string, number>
-    skinTypes?: Record<string, number>
-    categories?: Record<string, number>
-    ingredients?: Record<string, number>
+    tags?: Record<string, Record<string, number>> // tags[tagType][tagName] = count
   }
+}
+
+// Mapping des noms d'affichage pour les types de tags
+const TAG_TYPE_LABELS: Record<string, string> = {
+  'categories': 'CATÉGORIES',
+  'besoins': 'BESOINS',
+  'types-peau': 'TYPE DE PEAU',
+  'ingredients': 'INGRÉDIENTS',
+  // Fallback pour d'autres types
 }
 
 const Filters: FC<FiltersProps> = ({
@@ -49,23 +46,14 @@ const Filters: FC<FiltersProps> = ({
   onSortChange,
   availableBrands,
   rangesByBrand,
-  availableCategories,
-  availableNeeds,
-  availableSkinTypes,
-  availableIngredients,
+  itemsByType,
   selectedBrands,
   selectedRanges,
-  selectedCategories,
-  selectedNeeds,
-  selectedSkinTypes,
-  selectedIngredients,
+  selectedTags,
   onBrandToggle,
   onRangeToggle,
   onBrandSelectAll,
-  onCategoryToggle,
-  onNeedToggle,
-  onSkinTypeToggle,
-  onIngredientToggle,
+  onTagToggle,
   onClearFilters,
   productCounts,
 }) => {
@@ -254,201 +242,62 @@ const Filters: FC<FiltersProps> = ({
           </div>
         )}
         
-        {/* Catégories */}
-        {availableCategories.length > 0 && (
-          <div className="border-t border-gray-300">
-            <button
-              onClick={() => toggleSection('categories')}
-              className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
-            >
-              <span className="text-sm font-medium tracking-wide">CATÉGORIES</span>
-              {expandedSections.has('categories') ? (
-                <ChevronUpIcon className="h-5 w-5 text-gray-600" />
-              ) : (
-                <ChevronDownIcon className="h-5 w-5 text-gray-600" />
+        {/* Filtres dynamiques par type de tag */}
+        {Object.entries(itemsByType).map(([tagType, tagNames]) => {
+          if (tagNames.length === 0) return null
+          
+          const sectionKey = `tags-${tagType}`
+          const displayLabel = TAG_TYPE_LABELS[tagType] || tagType.toUpperCase()
+          const selectedTagsForType = selectedTags[tagType] || new Set()
+          
+          return (
+            <div key={tagType} className="border-t border-gray-300">
+              <button
+                onClick={() => toggleSection(sectionKey)}
+                className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
+              >
+                <span className="text-sm font-medium tracking-wide">{displayLabel}</span>
+                {expandedSections.has(sectionKey) ? (
+                  <ChevronUpIcon className="h-5 w-5 text-gray-600" />
+                ) : (
+                  <ChevronDownIcon className="h-5 w-5 text-gray-600" />
+                )}
+              </button>
+              
+              {expandedSections.has(sectionKey) && (
+                <div className="pb-4 space-y-3">
+                  {tagNames.map((tagName) => (
+                    <label key={tagName} className="flex items-center cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={selectedTagsForType.has(tagName)}
+                        onChange={() => onTagToggle(tagType, tagName)}
+                        className="sr-only"
+                      />
+                      <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
+                        selectedTagsForType.has(tagName)
+                          ? 'bg-black border-black'
+                          : 'bg-white border-gray-400 group-hover:border-gray-600'
+                      }`}>
+                        {selectedTagsForType.has(tagName) && (
+                          <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
+                        {tagName}
+                        {productCounts?.tags?.[tagType]?.[tagName] !== undefined && 
+                          <span className="text-gray-500"> ({productCounts.tags[tagType][tagName]})</span>
+                        }
+                      </span>
+                    </label>
+                  ))}
+                </div>
               )}
-            </button>
-            
-            {expandedSections.has('categories') && (
-              <div className="pb-4 space-y-3">
-                {availableCategories.map((category) => (
-                  <label key={category} className="flex items-center cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedCategories.has(category)}
-                      onChange={() => onCategoryToggle(category)}
-                      className="sr-only"
-                    />
-                    <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
-                      selectedCategories.has(category)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400 group-hover:border-gray-600'
-                    }`}>
-                      {selectedCategories.has(category) && (
-                        <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
-                      {category}
-                      {productCounts?.categories?.[category] !== undefined && 
-                        <span className="text-gray-500"> ({productCounts.categories[category]})</span>
-                      }
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Besoins */}
-        {availableNeeds.length > 0 && (
-          <div className="border-t border-gray-300">
-            <button
-              onClick={() => toggleSection('needs')}
-              className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
-            >
-              <span className="text-sm font-medium tracking-wide">BESOINS</span>
-              {expandedSections.has('needs') ? (
-                <ChevronUpIcon className="h-5 w-5 text-gray-600" />
-              ) : (
-                <ChevronDownIcon className="h-5 w-5 text-gray-600" />
-              )}
-            </button>
-            
-            {expandedSections.has('needs') && (
-              <div className="pb-4 space-y-3">
-                {availableNeeds.map((need) => (
-                  <label key={need} className="flex items-center cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedNeeds.has(need)}
-                      onChange={() => onNeedToggle(need)}
-                      className="sr-only"
-                    />
-                    <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
-                      selectedNeeds.has(need)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400 group-hover:border-gray-600'
-                    }`}>
-                      {selectedNeeds.has(need) && (
-                        <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
-                      {need}
-                      {productCounts?.needs?.[need] !== undefined && 
-                        <span className="text-gray-500"> ({productCounts.needs[need]})</span>
-                      }
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Type de peau */}
-        {availableSkinTypes.length > 0 && (
-          <div className="border-t border-gray-300">
-            <button
-              onClick={() => toggleSection('skinTypes')}
-              className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
-            >
-              <span className="text-sm font-medium tracking-wide">TYPE DE PEAU</span>
-              {expandedSections.has('skinTypes') ? (
-                <ChevronUpIcon className="h-5 w-5 text-gray-600" />
-              ) : (
-                <ChevronDownIcon className="h-5 w-5 text-gray-600" />
-              )}
-            </button>
-            
-            {expandedSections.has('skinTypes') && (
-              <div className="pb-4 space-y-3">
-                {availableSkinTypes.map((skinType) => (
-                  <label key={skinType} className="flex items-center cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedSkinTypes.has(skinType)}
-                      onChange={() => onSkinTypeToggle(skinType)}
-                      className="sr-only"
-                    />
-                    <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
-                      selectedSkinTypes.has(skinType)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400 group-hover:border-gray-600'
-                    }`}>
-                      {selectedSkinTypes.has(skinType) && (
-                        <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
-                      {skinType}
-                      {productCounts?.skinTypes?.[skinType] !== undefined && 
-                        <span className="text-gray-500"> ({productCounts.skinTypes[skinType]})</span>
-                      }
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Ingrédients */}
-        {availableIngredients.length > 0 && (
-          <div className="border-t border-gray-300">
-            <button
-              onClick={() => toggleSection('ingredients')}
-              className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
-            >
-              <span className="text-sm font-medium tracking-wide">INGRÉDIENTS</span>
-              {expandedSections.has('ingredients') ? (
-                <ChevronUpIcon className="h-5 w-5 text-gray-600" />
-              ) : (
-                <ChevronDownIcon className="h-5 w-5 text-gray-600" />
-              )}
-            </button>
-            
-            {expandedSections.has('ingredients') && (
-              <div className="pb-4 space-y-3">
-                {availableIngredients.map((ingredient) => (
-                  <label key={ingredient} className="flex items-center cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={selectedIngredients.has(ingredient)}
-                      onChange={() => onIngredientToggle(ingredient)}
-                      className="sr-only"
-                    />
-                    <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
-                      selectedIngredients.has(ingredient)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400 group-hover:border-gray-600'
-                    }`}>
-                      {selectedIngredients.has(ingredient) && (
-                        <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
-                      {ingredient}
-                      {productCounts?.ingredients?.[ingredient] !== undefined && 
-                        <span className="text-gray-500"> ({productCounts.ingredients[ingredient]})</span>
-                      }
-                    </span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )
+        })}
         
         <div className="border-t border-gray-300"></div>
       </div>
