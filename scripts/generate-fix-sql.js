@@ -1,0 +1,95 @@
+/**
+ * Générateur de script SQL pour corriger la récursion RLS
+ * Basé sur l'analyse complète de la base de données
+ */
+
+console.log('🎯 GÉNÉRATEUR DE SCRIPT SQL DE CORRECTION')
+console.log('=' .repeat(60))
+console.log('Basé sur l\'analyse qui a confirmé la récursion infinie dans les politiques RLS\n')
+
+console.log('📋 PROBLÈME IDENTIFIÉ:')
+console.log('- Récursion infinie détectée dans les politiques RLS de la table "profiles"')
+console.log('- L\'utilisateur j@gmail.com ne peut pas accéder à son profil')
+console.log('- La redirection vers /admin/overview échoue\n')
+
+console.log('🔧 SOLUTION:')
+console.log('Exécutez ce script SQL dans Supabase Dashboard > SQL Editor:\n')
+
+console.log('-- ======================================================================')
+console.log('-- CORRECTION DE LA RÉCURSION INFINIE DANS LES POLITIQUES RLS')
+console.log('-- ======================================================================')
+console.log('-- Problème: Les politiques actuelles créent une boucle infinie')
+console.log('-- Solution: Politiques simplifiées basées uniquement sur auth.uid()')
+console.log('-- ======================================================================')
+console.log('')
+
+console.log('-- Étape 1: Désactiver RLS temporairement pour éviter les erreurs')
+console.log('ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;')
+console.log('')
+
+console.log('-- Étape 2: Supprimer TOUTES les politiques existantes problématiques')
+console.log('DROP POLICY IF EXISTS "View own profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Create own profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Update own profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Admin user access" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "users_own_profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "admin_full_access" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Users can create own profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Admins can manage all profiles" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Admin view all" ON public.profiles;')
+console.log('DROP POLICY IF EXISTS "Admin manage all" ON public.profiles;')
+console.log('')
+
+console.log('-- Étape 3: Créer des politiques SIMPLES sans récursion')
+console.log('-- Politique 1: Chaque utilisateur peut gérer son propre profil')
+console.log('CREATE POLICY "user_own_profile_access"')
+console.log('ON public.profiles FOR ALL')
+console.log('USING (auth.uid() = id);')
+console.log('')
+
+console.log('-- Politique 2: L\'admin spécifique (j@gmail.com) a accès à tout')
+console.log('CREATE POLICY "specific_admin_full_access"')
+console.log('ON public.profiles FOR ALL')
+console.log('USING (auth.uid() = \'e7bc4c23-a9c8-4551-b212-b6a540af21ed\'::uuid);')
+console.log('')
+
+console.log('-- Étape 4: Réactiver RLS')
+console.log('ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;')
+console.log('')
+
+console.log('-- Étape 5: Vérifier que les politiques ont été créées')
+console.log('SELECT ')
+console.log('  policyname,')
+console.log('  cmd,')
+console.log('  qual')
+console.log('FROM pg_policies ')
+console.log('WHERE tablename = \'profiles\'')
+console.log('ORDER BY policyname;')
+console.log('')
+
+console.log('-- Étape 6: Test de la correction')
+console.log('-- Cette requête devrait maintenant fonctionner sans erreur')
+console.log('SELECT id, display_name, is_admin FROM public.profiles LIMIT 3;')
+console.log('')
+
+console.log('-- ======================================================================')
+console.log('-- NOTES IMPORTANTES')
+console.log('-- ======================================================================')
+console.log('-- 1. Ces politiques évitent toute récursion en utilisant uniquement auth.uid()')
+console.log('-- 2. L\'admin j@gmail.com aura accès complet via son UUID spécifique')
+console.log('-- 3. Les autres utilisateurs n\'auront accès qu\'à leur propre profil')
+console.log('-- 4. Aucune fonction externe n\'est utilisée dans les politiques')
+console.log('-- ======================================================================')
+
+console.log('\n🚀 APRÈS EXÉCUTION DU SCRIPT:')
+console.log('1. Testez la connexion: http://localhost:3001/login')
+console.log('2. Email: j@gmail.com')
+console.log('3. Mot de passe: 123456789')
+console.log('4. Vérifiez la redirection vers /admin/overview')
+console.log('5. Exécutez: node scripts/test-admin-login.js pour confirmer')
+
+console.log('\n✅ Script SQL généré avec succès!')
+console.log('📋 Copiez le script ci-dessus et exécutez-le dans Supabase Dashboard') 
