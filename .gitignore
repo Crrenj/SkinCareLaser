@@ -50,3 +50,6 @@ next-env.d.ts
 
 # Per-user Claude Code settings (le projet-level settings.json reste versionné)
 .claude/settings.local.json
+
+# Données de prix (générées par scripts/prices-export.cjs, ne pas versionner)
+/data/prices.csv

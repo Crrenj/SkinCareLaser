@@ -25,7 +25,7 @@ const { createClient } = require('@supabase/supabase-js')
 require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') })
 
 const DRY_RUN = process.argv.includes('--dry-run')
-const PLACEHOLDER_PRICE = 25.00
+const PLACEHOLDER_PRICE = 25.00 // Utilisé pour les produits sans prix dans catalog.json
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
 
@@ -239,7 +239,12 @@ async function importBrand(brand, tagTypeIds, tagCache) {
         }
       }
 
-      // Product
+      // Product (prix depuis catalog.json si défini, sinon placeholder)
+      const price = typeof product.price === 'number' && product.price > 0
+        ? product.price
+        : PLACEHOLDER_PRICE
+      const hasRealPrice = typeof product.price === 'number' && product.price > 0
+
       let productId
       if (DRY_RUN) {
         productId = 'dry-run-product-id'
@@ -250,10 +255,10 @@ async function importBrand(brand, tagTypeIds, tagCache) {
             slug: product.slug,
             name: product.name,
             description: product.description,
-            price: PLACEHOLDER_PRICE,
+            price,
             currency: 'DOP',
             stock: 0,
-            is_active: false,
+            is_active: hasRealPrice, // Activé seulement si un vrai prix est saisi
             image_url: imageUrl,
           }, { onConflict: 'slug' })
           .select()
@@ -311,8 +316,14 @@ async function main() {
 
   log(`\n=== TERMINÉ ===`)
   log(`Total : ${totalProducts} produits, ${totalImages} images traitées`)
-  log(`Prix placeholder : ${PLACEHOLDER_PRICE} DOP, is_active = false`)
-  log(`Active les produits via /admin/product une fois les prix vérifiés.`)
+  log(`Les produits avec un prix défini dans catalog.json sont actifs (is_active=true).`)
+  log(`Les autres restent inactifs avec prix placeholder ${PLACEHOLDER_PRICE} DOP.`)
+  log(``)
+  log(`Workflow recommandé :`)
+  log(`  1. node scripts/prices-export.cjs > data/prices.csv`)
+  log(`  2. Ouvre data/prices.csv dans Excel/Numbers, remplis la colonne new_price`)
+  log(`  3. node scripts/prices-import.cjs   # met à jour catalog.json`)
+  log(`  4. node scripts/seed-import.cjs     # ré-importe avec les vrais prix`)
 }
 
 main().catch(e => { console.error('FATAL:', e); process.exit(1) })

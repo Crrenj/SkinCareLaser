@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { AddToCartButton } from './AddToCartButton'
 
-type ProductImage = { url: string; alt: string }
+type ProductImage = { url: string; alt: string | null }
 type Product = {
   id: string
   name: string
@@ -53,7 +53,6 @@ export default function ProductCard({ product }: Props) {
         <div className="mt-auto flex justify-between items-center">
           <AddToCartButton
             productId={product.id}
-            productName={product.name}
             variant="ghost"
             size="sm"
             className="p-2 rounded-full hover:bg-gray-200 transition-colors hover:scale-110"

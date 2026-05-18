@@ -239,12 +239,18 @@ function parsePdf(pdfPath, brandSlug) {
     }
   }
 
-  // Auto-tagging pass : analyse la description complète de chaque produit
+  // Auto-tagging pass + déduplication des slugs (variantes "UVEBLOCK SPF 50+" multiples)
+  const slugCounts = new Map()
   for (const range of ranges) {
     for (const product of range.products) {
       product.description = product.description.replace(/\s+/g, ' ').trim()
       const fullText = `${product.name} ${range.description} ${product.description}`
       product.tags = detectTags(fullText)
+
+      const baseSlug = product.slug
+      const n = (slugCounts.get(baseSlug) || 0) + 1
+      slugCounts.set(baseSlug, n)
+      if (n > 1) product.slug = `${baseSlug}-${n}`
     }
   }
 

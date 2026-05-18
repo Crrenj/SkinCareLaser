@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient, type CookieOptions } from '@supabase/ssr'
 
 /**
  * ⚠️ ATTENTION - CODE CRITIQUE DE CONNEXION ⚠️
@@ -57,7 +57,7 @@ export const supabase = createBrowserClient(
           return undefined
         }
       },
-      set(name: string, value: string, options: any) {
+      set(name: string, value: string, options: CookieOptions) {
         // ⚠️ PROTECTION SSR : Vérifier que nous sommes côté client
         if (typeof window === 'undefined') {
           return
@@ -82,7 +82,7 @@ export const supabase = createBrowserClient(
           console.warn('localStorage non disponible:', error)
         }
       },
-      remove(name: string, options: any) {
+      remove(name: string, _options: CookieOptions) {
         // ⚠️ PROTECTION SSR : Vérifier que nous sommes côté client
         if (typeof window === 'undefined') {
           return

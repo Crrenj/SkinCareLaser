@@ -50,29 +50,12 @@ function LoginForm() {
   const errorParam = searchParams.get('error')
 
   useEffect(() => {
-    // Log l'URL actuelle pour debug
-    console.log('URL actuelle:', window.location.href)
-    console.log('Port utilisé:', window.location.port || 'default')
-    
-    // Vérifier si on est sur le bon port
-    if (window.location.port === '3000' && window.location.hostname === 'localhost') {
-      console.log('✅ Port correct (3000)')
-    } else if (window.location.port === '3001') {
-      console.log('⚠️ Port 3001 détecté - redirection vers 3000')
-      window.location.href = 'http://localhost:3000/login'
-      return
-    }
-    
-    // Afficher l'erreur d'autorisation si présente
     if (errorParam === 'unauthorized') {
       setError('Accès non autorisé. Vous devez être administrateur.')
     }
-
-    // Stocker l'URL de redirection dans sessionStorage
     if (redirectedFrom) {
       sessionStorage.setItem('redirect_to', redirectedFrom)
     }
-
   }, [redirectedFrom, errorParam])
 
   /**
@@ -103,57 +86,37 @@ function LoginForm() {
       }
 
       if (data.session) {
-        console.log('Session utilisateur:', data.session.user)
-        
-        // Vérifier si l'utilisateur est admin
         const isAdminFromMeta = data.session.user.app_metadata?.role === 'admin'
-        console.log('Admin depuis app_metadata:', isAdminFromMeta)
-        
-        // Si pas dans app_metadata, vérifier dans la table profiles
         let isAdmin = isAdminFromMeta
-        
+
         if (!isAdminFromMeta) {
-          const { data: profile, error: profileError } = await supabase
+          const { data: profile } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', data.session.user.id)
             .single()
 
-          console.log('Profil récupéré:', profile)
-          console.log('Erreur profil:', profileError)
-
           isAdmin = profile?.is_admin === true
         }
 
-        console.log('Est admin final:', isAdmin)
-
-        // Marquer comme redirection en cours
         setRedirecting(true)
         setLoading(false)
 
-        // Déterminer l'URL de redirection
         const redirectPath = isAdmin
           ? '/admin/product'
           : sessionStorage.getItem('redirect_to') || '/'
 
-        console.log('Redirection vers:', redirectPath)
-
-        // Rediriger directement vers la destination finale
-        console.log('Redirection vers:', redirectPath)
-        
-        // Attendre un peu pour que la session se stabilise
+        // Pause courte pour laisser les cookies de session se poser avant la nav
         await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Rediriger directement
+
         router.push(redirectPath)
 
-        // Nettoyer sessionStorage
         if (!isAdmin) {
           sessionStorage.removeItem('redirect_to')
         }
       }
     } catch (err) {
-      console.error('Erreur login complète:', err)
+      console.error('Erreur login:', err)
       setError('Une erreur est survenue lors de la connexion')
       setLoading(false)
       setRedirecting(false)

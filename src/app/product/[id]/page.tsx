@@ -6,15 +6,24 @@ import { notFound } from 'next/navigation'
 import { JSX } from 'react'
 
 type TagItem = { name: string; tag_type: string }
+
+// Forme retournée par Supabase pour les jointures :
+// PostgREST renvoie un object pour 1-1 et un array pour 1-n, mais nos relations
+// (range, brand, tag) sont aliasées avec `name:relation` ce qui force un object.
+type RangeJoin = {
+  range: { id: string; name: string; brand: { id: string; name: string } | null } | null
+}
+type TagJoin = { tag: TagItem | null }
+
 type RawProduct = {
   id: string
   name: string
-  description: string
+  description: string | null
   price: string | number
   currency: string
-  product_images: { url: string; alt: string | null }[]
-  product_ranges: { range: { id: string; name: string; brand: { id: string; name: string } } }[]
-  product_tags: { tag: TagItem }[]
+  product_images: { url: string; alt: string | null }[] | null
+  product_ranges: RangeJoin[] | null
+  product_tags: TagJoin[] | null
 }
 
 type MappedProduct = {
@@ -29,12 +38,47 @@ type MappedProduct = {
   tagsByCategory: Record<string, string[]>
 }
 
-function buildTagMap(rawTags: any[]): Record<string, string[]> {
-  return rawTags.reduce<Record<string, string[]>>((acc, { tag }) => {
+const PRODUCT_SELECT = `
+  id,
+  name,
+  description,
+  price,
+  currency,
+  product_images ( url, alt ),
+  product_ranges (
+    range:ranges (
+      id,
+      name,
+      brand:brands ( id, name )
+    )
+  ),
+  product_tags (
+    tag:tags_with_types ( name, tag_type )
+  )
+`
+
+function buildTagMap(rawTags: TagJoin[] | null): Record<string, string[]> {
+  return (rawTags ?? []).reduce<Record<string, string[]>>((acc, { tag }) => {
+    if (!tag) return acc
     acc[tag.tag_type] ??= []
     acc[tag.tag_type].push(tag.name)
     return acc
   }, {})
+}
+
+function mapProduct(raw: RawProduct): MappedProduct {
+  const firstRange = raw.product_ranges?.[0]?.range ?? null
+  return {
+    id: raw.id,
+    name: raw.name,
+    description: raw.description ?? '',
+    price: Number(raw.price),
+    currency: raw.currency,
+    images: raw.product_images ?? [],
+    brand: firstRange?.brand?.name ?? '',
+    range: firstRange?.name ?? '',
+    tagsByCategory: buildTagMap(raw.product_tags),
+  }
 }
 
 export default async function ProductPage({
@@ -48,127 +92,53 @@ export default async function ProductPage({
   // 1. Fetch produit principal
   const { data: prodRaw, error: pErr } = await supabase
     .from('products')
-    .select(`
-      id,
-      name,
-      description,
-      price,
-      currency,
-      product_images ( url, alt ),
-      product_ranges (
-        range:ranges (
-          id,
-          name,
-          brand:brands ( id, name )
-        )
-      ),
-      product_tags (
-        tag:tags_with_types ( name, tag_type )
-      )
-    `)
+    .select(PRODUCT_SELECT)
     .eq('id', id)
-    .single()
+    .single<RawProduct>()
 
   if (pErr || !prodRaw) {
     if (pErr) console.error('Product fetch error:', pErr)
     notFound()
   }
 
-  // 2. Mapping principal
-  const tagsByCategory = buildTagMap((prodRaw as any).product_tags || [])
-  const mainProduct: MappedProduct = {
-    id: prodRaw.id,
-    name: prodRaw.name,
-    description: prodRaw.description || '',
-    price: Number(prodRaw.price),
-    currency: prodRaw.currency,
-    images: (prodRaw as any).product_images || [],
-    brand: ((prodRaw as any).product_ranges?.[0]?.range?.brand as any)?.name ?? '',
-    range: (prodRaw as any).product_ranges?.[0]?.range?.name ?? '',
-    tagsByCategory,
-  }
+  const mainProduct = mapProduct(prodRaw)
+  const rangeId = prodRaw.product_ranges?.[0]?.range?.id
 
-  // 3. Produits similaires - étape A (même gamme)
-  const rangeId = (prodRaw as any).product_ranges?.[0]?.range?.id
+  // 2. Produits similaires — étape A (même gamme)
   const { data: sameRange } = rangeId
     ? await supabase
         .from('products')
-        .select(`
-          id,
-          name,
-          price,
-          currency,
-          product_images ( url, alt ),
-          product_ranges (
-            range:ranges (
-              id,
-              name,
-              brand:brands ( id, name )
-            )
-          ),
-          product_tags (
-            tag:tags_with_types ( name, tag_type )
-          )
-        `)
+        .select(PRODUCT_SELECT)
         .eq('product_ranges.range_id', rangeId)
         .neq('id', id)
         .limit(3)
+        .returns<RawProduct[]>()
     : { data: null }
 
-  // 4. Produits similaires - étape B (tags communs par catégorie)
+  // 3. Produits similaires — étape B (tags communs par catégorie)
   const { data: candidates } = await supabase
     .from('products')
-    .select(`
-      id,
-      name,
-      price,
-      currency,
-      product_images ( url, alt ),
-      product_ranges (
-        range:ranges (
-          id,
-          name,
-          brand:brands ( id, name )
-        )
-      ),
-      product_tags (
-        tag:tags_with_types ( name, tag_type )
-      )
-    `)
+    .select(PRODUCT_SELECT)
     .neq('id', id)
     .limit(50)
+    .returns<RawProduct[]>()
 
   const wantCats = ['skin_type', 'category', 'need']
-  const mainTags = tagsByCategory
+  const mainTags = mainProduct.tagsByCategory
 
-  const stepB = (candidates || [])
-    .map((p: any) => {
-      const mapB = buildTagMap(p.product_tags || [])
-      const ok = wantCats.every(
+  const stepB = (candidates ?? [])
+    .filter(p => {
+      const mapB = buildTagMap(p.product_tags)
+      return wantCats.every(
         cat =>
           Array.isArray(mainTags[cat]) &&
           Array.isArray(mapB[cat]) &&
           mainTags[cat].some(v => mapB[cat].includes(v))
       )
-      return ok ? p : null
     })
-    .filter((p): p is any => p !== null)
     .slice(0, 2)
 
-  const similarRaw = [...(sameRange || []), ...stepB]
-
-  // 5. Mapping similar
-  const similarProducts: MappedProduct[] = similarRaw.map((p: any) => ({
-    id: p.id,
-    name: p.name,
-    description: p.description || '',
-    price: Number(p.price),
-    currency: p.currency,
-    images: p.product_images || [],
-    brand: (p.product_ranges?.[0]?.range?.brand as any)?.name ?? '',
-    range: p.product_ranges?.[0]?.range?.name ?? '',
-    tagsByCategory: buildTagMap(p.product_tags || []),
-  }))
+  const similarProducts: MappedProduct[] = [...(sameRange ?? []), ...stepB].map(mapProduct)
 
   return (
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">

@@ -6,7 +6,6 @@ import { useCart } from '@/hooks/useCart'
 
 interface AddToCartButtonProps {
   productId: string
-  productName: string
   disabled?: boolean
   className?: string
   variant?: 'default' | 'outline' | 'ghost'
@@ -15,7 +14,6 @@ interface AddToCartButtonProps {
 
 export function AddToCartButton({
   productId,
-  productName,
   disabled = false,
   className = '',
   variant = 'default',

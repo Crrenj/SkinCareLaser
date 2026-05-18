@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -15,77 +16,47 @@ import {
   TagIcon,
   MegaphoneIcon,
   BuildingStorefrontIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline'
+
+const NAVIGATION = [
+  { name: 'Produits',     href: '/admin/product',  icon: CubeIcon },
+  { name: 'Marques',      href: '/admin/marques',  icon: BuildingStorefrontIcon },
+  { name: 'Stock',        href: '/admin/stock',    icon: ArchiveBoxIcon },
+  { name: 'Tags',         href: '/admin/tags',     icon: TagIcon },
+  { name: 'Messages',     href: '/admin/messages', icon: EnvelopeIcon },
+  { name: 'Annonces',     href: '/admin/annonce',  icon: MegaphoneIcon },
+  { name: 'Mon équipe',   href: '/admin/my-team',  icon: UsersIcon },
+  { name: 'Paramètres',   href: '/admin/settings', icon: CogIcon },
+  { name: 'Configuration', href: '/admin/setup',   icon: CogIcon },
+]
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
   const pathname = usePathname()
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [isAuthorized, setIsAuthorized] = useState(false)
+  const { user, isAdmin, loading } = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
-  const navigation = [
-    { name: 'Produits', href: '/admin/product', icon: CubeIcon },
-    { name: 'Marques', href: '/admin/marques', icon: BuildingStorefrontIcon },
-    { name: 'Stock', href: '/admin/stock', icon: ArchiveBoxIcon },
-    { name: 'Tags', href: '/admin/tags', icon: TagIcon },
-    { name: 'Messages', href: '/admin/messages', icon: EnvelopeIcon },
-    { name: 'Annonces', href: '/admin/annonce', icon: MegaphoneIcon },
-    { name: 'Mon équipe', href: '/admin/my-team', icon: UsersIcon },
-    { name: 'Paramètres', href: '/admin/settings', icon: CogIcon },
-    { name: 'Configuration', href: '/admin/setup', icon: CogIcon },
-  ]
-
+  // Le middleware redirige déjà côté serveur. Ce useEffect couvre les cas
+  // où l'utilisateur perd sa session pendant qu'il est sur une page admin.
   useEffect(() => {
-    checkAdminAccess()
-  }, [])
-
-  const checkAdminAccess = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        window.location.href = '/login?redirectedFrom=' + pathname
-        return
-      }
-
-      const isAdminFromMeta = session.user.app_metadata?.role === 'admin'
-      
-      if (!isAdminFromMeta) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single()
-
-        if (!profile?.is_admin) {
-          window.location.href = '/login?redirectedFrom=' + pathname + '&error=unauthorized'
-          return
-        }
-      }
-
-      setUser(session.user)
-      setIsAuthorized(true)
-    } catch (error) {
-      console.error('Erreur vérification accès admin:', error)
-      window.location.href = '/login'
-    } finally {
-      setLoading(false)
+    if (loading) return
+    if (!user) {
+      window.location.href = `/login?redirectedFrom=${pathname}`
+    } else if (!isAdmin) {
+      window.location.href = `/login?redirectedFrom=${pathname}&error=unauthorized`
     }
-  }
+  }, [loading, user, isAdmin, pathname])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/login'
   }
 
-  if (loading || !isAuthorized) {
+  if (loading || !user || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
@@ -98,10 +69,8 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-16'} transition-all duration-300 bg-white shadow-lg`}>
         <div className="flex flex-col h-full">
-          {/* Logo et toggle */}
           <div className="flex items-center justify-between h-16 px-4 border-b">
             {sidebarOpen && (
               <h2 className="text-xl font-semibold text-gray-800">Admin Panel</h2>
@@ -109,6 +78,7 @@ export default function AdminLayout({
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className={`p-1.5 rounded-md hover:bg-gray-100 ${!sidebarOpen && 'mx-auto'}`}
+              aria-label={sidebarOpen ? 'Réduire la barre latérale' : 'Ouvrir la barre latérale'}
             >
               {sidebarOpen ? (
                 <ChevronLeftIcon className="h-5 w-5 text-gray-600" />
@@ -118,9 +88,8 @@ export default function AdminLayout({
             </button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 px-2 py-4 space-y-1">
-            {navigation.map((item) => {
+            {NAVIGATION.map((item) => {
               const isActive = pathname === item.href
               return (
                 <Link
@@ -128,8 +97,8 @@ export default function AdminLayout({
                   href={item.href}
                   className={`
                     flex items-center px-2 py-2 text-sm font-medium rounded-md
-                    ${isActive 
-                      ? 'bg-blue-50 text-blue-700' 
+                    ${isActive
+                      ? 'bg-blue-50 text-blue-700'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }
                     ${!sidebarOpen && 'justify-center'}
@@ -143,18 +112,17 @@ export default function AdminLayout({
             })}
           </nav>
 
-          {/* User info et logout */}
           <div className="px-2 py-4 border-t">
             {sidebarOpen && (
               <div className="px-2 py-2 mb-2">
                 <p className="text-xs text-gray-500">Connecté en tant que</p>
-                <p className="text-sm font-medium text-gray-700 truncate">{user?.email}</p>
+                <p className="text-sm font-medium text-gray-700 truncate">{user.email}</p>
               </div>
             )}
             <button
               onClick={handleLogout}
               className={`
-                flex items-center w-full px-2 py-2 text-sm font-medium text-red-600 
+                flex items-center w-full px-2 py-2 text-sm font-medium text-red-600
                 rounded-md hover:bg-red-50
                 ${!sidebarOpen && 'justify-center'}
               `}
@@ -167,10 +135,9 @@ export default function AdminLayout({
         </div>
       </div>
 
-      {/* Main content */}
       <div className="flex-1 overflow-auto">
         {children}
       </div>
     </div>
   )
-} 
+}

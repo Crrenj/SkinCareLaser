@@ -134,13 +134,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </button>
                 
                 <button
-                  onClick={() => {
-                    // TODO: Rediriger vers la page de commande
-                    console.log('Procéder au paiement')
-                  }}
-                  className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none"
+                  type="button"
+                  disabled
+                  title="Checkout pas encore implémenté"
+                  className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Procéder au paiement
+                  Procéder au paiement (à venir)
                 </button>
               </div>
             </div>

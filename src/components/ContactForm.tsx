@@ -40,7 +40,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
       } else {
         setError(data.error || 'Erreur lors de l\'envoi du message')
       }
-    } catch (err) {
+    } catch {
       setError('Erreur de connexion. Veuillez réessayer.')
     } finally {
       setLoading(false)
@@ -106,7 +106,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
             />
           </div>
           <p className="mt-1 text-xs text-gray-500">
-            Utilisez l'email de votre compte utilisateur
+            Utilisez l&apos;email de votre compte utilisateur
           </p>
         </div>
 
@@ -169,11 +169,11 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
       {/* Informations supplémentaires */}
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
         <h3 className="font-medium text-blue-900 mb-2">
-          Conditions d'envoi
+          Conditions d&apos;envoi
         </h3>
         <ul className="text-sm text-blue-700 space-y-1">
           <li>• Vous devez avoir un compte utilisateur</li>
-          <li>• Utilisez l'email associé à votre compte</li>
+          <li>• Utilisez l&apos;email associé à votre compte</li>
           <li>• Nous répondons sous 24-48h ouvrées</li>
           <li>• Tous les champs sont obligatoires</li>
         </ul>

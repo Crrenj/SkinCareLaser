@@ -12,6 +12,9 @@
     "test:unit:watch": "vitest watch",
     "check-products": "node scripts/check-products.js",
     "parse-pdfs": "node scripts/parse-pdfs.cjs",
+    "validate-catalog": "node scripts/validate-catalog.cjs",
+    "prices:export": "node scripts/prices-export.cjs",
+    "prices:import": "node scripts/prices-import.cjs",
     "seed-import": "node scripts/seed-import.cjs",
     "create-admin": "node scripts/create-admin-user.js"
   },

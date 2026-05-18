@@ -5,34 +5,10 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
 /**
- * ⚠️ ATTENTION - PAGE DE CALLBACK D'AUTHENTIFICATION ⚠️
- * 
- * Cette page gère les redirections après connexion.
- * 
- * 🚨 NE PAS MODIFIER SANS AUTORISATION 🚨
- * 
- * Problèmes résolus :
- * - Synchronisation des sessions
- * - Délais appropriés pour les cookies
- * - Gestion des erreurs de redirection
- * - Feedback utilisateur pendant l'attente
- * 
- * Fonctionnalités :
- * - Vérification de session avec délai
- * - Redirection admin/user appropriée
- * - Gestion des erreurs gracieuse
- * - Interface de chargement
- * 
- * Si vous devez modifier ce code :
- * 1. Demandez l'autorisation
- * 2. Testez les délais de redirection
- * 3. Vérifiez la synchronisation des sessions
- * 4. Testez les cas d'erreur
- */
-
-/**
- * Page de callback après authentification
- * Vérifie la session et redirige vers la bonne page
+ * Page de callback post-Supabase Auth (vérification d'email, OAuth).
+ * Attend que la session soit posée puis redirige selon le rôle :
+ *   - admin → /admin/product
+ *   - autre → sessionStorage.redirect_to ou /
  */
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -40,48 +16,36 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const checkSessionAndRedirect = async () => {
-      console.log('🔄 Vérification de la session dans callback...')
-      setStatus('Vérification de la session...')
-      
       try {
-        // Attendre que les cookies se stabilisent
+        // Laisser un instant aux cookies pour se poser
         await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // Forcer le rafraîchissement de la session
+
         const { data: { session }, error } = await supabase.auth.getSession()
-        
+
         if (error) {
-          console.error('❌ Erreur session:', error)
+          console.error('Callback session error:', error)
           setStatus('Erreur de session, redirection...')
           setTimeout(() => router.push('/login?error=session_error'), 1000)
           return
         }
-        
+
         if (!session) {
-          console.log('❌ Pas de session dans callback')
           setStatus('Session non trouvée, redirection...')
           setTimeout(() => router.push('/login'), 1000)
           return
         }
 
-        console.log('✅ Session trouvée dans callback:', session.user.email)
         setStatus('Session trouvée, vérification des permissions...')
-        
-        // Vérifier si admin
+
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('id', session.user.id)
           .single()
-        
-        if (profileError) {
-          console.error('❌ Erreur profil:', profileError)
-          // Continuer même si erreur profil, rediriger vers accueil
-        }
-        
-        // Déterminer où rediriger
+
+        if (profileError) console.error('Callback profile error:', profileError)
+
         let redirectPath = '/'
-        
         if (profile?.is_admin) {
           redirectPath = '/admin/product'
           setStatus('Accès admin confirmé, redirection...')
@@ -91,19 +55,13 @@ export default function AuthCallbackPage() {
             redirectPath = savedRedirect
             sessionStorage.removeItem('redirect_to')
           }
-          setStatus('Redirection vers l\'accueil...')
+          setStatus("Redirection vers l'accueil...")
         }
-        
-        console.log('🎯 Redirection finale vers:', redirectPath)
-        
-        // Attendre un peu avant la redirection pour éviter les conflits
+
         await new Promise(resolve => setTimeout(resolve, 500))
-        
-        // Utiliser router.push au lieu de window.location.href
         router.push(redirectPath)
-        
       } catch (error) {
-        console.error('❌ Erreur dans callback:', error)
+        console.error('Callback unexpected error:', error)
         setStatus('Erreur inattendue, redirection...')
         setTimeout(() => router.push('/login?error=callback_error'), 1000)
       }
@@ -123,4 +81,4 @@ export default function AuthCallbackPage() {
       </div>
     </div>
   )
-} 
+}

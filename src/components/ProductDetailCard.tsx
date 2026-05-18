@@ -125,10 +125,8 @@ export default function ProductDetailCard({
                 </button>
               </div>
               
-              {/* Nouveau AddToCartButton avec quantité */}
               <AddToCartButton
                 productId={product.id}
-                productName={product.name}
                 variant="default"
                 size="lg"
                 className="w-full md:w-auto"

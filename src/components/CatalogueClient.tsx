@@ -9,7 +9,7 @@ interface Product {
   name: string
   price: number
   currency: string
-  images: { url: string; alt: string }[]
+  images: { url: string; alt: string | null }[]
   brand?: string
   range?: string
   tags?: TagItem[]

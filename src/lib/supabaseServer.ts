@@ -1,16 +1,10 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 /**
- * Client Supabase pour le serveur (SSR)
- * Utilise createServerClient pour les opérations côté serveur
- * 
- * ⚠️ À utiliser uniquement dans :
- * - Les Server Components
- * - Les API Routes
- * - Les fonctions getServerSideProps
- * 
- * Pour les Client Components, utilisez @/lib/supabaseClient
+ * Client Supabase pour le serveur (SSR).
+ * À utiliser dans : Server Components, API Routes, getServerSideProps.
+ * Pour les Client Components, utiliser @/lib/supabaseClient.
  */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
@@ -23,18 +17,18 @@ export async function createSupabaseServerClient() {
         get(name: string) {
           return cookieStore.get(name)?.value
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value, ...options })
-          } catch (error) {
-            // Ignore les erreurs de cookies en lecture seule
+          } catch {
+            // cookieStore en lecture seule depuis un Server Component — ignoré
           }
         },
-        remove(name: string, options: any) {
+        remove(name: string, options: CookieOptions) {
           try {
             cookieStore.set({ name, value: '', ...options })
-          } catch (error) {
-            // Ignore les erreurs de cookies en lecture seule
+          } catch {
+            // cookieStore en lecture seule depuis un Server Component — ignoré
           }
         },
       },

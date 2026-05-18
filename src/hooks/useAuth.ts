@@ -1,12 +1,10 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useCart } from './useCart'
 
 export function useAuth() {
-  const router = useRouter()
   const { refreshCart } = useCart()
 
   useEffect(() => {

@@ -1,57 +1,19 @@
 'use client'
-import React, { useState, useCallback, useEffect } from 'react'
-import { Mail, User, ChevronDown, Shield } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Mail, User as UserIcon, ChevronDown, Shield } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { CartIcon } from './CartIcon'
 import { CartDrawer } from './CartDrawer'
 import { supabase } from '@/lib/supabaseClient'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useRouter } from 'next/navigation'
 
 export default function NavBar() {
   const [open, setOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const { user, isAdmin } = useIsAdmin()
   const router = useRouter()
-
-  useEffect(() => {
-    // Vérifier l'utilisateur connecté
-    checkUser()
-
-    // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        checkUser()
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    setUser(session?.user || null)
-
-    if (session?.user) {
-      // Vérifier si l'utilisateur est admin
-      const isAdminFromMeta = session.user.app_metadata?.role === 'admin'
-      
-      if (!isAdminFromMeta) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single()
-
-        setIsAdmin(profile?.is_admin === true)
-      } else {
-        setIsAdmin(true)
-      }
-    } else {
-      setIsAdmin(false)
-    }
-  }
 
   const handleLanguageToggle = useCallback(() => {
     setOpen(prev => !prev)
@@ -155,7 +117,7 @@ export default function NavBar() {
                 className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
                 aria-label="Se connecter"
               >
-                <User className="w-6 h-6" />
+                <UserIcon className="w-6 h-6" />
               </Link>
               <Link 
                 href="/login"
