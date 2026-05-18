@@ -1,78 +1,59 @@
-# 🛍️ Skincare Laser - E-commerce Next.js
+# FARMAU — E-commerce dermo-cosmétique
 
-Application e-commerce pour produits de soins avec dashboard admin.
+Next.js 15 + TypeScript + Supabase + Tailwind. Catalogue produits + dashboard admin pour pharmaciens-dermatologues.
 
-## 🚀 Démarrage rapide
+Voir **`CLAUDE.md`** pour l'architecture détaillée et **`db/README.md`** pour la base.
+
+## Démarrage
 
 ```bash
-# Installation
 npm install
-
-# Configuration
-cp .env.local.example .env.local
-# Ajouter vos clés Supabase
-
-# Base de données
-# 1. Exécuter db/schema_complet.sql dans Supabase
-# 2. Exécuter db/populate_catalog.sql pour les produits
-
-# Lancer le projet
-npm run dev
+cp .env.local.example .env.local   # éditer avec tes clés Supabase
+npm run dev                        # http://localhost:3000
 ```
 
-## 📚 Documentation
+## Variables d'environnement requises
 
-Voir **[DOCUMENTATION_COMPLETE.md](DOCUMENTATION_COMPLETE.md)** pour la documentation détaillée.
-
-## 🔐 Compte admin
-
-- Email : j@gmail.com
-- Mot de passe : 123456789
-
-## 🛠️ Stack
-
-- Next.js 15 + TypeScript
-- Supabase (Auth + Database)
-- Tailwind CSS
-- Vitest + Playwright
-
-**Résumé persistant** : README simple avec démarrage rapide. Documentation complète dans DOCUMENTATION_COMPLETE.md.
-
-## Optimisations et stratégies de mise en cache
-
-L'application intègre plusieurs stratégies pour des performances optimales :
-
-- **Rendu statique de la page catalogue** avec revalidation toutes les 60 secondes
-- **Mise en cache des requêtes API** avec Next.js `unstable_cache`
-- **Stratégie de revalidation incrémentale** pour les pages produits
-- **Prefetching et chargement progressif des images** avec Next.js Image
-- **Compression et optimisation automatique** des assets avec Next.js
-
-Ces optimisations permettent d'obtenir de très bonnes performances web vitals, notamment sur les métriques LCP, FID et CLS.
-
-## Migration de la base de données
-
-Pour ajouter les nouveaux champs au formulaire d'inscription (prénom, nom, téléphone, date de naissance), vous devez exécuter la migration suivante :
-
-### Option 1 : Via l'interface Supabase
-1. Connectez-vous à votre dashboard Supabase
-2. Allez dans l'éditeur SQL
-3. Copiez et exécutez le contenu du fichier `db/add_profile_fields.sql`
-
-### Option 2 : Via la ligne de commande
 ```bash
-# Si vous avez Supabase CLI installé
-supabase db push db/add_profile_fields.sql --db-url <YOUR_DATABASE_URL>
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...      # ou SUPABASE_SERVICE_KEY (les deux noms acceptés)
 ```
 
-### Option 3 : Via le script Node.js
+## Bootstrap d'un nouveau projet Supabase
+
+1. Créer le projet sur supabase.com
+2. SQL Editor → exécuter `db/schema.sql` (tables + RLS + RPC + buckets)
+3. Créer le compte admin :
+   ```bash
+   npm run create-admin -- admin@example.com motdepasse
+   ```
+   Puis dans SQL Editor :
+   ```sql
+   INSERT INTO public.admin_users (user_id) VALUES ('<uuid>');
+   UPDATE public.profiles SET is_admin = true, role = 'admin' WHERE id = '<uuid>';
+   ```
+4. Seed du catalogue depuis `contenu_bd/` :
+   ```bash
+   npm run parse-pdfs              # → db/catalog.json (déjà fait, idempotent)
+   npm run seed-import -- --dry-run
+   npm run seed-import             # import réel + upload images/PDFs
+   ```
+
+## Commandes utiles
+
 ```bash
-# Assurez-vous d'avoir les variables d'environnement configurées
-node scripts/migrate_profiles.js
+npm run dev                   # serveur dev avec Turbopack
+npm run build && npm start    # build production
+npm run lint                  # ESLint
+npm run test                  # Playwright E2E (lance dev server auto)
+npm run test:unit             # Vitest unit tests
+npm run check-products        # diagnostic Supabase
 ```
 
-Les champs ajoutés sont :
-- `first_name` (TEXT) - Prénom de l'utilisateur
-- `last_name` (TEXT) - Nom de famille
-- `phone` (TEXT) - Numéro de téléphone
-- `birth_date` (DATE) - Date de naissance
+## Stack
+
+- **Next.js 15** App Router, React 19, TypeScript strict, Turbopack
+- **Supabase** : Auth, Postgres + RLS, Storage (buckets `product-image` + `brand-fiche`)
+- **Tailwind 4** + Heroicons + Lucide React + Framer Motion
+- **SWR** pour le panier client, **Vitest** + **Playwright** pour les tests

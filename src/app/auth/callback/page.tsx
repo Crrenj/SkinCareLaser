@@ -83,7 +83,7 @@ export default function AuthCallbackPage() {
         let redirectPath = '/'
         
         if (profile?.is_admin) {
-          redirectPath = '/admin/overview'
+          redirectPath = '/admin/product'
           setStatus('Accès admin confirmé, redirection...')
         } else {
           const savedRedirect = sessionStorage.getItem('redirect_to')

@@ -1,0 +1,41 @@
+{
+  "model": "claude-opus-4-7",
+  "effortLevel": "max",
+  "permissions": {
+    "allow": [
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__list_tables",
+      "mcp__supabase__list_migrations",
+      "mcp__supabase__list_extensions",
+      "mcp__supabase__get_advisors",
+      "mcp__supabase__get_logs",
+      "mcp__supabase__get_project_url",
+      "mcp__supabase__get_publishable_keys",
+      "mcp__supabase__search_docs",
+      "mcp__supabase__generate_typescript_types",
+      "mcp__stripe__get_stripe_account_info",
+      "mcp__stripe__retrieve_balance",
+      "mcp__stripe__fetch_stripe_resources",
+      "mcp__stripe__search_stripe_documentation",
+      "mcp__stripe__search_stripe_resources",
+      "mcp__stripe__stripe_api_search",
+      "mcp__stripe__stripe_api_details",
+      "mcp__stripe__list_products",
+      "mcp__stripe__list_prices",
+      "mcp__stripe__list_subscriptions",
+      "mcp__stripe__list_customers",
+      "mcp__stripe__list_invoices",
+      "mcp__stripe__list_payment_intents",
+      "mcp__stripe__list_disputes",
+      "mcp__stripe__list_coupons",
+      "mcp__vercel__list_teams",
+      "mcp__vercel__list_projects",
+      "mcp__vercel__list_deployments",
+      "mcp__vercel__get_project",
+      "mcp__vercel__get_deployment",
+      "mcp__vercel__get_runtime_logs",
+      "mcp__vercel__get_deployment_build_logs",
+      "mcp__vercel__search_vercel_documentation"
+    ]
+  }
+}

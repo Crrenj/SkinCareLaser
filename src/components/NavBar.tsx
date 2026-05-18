@@ -132,8 +132,8 @@ export default function NavBar() {
           {user ? (
             <>
               {isAdmin && (
-                <Link 
-                  href="/admin/overview"
+                <Link
+                  href="/admin/product"
                   className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
                   aria-label="Dashboard admin"
                 >
@@ -173,7 +173,6 @@ export default function NavBar() {
         <Link href="/" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
         <Link href="/catalogue" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
         <Link href="/a-propos" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">À propos</Link>
-        <Link href="/rdv" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Clinic</Link>
       </nav>
 
       {/* CartDrawer */}

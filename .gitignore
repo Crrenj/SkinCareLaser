@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Sauvegardes locales (paused Supabase project)
+/bd1
+/bd2
+
+# Assets réels du seed (203 MB d'images + PDFs)
+# Utilisés par scripts/seed-import.cjs en local — non versionnés
+/contenu_bd
+
+# Per-user Claude Code settings (le projet-level settings.json reste versionné)
+.claude/settings.local.json

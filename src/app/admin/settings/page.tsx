@@ -16,6 +16,12 @@ export default function SettingsPage() {
   
   return (
     <div className="p-8">
+      <div className="mb-6 bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
+        <p className="text-sm text-amber-800">
+          <strong>Mode démo</strong> — Les modifications ne sont pas persistées. Cette page sera câblée quand la config boutique sera stockée en BDD.
+        </p>
+      </div>
+
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Paramètres</h1>
       
       <div className="flex gap-8">

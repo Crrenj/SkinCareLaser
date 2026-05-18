@@ -48,6 +48,12 @@ export default function MyTeamPage() {
   
   return (
     <div className="p-8">
+      <div className="mb-6 bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
+        <p className="text-sm text-amber-800">
+          <strong>Mode démo</strong> — Cette page affiche des données fictives. Le câblage avec la table <code>profiles</code> n'est pas encore implémenté.
+        </p>
+      </div>
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Mon équipe</h1>
         <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">

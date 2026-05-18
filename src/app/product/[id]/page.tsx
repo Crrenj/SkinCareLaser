@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabaseClient'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductClient from '@/components/ProductClient'
@@ -43,8 +43,7 @@ export default async function ProductPage({
   params: Promise<{ id: string }>
 }): Promise<JSX.Element> {
   const { id } = await params
-
-  console.log('Fetching product with ID:', id)
+  const supabase = await createSupabaseServerClient()
 
   // 1. Fetch produit principal
   const { data: prodRaw, error: pErr } = await supabase
@@ -70,15 +69,8 @@ export default async function ProductPage({
     .eq('id', id)
     .single()
 
-  console.log('Product fetch result:', { prodRaw, error: pErr })
-
-  if (pErr) {
-    console.error('Product fetch error:', pErr)
-    notFound()
-  }
-
-  if (!prodRaw) {
-    console.log('Product not found')
+  if (pErr || !prodRaw) {
+    if (pErr) console.error('Product fetch error:', pErr)
     notFound()
   }
 
@@ -95,8 +87,6 @@ export default async function ProductPage({
     range: (prodRaw as any).product_ranges?.[0]?.range?.name ?? '',
     tagsByCategory,
   }
-
-  console.log('Mapped product:', mainProduct)
 
   // 3. Produits similaires - étape A (même gamme)
   const rangeId = (prodRaw as any).product_ranges?.[0]?.range?.id
@@ -179,8 +169,6 @@ export default async function ProductPage({
     range: p.product_ranges?.[0]?.range?.name ?? '',
     tagsByCategory: buildTagMap(p.product_tags || []),
   }))
-
-  console.log('Similar products count:', similarProducts.length)
 
   return (
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">

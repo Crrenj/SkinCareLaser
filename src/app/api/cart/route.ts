@@ -32,8 +32,8 @@ export async function GET() {
     
     // Récupérer ou créer le panier
     const { data: cartId, error: cartError } = await supabase
-      .rpc('get_or_create_cart', { p_anon: anonId })
-    
+      .rpc('get_or_create_cart', { p_anonymous_id: anonId })
+
     if (cartError) {
       console.error('Erreur création panier:', cartError)
       return NextResponse.json(
@@ -41,7 +41,7 @@ export async function GET() {
         { status: 500 }
       )
     }
-    
+
     // Récupérer les items du panier avec les détails produits
     const { data: cartItems, error: itemsError } = await supabase
       .from('cart_items')
@@ -161,21 +161,22 @@ export async function POST(request: NextRequest) {
     
     // Récupérer ou créer le panier
     const { data: cartId, error: cartError } = await supabase
-      .rpc('get_or_create_cart', { p_anon: anonId })
-    
+      .rpc('get_or_create_cart', { p_anonymous_id: anonId })
+
     if (cartError) {
       return NextResponse.json(
         { error: 'Erreur lors de la création du panier' },
         { status: 500 }
       )
     }
-    
+
     // Utiliser directement la fonction RPC avec la signature correcte
     const { error: rpcError } = await supabase
       .rpc('add_to_cart', {
         p_cart_id: cartId,
         p_product_id: productId,
-        p_qty: quantity
+        p_quantity: quantity,
+        p_anon_id: anonId
       })
     
     if (rpcError) {

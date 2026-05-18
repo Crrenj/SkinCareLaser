@@ -132,8 +132,8 @@ function LoginForm() {
         setLoading(false)
 
         // Déterminer l'URL de redirection
-        const redirectPath = isAdmin 
-          ? '/admin/overview'
+        const redirectPath = isAdmin
+          ? '/admin/product'
           : sessionStorage.getItem('redirect_to') || '/'
 
         console.log('Redirection vers:', redirectPath)
@@ -292,23 +292,6 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Liens de debug (temporaires) */}
-        <div className="text-center text-sm text-gray-600 mt-6">
-          <p>Problème de redirection ?</p>
-          <a 
-            href="/admin/overview" 
-            className="text-[#CCC5BD] hover:text-[#B8B1A8] underline font-medium"
-          >
-            Accéder directement au dashboard admin
-          </a>
-          <p className="mt-2">ou essayez la</p>
-          <a 
-            href="/login-debug" 
-            className="text-[#CCC5BD] hover:text-[#B8B1A8] underline font-medium"
-          >
-            Page de connexion DEBUG
-          </a>
-        </div>
       </div>
     </div>
   )

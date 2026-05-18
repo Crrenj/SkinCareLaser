@@ -4,18 +4,15 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { 
-  ChevronLeftIcon, 
+import {
+  ChevronLeftIcon,
   ChevronRightIcon,
-  HomeIcon,
   CubeIcon,
   UsersIcon,
-  ChartBarIcon,
   CogIcon,
   ArrowRightOnRectangleIcon,
   ArchiveBoxIcon,
   TagIcon,
-  ShoppingBagIcon,
   MegaphoneIcon,
   BuildingStorefrontIcon,
   EnvelopeIcon
@@ -34,16 +31,13 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const navigation = [
-    { name: 'Vue d\'ensemble', href: '/admin/overview', icon: HomeIcon },
     { name: 'Produits', href: '/admin/product', icon: CubeIcon },
     { name: 'Marques', href: '/admin/marques', icon: BuildingStorefrontIcon },
     { name: 'Stock', href: '/admin/stock', icon: ArchiveBoxIcon },
     { name: 'Tags', href: '/admin/tags', icon: TagIcon },
-    { name: 'Commandes', href: '/admin/commande', icon: ShoppingBagIcon },
     { name: 'Messages', href: '/admin/messages', icon: EnvelopeIcon },
     { name: 'Annonces', href: '/admin/annonce', icon: MegaphoneIcon },
     { name: 'Mon équipe', href: '/admin/my-team', icon: UsersIcon },
-    { name: 'Statistiques', href: '/admin/statistics', icon: ChartBarIcon },
     { name: 'Paramètres', href: '/admin/settings', icon: CogIcon },
     { name: 'Configuration', href: '/admin/setup', icon: CogIcon },
   ]

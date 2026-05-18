@@ -10,9 +10,10 @@
     "test": "playwright test",
     "test:unit": "vitest",
     "test:unit:watch": "vitest watch",
-    "test:cart": "node scripts/test-cart-real.js",
     "check-products": "node scripts/check-products.js",
-    "setup-cart": "node scripts/setup-cart-functions.js"
+    "parse-pdfs": "node scripts/parse-pdfs.cjs",
+    "seed-import": "node scripts/seed-import.cjs",
+    "create-admin": "node scripts/create-admin-user.js"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

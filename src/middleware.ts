@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Routes à exclure du middleware
-  const publicRoutes = ['/login', '/signup', '/login-debug', '/test-redirect', '/auth/callback']
+  const publicRoutes = ['/login', '/signup', '/auth/callback']
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route))
   
   // Routes API et assets à ignorer
