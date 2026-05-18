@@ -15,6 +15,7 @@
     "validate-catalog": "node scripts/validate-catalog.cjs",
     "prices:export": "node scripts/prices-export.cjs",
     "prices:import": "node scripts/prices-import.cjs",
+    "prices:default": "node scripts/prices-set-default.cjs",
     "seed-import": "node scripts/seed-import.cjs",
     "create-admin": "node scripts/create-admin-user.js"
   },

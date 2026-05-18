@@ -26,6 +26,11 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') })
 
 const DRY_RUN = process.argv.includes('--dry-run')
 const PLACEHOLDER_PRICE = 25.00 // Utilisé pour les produits sans prix dans catalog.json
+
+// --brands acm,avene  → ne traiter que ces marques (slug du PDF, ex aderma pas adrema)
+const brandsArg = process.argv.find(a => a.startsWith('--brands='))
+  || (process.argv.includes('--brands') ? process.argv[process.argv.indexOf('--brands') + 1] : null)
+const BRAND_FILTER = brandsArg ? brandsArg.replace('--brands=', '').split(',').map(s => s.trim()) : null
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
 
@@ -275,8 +280,9 @@ async function importBrand(brand, tagTypeIds, tagCache) {
         await supabase.from('product_ranges').upsert({ product_id: productId, range_id: rangeId }, { onConflict: 'product_id,range_id' })
       }
 
-      // product_images
+      // product_images (delete-then-insert pour idempotence sur re-run)
       if (imageUrl && !DRY_RUN) {
+        await supabase.from('product_images').delete().eq('product_id', productId)
         await supabase.from('product_images').insert({ product_id: productId, url: imageUrl, alt: product.name })
       }
 
@@ -302,28 +308,44 @@ async function main() {
   const tagTypeIds = await ensureTagTypes()
   const tagCache = new Map()
 
+  const brandsToProcess = BRAND_FILTER
+    ? CATALOG.brands.filter(b => BRAND_FILTER.includes(b.slug))
+    : CATALOG.brands
+
+  if (BRAND_FILTER) {
+    log(`Filtre actif : ${BRAND_FILTER.join(', ')} (${brandsToProcess.length} marques)`)
+  }
+
   let totalProducts = 0
   let totalImages = 0
-  for (const brand of CATALOG.brands) {
+  const failed = []
+  for (const brand of brandsToProcess) {
     try {
       await importBrand(brand, tagTypeIds, tagCache)
       totalProducts += brand.ranges.reduce((s, r) => s + r.products.length, 0)
       totalImages += brand.image_files.length
     } catch (e) {
       log(`❌ Erreur marque ${brand.slug}: ${e.message}`)
+      failed.push(brand.slug)
     }
+  }
+
+  if (failed.length > 0) {
+    log(``)
+    log(`Marques en erreur : ${failed.join(', ')}`)
+    log(`Re-jouer uniquement celles-là : npm run seed-import -- --brands ${failed.join(',')}`)
   }
 
   log(`\n=== TERMINÉ ===`)
   log(`Total : ${totalProducts} produits, ${totalImages} images traitées`)
-  log(`Les produits avec un prix défini dans catalog.json sont actifs (is_active=true).`)
-  log(`Les autres restent inactifs avec prix placeholder ${PLACEHOLDER_PRICE} DOP.`)
   log(``)
-  log(`Workflow recommandé :`)
-  log(`  1. node scripts/prices-export.cjs > data/prices.csv`)
-  log(`  2. Ouvre data/prices.csv dans Excel/Numbers, remplis la colonne new_price`)
-  log(`  3. node scripts/prices-import.cjs   # met à jour catalog.json`)
-  log(`  4. node scripts/seed-import.cjs     # ré-importe avec les vrais prix`)
+  log(`Produits avec prix dans catalog.json → is_active=true`)
+  log(`Produits sans prix → is_active=false (placeholder ${PLACEHOLDER_PRICE} DOP)`)
+  log(``)
+  log(`Pour ajuster les prix après coup :`)
+  log(`  - Via /admin/product (un par un)`)
+  log(`  - Ou : npm run prices:export → édite data/prices.csv → npm run prices:import → relance ce script`)
+  log(`  - Ou : npm run prices:default <prix>  (tous les produits à un prix uniforme)`)
 }
 
 main().catch(e => { console.error('FATAL:', e); process.exit(1) })

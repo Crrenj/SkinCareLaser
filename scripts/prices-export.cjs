@@ -5,17 +5,18 @@
  * Colonnes :
  *   brand, range, product_slug, product_name, description (tronquée), current_price, new_price
  *
- * current_price contient le prix déjà fixé dans catalog.json (sinon vide).
- * new_price est la colonne à remplir.
+ * Écrit directement dans data/prices.csv (crée le dossier si besoin).
  *
  * Usage:
- *   node scripts/prices-export.cjs > data/prices.csv
+ *   node scripts/prices-export.cjs            # → data/prices.csv
+ *   node scripts/prices-export.cjs -          # → stdout (pour piper)
  */
 
 const fs = require('fs')
 const path = require('path')
 
 const CATALOG = require(path.join(__dirname, '..', 'db', 'catalog.json'))
+const OUTPUT = path.join(__dirname, '..', 'data', 'prices.csv')
 
 function escape(s) {
   if (s == null) return ''
@@ -24,7 +25,9 @@ function escape(s) {
   return str
 }
 
-console.log(['brand', 'range', 'product_slug', 'product_name', 'description', 'current_price', 'new_price'].join(','))
+const lines = [
+  ['brand', 'range', 'product_slug', 'product_name', 'description', 'current_price', 'new_price'].join(',')
+]
 
 for (const brand of CATALOG.brands) {
   for (const range of brand.ranges) {
@@ -32,7 +35,7 @@ for (const brand of CATALOG.brands) {
       const desc = product.description.length > 120
         ? product.description.slice(0, 117) + '...'
         : product.description
-      console.log([
+      lines.push([
         escape(brand.name),
         escape(range.name),
         escape(product.slug),
@@ -43,4 +46,15 @@ for (const brand of CATALOG.brands) {
       ].join(','))
     }
   }
+}
+
+const content = lines.join('\n') + '\n'
+
+if (process.argv[2] === '-') {
+  process.stdout.write(content)
+} else {
+  fs.mkdirSync(path.dirname(OUTPUT), { recursive: true })
+  fs.writeFileSync(OUTPUT, content)
+  console.error(`✓ Écrit ${lines.length - 1} produits dans ${path.relative(process.cwd(), OUTPUT)}`)
+  console.error(`  Édite ce fichier dans Excel/Numbers, puis : npm run prices:import`)
 }
