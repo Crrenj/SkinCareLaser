@@ -42,7 +42,7 @@ export default async function Catalogue() {
         tag:tags_with_types ( name, tag_type )
       )
     `)
-    .limit(100)
+    .limit(500)
     .returns<RawProduct[]>()
 
   // 2. Tous les tags disponibles
