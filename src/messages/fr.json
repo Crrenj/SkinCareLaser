@@ -1,0 +1,31 @@
+{
+  "Home": {
+    "title": "FARMAU",
+    "tagline": "Dermo-cosmétique d'expert pharmacien",
+    "servicesTitle": "Nos Services",
+    "services": {
+      "catalogueTitle": "Catalogue",
+      "catalogueDescription": "Découvrez notre sélection de produits dermatologiques certifiés",
+      "aboutTitle": "À propos",
+      "aboutDescription": "En savoir plus sur notre équipe et notre expertise",
+      "consultationTitle": "Consultation",
+      "consultationDescription": "Consultez nos pharmaciens-dermatologues"
+    }
+  },
+  "Nav": {
+    "home": "Accueil",
+    "catalogue": "Catalogue",
+    "about": "À propos",
+    "contact": "Contact",
+    "login": "Se connecter",
+    "logout": "Déconnexion",
+    "cart": "Panier",
+    "skipToMain": "Aller au contenu principal"
+  },
+  "LocaleSwitcher": {
+    "label": "Langue",
+    "fr": "Français",
+    "es": "Español",
+    "en": "English"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "Home": {
+    "title": "FARMAU",
+    "tagline": "Dermocosmética de experto farmacéutico",
+    "servicesTitle": "Nuestros Servicios",
+    "services": {
+      "catalogueTitle": "Catálogo",
+      "catalogueDescription": "Descubra nuestra selección de productos dermatológicos certificados",
+      "aboutTitle": "Acerca de",
+      "aboutDescription": "Conozca más sobre nuestro equipo y nuestra experiencia",
+      "consultationTitle": "Consulta",
+      "consultationDescription": "Consulte a nuestros farmacéuticos-dermatólogos"
+    }
+  },
+  "Nav": {
+    "home": "Inicio",
+    "catalogue": "Catálogo",
+    "about": "Acerca de",
+    "contact": "Contacto",
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "cart": "Carrito",
+    "skipToMain": "Ir al contenido principal"
+  },
+  "LocaleSwitcher": {
+    "label": "Idioma",
+    "fr": "Français",
+    "es": "Español",
+    "en": "English"
+  }
+}

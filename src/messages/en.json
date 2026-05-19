@@ -1,0 +1,31 @@
+{
+  "Home": {
+    "title": "FARMAU",
+    "tagline": "Pharmacist-grade dermocosmetics",
+    "servicesTitle": "Our Services",
+    "services": {
+      "catalogueTitle": "Catalogue",
+      "catalogueDescription": "Discover our selection of certified dermatology products",
+      "aboutTitle": "About us",
+      "aboutDescription": "Learn more about our team and expertise",
+      "consultationTitle": "Consultation",
+      "consultationDescription": "Consult our pharmacist-dermatologists"
+    }
+  },
+  "Nav": {
+    "home": "Home",
+    "catalogue": "Catalogue",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "cart": "Cart",
+    "skipToMain": "Skip to main content"
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "fr": "Français",
+    "es": "Español",
+    "en": "English"
+  }
+}

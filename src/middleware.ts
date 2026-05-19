@@ -1,29 +1,51 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import createIntlMiddleware from 'next-intl/middleware'
+import { routing } from '@/i18n/routing'
+
+const intlMiddleware = createIntlMiddleware(routing)
 
 /**
- * Protège les routes /admin/* :
- * - Pas de session → /login?redirectedFrom=<path>
- * - Session sans is_admin → /login?error=unauthorized
+ * Middleware Next.js qui chaîne :
+ *   - /admin/*           -> check session + admin (Supabase SSR)
+ *   - / et /(fr|es|en)/* -> next-intl (routing locale)
+ *   - autres             -> passthrough
  *
- * Synchronise les cookies Supabase via createServerClient.
- * Les routes /_next, /api, /login, /signup, /auth/callback sont laissées passer.
+ * Pendant la migration i18n progressive, les pages publiques pas encore
+ * sous `[locale]/` (ex: /catalogue, /cart, /contact, /a-propos) sont
+ * laissées passer telles quelles. Elles seront déplacées au palier 2.
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const publicRoutes = ['/login', '/signup', '/auth/callback']
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next()
-  }
-  if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname.includes('.')) {
-    return NextResponse.next()
-  }
-  if (!pathname.startsWith('/admin')) {
+  // Static / API / fichiers : passthrough (le matcher devrait déjà filtrer
+  // mais on défense en profondeur)
+  if (
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    /\.[a-z0-9]+$/i.test(pathname)
+  ) {
     return NextResponse.next()
   }
 
+  // Admin : auth check existant
+  if (pathname.startsWith('/admin')) {
+    return adminAuthMiddleware(request)
+  }
+
+  // Intl : racine + routes localisées
+  const isLocalePrefixed = /^\/(fr|es|en)(\/|$)/.test(pathname)
+  if (pathname === '/' || isLocalePrefixed) {
+    return intlMiddleware(request)
+  }
+
+  // Routes publiques pas encore migrées sous [locale] : passthrough
+  return NextResponse.next()
+}
+
+async function adminAuthMiddleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
   const response = NextResponse.next({ request: { headers: request.headers } })
 
   const supabase = createServerClient(
@@ -54,11 +76,14 @@ export async function middleware(request: NextRequest) {
           })
         },
       },
-    }
+    },
   )
 
   try {
-    const { data: { session }, error } = await supabase.auth.getSession()
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession()
     if (error) console.error('Middleware session error:', error)
 
     if (!session) {
@@ -78,8 +103,8 @@ export async function middleware(request: NextRequest) {
       redirectUrl.searchParams.set('error', 'unauthorized')
       return NextResponse.redirect(redirectUrl)
     }
-  } catch (error) {
-    console.error('Middleware error:', error)
+  } catch (e) {
+    console.error('Middleware error:', e)
     const redirectUrl = new URL('/login', request.url)
     redirectUrl.searchParams.set('error', 'middleware_error')
     return NextResponse.redirect(redirectUrl)
@@ -89,5 +114,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  // Tout sauf api, _next, et fichiers avec extension
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
 }
