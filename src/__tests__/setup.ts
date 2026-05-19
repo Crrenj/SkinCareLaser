@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
+import frMessages from '@/messages/fr.json'
 
 // Mock du module next/navigation
 vi.mock('next/navigation', () => ({
@@ -11,6 +12,50 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => ({
     get: vi.fn(),
   }),
+}))
+
+// Mock next-intl : resout les clés depuis fr.json (les tests assertent sur le texte FR)
+vi.mock('next-intl', () => ({
+  useTranslations: (namespace?: string) => {
+    function lookup(key: string): unknown {
+      const path = namespace ? `${namespace}.${key}` : key
+      return path.split('.').reduce<unknown>((acc, part) => {
+        if (acc && typeof acc === 'object' && part in (acc as Record<string, unknown>)) {
+          return (acc as Record<string, unknown>)[part]
+        }
+        return undefined
+      }, frMessages)
+    }
+    const t = (key: string, vars?: Record<string, string | number>) => {
+      const value = lookup(key)
+      if (typeof value !== 'string') return key
+      if (!vars) return value
+      // Remplace {var} et gère ICU plural minimal {count, plural, =0 {...} =1 {...} other {...}}
+      const pluralMatch = value.match(/^\{(\w+),\s*plural,([\s\S]+)\}$/)
+      if (pluralMatch) {
+        const [, varName, branches] = pluralMatch
+        const count = Number(vars[varName])
+        const branchRe = /(=\d+|other)\s*\{([^{}]*?)\}/g
+        const found: Record<string, string> = {}
+        let m: RegExpExecArray | null
+        while ((m = branchRe.exec(branches)) !== null) {
+          found[m[1]] = m[2]
+        }
+        const chosen = found[`=${count}`] ?? found.other ?? ''
+        return chosen.replace(/#/g, String(count))
+      }
+      return Object.entries(vars).reduce(
+        (s, [k, v]) => s.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v)),
+        value,
+      )
+    }
+    // rich(): renvoie une string simple ignorant les tags (suffisant pour les tests)
+    t.rich = (key: string) => {
+      const value = lookup(key)
+      return typeof value === 'string' ? value.replace(/<\/?\w+>/g, '') : key
+    }
+    return t
+  },
 }))
 
 // Mock de useCart pour éviter les dépendances circulaires

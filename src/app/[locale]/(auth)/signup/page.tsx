@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Mail, Lock, User, Phone, Calendar, ArrowRight } from 'lucide-react'
@@ -12,6 +13,7 @@ import { Mail, Lock, User, Phone, Calendar, ArrowRight } from 'lucide-react'
  * @returns Page d'inscription avec formulaire
  */
 export default function SignupPage() {
+  const t = useTranslations('Signup')
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: '',
@@ -45,27 +47,23 @@ export default function SignupPage() {
     e.preventDefault()
     setError(null)
 
-    // Vérifier que les mots de passe correspondent
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      setError(t('errors.passwordsMismatch'))
       return
     }
 
-    // Vérifier la longueur du mot de passe
     if (formData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères')
+      setError(t('errors.passwordTooShort'))
       return
     }
 
-    // Vérifier que tous les champs requis sont remplis
     if (!formData.firstName || !formData.lastName) {
-      setError('Veuillez remplir tous les champs obligatoires')
+      setError(t('errors.missingFields'))
       return
     }
 
-    // Téléphone obligatoire (requis pour la réservation)
     if (!formData.phone || !formData.phone.trim()) {
-      setError('Le téléphone est obligatoire (requis pour la réservation)')
+      setError(t('errors.phoneRequired'))
       return
     }
 
@@ -89,15 +87,15 @@ export default function SignupPage() {
 
       if (error) {
         // Gérer spécifiquement l'erreur d'email déjà utilisé
-        if (error.message.includes('already registered') || 
+        if (error.message.includes('already registered') ||
             error.message.includes('already exists') ||
             error.message.includes('duplicate key') ||
             error.code === '23505') {
-          setError('Cet email est déjà utilisé. Veuillez vous connecter ou utiliser un autre email.')
+          setError(t('errors.emailAlreadyUsed'))
         } else if (error.message.includes('invalid') && error.message.includes('email')) {
-          setError('Format d\'email invalide. Veuillez vérifier votre adresse email.')
+          setError(t('errors.invalidEmail'))
         } else if (error.message.includes('disposable') || error.message.includes('fake')) {
-          setError('Les adresses email temporaires ne sont pas acceptées. Veuillez utiliser une adresse email valide.')
+          setError(t('errors.disposableEmail'))
         } else {
           setError(error.message)
         }
@@ -128,7 +126,7 @@ export default function SignupPage() {
         }, 2000)
       }
     } catch (err) {
-      setError('Une erreur est survenue lors de l\'inscription')
+      setError(t('errors.generic'))
       console.error('Erreur signup:', err)
     } finally {
       setLoading(false)
@@ -145,10 +143,10 @@ export default function SignupPage() {
               <User className="w-12 h-12 text-ink-800" />
             </div>
             <h2 className="text-center text-2xl font-bold text-ink-800">
-              Créer un nouveau compte
+              {t('title')}
             </h2>
             <p className="mt-2 text-center text-sm text-ink-800">
-              Rejoignez la communauté FARMAU
+              {t('subtitle')}
             </p>
           </div>
 
@@ -162,7 +160,7 @@ export default function SignupPage() {
 
             {success && (
               <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
-                <p className="text-sm text-olive-600">Inscription réussie ! Redirection vers la page de connexion...</p>
+                <p className="text-sm text-olive-600">{t('successMessage')}</p>
               </div>
             )}
 
@@ -171,7 +169,7 @@ export default function SignupPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-ink-800 mb-1">
-                    Prénom *
+                    {t('firstNameLabel')}
                   </label>
                   <input
                     id="firstName"
@@ -181,12 +179,12 @@ export default function SignupPage() {
                     value={formData.firstName}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="Jean"
+                    placeholder={t('firstNamePlaceholder')}
                   />
                 </div>
                 <div>
                   <label htmlFor="lastName" className="block text-sm font-medium text-ink-800 mb-1">
-                    Nom *
+                    {t('lastNameLabel')}
                   </label>
                   <input
                     id="lastName"
@@ -196,7 +194,7 @@ export default function SignupPage() {
                     value={formData.lastName}
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="Dupont"
+                    placeholder={t('lastNamePlaceholder')}
                   />
                 </div>
               </div>
@@ -204,7 +202,7 @@ export default function SignupPage() {
               {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
-                  Adresse email *
+                  {t('emailLabel')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -217,7 +215,7 @@ export default function SignupPage() {
                     value={formData.email}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="votre@email.com"
+                    placeholder={t('emailPlaceholder')}
                   />
                 </div>
               </div>
@@ -225,7 +223,7 @@ export default function SignupPage() {
               {/* Téléphone (obligatoire pour la réservation) */}
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-ink-800 mb-1">
-                  Téléphone *
+                  {t('phoneLabel')}
                 </label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -238,16 +236,16 @@ export default function SignupPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="+1 809 123 4567"
+                    placeholder={t('phonePlaceholder')}
                   />
                 </div>
-                <p className="mt-1 text-xs text-ink-500">Requis pour la confirmation de réservation via WhatsApp</p>
+                <p className="mt-1 text-xs text-ink-500">{t('phoneHint')}</p>
               </div>
 
               {/* Date de naissance */}
               <div>
                 <label htmlFor="birthDate" className="block text-sm font-medium text-ink-800 mb-1">
-                  Date de naissance
+                  {t('birthDateLabel')}
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -265,7 +263,7 @@ export default function SignupPage() {
               {/* Mot de passe */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-ink-800 mb-1">
-                  Mot de passe *
+                  {t('passwordLabel')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -278,16 +276,16 @@ export default function SignupPage() {
                     value={formData.password}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                   />
                 </div>
-                <p className="mt-1 text-xs text-ink-500">Minimum 6 caractères</p>
+                <p className="mt-1 text-xs text-ink-500">{t('passwordHint')}</p>
               </div>
 
               {/* Confirmer mot de passe */}
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink-800 mb-1">
-                  Confirmer le mot de passe *
+                  {t('confirmPasswordLabel')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -300,7 +298,7 @@ export default function SignupPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                   />
                 </div>
               </div>
@@ -313,10 +311,10 @@ export default function SignupPage() {
                 className="w-full flex items-center justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
-                  'Inscription...'
+                  t('submitLoading')
                 ) : (
                   <>
-                    S'inscrire
+                    {t('submitButton')}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </>
                 )}
@@ -324,16 +322,16 @@ export default function SignupPage() {
             </div>
 
             <div className="text-center text-xs text-ink-500">
-              * Champs obligatoires
+              {t('requiredFields')}
             </div>
           </form>
 
           {/* Lien connexion */}
           <div className="px-8 pb-6">
             <div className="text-center text-sm text-ink-700">
-              Déjà inscrit ?{' '}
+              {t('alreadySignedUp')}{' '}
               <Link href="/login" className="font-medium text-clay-700 hover:text-clay-800 transition-colors">
-                Connectez-vous
+                {t('signInLink')}
               </Link>
             </div>
           </div>

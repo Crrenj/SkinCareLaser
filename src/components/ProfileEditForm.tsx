@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Mail, Phone, User, Calendar, Save } from 'lucide-react'
@@ -25,6 +26,7 @@ export default function ProfileEditForm({
   userEmail,
   redirectTo,
 }: ProfileEditFormProps) {
+  const t = useTranslations('Profile')
   const router = useRouter()
   const [form, setForm] = useState({
     first_name: profile.first_name ?? '',
@@ -48,7 +50,7 @@ export default function ProfileEditForm({
     setSuccess(false)
 
     if (!form.phone.trim()) {
-      setError('Le téléphone est obligatoire')
+      setError(t('phoneRequiredError'))
       return
     }
 
@@ -97,8 +99,8 @@ export default function ProfileEditForm({
       {success && (
         <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
           <p className="text-sm text-olive-600">
-            Profil mis à jour avec succès.
-            {redirectTo && ' Redirection en cours…'}
+            {t('saveSuccess')}
+            {redirectTo && ` ${t('redirecting')}`}
           </p>
         </div>
       )}
@@ -106,7 +108,7 @@ export default function ProfileEditForm({
       {/* Email (read-only, géré par auth) */}
       <div>
         <label className="block text-sm font-medium text-ink-800 mb-1">
-          Email
+          {t('emailLabel')}
         </label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -118,7 +120,7 @@ export default function ProfileEditForm({
           />
         </div>
         <p className="mt-1 text-xs text-ink-500">
-          L&apos;email ne peut pas être modifié ici.
+          {t('emailReadOnly')}
         </p>
       </div>
 
@@ -129,7 +131,7 @@ export default function ProfileEditForm({
             htmlFor="first_name"
             className="block text-sm font-medium text-ink-800 mb-1"
           >
-            Prénom
+            {t('firstNameLabel')}
           </label>
           <input
             id="first_name"
@@ -138,7 +140,7 @@ export default function ProfileEditForm({
             value={form.first_name}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
-            placeholder="Jean"
+            placeholder={t('firstNamePlaceholder')}
           />
         </div>
         <div>
@@ -146,7 +148,7 @@ export default function ProfileEditForm({
             htmlFor="last_name"
             className="block text-sm font-medium text-ink-800 mb-1"
           >
-            Nom
+            {t('lastNameLabel')}
           </label>
           <input
             id="last_name"
@@ -155,7 +157,7 @@ export default function ProfileEditForm({
             value={form.last_name}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
-            placeholder="Dupont"
+            placeholder={t('lastNamePlaceholder')}
           />
         </div>
       </div>
@@ -166,7 +168,7 @@ export default function ProfileEditForm({
           htmlFor="display_name"
           className="block text-sm font-medium text-ink-800 mb-1"
         >
-          Nom affiché
+          {t('displayNameLabel')}
         </label>
         <div className="relative">
           <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -177,7 +179,7 @@ export default function ProfileEditForm({
             value={form.display_name}
             onChange={handleChange}
             className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
-            placeholder="Comment vous appeler ?"
+            placeholder={t('displayNamePlaceholder')}
           />
         </div>
       </div>
@@ -188,7 +190,7 @@ export default function ProfileEditForm({
           htmlFor="phone"
           className="block text-sm font-medium text-ink-800 mb-1"
         >
-          Téléphone *
+          {t('phoneLabel')}
         </label>
         <div className="relative">
           <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -201,11 +203,11 @@ export default function ProfileEditForm({
             value={form.phone}
             onChange={handleChange}
             className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
-            placeholder="+1 809 123 4567"
+            placeholder={t('phonePlaceholder')}
           />
         </div>
         <p className="mt-1 text-xs text-ink-500">
-          Requis pour la confirmation de réservation via WhatsApp.
+          {t('phoneHint')}
         </p>
       </div>
 
@@ -215,7 +217,7 @@ export default function ProfileEditForm({
           htmlFor="birth_date"
           className="block text-sm font-medium text-ink-800 mb-1"
         >
-          Date de naissance
+          {t('birthDateLabel')}
         </label>
         <div className="relative">
           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -237,17 +239,17 @@ export default function ProfileEditForm({
           className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? (
-            'Enregistrement…'
+            t('saving')
           ) : (
             <>
               <Save className="w-4 h-4" />
-              Enregistrer
+              {t('saveButton')}
             </>
           )}
         </button>
       </div>
 
-      <p className="text-xs text-ink-500 text-center">* Champs obligatoires</p>
+      <p className="text-xs text-ink-500 text-center">{t('requiredFields')}</p>
     </form>
   )
 }

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProfileEditForm from '@/components/ProfileEditForm'
@@ -15,6 +16,8 @@ export default async function ProfilePage({
   searchParams: Promise<{ required?: string; from?: string }>
 }) {
   const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('Profile')
   const supabase = await createSupabaseServerClient()
   const {
     data: { session },
@@ -25,8 +28,6 @@ export default async function ProfilePage({
       `/${locale}/login?redirectedFrom=${encodeURIComponent(`/${locale}/account/profile`)}`,
     )
   }
-  // locale is read but TS doesn't see it via redirect() control-flow; suppress unused warning
-  void locale
 
   const { data: profile, error } = await supabase
     .from('profiles')
@@ -57,11 +58,8 @@ export default async function ProfilePage({
       <NavBar />
       <main id="main-content" className="flex-1 p-6">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-ink-900 mb-2">Mon profil</h1>
-          <p className="text-ink-700 mb-8">
-            Gérez vos informations personnelles. Le téléphone est requis pour
-            pouvoir réserver des produits.
-          </p>
+          <h1 className="text-3xl font-bold text-ink-900 mb-2">{t('pageTitle')}</h1>
+          <p className="text-ink-700 mb-8">{t('pageDescription')}</p>
 
           {phoneRequired && (
             <div
@@ -69,11 +67,10 @@ export default async function ProfilePage({
               className="mb-6 bg-clay-50 border-l-4 border-clay-700 p-4 rounded"
             >
               <p className="font-medium text-ink-900">
-                Téléphone manquant
+                {t('phoneRequiredTitle')}
               </p>
               <p className="text-sm text-ink-700 mt-1">
-                Pour confirmer votre réservation par WhatsApp, vous devez
-                d&apos;abord renseigner un numéro de téléphone ci-dessous.
+                {t('phoneRequiredDescription')}
               </p>
             </div>
           )}

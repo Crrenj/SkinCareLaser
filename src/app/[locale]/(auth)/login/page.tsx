@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Mail, Lock, User, ArrowRight } from 'lucide-react'
@@ -37,6 +38,7 @@ import { Mail, Lock, User, ArrowRight } from 'lucide-react'
  * Composant de connexion avec gestion des search params
  */
 function LoginForm() {
+  const t = useTranslations('Login')
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
@@ -51,12 +53,12 @@ function LoginForm() {
 
   useEffect(() => {
     if (errorParam === 'unauthorized') {
-      setError('Accès non autorisé. Vous devez être administrateur.')
+      setError(t('errors.unauthorized'))
     }
     if (redirectedFrom) {
       sessionStorage.setItem('redirect_to', redirectedFrom)
     }
-  }, [redirectedFrom, errorParam])
+  }, [redirectedFrom, errorParam, t])
 
   /**
    * Gère la soumission du formulaire de connexion
@@ -75,9 +77,8 @@ function LoginForm() {
       })
 
       if (error) {
-        // Gérer les erreurs spécifiques
         if (error.message.includes('Invalid login credentials')) {
-          setError('Email ou mot de passe incorrect')
+          setError(t('errors.invalidCredentials'))
         } else {
           setError(error.message)
         }
@@ -117,7 +118,7 @@ function LoginForm() {
       }
     } catch (err) {
       console.error('Erreur login:', err)
-      setError('Une erreur est survenue lors de la connexion')
+      setError(t('errors.generic'))
       setLoading(false)
       setRedirecting(false)
     }
@@ -133,10 +134,10 @@ function LoginForm() {
               <User className="w-12 h-12 text-ink-800" />
             </div>
             <h2 className="text-center text-2xl font-bold text-ink-800">
-              Connexion à votre compte
+              {t('title')}
             </h2>
             <p className="mt-2 text-center text-sm text-ink-800">
-              Bienvenue chez FARMAU
+              {t('welcome')}
             </p>
           </div>
 
@@ -150,7 +151,7 @@ function LoginForm() {
 
             {redirecting && (
               <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
-                <p className="text-sm text-olive-600">Connexion réussie ! Redirection en cours...</p>
+                <p className="text-sm text-olive-600">{t('successMessage')}</p>
               </div>
             )}
 
@@ -158,7 +159,7 @@ function LoginForm() {
               {/* Email */}
               <div className="relative">
                 <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
-                  Adresse email
+                  {t('emailLabel')}
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -171,7 +172,7 @@ function LoginForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="votre@email.com"
+                    placeholder={t('emailPlaceholder')}
                     disabled={redirecting}
                   />
                 </div>
@@ -180,7 +181,7 @@ function LoginForm() {
               {/* Mot de passe */}
               <div className="relative">
                 <label htmlFor="password" className="block text-sm font-medium text-ink-800 mb-1">
-                  Mot de passe
+                  {t('passwordLabel')}
                 </label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
@@ -193,7 +194,7 @@ function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder="••••••••"
+                    placeholder={t('passwordPlaceholder')}
                     disabled={redirecting}
                   />
                 </div>
@@ -207,12 +208,12 @@ function LoginForm() {
                 className="w-full flex items-center justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
-                  'Connexion...'
+                  t('submitLoading')
                 ) : redirecting ? (
-                  'Redirection...'
+                  t('submitRedirecting')
                 ) : (
                   <>
-                    Se connecter
+                    {t('submitButton')}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </>
                 )}
@@ -222,7 +223,7 @@ function LoginForm() {
             {/* Lien mot de passe oublié */}
             <div className="text-center">
               <Link href="#" className="text-sm text-ink-700 hover:text-ink-800 transition-colors">
-                Mot de passe oublié ?
+                {t('forgotPassword')}
               </Link>
             </div>
           </form>
@@ -234,7 +235,7 @@ function LoginForm() {
                 <div className="w-full border-t border-sand-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-ink-500">Nouveau client ?</span>
+                <span className="px-4 bg-white text-ink-500">{t('newCustomer')}</span>
               </div>
             </div>
           </div>
@@ -245,7 +246,7 @@ function LoginForm() {
               href="/signup"
               className="w-full flex items-center justify-center py-3 px-4 border-2 border-clay-700 text-clay-700 font-medium rounded-lg hover:bg-clay-700 hover:text-white transition-colors duration-200"
             >
-              Créer un compte
+              {t('createAccount')}
             </Link>
           </div>
         </div>
