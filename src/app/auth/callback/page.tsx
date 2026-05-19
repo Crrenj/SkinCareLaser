@@ -71,12 +71,12 @@ export default function AuthCallbackPage() {
   }, [router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EDEAE5' }}>
+    <div className="min-h-screen flex items-center justify-center bg-sand-200">
       <div className="text-center">
         <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#CCC5BD] mx-auto"></div>
-          <p className="mt-4 text-gray-700 font-medium">{status}</p>
-          <p className="mt-2 text-sm text-gray-500">Veuillez patienter...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-clay-700 mx-auto"></div>
+          <p className="mt-4 text-ink-800 font-medium">{status}</p>
+          <p className="mt-2 text-sm text-ink-500">Veuillez patienter...</p>
         </div>
       </div>
     </div>

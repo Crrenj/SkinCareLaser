@@ -15,7 +15,7 @@ export function CartIcon({ className = '', onClick }: CartIconProps) {
     <div className={`relative inline-block ${className}`}>
       <button
         onClick={onClick}
-        className="relative p-2 text-gray-700 hover:text-gray-900 transition-colors focus:outline-none"
+        className="relative p-2 text-ink-800 hover:text-ink-900 transition-colors focus:outline-none"
         disabled={isLoading}
         data-testid="cart-icon"
         aria-label="Ouvrir le panier"
@@ -25,7 +25,7 @@ export function CartIcon({ className = '', onClick }: CartIconProps) {
         {/* Badge avec le nombre d'items */}
         {totalItems > 0 && (
           <span 
-            className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium cart-badge"
+            className="absolute -top-1 -right-1 bg-clay-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium cart-badge"
             data-testid="cart-badge"
           >
             {totalItems > 99 ? '99+' : totalItems}
@@ -36,7 +36,7 @@ export function CartIcon({ className = '', onClick }: CartIconProps) {
       {/* Indicateur de chargement */}
       {isLoading && (
         <div className="absolute inset-0 bg-white bg-opacity-50 rounded flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+          <div className="w-4 h-4 border-2 border-sand-300 border-t-brick-600 rounded-full animate-spin"></div>
         </div>
       )}
     </div>

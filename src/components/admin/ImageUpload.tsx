@@ -86,7 +86,7 @@ export default function ImageUpload({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-ink-800">
         Image du produit
       </label>
       
@@ -100,8 +100,8 @@ export default function ImageUpload({
           />
         </div>
       ) : (
-        <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-          <PhotoIcon className="h-8 w-8 text-gray-400" />
+        <div className="w-32 h-32 border-2 border-dashed border-sand-300 rounded-lg flex items-center justify-center">
+          <PhotoIcon className="h-8 w-8 text-ink-400" />
         </div>
       )}
 
@@ -111,17 +111,17 @@ export default function ImageUpload({
         accept="image/*"
         onChange={handleFileChange}
         disabled={uploading}
-        className="block w-full text-sm text-gray-500
+        className="block w-full text-sm text-ink-500
           file:mr-4 file:py-2 file:px-4
           file:rounded-full file:border-0
           file:text-sm file:font-semibold
-          file:bg-blue-50 file:text-blue-700
-          hover:file:bg-blue-100
+          file:bg-clay-50 file:text-clay-800
+          hover:file:bg-clay-50
           disabled:opacity-50 disabled:cursor-not-allowed"
       />
       
       {uploading && (
-        <p className="text-sm text-gray-500">Upload en cours...</p>
+        <p className="text-sm text-ink-500">Upload en cours...</p>
       )}
     </div>
   )

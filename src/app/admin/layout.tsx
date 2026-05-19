@@ -60,8 +60,8 @@ export default function AdminLayout({
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Vérification des permissions...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-clay-700 mx-auto"></div>
+          <p className="mt-4 text-ink-700">Vérification des permissions...</p>
         </div>
       </div>
     )
@@ -73,17 +73,17 @@ export default function AdminLayout({
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between h-16 px-4 border-b">
             {sidebarOpen && (
-              <h2 className="text-xl font-semibold text-gray-800">Admin Panel</h2>
+              <h2 className="text-xl font-semibold text-ink-800">Admin Panel</h2>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className={`p-1.5 rounded-md hover:bg-gray-100 ${!sidebarOpen && 'mx-auto'}`}
+              className={`p-1.5 rounded-md hover:bg-sand-100 ${!sidebarOpen && 'mx-auto'}`}
               aria-label={sidebarOpen ? 'Réduire la barre latérale' : 'Ouvrir la barre latérale'}
             >
               {sidebarOpen ? (
-                <ChevronLeftIcon className="h-5 w-5 text-gray-600" />
+                <ChevronLeftIcon className="h-5 w-5 text-ink-700" />
               ) : (
-                <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+                <ChevronRightIcon className="h-5 w-5 text-ink-700" />
               )}
             </button>
           </div>
@@ -98,8 +98,8 @@ export default function AdminLayout({
                   className={`
                     flex items-center px-2 py-2 text-sm font-medium rounded-md
                     ${isActive
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-clay-50 text-clay-800'
+                      : 'text-ink-700 hover:bg-sand-100 hover:text-ink-900'
                     }
                     ${!sidebarOpen && 'justify-center'}
                   `}
@@ -115,15 +115,15 @@ export default function AdminLayout({
           <div className="px-2 py-4 border-t">
             {sidebarOpen && (
               <div className="px-2 py-2 mb-2">
-                <p className="text-xs text-gray-500">Connecté en tant que</p>
-                <p className="text-sm font-medium text-gray-700 truncate">{user.email}</p>
+                <p className="text-xs text-ink-500">Connecté en tant que</p>
+                <p className="text-sm font-medium text-ink-800 truncate">{user.email}</p>
               </div>
             )}
             <button
               onClick={handleLogout}
               className={`
-                flex items-center w-full px-2 py-2 text-sm font-medium text-red-600
-                rounded-md hover:bg-red-50
+                flex items-center w-full px-2 py-2 text-sm font-medium text-brick-600
+                rounded-md hover:bg-clay-50
                 ${!sidebarOpen && 'justify-center'}
               `}
               title={!sidebarOpen ? 'Déconnexion' : undefined}

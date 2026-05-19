@@ -124,18 +124,18 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#EDEAE5' }}>
+    <div className="min-h-screen flex items-center justify-center bg-sand-200">
       <div className="w-full max-w-md mx-4">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* En-tête avec couleur du navbar */}
-          <div className="px-8 py-6" style={{ backgroundColor: '#CCC5BD' }}>
+          <div className="px-8 py-6 bg-sand-400">
             <div className="flex items-center justify-center mb-2">
-              <User className="w-12 h-12 text-gray-700" />
+              <User className="w-12 h-12 text-ink-800" />
             </div>
-            <h2 className="text-center text-2xl font-bold text-gray-800">
+            <h2 className="text-center text-2xl font-bold text-ink-800">
               Connexion à votre compte
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-700">
+            <p className="mt-2 text-center text-sm text-ink-800">
               Bienvenue chez FARMAU
             </p>
           </div>
@@ -143,25 +143,25 @@ function LoginForm() {
           {/* Formulaire */}
           <form className="px-8 py-6 space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="bg-clay-50 border-l-4 border-brick-600 p-4 rounded">
+                <p className="text-sm text-brick-600">{error}</p>
               </div>
             )}
 
             {redirecting && (
-              <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                <p className="text-sm text-green-700">Connexion réussie ! Redirection en cours...</p>
+              <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
+                <p className="text-sm text-olive-600">Connexion réussie ! Redirection en cours...</p>
               </div>
             )}
 
             <div className="space-y-5">
               {/* Email */}
               <div className="relative">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
                   Adresse email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="email"
                     name="email"
@@ -170,7 +170,7 @@ function LoginForm() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="votre@email.com"
                     disabled={redirecting}
                   />
@@ -179,11 +179,11 @@ function LoginForm() {
 
               {/* Mot de passe */}
               <div className="relative">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-ink-800 mb-1">
                   Mot de passe
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="password"
                     name="password"
@@ -192,7 +192,7 @@ function LoginForm() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="••••••••"
                     disabled={redirecting}
                   />
@@ -204,12 +204,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading || redirecting}
-                className="w-full flex items-center justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ 
-                  backgroundColor: '#CCC5BD'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B8B1A8'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#CCC5BD'}
+                className="w-full flex items-center justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   'Connexion...'
@@ -226,7 +221,7 @@ function LoginForm() {
 
             {/* Lien mot de passe oublié */}
             <div className="text-center">
-              <Link href="#" className="text-sm text-gray-600 hover:text-gray-800 transition-colors">
+              <Link href="#" className="text-sm text-ink-700 hover:text-ink-800 transition-colors">
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -236,19 +231,19 @@ function LoginForm() {
           <div className="px-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-sand-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">Nouveau client ?</span>
+                <span className="px-4 bg-white text-ink-500">Nouveau client ?</span>
               </div>
             </div>
           </div>
 
           {/* Lien inscription */}
           <div className="px-8 py-6">
-            <Link 
-              href="/signup" 
-              className="w-full flex items-center justify-center py-3 px-4 border-2 border-[#CCC5BD] text-[#CCC5BD] font-medium rounded-lg hover:bg-[#CCC5BD] hover:text-white transition-all duration-200"
+            <Link
+              href="/signup"
+              className="w-full flex items-center justify-center py-3 px-4 border-2 border-clay-700 text-clay-700 font-medium rounded-lg hover:bg-clay-700 hover:text-white transition-colors duration-200"
             >
               Créer un compte
             </Link>

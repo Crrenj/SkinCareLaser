@@ -1,39 +1,68 @@
 @import "tailwindcss";
 
-:root {
-  --background: #EDEAE5;
-  --foreground: #333333;
-  --primary: #3B82F6;
-  --primary-hover: #2563EB;
-  --gray-light: #F3F4F6;
-  --gray-medium: #9CA3AF;
-  --gray-dark: #374151;
+@theme {
+  /* ─── Couleurs ─── */
+  --color-sand-50:  #FBF8F4;
+  --color-sand-100: #F4EFE7;
+  --color-sand-200: #EDEAE5;
+  --color-sand-300: #D8D1C6;
+  --color-sand-400: #CCC5BD;
+  --color-sand-500: #B8B1A8;
+  --color-sand-600: #9A9388;
+
+  --color-clay-50:  #FBF2EC;
+  --color-clay-200: #F0D7C5;
+  --color-clay-400: #D89A75;
+  --color-clay-600: #B86F4A;
+  --color-clay-700: #8E5232;   /* CTA principal */
+  --color-clay-800: #5F381F;
+
+  --color-ink-50:  #F5F4F2;
+  --color-ink-200: #D5D2CB;
+  --color-ink-400: #A8A293;
+  --color-ink-500: #807969;
+  --color-ink-700: #5A5448;
+  --color-ink-800: #3C3830;
+  --color-ink-900: #1F1B16;
+
+  --color-olive-600: #5B6B3F;
+  --color-brick-600: #8B3A2E;
+
+  /* ─── Typographie ─── */
+  --font-serif: var(--font-instrument), Georgia, serif;
+  --font-sans:  var(--font-bevn), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:  ui-monospace, "JetBrains Mono", "SF Mono", monospace;
+
+  /* ─── Radii ─── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.25rem;
 }
 
-/* Optimisations de base */
-* {
-  box-sizing: border-box;
-}
+/* ─── Base ─── */
+* { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-  line-height: 1.6;
+  background: var(--color-sand-200);
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Optimisations d'accessibilité */
+img { max-width: 100%; height: auto; display: block; }
+
+::selection { background: var(--color-clay-200); color: var(--color-ink-900); }
+::placeholder { color: var(--color-ink-400); opacity: 1; }
+
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -41,210 +70,8 @@ body {
   }
 }
 
-/* Focus visible pour l'accessibilité */
-.focus-visible:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-/* Optimisations de performance pour les images */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* Optimisations pour les liens */
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-a:hover {
-  color: var(--primary);
-}
-
-/* Optimisations pour les boutons */
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-/* Optimisations pour les inputs */
-input,
-textarea,
-select {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-
-/* Optimisations de scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--gray-light);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--gray-medium);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-dark);
-}
-
-/* Optimisations pour les sélections */
-::selection {
-  background: var(--primary);
-  color: white;
-}
-
-/* Optimisations pour les placeholders */
-::placeholder {
-  color: var(--gray-medium);
-  opacity: 1;
-}
-
-/* Optimisations pour les listes */
-ul,
-ol {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Optimisations pour les titres */
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-/* Optimisations pour les paragraphes */
-p {
-  margin: 0;
-}
-
-/* Optimisations pour les conteneurs */
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-/* Optimisations pour les grilles */
-.grid {
-  display: grid;
-  gap: 1rem;
-}
-
-/* Optimisations pour les flexbox */
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-/* Optimisations pour les espacements */
-.space-y > * + * {
-  margin-top: 1rem;
-}
-
-.space-x > * + * {
-  margin-left: 1rem;
-}
-
-/* Optimisations pour les transitions */
-.transition {
-  transition: all 0.2s ease;
-}
-
-.transition-colors {
-  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.transition-transform {
-  transition: transform 0.2s ease;
-}
-
-/* Optimisations pour les ombres */
-.shadow {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-/* Optimisations pour les bordures arrondies */
-.rounded {
-  border-radius: 0.25rem;
-}
-
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.rounded-xl {
-  border-radius: 0.75rem;
-}
-
-/* Optimisations pour les états de focus */
-.focus\:outline-none:focus {
-  outline: none;
-}
-
-.focus\:ring-2:focus {
-  box-shadow: 0 0 0 2px var(--primary);
-}
-
-.focus\:ring-blue-500:focus {
-  box-shadow: 0 0 0 2px var(--primary);
-}
-
-/* Optimisations pour les états de hover */
-.hover\:bg-gray-50:hover {
-  background-color: var(--gray-light);
-}
-
-.hover\:bg-blue-700:hover {
-  background-color: var(--primary-hover);
-}
-
-/* Optimisations pour les états disabled */
-.disabled\:opacity-50:disabled {
-  opacity: 0.5;
-}
-
-.disabled\:cursor-not-allowed:disabled {
-  cursor: not-allowed;
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-sand-100); }
+::-webkit-scrollbar-thumb { background: var(--color-sand-500); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-ink-500); }

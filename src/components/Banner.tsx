@@ -44,10 +44,10 @@ export default function Banner({
 
   const renderContent = () => (
     <div className="flex-1 flex flex-col justify-center space-y-4">
-      <h3 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+      <h3 className="text-2xl md:text-3xl font-bold text-ink-900 leading-tight">
         {title}
       </h3>
-      <p className="text-lg text-gray-700 leading-relaxed">
+      <p className="text-lg text-ink-800 leading-relaxed">
         {description}
       </p>
       {linkUrl && linkText && (
@@ -55,7 +55,7 @@ export default function Banner({
           <Link
             href={linkUrl}
             onClick={handleClick}
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md hover:shadow-lg"
+            className="inline-flex items-center px-6 py-3 bg-clay-700 text-white font-semibold rounded-lg hover:bg-clay-800 transition-colors duration-200 shadow-md hover:shadow-lg"
           >
             {linkText}
             <svg
@@ -91,8 +91,8 @@ export default function Banner({
         priority
       />
       {!imageLoaded && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          <div className="text-gray-400">Chargement...</div>
+        <div className="absolute inset-0 bg-sand-200 animate-pulse flex items-center justify-center">
+          <div className="text-ink-400">Chargement...</div>
         </div>
       )}
     </div>
@@ -103,7 +103,7 @@ export default function Banner({
     return (
       <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[320px] gap-4">
-          <div className="flex items-center justify-center p-6 bg-gray-50">
+          <div className="flex items-center justify-center p-6 bg-sand-50">
             {renderImage()}
           </div>
           <div className="flex items-center p-6 md:p-8">
@@ -122,7 +122,7 @@ export default function Banner({
           <div className="flex items-center p-6 md:p-8">
             {renderContent()}
           </div>
-          <div className="flex items-center justify-center p-6 bg-gray-50">
+          <div className="flex items-center justify-center p-6 bg-sand-50">
             {renderImage()}
           </div>
         </div>
@@ -146,8 +146,8 @@ export default function Banner({
           priority
         />
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-            <div className="text-gray-400">Chargement...</div>
+          <div className="absolute inset-0 bg-sand-200 animate-pulse flex items-center justify-center">
+            <div className="text-ink-400">Chargement...</div>
           </div>
         )}
         
@@ -167,7 +167,7 @@ export default function Banner({
               <Link
                 href={linkUrl}
                 onClick={handleClick}
-                className="inline-flex items-center px-8 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200 shadow-md hover:shadow-lg"
+                className="inline-flex items-center px-8 py-3 bg-white text-ink-900 font-semibold rounded-lg hover:bg-sand-100 transition-colors duration-200 shadow-md hover:shadow-lg"
               >
                 {linkText}
                 <svg
@@ -208,23 +208,23 @@ export default function Banner({
             priority
           />
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-              <div className="text-gray-400">Chargement...</div>
+            <div className="absolute inset-0 bg-sand-200 animate-pulse flex items-center justify-center">
+              <div className="text-ink-400">Chargement...</div>
             </div>
           )}
         </div>
         <div className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-3 leading-tight">
+          <h3 className="text-xl font-bold text-ink-900 mb-3 leading-tight">
             {title}
           </h3>
-          <p className="text-gray-600 mb-4 leading-relaxed">
+          <p className="text-ink-700 mb-4 leading-relaxed">
             {description}
           </p>
           {linkUrl && linkText && (
             <Link
               href={linkUrl}
               onClick={handleClick}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              className="inline-flex items-center px-4 py-2 bg-clay-700 text-white font-medium rounded-lg hover:bg-clay-800 transition-colors duration-200"
             >
               {linkText}
               <svg
@@ -250,7 +250,7 @@ export default function Banner({
   // Style minimal
   if (bannerType === 'minimal') {
     return (
-      <div className="bg-gray-50 rounded-xl p-8 mb-8 border-l-4 border-blue-500">
+      <div className="bg-sand-50 rounded-xl p-8 mb-8 border-l-4 border-clay-600">
         <div className="flex items-start space-x-6">
           <div className="relative w-16 h-16 flex-shrink-0">
             <Image
@@ -265,23 +265,23 @@ export default function Banner({
               priority
             />
             {!imageLoaded && (
-              <div className="absolute inset-0 bg-gray-200 animate-pulse rounded-full flex items-center justify-center">
-                <div className="text-gray-400 text-xs">...</div>
+              <div className="absolute inset-0 bg-sand-200 animate-pulse rounded-full flex items-center justify-center">
+                <div className="text-ink-400 text-xs">...</div>
               </div>
             )}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-ink-900 mb-2">
               {title}
             </h3>
-            <p className="text-gray-600 mb-3 text-sm leading-relaxed">
+            <p className="text-ink-700 mb-3 text-sm leading-relaxed">
               {description}
             </p>
             {linkUrl && linkText && (
               <Link
                 href={linkUrl}
                 onClick={handleClick}
-                className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors duration-200"
+                className="text-clay-700 hover:text-clay-800 font-medium text-sm transition-colors duration-200"
               >
                 {linkText} →
               </Link>
@@ -308,8 +308,8 @@ export default function Banner({
           priority
         />
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-            <div className="text-gray-400">Chargement...</div>
+          <div className="absolute inset-0 bg-sand-200 animate-pulse flex items-center justify-center">
+            <div className="text-ink-400">Chargement...</div>
           </div>
         )}
         

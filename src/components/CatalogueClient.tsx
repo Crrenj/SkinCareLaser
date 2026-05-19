@@ -282,11 +282,11 @@ export default function CatalogueClient({
             placeholder="Rechercher un produit..."
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full px-4 py-3 border border-sand-300 rounded-lg focus:outline-none focus:border-clay-600 transition-colors"
             aria-label="Rechercher un produit"
           />
           <svg
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400 pointer-events-none"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -334,11 +334,11 @@ export default function CatalogueClient({
           </div>
           
           {currentProducts.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-ink-500">
               <p>Aucun produit trouvé avec les critères sélectionnés.</p>
               <button
                 onClick={clearAllFilters}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none"
+                className="mt-4 px-4 py-2 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
               >
                 Réinitialiser les filtres
               </button>
@@ -353,7 +353,7 @@ export default function CatalogueClient({
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors focus:outline-none"
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus:outline-none"
             aria-label="Page précédente"
           >
             Précédent
@@ -365,8 +365,8 @@ export default function CatalogueClient({
               onClick={() => handlePageChange(page)}
               className={`px-4 py-2 border rounded-lg transition-colors focus:outline-none ${
                 currentPage === page
-                  ? 'bg-blue-500 text-white border-blue-500'
-                  : 'hover:bg-gray-50'
+                  ? 'bg-clay-700 text-white border-clay-600'
+                  : 'hover:bg-sand-50'
               }`}
               aria-label={`Page ${page}`}
               aria-current={currentPage === page ? 'page' : undefined}
@@ -378,7 +378,7 @@ export default function CatalogueClient({
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors focus:outline-none"
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus:outline-none"
             aria-label="Page suivante"
           >
             Suivant

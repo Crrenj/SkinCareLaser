@@ -110,7 +110,7 @@ export default function DirectImageUpload({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-ink-800">
         Image du produit (Upload direct)
       </label>
       
@@ -125,7 +125,7 @@ export default function DirectImageUpload({
             <button
               onClick={handleDelete}
               disabled={uploading}
-              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded 
+              className="absolute top-1 right-1 bg-clay-500 text-white p-1 rounded 
                 opacity-0 group-hover:opacity-100 transition-opacity
                 disabled:opacity-50"
               title="Supprimer"
@@ -135,8 +135,8 @@ export default function DirectImageUpload({
           )}
         </div>
       ) : (
-        <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-          <PhotoIcon className="h-8 w-8 text-gray-400" />
+        <div className="w-32 h-32 border-2 border-dashed border-sand-300 rounded-lg flex items-center justify-center">
+          <PhotoIcon className="h-8 w-8 text-ink-400" />
         </div>
       )}
 
@@ -145,20 +145,20 @@ export default function DirectImageUpload({
         accept="image/*"
         onChange={handleFileChange}
         disabled={uploading}
-        className="block w-full text-sm text-gray-500
+        className="block w-full text-sm text-ink-500
           file:mr-4 file:py-2 file:px-4
           file:rounded-full file:border-0
           file:text-sm file:font-semibold
-          file:bg-blue-50 file:text-blue-700
-          hover:file:bg-blue-100
+          file:bg-clay-50 file:text-clay-800
+          hover:file:bg-clay-50
           disabled:opacity-50 disabled:cursor-not-allowed"
       />
       
       {uploading && (
-        <p className="text-sm text-gray-500">Traitement...</p>
+        <p className="text-sm text-ink-500">Traitement...</p>
       )}
       
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-ink-400">
         Formats: PNG, JPG, WebP (max 5MB)
       </p>
     </div>

@@ -47,9 +47,9 @@ export function AddToCartButton({
 
   // Classes de base selon la variante
   const baseClasses = {
-    default: 'bg-blue-600 text-white hover:bg-blue-700',
-    outline: 'border border-blue-600 text-blue-600 hover:bg-blue-50',
-    ghost: 'text-blue-600 hover:bg-blue-50'
+    default: 'bg-clay-700 text-white hover:bg-clay-800',
+    outline: 'border border-clay-700 text-clay-700 hover:bg-clay-50',
+    ghost: 'text-clay-700 hover:bg-clay-50'
   }
 
   // Classes de taille

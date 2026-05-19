@@ -216,7 +216,7 @@ export default function SignupPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="votre@email.com"
                   />
                 </div>
@@ -237,7 +237,7 @@ export default function SignupPage() {
                     required
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="+1 809 123 4567"
                   />
                 </div>
@@ -257,7 +257,7 @@ export default function SignupPage() {
                     type="date"
                     value={formData.birthDate}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                   />
                 </div>
               </div>
@@ -277,7 +277,7 @@ export default function SignupPage() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="••••••••"
                   />
                 </div>
@@ -299,7 +299,7 @@ export default function SignupPage() {
                     required
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="••••••••"
                   />
                 </div>

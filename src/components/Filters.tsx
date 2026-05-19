@@ -78,18 +78,18 @@ const Filters: FC<FiltersProps> = ({
   ]
   
   return (
-    <div className="filters w-full max-w-sm bg-gray-50 p-6 rounded-lg">
+    <div className="filters w-full max-w-sm bg-sand-50 p-6 rounded-lg">
       {/* TRIER PAR */}
       <div className="mb-6">
         <button
           onClick={() => toggleSection('sort')}
-          className="w-full flex items-center justify-between py-4 border-b border-gray-300 text-left focus:outline-none"
+          className="w-full flex items-center justify-between py-4 border-b border-sand-300 text-left focus:outline-none"
         >
           <span className="text-base font-semibold tracking-wide">TRIER PAR</span>
           {expandedSections.has('sort') ? (
-            <ChevronUpIcon className="h-5 w-5 text-gray-600" />
+            <ChevronUpIcon className="h-5 w-5 text-ink-700" />
           ) : (
-            <ChevronDownIcon className="h-5 w-5 text-gray-600" />
+            <ChevronDownIcon className="h-5 w-5 text-ink-700" />
           )}
         </button>
         
@@ -107,8 +107,8 @@ const Filters: FC<FiltersProps> = ({
                 />
                 <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
                   sortOption === option.value
-                    ? 'bg-black border-black'
-                    : 'bg-white border-gray-400 group-hover:border-gray-600'
+                    ? 'bg-ink-900 border-ink-900'
+                    : 'bg-white border-sand-400 group-hover:border-ink-700'
                 }`}>
                   {sortOption === option.value && (
                     <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -116,7 +116,7 @@ const Filters: FC<FiltersProps> = ({
                     </svg>
                   )}
                 </div>
-                <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900">{option.label}</span>
+                <span className="ml-3 text-sm text-ink-800 group-hover:text-ink-900">{option.label}</span>
               </label>
             ))}
           </div>
@@ -137,16 +137,16 @@ const Filters: FC<FiltersProps> = ({
         
         {/* Marques */}
         {availableBrands.length > 0 && (
-          <div className="border-t border-gray-300">
+          <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('brands')}
               className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
             >
               <span className="text-sm font-medium tracking-wide">MARQUES</span>
               {expandedSections.has('brands') ? (
-                <ChevronUpIcon className="h-5 w-5 text-gray-600" />
+                <ChevronUpIcon className="h-5 w-5 text-ink-700" />
               ) : (
-                <ChevronDownIcon className="h-5 w-5 text-gray-600" />
+                <ChevronDownIcon className="h-5 w-5 text-ink-700" />
               )}
             </button>
             
@@ -180,10 +180,10 @@ const Filters: FC<FiltersProps> = ({
                         />
                         <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
                           selectedBrands.has(brand) || allRangesSelected
-                            ? 'bg-black border-black'
+                            ? 'bg-ink-900 border-ink-900'
                             : someRangesSelected
-                            ? 'bg-gray-500 border-gray-500'
-                            : 'bg-white border-gray-400 group-hover:border-gray-600'
+                            ? 'bg-sand-500 border-sand-500'
+                            : 'bg-white border-sand-400 group-hover:border-ink-700'
                         }`}>
                           {(selectedBrands.has(brand) || allRangesSelected) && (
                             <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -194,10 +194,10 @@ const Filters: FC<FiltersProps> = ({
                             <div className="w-full h-0.5 bg-white"></div>
                           )}
                         </div>
-                        <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
+                        <span className="ml-3 text-sm text-ink-800 group-hover:text-ink-900 uppercase tracking-wide">
                           {brand}
                           {productCounts?.brands?.[brand] !== undefined && 
-                            <span className="text-gray-500"> ({productCounts.brands[brand]})</span>
+                            <span className="text-ink-500"> ({productCounts.brands[brand]})</span>
                           }
                         </span>
                       </label>
@@ -215,8 +215,8 @@ const Filters: FC<FiltersProps> = ({
                               />
                               <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
                                 selectedRanges.has(range)
-                                  ? 'bg-black border-black'
-                                  : 'bg-white border-gray-400 group-hover:border-gray-600'
+                                  ? 'bg-ink-900 border-ink-900'
+                                  : 'bg-white border-sand-400 group-hover:border-ink-700'
                               }`}>
                                 {selectedRanges.has(range) && (
                                   <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -224,10 +224,10 @@ const Filters: FC<FiltersProps> = ({
                                   </svg>
                                 )}
                               </div>
-                              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
+                              <span className="ml-3 text-sm text-ink-800 group-hover:text-ink-900 uppercase tracking-wide">
                                 {range}
                                 {productCounts?.ranges?.[range] !== undefined && 
-                                  <span className="text-gray-500"> ({productCounts.ranges[range]})</span>
+                                  <span className="text-ink-500"> ({productCounts.ranges[range]})</span>
                                 }
                               </span>
                             </label>
@@ -251,16 +251,16 @@ const Filters: FC<FiltersProps> = ({
           const selectedTagsForType = selectedTags[tagType] || new Set()
           
           return (
-            <div key={tagType} className="border-t border-gray-300">
+            <div key={tagType} className="border-t border-sand-300">
               <button
                 onClick={() => toggleSection(sectionKey)}
                 className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
               >
                 <span className="text-sm font-medium tracking-wide">{displayLabel}</span>
                 {expandedSections.has(sectionKey) ? (
-                  <ChevronUpIcon className="h-5 w-5 text-gray-600" />
+                  <ChevronUpIcon className="h-5 w-5 text-ink-700" />
                 ) : (
-                  <ChevronDownIcon className="h-5 w-5 text-gray-600" />
+                  <ChevronDownIcon className="h-5 w-5 text-ink-700" />
                 )}
               </button>
               
@@ -276,8 +276,8 @@ const Filters: FC<FiltersProps> = ({
                       />
                       <div className={`w-5 h-5 border-2 rounded-sm transition-all ${
                         selectedTagsForType.has(tagName)
-                          ? 'bg-black border-black'
-                          : 'bg-white border-gray-400 group-hover:border-gray-600'
+                          ? 'bg-ink-900 border-ink-900'
+                          : 'bg-white border-sand-400 group-hover:border-ink-700'
                       }`}>
                         {selectedTagsForType.has(tagName) && (
                           <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -285,10 +285,10 @@ const Filters: FC<FiltersProps> = ({
                           </svg>
                         )}
                       </div>
-                      <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 uppercase tracking-wide">
+                      <span className="ml-3 text-sm text-ink-800 group-hover:text-ink-900 uppercase tracking-wide">
                         {tagName}
                         {productCounts?.tags?.[tagType]?.[tagName] !== undefined && 
-                          <span className="text-gray-500"> ({productCounts.tags[tagType][tagName]})</span>
+                          <span className="text-ink-500"> ({productCounts.tags[tagType][tagName]})</span>
                         }
                       </span>
                     </label>
@@ -299,7 +299,7 @@ const Filters: FC<FiltersProps> = ({
           )
         })}
         
-        <div className="border-t border-gray-300"></div>
+        <div className="border-t border-sand-300"></div>
       </div>
     </div>
   )

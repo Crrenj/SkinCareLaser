@@ -57,8 +57,8 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     <>
       {/* Overlay avec fond semi-transparent */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-gray-900 bg-opacity-30 backdrop-blur-sm z-40"
+        <div
+          className="fixed inset-0 bg-ink-900 bg-opacity-30 backdrop-blur-sm z-40"
           onClick={onClose}
         />
       )}
@@ -72,17 +72,17 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         data-testid="cart-drawer"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-sand-300">
           <div className="flex items-center gap-2">
-            <ShoppingBag size={24} className="text-gray-700" />
-            <h2 className="text-lg font-semibold text-gray-900">Panier ({totalItems})</h2>
+            <ShoppingBag size={24} className="text-ink-800" />
+            <h2 className="text-lg font-semibold text-ink-900">Panier ({totalItems})</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
+            className="p-2 hover:bg-sand-100 rounded-full transition-colors focus:outline-none"
             aria-label="Fermer le panier"
           >
-            <X size={20} className="text-gray-600" />
+            <X size={20} className="text-ink-700" />
           </button>
         </div>
 
@@ -92,12 +92,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading ? (
               <div className="flex items-center justify-center h-32">
-                <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-sand-300 border-t-clay-700 rounded-full animate-spin"></div>
               </div>
             ) : items.length === 0 ? (
               <div className="text-center py-8">
-                <ShoppingBag size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500">Votre panier est vide</p>
+                <ShoppingBag size={48} className="mx-auto text-ink-200 mb-4" />
+                <p className="text-ink-500">Votre panier est vide</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -117,27 +117,27 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
           {/* Footer */}
           {items.length > 0 && (
-            <div className="border-t border-gray-200 p-4 space-y-4 bg-gray-50">
+            <div className="border-t border-sand-300 p-4 space-y-4 bg-sand-50">
               {/* Total */}
               <div className="flex justify-between items-center text-lg font-semibold">
-                <span className="text-gray-900">Total</span>
-                <span className="text-blue-600">{formatPrice(totalPrice)}</span>
+                <span className="text-ink-900">Total</span>
+                <span className="text-ink-900">{formatPrice(totalPrice)}</span>
               </div>
 
               {/* Actions */}
               <div className="space-y-2">
                 <button
                   onClick={() => clearCart()}
-                  className="w-full py-2 px-4 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors focus:outline-none"
+                  className="w-full py-2 px-4 text-brick-600 border border-brick-600 rounded-md hover:bg-clay-50 transition-colors focus:outline-none"
                 >
                   Vider le panier
                 </button>
-                
+
                 <button
                   type="button"
                   disabled
                   title="Checkout pas encore implémenté"
-                  className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-2 px-4 bg-clay-700 text-white rounded-md hover:bg-clay-800 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Procéder au paiement (à venir)
                 </button>
@@ -174,13 +174,13 @@ function CartItemCard({ item, isUpdating, onUpdateQuantity, onRemove, formatPric
   }
 
   return (
-    <div 
-      className={`border border-gray-200 rounded-lg p-3 bg-white ${isUpdating ? 'opacity-50' : ''}`}
+    <div
+      className={`border border-sand-300 rounded-lg p-3 bg-white ${isUpdating ? 'opacity-50' : ''}`}
       data-testid="cart-item"
     >
       <div className="flex gap-3">
         {/* Image */}
-        <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 overflow-hidden">
+        <div className="w-16 h-16 bg-sand-100 rounded-md flex-shrink-0 overflow-hidden">
           {item.product.images[0] && (
             <img
               src={item.product.images[0].url}
@@ -192,34 +192,34 @@ function CartItemCard({ item, isUpdating, onUpdateQuantity, onRemove, formatPric
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-sm truncate text-gray-900">{item.product.name}</h3>
-          <p className="text-sm text-gray-600">{formatPrice(item.product.price)}</p>
-          
+          <h3 className="font-medium text-sm truncate text-ink-900">{item.product.name}</h3>
+          <p className="text-sm text-ink-700">{formatPrice(item.product.price)}</p>
+
           {/* Quantity controls */}
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => handleQuantityChange(localQuantity - 1)}
               disabled={isUpdating || localQuantity <= 1}
-              className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 transition-colors focus:outline-none"
+              className="p-1 hover:bg-sand-100 rounded disabled:opacity-50 transition-colors focus:outline-none"
               data-testid="quantity-decrease"
             >
-              <Minus size={12} className="text-gray-600" />
+              <Minus size={12} className="text-ink-700" />
             </button>
-            
-            <span 
-              className="text-sm font-medium min-w-[2rem] text-center text-gray-900"
+
+            <span
+              className="text-sm font-medium min-w-[2rem] text-center text-ink-900"
               data-testid="quantity-display"
             >
               {localQuantity}
             </span>
-            
+
             <button
               onClick={() => handleQuantityChange(localQuantity + 1)}
               disabled={isUpdating || localQuantity >= item.product.stock}
-              className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 transition-colors focus:outline-none"
+              className="p-1 hover:bg-sand-100 rounded disabled:opacity-50 transition-colors focus:outline-none"
               data-testid="quantity-increase"
             >
-              <Plus size={12} className="text-gray-600" />
+              <Plus size={12} className="text-ink-700" />
             </button>
           </div>
         </div>
@@ -228,7 +228,7 @@ function CartItemCard({ item, isUpdating, onUpdateQuantity, onRemove, formatPric
         <button
           onClick={() => onRemove(item.product_id)}
           disabled={isUpdating}
-          className="p-1 text-red-500 hover:bg-red-50 rounded disabled:opacity-50 transition-colors focus:outline-none"
+          className="p-1 text-brick-600 hover:bg-clay-50 rounded disabled:opacity-50 transition-colors focus:outline-none"
           data-testid="remove-item"
           aria-label={`Supprimer ${item.product.name} du panier`}
         >
@@ -238,7 +238,7 @@ function CartItemCard({ item, isUpdating, onUpdateQuantity, onRemove, formatPric
 
       {/* Subtotal */}
       <div className="mt-2 text-right">
-        <span className="text-sm font-medium text-gray-900">
+        <span className="text-sm font-medium text-ink-900">
           {formatPrice(item.product.price * localQuantity)}
         </span>
       </div>

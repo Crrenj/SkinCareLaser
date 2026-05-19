@@ -87,12 +87,12 @@ const Filters: FC<FiltersProps> = ({
   ]
   
   return (
-    <div className="filters w-full max-w-sm bg-gray-50 p-6">
+    <div className="filters w-full max-w-sm bg-sand-50 p-6">
       {/* TRIER PAR */}
       <div className="mb-6">
         <button
           onClick={() => toggleSection('sort')}
-          className="w-full flex items-center justify-between py-4 border-b border-gray-300 text-left"
+          className="w-full flex items-center justify-between py-4 border-b border-sand-300 text-left"
         >
           <span className="text-base font-medium">TRIER PAR</span>
           {expandedSections.has('sort') ? (
@@ -116,8 +116,8 @@ const Filters: FC<FiltersProps> = ({
                 />
                 <div className={`w-5 h-5 border-2 rounded ${
                   sortOption === option.value
-                    ? 'bg-black border-black'
-                    : 'bg-white border-gray-400'
+                    ? 'bg-ink-900 border-ink-900'
+                    : 'bg-white border-sand-400'
                 }`}>
                   {sortOption === option.value && (
                     <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -146,7 +146,7 @@ const Filters: FC<FiltersProps> = ({
         
         {/* Type de peau */}
         {availableSkinTypes.length > 0 && (
-          <div className="border-t border-gray-300">
+          <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('skinTypes')}
               className="w-full flex items-center justify-between py-4 text-left"
@@ -171,8 +171,8 @@ const Filters: FC<FiltersProps> = ({
                     />
                     <div className={`w-5 h-5 border-2 rounded ${
                       selectedSkinTypes.has(skinType)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400'
+                        ? 'bg-ink-900 border-ink-900'
+                        : 'bg-white border-sand-400'
                     }`}>
                       {selectedSkinTypes.has(skinType) && (
                         <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -195,7 +195,7 @@ const Filters: FC<FiltersProps> = ({
         
         {/* Besoins */}
         {availableNeeds.length > 0 && (
-          <div className="border-t border-gray-300">
+          <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('needs')}
               className="w-full flex items-center justify-between py-4 text-left"
@@ -220,8 +220,8 @@ const Filters: FC<FiltersProps> = ({
                     />
                     <div className={`w-5 h-5 border-2 rounded ${
                       selectedNeeds.has(need)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400'
+                        ? 'bg-ink-900 border-ink-900'
+                        : 'bg-white border-sand-400'
                     }`}>
                       {selectedNeeds.has(need) && (
                         <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -244,7 +244,7 @@ const Filters: FC<FiltersProps> = ({
         
         {/* Catégories */}
         {availableCategories.length > 0 && (
-          <div className="border-t border-gray-300">
+          <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('categories')}
               className="w-full flex items-center justify-between py-4 text-left"
@@ -269,8 +269,8 @@ const Filters: FC<FiltersProps> = ({
                     />
                     <div className={`w-5 h-5 border-2 rounded ${
                       selectedCategories.has(category)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400'
+                        ? 'bg-ink-900 border-ink-900'
+                        : 'bg-white border-sand-400'
                     }`}>
                       {selectedCategories.has(category) && (
                         <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -293,7 +293,7 @@ const Filters: FC<FiltersProps> = ({
         
         {/* Marques */}
         {availableBrands.length > 0 && (
-          <div className="border-t border-gray-300">
+          <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('brands')}
               className="w-full flex items-center justify-between py-4 text-left"
@@ -311,7 +311,7 @@ const Filters: FC<FiltersProps> = ({
                 <select 
                   value={selectedBrand} 
                   onChange={e => onBrandChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-black text-sm"
+                  className="w-full px-3 py-2 border border-sand-300 rounded-md focus:outline-none focus:border-ink-900 text-sm"
                 >
                   <option value="">Toutes les marques</option>
                   {availableBrands.map(b => (
@@ -323,7 +323,7 @@ const Filters: FC<FiltersProps> = ({
                   <select
                     value={selectedRange}
                     onChange={e => onRangeChange(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-black text-sm mt-2"
+                    className="w-full px-3 py-2 border border-sand-300 rounded-md focus:outline-none focus:border-ink-900 text-sm mt-2"
                   >
                     <option value="">Toutes les gammes</option>
                     {rangesByBrand[selectedBrand].map(r => (
@@ -338,7 +338,7 @@ const Filters: FC<FiltersProps> = ({
         
         {/* Ingrédients */}
         {availableIngredients.length > 0 && (
-          <div className="border-t border-gray-300">
+          <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('ingredients')}
               className="w-full flex items-center justify-between py-4 text-left"
@@ -363,8 +363,8 @@ const Filters: FC<FiltersProps> = ({
                     />
                     <div className={`w-5 h-5 border-2 rounded ${
                       selectedIngredients.has(ingredient)
-                        ? 'bg-black border-black'
-                        : 'bg-white border-gray-400'
+                        ? 'bg-ink-900 border-ink-900'
+                        : 'bg-white border-sand-400'
                     }`}>
                       {selectedIngredients.has(ingredient) && (
                         <svg className="w-3 h-3 m-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -385,7 +385,7 @@ const Filters: FC<FiltersProps> = ({
           </div>
         )}
         
-        <div className="border-t border-gray-300"></div>
+        <div className="border-t border-sand-300"></div>
       </div>
     </div>
   )

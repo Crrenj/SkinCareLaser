@@ -32,15 +32,15 @@ export default function CartClient() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center py-16">
           <div className="mb-6">
-            <ShoppingBag className="mx-auto h-16 w-16 text-gray-400" />
+            <ShoppingBag className="mx-auto h-16 w-16 text-ink-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Votre panier est vide</h1>
-          <p className="text-gray-600 mb-8">
+          <h1 className="text-2xl font-bold text-ink-900 mb-4">Votre panier est vide</h1>
+          <p className="text-ink-700 mb-8">
             Découvrez nos produits et commencez votre shopping !
           </p>
-          <Link 
+          <Link
             href="/catalogue"
-            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none"
+            className="inline-flex items-center px-6 py-3 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Continuer les achats
@@ -54,8 +54,8 @@ export default function CartClient() {
     <div className="max-w-6xl mx-auto">
       {/* En-tête */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Votre panier</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-ink-900 mb-2">Votre panier</h1>
+        <p className="text-ink-700">
           {items.length} produit{items.length > 1 ? 's' : ''} dans votre panier
         </p>
       </div>
@@ -64,11 +64,11 @@ export default function CartClient() {
         {/* Liste des produits */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Produits</h2>
+            <div className="p-6 border-b border-sand-300">
+              <h2 className="text-lg font-semibold text-ink-900">Produits</h2>
             </div>
-            
-            <div className="divide-y divide-gray-200">
+
+            <div className="divide-y divide-sand-300">
               {items.map((item) => {
                 if (!item.product) return null
                 
@@ -88,8 +88,8 @@ export default function CartClient() {
                             sizes="80px"
                           />
                         ) : (
-                          <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                            <span className="text-gray-400 text-xs">No image</span>
+                          <div className="w-20 h-20 bg-sand-200 rounded-lg flex items-center justify-center">
+                            <span className="text-ink-400 text-xs">No image</span>
                           </div>
                         )}
                       </div>
@@ -98,32 +98,32 @@ export default function CartClient() {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h3 className="text-lg font-medium text-gray-900 truncate">
+                            <h3 className="text-lg font-medium text-ink-900 truncate">
                               {item.product.name}
                             </h3>
-                            <p className="text-lg font-semibold text-blue-600 mt-1">
+                            <p className="text-lg font-semibold text-ink-900 mt-1">
                               {item.product.price.toFixed(2)} {item.product.currency.toUpperCase()}
                             </p>
                           </div>
 
                           {/* Quantité */}
                           <div className="flex items-center space-x-3 ml-4">
-                            <div className="flex items-center border border-gray-300 rounded-lg">
+                            <div className="flex items-center border border-sand-300 rounded-lg">
                               <button
                                 onClick={() => handleQuantityUpdate(item.product_id, item.quantity - 1)}
                                 disabled={item.quantity <= 1}
-                                className="px-3 py-1 text-gray-600 hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none rounded-l"
+                                className="px-3 py-1 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed focus:outline-none rounded-l"
                                 aria-label="Diminuer la quantité"
                               >
                                 -
                               </button>
-                              <span className="px-3 py-1 border-x border-gray-300 min-w-[40px] text-center">
+                              <span className="px-3 py-1 border-x border-sand-300 min-w-[40px] text-center">
                                 {item.quantity}
                               </span>
                               <button
                                 onClick={() => handleQuantityUpdate(item.product_id, item.quantity + 1)}
                                 disabled={item.quantity >= 99}
-                                className="px-3 py-1 text-gray-600 hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed focus:outline-none rounded-r"
+                                className="px-3 py-1 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed focus:outline-none rounded-r"
                                 aria-label="Augmenter la quantité"
                               >
                                 +
@@ -132,7 +132,7 @@ export default function CartClient() {
 
                             {/* Prix total pour cet item */}
                             <div className="text-right min-w-[80px]">
-                              <p className="font-semibold text-gray-900">
+                              <p className="font-semibold text-ink-900">
                                 {itemTotal.toFixed(2)} {item.product.currency.toUpperCase()}
                               </p>
                             </div>
@@ -140,7 +140,7 @@ export default function CartClient() {
                             {/* Bouton supprimer */}
                             <button
                               onClick={() => handleRemoveItem(item.product_id)}
-                              className="text-red-500 hover:text-red-700 p-1 transition-colors focus:outline-none rounded"
+                              className="text-brick-600 hover:text-brick-600 p-1 transition-colors focus:outline-none rounded"
                               title="Supprimer du panier"
                               aria-label={`Supprimer ${item.product.name} du panier`}
                             >
@@ -160,32 +160,32 @@ export default function CartClient() {
         {/* Résumé de commande */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Résumé de commande</h2>
-            
+            <h2 className="text-lg font-semibold text-ink-900 mb-4">Résumé de commande</h2>
+
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Sous-total</span>
-                <span className="font-medium">{totalPrice.toFixed(2)} DOP</span>
+                <span className="text-ink-700">Sous-total</span>
+                <span className="font-medium text-ink-900">{totalPrice.toFixed(2)} DOP</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Frais de livraison</span>
-                <span className="font-medium">{shipping.toFixed(2)} DOP</span>
+                <span className="text-ink-700">Frais de livraison</span>
+                <span className="font-medium text-ink-900">{shipping.toFixed(2)} DOP</span>
               </div>
-              <div className="border-t border-gray-200 pt-3">
+              <div className="border-t border-sand-300 pt-3">
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span className="text-blue-600">{total.toFixed(2)} DOP</span>
+                  <span className="text-ink-900">{total.toFixed(2)} DOP</span>
                 </div>
               </div>
             </div>
 
-            <button className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold mb-4 focus:outline-none">
+            <button className="w-full bg-clay-700 text-white py-3 px-6 rounded-lg hover:bg-clay-800 transition-colors font-semibold mb-4 focus:outline-none">
               Procéder au paiement
             </button>
 
-            <Link 
+            <Link
               href="/catalogue"
-              className="w-full inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none"
+              className="w-full inline-flex items-center justify-center px-6 py-3 border border-sand-300 text-ink-800 rounded-lg hover:bg-sand-100 transition-colors focus:outline-none"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Continuer les achats

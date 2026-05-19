@@ -33,7 +33,7 @@ export default function NavBar() {
   }
 
   return (
-    <header className="h-32 relative" style={{ backgroundColor: '#CCC5BD' }}>
+    <header className="h-32 relative bg-sand-400">
       {/* ligne 1 */}
       <div className="h-20 flex items-center px-4">
         {/* wrapper relatif pour bouton + dropdown, avec z-index */}
@@ -41,22 +41,22 @@ export default function NavBar() {
           <button
             type="button"
             onClick={handleLanguageToggle}
-            className="bg-transparent text-gray-600 p-2 cursor-pointer flex items-center hover:text-gray-800 transition-colors focus:outline-none rounded"
+            className="bg-transparent text-ink-700 p-2 cursor-pointer flex items-center hover:text-ink-800 transition-colors focus:outline-none rounded"
             aria-expanded={open}
             aria-haspopup="true"
             aria-label="Sélectionner la langue"
           >
             Langue
-            <ChevronDown className={`w-4 h-4 ml-1 text-gray-600 transition-transform ${open ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-4 h-4 ml-1 text-ink-700 transition-transform ${open ? 'rotate-180' : ''}`} />
           </button>
           {open && (
             <ul
-              className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg text-sm z-30 min-w-[120px] border border-gray-200"
+              className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg text-sm z-30 min-w-[120px] border border-sand-300"
               role="menu"
             >
-              <li role="menuitem" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-t-lg">Français</li>
-              <li role="menuitem" className="px-3 py-2 hover:bg-gray-100 cursor-pointer">English</li>
-              <li role="menuitem" className="px-3 py-2 hover:bg-gray-100 cursor-pointer rounded-b-lg">Español</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-t-lg">Français</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer">English</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-b-lg">Español</li>
             </ul>
           )}
         </div>
@@ -79,7 +79,7 @@ export default function NavBar() {
         <div className="absolute right-4 flex items-center gap-4">
           <Link
             href="/contact"
-            className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
+            className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
             aria-label="Contact par email"
           >
             <Mail className="w-6 h-6" />
@@ -96,7 +96,7 @@ export default function NavBar() {
               {isAdmin && (
                 <Link
                   href="/admin/product"
-                  className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
+                  className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
                   aria-label="Dashboard admin"
                 >
                   <Shield className="w-6 h-6" />
@@ -104,7 +104,7 @@ export default function NavBar() {
               )}
               <button
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded px-2 py-1"
+                className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded px-2 py-1"
                 aria-label="Se déconnecter"
               >
                 Se déconnecter
@@ -114,14 +114,14 @@ export default function NavBar() {
             <>
               <Link
                 href="/login"
-                className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded p-1"
+                className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
                 aria-label="Se connecter"
               >
                 <UserIcon className="w-6 h-6" />
               </Link>
               <Link 
                 href="/login"
-                className="text-gray-600 hover:text-gray-800 transition-colors focus:outline-none rounded"
+                className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded"
               >
                 Se connecter
               </Link>
@@ -131,10 +131,10 @@ export default function NavBar() {
       </div>
 
       {/* ligne 2 */}
-      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-gray-700" role="navigation" aria-label="Navigation principale">
-        <Link href="/" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
-        <Link href="/catalogue" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
-        <Link href="/a-propos" className="hover:text-gray-900 transition-colors focus:outline-none rounded px-2 py-1">À propos</Link>
+      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-ink-800" role="navigation" aria-label="Navigation principale">
+        <Link href="/" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
+        <Link href="/catalogue" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
+        <Link href="/a-propos" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">À propos</Link>
       </nav>
 
       {/* CartDrawer */}

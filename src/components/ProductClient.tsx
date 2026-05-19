@@ -32,7 +32,7 @@ export default function ProductClient({
   if (!product) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Produit non trouvé</p>
+        <p className="text-ink-500">Produit non trouvé</p>
       </div>
     )
   }
@@ -63,7 +63,7 @@ export default function ProductClient({
             {product.images && product.images.length > 0 ? (
               <div className="space-y-4">
                 {/* Image principale */}
-                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                <div className="aspect-square bg-sand-100 rounded-lg overflow-hidden flex items-center justify-center">
                   <img 
                     src={product.images[0].url} 
                     alt={product.images[0].alt || product.name} 
@@ -75,7 +75,7 @@ export default function ProductClient({
                 {product.images.length > 1 && (
                   <div className="grid grid-cols-4 gap-2">
                     {product.images.slice(1).map((img, i) => (
-                      <div key={i} className="aspect-square bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                      <div key={i} className="aspect-square bg-sand-100 rounded-lg overflow-hidden flex items-center justify-center">
                         <img 
                           src={img.url} 
                           alt={img.alt || product.name} 
@@ -87,8 +87,8 @@ export default function ProductClient({
                 )}
               </div>
             ) : (
-              <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-500">Aucune image disponible</p>
+              <div className="aspect-square bg-sand-100 rounded-lg flex items-center justify-center">
+                <p className="text-ink-500">Aucune image disponible</p>
               </div>
             )}
           </div>
@@ -98,49 +98,49 @@ export default function ProductClient({
             {/* Marque et gamme */}
             <div className="space-y-2">
               {product.brand && (
-                <p className="text-sm font-medium text-blue-600 uppercase tracking-wide">
+                <p className="text-sm font-medium text-clay-700 uppercase tracking-wide">
                   {product.brand}
                 </p>
               )}
               {product.range && (
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-ink-700">
                   Gamme {product.range}
                 </p>
               )}
             </div>
 
             {/* Nom du produit */}
-            <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-3xl font-bold text-ink-900 leading-tight">
               {product.name}
             </h1>
 
             {/* Prix */}
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-ink-900">
               {product.price.toFixed(2)} {product.currency.toUpperCase()}
             </div>
 
             {/* Description */}
             {product.description && (
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-700 leading-relaxed">{product.description}</p>
+                <h3 className="text-lg font-semibold text-ink-900 mb-2">Description</h3>
+                <p className="text-ink-800 leading-relaxed">{product.description}</p>
               </div>
             )}
 
             {/* Tags par catégorie */}
             {Object.entries(product.tagsByCategory).length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900">Caractéristiques</h3>
+                <h3 className="text-lg font-semibold text-ink-900">Caractéristiques</h3>
                 {Object.entries(product.tagsByCategory).map(([category, tags]) => (
                   <div key={category}>
-                    <span className="text-sm font-medium text-gray-600 capitalize block mb-2">
+                    <span className="text-sm font-medium text-ink-700 capitalize block mb-2">
                       {category.replace('_', ' ')}:
                     </span>
                     <div className="flex flex-wrap gap-2">
                       {tags.map((tag, index) => (
-                        <span 
+                        <span
                           key={index}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                          className="px-3 py-1 bg-clay-50 text-clay-800 text-sm rounded-full"
                         >
                           {tag}
                         </span>
@@ -153,38 +153,38 @@ export default function ProductClient({
 
             {/* Section quantité */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-gray-900">Quantité</h3>
+              <h3 className="text-lg font-semibold text-ink-900">Quantité</h3>
               <div className="flex items-center space-x-4">
-                <div className="flex items-center border border-gray-300 rounded-lg">
+                <div className="flex items-center border border-sand-300 rounded-lg">
                   <button
                     onClick={() => handleQuantityChange(quantity - 1)}
                     disabled={quantity <= 1}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed"
                   >
                     -
                   </button>
-                  <span className="px-4 py-2 border-x border-gray-300 min-w-[60px] text-center">
+                  <span className="px-4 py-2 border-x border-sand-300 min-w-[60px] text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => handleQuantityChange(quantity + 1)}
                     disabled={quantity >= 99}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed"
                   >
                     +
                   </button>
                 </div>
-                <div className="text-sm text-gray-600">
-                  Prix total: <span className="font-semibold text-blue-600">{totalPrice.toFixed(2)} {product.currency.toUpperCase()}</span>
+                <div className="text-sm text-ink-700">
+                  Prix total: <span className="font-semibold text-ink-900">{totalPrice.toFixed(2)} {product.currency.toUpperCase()}</span>
                 </div>
               </div>
             </div>
 
             {/* Bouton d'action */}
             <div className="pt-4">
-              <button 
+              <button
                 onClick={handleAddToCart}
-                className="w-full bg-blue-600 text-white py-4 px-6 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-lg"
+                className="w-full bg-clay-700 text-white py-4 px-6 rounded-lg hover:bg-clay-800 transition-colors font-semibold text-lg"
               >
                 Ajouter au panier ({quantity})
               </button>
@@ -196,7 +196,7 @@ export default function ProductClient({
       {/* Produits similaires */}
       {similarProducts && similarProducts.length > 0 && (
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Produits similaires</h2>
+          <h2 className="text-2xl font-bold text-ink-900 mb-6">Produits similaires</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {similarProducts.map((p) => (
               <ProductCard 

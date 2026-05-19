@@ -46,7 +46,7 @@ export default function ProductDetailCard({
       <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
         {/* Image */}
         <div className="flex justify-center items-center md:col-span-2">
-          <div className="relative aspect-square w-full md:w-4/5 max-w-[500px] mx-auto rounded-2xl shadow-lg ring-1 ring-slate-200/50 overflow-hidden">
+          <div className="relative aspect-square w-full md:w-4/5 max-w-[500px] mx-auto rounded-2xl shadow-lg ring-1 ring-sand-300/50 overflow-hidden">
             <Image
               src={images?.[0]?.url || '/placeholder.png'}
               alt={`Image de ${product.name}`}
@@ -61,12 +61,12 @@ export default function ProductDetailCard({
           {/* Marques + Gamme sans titre */}
           <div className="mb-6 flex flex-wrap gap-2">
             {brand && (
-              <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full">
+              <span className="inline-block bg-sand-100 text-ink-700 uppercase text-xs px-2 py-1 rounded-full">
                 {brand}
               </span>
             )}
             {range && (
-              <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full">
+              <span className="inline-block bg-sand-100 text-ink-700 uppercase text-xs px-2 py-1 rounded-full">
                 {range}
               </span>
             )}
@@ -74,7 +74,7 @@ export default function ProductDetailCard({
 
           {/* Nom et Description */}
           <h1 className="font-bold text-3xl md:text-4xl">{product.name}</h1>
-          <p className="text-slate-600 leading-relaxed mt-4">
+          <p className="text-ink-700 leading-relaxed mt-4">
             {product.description}
           </p>
 
@@ -91,7 +91,7 @@ export default function ProductDetailCard({
                     {list.map(tag => (
                       <span
                         key={tag}
-                        className="bg-slate-100 text-sm px-2 py-1 rounded-full"
+                        className="bg-sand-100 text-sm px-2 py-1 rounded-full"
                       >
                         {tag}
                       </span>
@@ -103,7 +103,7 @@ export default function ProductDetailCard({
 
             {/* colonne droite : prix + quantité + bouton */}
             <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-2xl font-semibold text-primary-700">
+              <p className="text-2xl font-semibold text-clay-700">
                 {price} {product.currency}
               </p>
               {/* Quantité */}
@@ -111,7 +111,7 @@ export default function ProductDetailCard({
                 <button
                   type="button"
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-8 h-8 bg-gray-100 hover:bg-gray-200 transition rounded-full grid place-items-center"
+                  className="w-8 h-8 bg-sand-100 hover:bg-sand-200 transition rounded-full grid place-items-center"
                 >
                   −
                 </button>
@@ -119,7 +119,7 @@ export default function ProductDetailCard({
                 <button
                   type="button"
                   onClick={() => setQuantity(q => q + 1)}
-                  className="w-8 h-8 bg-gray-100 hover:bg-gray-200 transition rounded-full grid place-items-center"
+                  className="w-8 h-8 bg-sand-100 hover:bg-sand-200 transition rounded-full grid place-items-center"
                 >
                   +
                 </button>

@@ -22,7 +22,7 @@ export default function ProductCard({ product }: Props) {
   return (
     <Link href={`/product/${product.id}`} className="block h-full group" prefetch={false}>
       <article
-        className="rounded-lg p-3 bg-white flex flex-col h-full shadow-md hover:shadow-lg transition-shadow group-hover:ring-2 group-hover:ring-blue-400"
+        className="rounded-lg p-3 bg-white flex flex-col h-full shadow-md hover:shadow-lg transition-shadow group-hover:ring-2 group-hover:ring-clay-400"
         data-testid="product-card"
       >
         <Image
@@ -34,19 +34,19 @@ export default function ProductCard({ product }: Props) {
         />
         {/* Brand badge */}
         {product.brand && (
-          <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full mt-2">
+          <span className="inline-block bg-sand-100 text-ink-700 uppercase text-xs px-2 py-1 rounded-full mt-2">
             {product.brand}
           </span>
         )}
         {/* Range badge */}
         {product.range && (
-          <span className="inline-block bg-slate-100 text-slate-600 uppercase text-xs px-2 py-1 rounded-full mt-1">
+          <span className="inline-block bg-sand-100 text-ink-700 uppercase text-xs px-2 py-1 rounded-full mt-1">
             {product.range}
           </span>
         )}
         <h2 className="mt-2 text-xl font-semibold text-center">{product.name}</h2>
         {product.description && (
-          <p className="mt-4 mb-4 text-sm text-gray-600 text-center">
+          <p className="mt-4 mb-4 text-sm text-ink-700 text-center">
             {product.description}
           </p>
         )}
@@ -55,7 +55,7 @@ export default function ProductCard({ product }: Props) {
             productId={product.id}
             variant="ghost"
             size="sm"
-            className="p-2 rounded-full hover:bg-gray-200 transition-colors hover:scale-110"
+            className="p-2 rounded-full hover:bg-sand-200 transition-colors hover:scale-110"
           />
           <p className="text-lg font-bold">{price} {product.currency}</p>
         </div>

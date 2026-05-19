@@ -5,7 +5,7 @@ import { SiTiktok } from 'react-icons/si'
 
 export default function Footer() {
   return (
-    <footer style={{ backgroundColor: '#CCC5BD' }} className="text-primary">
+    <footer className="bg-sand-400 text-ink-800">
       {/* Ligne 1 : grille 4 colonnes */}
       <div className="grid grid-cols-4 gap-8 p-8">
         {/* Colonne 1 : logo + réseaux */}
@@ -66,8 +66,8 @@ export default function Footer() {
         </div>
       </div>
       {/* Ligne 2 : copyright */}
-      <div className="border-t border-gray-200 text-center p-4 text-sm">
-        © 2025 SkinCareLaser. Tous droits réservés.
+      <div className="border-t border-sand-300 text-center p-4 text-sm">
+        © 2026 FARMAU. Tous droits réservés.
       </div>
     </footer>
   )
