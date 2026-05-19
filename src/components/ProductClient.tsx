@@ -1,9 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import ProductCard from '@/components/ProductCard'
 import { useCart } from '@/hooks/useCart'
+import Breadcrumb from '@/components/Breadcrumb'
+import ProductCard from '@/components/ProductCard'
+import { Link } from '@/i18n/navigation'
+import { PdpGallery } from '@/components/pdp/PdpGallery'
+import { PdpStockBadge } from '@/components/pdp/PdpStockBadge'
+import { PdpQuantity } from '@/components/pdp/PdpQuantity'
+import { PdpWishlistButton } from '@/components/pdp/PdpWishlistButton'
+import { PdpTrustSignals } from '@/components/pdp/PdpTrustSignals'
+import { PdpAccordions, type PdpAccordionData } from '@/components/pdp/PdpAccordions'
+import { PdpPharmacist } from '@/components/pdp/PdpPharmacist'
+import { PdpStickyBar } from '@/components/pdp/PdpStickyBar'
 
 export type MappedProduct = {
   id: string
@@ -15,6 +25,15 @@ export type MappedProduct = {
   brand: string
   range: string
   tagsByCategory: Record<string, string[]>
+  // Champs optionnels — backés par DB plus tard (spec §07 schéma)
+  volume?: string
+  stock?: number
+  benefits?: string[]
+  usage?: string
+  inci?: string
+  technicalPdfUrl?: string
+  pharmacistAdvice?: string
+  pharmacistName?: string
 }
 
 interface ProductClientProps {
@@ -29,20 +48,14 @@ export default function ProductClient({
   const t = useTranslations('Product')
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
+  const buyRowRef = useRef<HTMLDivElement | null>(null)
 
-  // Vérification des données
   if (!product) {
     return (
       <div className="text-center py-12">
         <p className="text-ink-500">{t('notFound')}</p>
       </div>
     )
-  }
-
-  const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= 99) {
-      setQuantity(newQuantity)
-    }
   }
 
   const handleAddToCart = async () => {
@@ -53,174 +66,174 @@ export default function ProductClient({
     }
   }
 
-  const totalPrice = product.price * quantity
+  const outOfStock = product.stock === 0
+
+  // Construit les data accordéons — chaque section ne s'affiche que si du
+  // contenu existe, d'où l'ordre des fallbacks.
+  const accordionData: PdpAccordionData = {
+    description: product.description || undefined,
+    benefits: product.benefits,
+    usage: product.usage,
+    inci: product.inci,
+    technicalPdfUrl: product.technicalPdfUrl,
+    technical: buildTechnicalSpecs(product),
+  }
+
+  // Breadcrumb : Accueil › Catalogue › Marque › Gamme › Nom
+  const breadcrumbItems = [
+    { href: '/', label: t('breadcrumb.home') },
+    { href: '/catalogue', label: t('breadcrumb.catalogue') },
+    ...(product.brand
+      ? [{ href: `/catalogue?brand=${encodeURIComponent(product.brand)}`, label: product.brand }]
+      : []),
+    ...(product.range
+      ? [{ href: `/catalogue?range=${encodeURIComponent(product.range)}`, label: product.range }]
+      : []),
+    { label: product.name, current: true },
+  ]
 
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Carte principale du produit */}
-      <div className="bg-white rounded-xl shadow-lg p-8 mb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Colonne gauche - Images */}
-          <div className="space-y-4">
-            {product.images && product.images.length > 0 ? (
-              <div className="space-y-4">
-                {/* Image principale */}
-                <div className="aspect-square bg-sand-100 rounded-lg overflow-hidden flex items-center justify-center">
-                  <img 
-                    src={product.images[0].url} 
-                    alt={product.images[0].alt || product.name} 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                
-                {/* Galerie d'images secondaires */}
-                {product.images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-2">
-                    {product.images.slice(1).map((img, i) => (
-                      <div key={i} className="aspect-square bg-sand-100 rounded-lg overflow-hidden flex items-center justify-center">
-                        <img 
-                          src={img.url} 
-                          alt={img.alt || product.name} 
-                          className="w-full h-full object-contain cursor-pointer hover:opacity-75 transition-opacity" 
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="aspect-square bg-sand-100 rounded-lg flex items-center justify-center">
-                <p className="text-ink-500">{t('noImage')}</p>
-              </div>
-            )}
-          </div>
+    <div className="bg-sand-50">
+      <Breadcrumb items={breadcrumbItems} />
 
-          {/* Colonne droite - Informations produit */}
-          <div className="space-y-6">
-            {/* Marque et gamme */}
-            <div className="space-y-2">
-              {product.brand && (
-                <p className="text-sm font-medium text-clay-700 uppercase tracking-wide">
-                  {product.brand}
-                </p>
-              )}
-              {product.range && (
-                <p className="text-sm text-ink-700">
-                  {t('rangeLabel', { range: product.range })}
-                </p>
-              )}
-            </div>
+      {/* ── HERO ── */}
+      <section className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 px-6 lg:px-8 py-10 lg:py-14 max-w-7xl mx-auto">
+        <PdpGallery images={product.images} name={product.name} />
 
-            {/* Nom du produit */}
-            <h1 className="text-3xl font-bold text-ink-900 leading-tight">
-              {product.name}
-            </h1>
+        <div className="pt-2">
+          {product.brand && (
+            <Link
+              href={`/catalogue?brand=${encodeURIComponent(product.brand)}`}
+              className="inline-block text-[12px] uppercase tracking-[0.16em] text-clay-700 font-semibold hover:text-clay-800 mb-2"
+            >
+              {product.brand}
+            </Link>
+          )}
 
-            {/* Prix */}
-            <div className="text-3xl font-bold text-ink-900">
-              {product.price.toFixed(2)} {product.currency.toUpperCase()}
-            </div>
+          <h1 className="font-serif text-[36px] lg:text-[44px] leading-[1.02] -tracking-[0.015em] text-ink-900 mb-3 text-balance">
+            {product.name}
+          </h1>
 
-            {/* Description */}
-            {product.description && (
-              <div>
-                <h3 className="text-lg font-semibold text-ink-900 mb-2">{t('descriptionHeading')}</h3>
-                <p className="text-ink-800 leading-relaxed">{product.description}</p>
-              </div>
-            )}
-
-            {/* Tags par catégorie */}
-            {Object.entries(product.tagsByCategory).length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-ink-900">{t('characteristicsHeading')}</h3>
-                {Object.entries(product.tagsByCategory).map(([category, tags]) => (
-                  <div key={category}>
-                    <span className="text-sm font-medium text-ink-700 capitalize block mb-2">
-                      {category.replace('_', ' ')}:
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-clay-50 text-clay-800 text-sm rounded-full"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Section quantité */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-ink-900">{t('quantityHeading')}</h3>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border border-sand-300 rounded-lg">
-                  <button
-                    onClick={() => handleQuantityChange(quantity - 1)}
-                    disabled={quantity <= 1}
-                    className="px-4 py-2 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed"
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 border-x border-sand-300 min-w-[60px] text-center">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => handleQuantityChange(quantity + 1)}
-                    disabled={quantity >= 99}
-                    className="px-4 py-2 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed"
-                  >
-                    +
-                  </button>
-                </div>
-                <div className="text-sm text-ink-700">
-                  {t('totalPriceLabel')} <span className="font-semibold text-ink-900">{totalPrice.toFixed(2)} {product.currency.toUpperCase()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bouton d'action */}
-            <div className="pt-4">
-              <button
-                onClick={handleAddToCart}
-                className="w-full bg-clay-700 text-white py-4 px-6 rounded-lg hover:bg-clay-800 transition-colors font-semibold text-lg"
+          {product.range && (
+            <div className="font-serif italic text-[17px] text-ink-500 mb-7">
+              {t('rangePrefix')}{' '}
+              <Link
+                href={`/catalogue?range=${encodeURIComponent(product.range)}`}
+                className="underline decoration-sand-400 underline-offset-[3px] hover:decoration-clay-600"
               >
-                {t('addToCart', { count: quantity })}
-              </button>
+                {product.range}
+              </Link>
             </div>
-          </div>
-        </div>
-      </div>
+          )}
 
-      {/* Produits similaires */}
-      {similarProducts && similarProducts.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-ink-900 mb-6">{t('similarProductsHeading')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {similarProducts.map((p) => (
-              <ProductCard 
-                key={p.id} 
+          <div className="flex items-baseline gap-4 mb-2">
+            <div className="font-serif text-[36px] lg:text-[40px] text-ink-900 leading-none -tracking-[0.015em]">
+              {product.price.toFixed(0)}
+              <span className="font-sans text-[15px] text-ink-500 tracking-wider ml-1.5 font-medium">
+                {product.currency.toUpperCase()}
+              </span>
+            </div>
+            {product.volume && (
+              <span className="text-[13px] text-ink-500">· {product.volume}</span>
+            )}
+          </div>
+          <PdpStockBadge stock={product.stock} />
+
+          <div
+            ref={buyRowRef}
+            className="grid grid-cols-[120px_1fr_52px] gap-3 mt-7 mb-4"
+          >
+            <PdpQuantity value={quantity} onChange={setQuantity} max={product.stock} />
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={outOfStock}
+              className="h-[52px] bg-clay-700 text-sand-50 rounded-sm font-semibold text-[14px] uppercase tracking-wider hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {t('addToCartCta')}
+            </button>
+            <PdpWishlistButton productId={product.id} />
+          </div>
+
+          <PdpTrustSignals />
+        </div>
+      </section>
+
+      {/* ── ACCORDIONS ── */}
+      <PdpAccordions data={accordionData} />
+
+      {/* ── PHARMACIST (variant A/B, ne render rien si vide) ── */}
+      <PdpPharmacist quote={product.pharmacistAdvice} name={product.pharmacistName} />
+
+      {/* ── SIMILAR PRODUCTS ── */}
+      {similarProducts.length > 0 && (
+        <section className="px-6 lg:px-8 py-14 max-w-7xl mx-auto">
+          <div className="flex justify-between items-baseline mb-6 gap-4 flex-wrap">
+            <h2 className="font-serif text-[28px] lg:text-[32px] -tracking-[0.01em]">
+              {t('similar.heading')}
+            </h2>
+            {product.range && (
+              <Link
+                href={`/catalogue?range=${encodeURIComponent(product.range)}`}
+                className="text-[12.5px] text-clay-700 underline decoration-clay-200 underline-offset-[3px] hover:text-clay-800"
+              >
+                {t('similar.seeRange', { range: product.range })}
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {similarProducts.slice(0, 4).map((p) => (
+              <ProductCard
+                key={p.id}
                 product={{
                   id: p.id,
                   name: p.name,
                   description: p.description,
                   price: p.price,
                   currency: p.currency,
-                  images: p.images.map(img => ({
-                    url: img.url,
-                    alt: img.alt || ''
-                  })),
+                  images: p.images.map((img) => ({ url: img.url, alt: img.alt || '' })),
                   brand: p.brand,
-                  range: p.range
-                }} 
+                  range: p.range,
+                }}
               />
             ))}
           </div>
         </section>
       )}
+
+      {/* ── STICKY BAR mobile ── */}
+      <PdpStickyBar
+        buyRowRef={buyRowRef}
+        productName={product.name}
+        price={product.price}
+        currency={product.currency}
+        disabled={outOfStock}
+        onAdd={handleAddToCart}
+      />
     </div>
   )
+}
+
+/**
+ * Reconstruit une fiche technique à partir des tags existants (skin_type,
+ * texture, etc.) tant que les colonnes dédiées n'existent pas en DB.
+ * Si rien n'est dispo, retourne undefined (l'accordéon n'apparaît pas).
+ */
+function buildTechnicalSpecs(product: MappedProduct) {
+  const tags = product.tagsByCategory
+  const labelMap: Record<string, string> = {
+    skin_type: 'Type de peau',
+    texture: 'Texture',
+    category: 'Catégorie',
+    need: 'Besoin',
+  }
+  const specs: { label: string; value: string }[] = []
+  for (const [key, label] of Object.entries(labelMap)) {
+    const values = tags[key]
+    if (values && values.length > 0) {
+      specs.push({ label, value: values.join(', ') })
+    }
+  }
+  if (product.volume) specs.push({ label: 'Volume', value: product.volume })
+  return specs.length > 0 ? specs : undefined
 }
