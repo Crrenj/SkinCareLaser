@@ -1,5 +1,6 @@
 import React from 'react'
 import Image from 'next/image'
+import { Link } from '@/i18n/navigation'
 import { Instagram, Facebook, Youtube } from 'lucide-react'
 import { SiTiktok } from 'react-icons/si'
 
@@ -54,7 +55,7 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-2">SERVICE</h3>
           <ul className="space-y-1 text-sm">
-            <li><a href="/contact" className="hover:underline">Contact</a></li>
+            <li><Link href="/contact" className="hover:underline">Contact</Link></li>
             <li>Nos points de vente</li>
           </ul>
           <h3 className="font-semibold mt-4 mb-2">MARQUE</h3>
