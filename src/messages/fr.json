@@ -13,13 +13,18 @@
     }
   },
   "Nav": {
+    "languageLabel": "Langue",
+    "languageSelectAriaLabel": "Sélectionner la langue",
+    "homeAriaLabel": "Accueil FARMAU",
+    "logoAlt": "Logo FARMAU",
+    "contactAriaLabel": "Contact par email",
+    "adminDashboardAriaLabel": "Dashboard admin",
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter",
     "home": "Accueil",
     "catalogue": "Catalogue",
     "about": "À propos",
-    "contact": "Contact",
-    "login": "Se connecter",
-    "logout": "Déconnexion",
-    "cart": "Panier",
+    "mainNavAriaLabel": "Navigation principale",
     "skipToMain": "Aller au contenu principal"
   },
   "LocaleSwitcher": {
@@ -27,5 +32,86 @@
     "fr": "Français",
     "es": "Español",
     "en": "English"
+  },
+  "Footer": {
+    "logoAlt": "Logo",
+    "productsHeading": "PRODUITS",
+    "needsHeading": "BESOINS",
+    "serviceHeading": "SERVICE",
+    "brandHeading": "MARQUE",
+    "products": {
+      "cleansers": "Démaquillants & Nettoyants",
+      "serums": "Sérums",
+      "masks": "Masques & Exfoliants",
+      "essences": "Essences",
+      "dayCreams": "Crèmes de jour",
+      "nightCreams": "Crèmes de nuit",
+      "eyeCare": "Soins yeux",
+      "lipCare": "Soins lèvres",
+      "uvCare": "Soins UV"
+    },
+    "needs": {
+      "wrinkles": "Rides",
+      "hydration": "Hydratation",
+      "firmness": "Fermeté",
+      "darkCircles": "Cernes, rides et poches",
+      "regeneration": "Régénération",
+      "antiAging": "Anti-âge global",
+      "radiance": "Éclat",
+      "cleansing": "Nettoyant",
+      "sunProtection": "Protection solaire",
+      "wrinklesImperfections": "Rides & Imperfections",
+      "spots": "Taches"
+    },
+    "service": {
+      "contact": "Contact",
+      "stores": "Nos points de vente"
+    },
+    "brand": {
+      "about": "À propos de nous",
+      "values": "Nos valeurs",
+      "team": "Notre équipe"
+    },
+    "copyright": "© 2026 FARMAU. Tous droits réservés."
+  },
+  "AddToCart": {
+    "quickAddAriaLabel": "Ajout rapide au panier",
+    "unavailable": "Indisponible",
+    "adding": "Ajout…",
+    "added": "Ajouté !",
+    "add": "Ajouter",
+    "addToCart": "Ajouter au panier"
+  },
+  "Cart": {
+    "emptyTitle": "Votre panier est vide",
+    "emptyDescription": "Découvrez nos produits et commencez votre shopping !",
+    "continueShopping": "Continuer les achats",
+    "title": "Votre panier",
+    "summary": "{count, plural, =0 {Aucun produit dans votre panier} =1 {1 produit dans votre panier} other {# produits dans votre panier}}",
+    "productsHeading": "Produits",
+    "summaryHeading": "Résumé de commande",
+    "subtotal": "Sous-total",
+    "shipping": "Frais de livraison",
+    "total": "Total",
+    "decreaseQuantityAriaLabel": "Diminuer la quantité",
+    "increaseQuantityAriaLabel": "Augmenter la quantité",
+    "removeAriaLabel": "Supprimer {name} du panier",
+    "removeTitle": "Supprimer du panier",
+    "noImage": "Pas d'image",
+    "reserveButton": "Réserver",
+    "reserving": "Réservation en cours…",
+    "reserveSubtext": "Pas de paiement en ligne. Vous serez contacté via WhatsApp pour fixer l'heure de collecte.",
+    "errors": {
+      "alreadyActive": "Vous avez déjà une réservation active. Attendez sa résolution ou contactez-nous via WhatsApp.",
+      "cartEmpty": "Votre panier est vide.",
+      "generic": "Erreur lors de la réservation, veuillez réessayer.",
+      "network": "Erreur réseau, veuillez réessayer."
+    }
+  },
+  "Reservation": {
+    "successTitle": "Réservation enregistrée !",
+    "referenceLabel": "Référence :",
+    "successDescription": "Nous vous contacterons via <strong>WhatsApp</strong> dans les prochaines 24h pour fixer l'heure de collecte en pharmacie. Passé ce délai, la réservation est automatiquement annulée.",
+    "backToCatalogue": "Retour au catalogue"
   }
 }

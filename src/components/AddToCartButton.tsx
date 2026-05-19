@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ShoppingCart, Check, Loader2, Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useCart } from '@/hooks/useCart'
 
 type Variant = 'default' | 'outline' | 'ghost' | 'icon' | 'card-cta'
@@ -21,6 +22,7 @@ export function AddToCartButton({
   variant = 'default',
   size = 'md'
 }: AddToCartButtonProps) {
+  const t = useTranslations('AddToCart')
   const { addToCart } = useCart()
   const [isAdding, setIsAdding] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -54,7 +56,7 @@ export function AddToCartButton({
         type="button"
         onClick={handleAddToCart}
         disabled={disabled || isAdding}
-        aria-label="Ajout rapide au panier"
+        aria-label={t('quickAddAriaLabel')}
         className={`inline-flex items-center justify-center rounded-full bg-ink-900 text-sand-50 hover:bg-clay-700 transition-colors ${stateClasses} ${className}`}
         data-testid="add-to-cart-button"
       >
@@ -73,7 +75,7 @@ export function AddToCartButton({
     const base = disabled
       ? 'border-sand-400 text-ink-500 cursor-not-allowed'
       : 'border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-sand-50'
-    const label = disabled ? 'Indisponible' : isAdding ? 'Ajout…' : showSuccess ? 'Ajouté !' : 'Ajouter'
+    const label = disabled ? t('unavailable') : isAdding ? t('adding') : showSuccess ? t('added') : t('add')
     return (
       <button
         type="button"
@@ -120,17 +122,17 @@ export function AddToCartButton({
       {isAdding ? (
         <>
           <Loader2 size={16} className="animate-spin" />
-          Ajout...
+          {t('adding')}
         </>
       ) : showSuccess ? (
         <>
           <Check size={16} />
-          Ajouté !
+          {t('added')}
         </>
       ) : (
         <>
           <ShoppingCart size={16} />
-          Ajouter au panier
+          {t('addToCart')}
         </>
       )}
     </button>

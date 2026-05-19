@@ -2,11 +2,14 @@
 
 import React, { useMemo, useCallback, useState } from 'react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { Trash2, ArrowLeft, ShoppingBag, CheckCircle, Loader2 } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 
 export default function CartClient() {
+  const t = useTranslations('Cart')
+  const tRes = useTranslations('Reservation')
   const router = useRouter()
   const {
     items,
@@ -43,17 +46,13 @@ export default function CartClient() {
             )
             return
           case 'already_active':
-            setReserveError(
-              'Vous avez déjà une réservation active. Attendez sa résolution ou contactez-nous via WhatsApp.',
-            )
+            setReserveError(t('errors.alreadyActive'))
             return
           case 'cart_empty':
-            setReserveError('Votre panier est vide.')
+            setReserveError(t('errors.cartEmpty'))
             return
           default:
-            setReserveError(
-              json.error || 'Erreur lors de la réservation, veuillez réessayer.',
-            )
+            setReserveError(json.error || t('errors.generic'))
             return
         }
       }
@@ -62,11 +61,11 @@ export default function CartClient() {
       // Refresh le cart côté SWR (sera vide après création réservation)
       await refreshCart()
     } catch {
-      setReserveError('Erreur réseau, veuillez réessayer.')
+      setReserveError(t('errors.network'))
     } finally {
       setReserving(false)
     }
-  }, [router, refreshCart])
+  }, [router, refreshCart, t])
 
   const handleQuantityUpdate = useCallback((productId: string, newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= 99) {
@@ -88,15 +87,15 @@ export default function CartClient() {
             <CheckCircle className="h-16 w-16 text-olive-600" />
           </div>
           <h1 className="text-2xl font-bold text-ink-900 mb-3">
-            Réservation enregistrée !
+            {tRes('successTitle')}
           </h1>
           <p className="text-ink-700 mb-2">
-            Référence : <span className="font-mono font-semibold">#{shortRef}</span>
+            {tRes('referenceLabel')} <span className="font-mono font-semibold">#{shortRef}</span>
           </p>
           <p className="text-ink-700 mb-6">
-            Nous vous contacterons via <strong>WhatsApp</strong> dans les
-            prochaines 24h pour fixer l&apos;heure de collecte en pharmacie.
-            Passé ce délai, la réservation est automatiquement annulée.
+            {tRes.rich('successDescription', {
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -104,7 +103,7 @@ export default function CartClient() {
               className="inline-flex items-center justify-center px-6 py-3 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour au catalogue
+              {tRes('backToCatalogue')}
             </Link>
           </div>
         </div>
@@ -120,16 +119,14 @@ export default function CartClient() {
           <div className="mb-6">
             <ShoppingBag className="mx-auto h-16 w-16 text-ink-400" />
           </div>
-          <h1 className="text-2xl font-bold text-ink-900 mb-4">Votre panier est vide</h1>
-          <p className="text-ink-700 mb-8">
-            Découvrez nos produits et commencez votre shopping !
-          </p>
+          <h1 className="text-2xl font-bold text-ink-900 mb-4">{t('emptyTitle')}</h1>
+          <p className="text-ink-700 mb-8">{t('emptyDescription')}</p>
           <Link
             href="/catalogue"
             className="inline-flex items-center px-6 py-3 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Continuer les achats
+            {t('continueShopping')}
           </Link>
         </div>
       </div>
@@ -140,10 +137,8 @@ export default function CartClient() {
     <div className="max-w-6xl mx-auto">
       {/* En-tête */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-ink-900 mb-2">Votre panier</h1>
-        <p className="text-ink-700">
-          {items.length} produit{items.length > 1 ? 's' : ''} dans votre panier
-        </p>
+        <h1 className="text-3xl font-bold text-ink-900 mb-2">{t('title')}</h1>
+        <p className="text-ink-700">{t('summary', { count: items.length })}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -151,7 +146,7 @@ export default function CartClient() {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="p-6 border-b border-sand-300">
-              <h2 className="text-lg font-semibold text-ink-900">Produits</h2>
+              <h2 className="text-lg font-semibold text-ink-900">{t('productsHeading')}</h2>
             </div>
 
             <div className="divide-y divide-sand-300">
@@ -175,7 +170,7 @@ export default function CartClient() {
                           />
                         ) : (
                           <div className="w-20 h-20 bg-sand-200 rounded-lg flex items-center justify-center">
-                            <span className="text-ink-400 text-xs">No image</span>
+                            <span className="text-ink-400 text-xs">{t('noImage')}</span>
                           </div>
                         )}
                       </div>
@@ -199,7 +194,7 @@ export default function CartClient() {
                                 onClick={() => handleQuantityUpdate(item.product_id, item.quantity - 1)}
                                 disabled={item.quantity <= 1}
                                 className="px-3 py-1 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed focus:outline-none rounded-l"
-                                aria-label="Diminuer la quantité"
+                                aria-label={t('decreaseQuantityAriaLabel')}
                               >
                                 -
                               </button>
@@ -210,7 +205,7 @@ export default function CartClient() {
                                 onClick={() => handleQuantityUpdate(item.product_id, item.quantity + 1)}
                                 disabled={item.quantity >= 99}
                                 className="px-3 py-1 text-ink-700 hover:text-ink-800 disabled:text-ink-400 disabled:cursor-not-allowed focus:outline-none rounded-r"
-                                aria-label="Augmenter la quantité"
+                                aria-label={t('increaseQuantityAriaLabel')}
                               >
                                 +
                               </button>
@@ -227,8 +222,8 @@ export default function CartClient() {
                             <button
                               onClick={() => handleRemoveItem(item.product_id)}
                               className="text-brick-600 hover:text-brick-600 p-1 transition-colors focus:outline-none rounded"
-                              title="Supprimer du panier"
-                              aria-label={`Supprimer ${item.product.name} du panier`}
+                              title={t('removeTitle')}
+                              aria-label={t('removeAriaLabel', { name: item.product.name })}
                             >
                               <Trash2 className="h-5 w-5" />
                             </button>
@@ -246,20 +241,20 @@ export default function CartClient() {
         {/* Résumé de commande */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-            <h2 className="text-lg font-semibold text-ink-900 mb-4">Résumé de commande</h2>
+            <h2 className="text-lg font-semibold text-ink-900 mb-4">{t('summaryHeading')}</h2>
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-ink-700">Sous-total</span>
+                <span className="text-ink-700">{t('subtotal')}</span>
                 <span className="font-medium text-ink-900">{totalPrice.toFixed(2)} DOP</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-ink-700">Frais de livraison</span>
+                <span className="text-ink-700">{t('shipping')}</span>
                 <span className="font-medium text-ink-900">{shipping.toFixed(2)} DOP</span>
               </div>
               <div className="border-t border-sand-300 pt-3">
                 <div className="flex justify-between text-lg font-semibold">
-                  <span>Total</span>
+                  <span>{t('total')}</span>
                   <span className="text-ink-900">{total.toFixed(2)} DOP</span>
                 </div>
               </div>
@@ -283,15 +278,14 @@ export default function CartClient() {
               {reserving ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Réservation en cours…
+                  {t('reserving')}
                 </>
               ) : (
-                'Réserver'
+                t('reserveButton')
               )}
             </button>
             <p className="text-xs text-ink-500 text-center mb-4">
-              Pas de paiement en ligne. Vous serez contacté via WhatsApp pour
-              fixer l&apos;heure de collecte.
+              {t('reserveSubtext')}
             </p>
 
             <Link
@@ -299,7 +293,7 @@ export default function CartClient() {
               className="w-full inline-flex items-center justify-center px-6 py-3 border border-sand-300 text-ink-800 rounded-lg hover:bg-sand-100 transition-colors focus:outline-none"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Continuer les achats
+              {t('continueShopping')}
             </Link>
           </div>
         </div>

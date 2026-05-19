@@ -13,13 +13,18 @@
     }
   },
   "Nav": {
+    "languageLabel": "Idioma",
+    "languageSelectAriaLabel": "Seleccionar idioma",
+    "homeAriaLabel": "Inicio FARMAU",
+    "logoAlt": "Logo FARMAU",
+    "contactAriaLabel": "Contacto por correo",
+    "adminDashboardAriaLabel": "Panel de administración",
+    "signOut": "Cerrar sesión",
+    "signIn": "Iniciar sesión",
     "home": "Inicio",
     "catalogue": "Catálogo",
     "about": "Acerca de",
-    "contact": "Contacto",
-    "login": "Iniciar sesión",
-    "logout": "Cerrar sesión",
-    "cart": "Carrito",
+    "mainNavAriaLabel": "Navegación principal",
     "skipToMain": "Ir al contenido principal"
   },
   "LocaleSwitcher": {
@@ -27,5 +32,86 @@
     "fr": "Français",
     "es": "Español",
     "en": "English"
+  },
+  "Footer": {
+    "logoAlt": "Logo",
+    "productsHeading": "PRODUCTOS",
+    "needsHeading": "NECESIDADES",
+    "serviceHeading": "SERVICIO",
+    "brandHeading": "MARCA",
+    "products": {
+      "cleansers": "Desmaquillantes y limpiadores",
+      "serums": "Sueros",
+      "masks": "Mascarillas y exfoliantes",
+      "essences": "Esencias",
+      "dayCreams": "Cremas de día",
+      "nightCreams": "Cremas de noche",
+      "eyeCare": "Cuidado de ojos",
+      "lipCare": "Cuidado de labios",
+      "uvCare": "Cuidado UV"
+    },
+    "needs": {
+      "wrinkles": "Arrugas",
+      "hydration": "Hidratación",
+      "firmness": "Firmeza",
+      "darkCircles": "Ojeras, arrugas y bolsas",
+      "regeneration": "Regeneración",
+      "antiAging": "Antiedad global",
+      "radiance": "Luminosidad",
+      "cleansing": "Limpiador",
+      "sunProtection": "Protección solar",
+      "wrinklesImperfections": "Arrugas e imperfecciones",
+      "spots": "Manchas"
+    },
+    "service": {
+      "contact": "Contacto",
+      "stores": "Nuestros puntos de venta"
+    },
+    "brand": {
+      "about": "Acerca de nosotros",
+      "values": "Nuestros valores",
+      "team": "Nuestro equipo"
+    },
+    "copyright": "© 2026 FARMAU. Todos los derechos reservados."
+  },
+  "AddToCart": {
+    "quickAddAriaLabel": "Añadir rápido al carrito",
+    "unavailable": "No disponible",
+    "adding": "Añadiendo…",
+    "added": "¡Añadido!",
+    "add": "Añadir",
+    "addToCart": "Añadir al carrito"
+  },
+  "Cart": {
+    "emptyTitle": "Tu carrito está vacío",
+    "emptyDescription": "¡Descubre nuestros productos y empieza a comprar!",
+    "continueShopping": "Seguir comprando",
+    "title": "Tu carrito",
+    "summary": "{count, plural, =0 {Ningún producto en tu carrito} =1 {1 producto en tu carrito} other {# productos en tu carrito}}",
+    "productsHeading": "Productos",
+    "summaryHeading": "Resumen del pedido",
+    "subtotal": "Subtotal",
+    "shipping": "Gastos de envío",
+    "total": "Total",
+    "decreaseQuantityAriaLabel": "Disminuir cantidad",
+    "increaseQuantityAriaLabel": "Aumentar cantidad",
+    "removeAriaLabel": "Eliminar {name} del carrito",
+    "removeTitle": "Eliminar del carrito",
+    "noImage": "Sin imagen",
+    "reserveButton": "Reservar",
+    "reserving": "Reservando…",
+    "reserveSubtext": "No hay pago en línea. Le contactaremos por WhatsApp para fijar la hora de recogida.",
+    "errors": {
+      "alreadyActive": "Ya tienes una reserva activa. Espera su resolución o contáctanos por WhatsApp.",
+      "cartEmpty": "Tu carrito está vacío.",
+      "generic": "Error al reservar, por favor inténtalo de nuevo.",
+      "network": "Error de red, por favor inténtalo de nuevo."
+    }
+  },
+  "Reservation": {
+    "successTitle": "¡Reserva registrada!",
+    "referenceLabel": "Referencia:",
+    "successDescription": "Le contactaremos por <strong>WhatsApp</strong> en las próximas 24h para fijar la hora de recogida en farmacia. Pasado este plazo, la reserva se cancela automáticamente.",
+    "backToCatalogue": "Volver al catálogo"
   }
 }

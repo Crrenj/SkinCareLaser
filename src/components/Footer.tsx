@@ -1,74 +1,71 @@
-import React from 'react'
+'use client'
+
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { Instagram, Facebook, Youtube } from 'lucide-react'
 import { SiTiktok } from 'react-icons/si'
+import { useTranslations } from 'next-intl'
 
 export default function Footer() {
+  const t = useTranslations('Footer')
   return (
     <footer className="bg-sand-400 text-ink-800">
-      {/* Ligne 1 : grille 4 colonnes */}
       <div className="grid grid-cols-4 gap-8 p-8">
-        {/* Colonne 1 : logo + réseaux */}
         <div className="flex flex-col items-center">
-          <Image src="/image/logo_trans.png" alt="Logo" width={100} height={100} />
+          <Image src="/image/logo_trans.png" alt={t('logoAlt')} width={100} height={100} />
           <div className="flex gap-6 mt-4">
             <Instagram className="w-6 h-6 cursor-pointer" />
-            <SiTiktok className="w-6 h-6 cursor-pointer" />  {/* TikTok aligné */}
+            <SiTiktok className="w-6 h-6 cursor-pointer" />
             <Facebook className="w-6 h-6 cursor-pointer" />
             <Youtube className="w-6 h-6 cursor-pointer" />
           </div>
         </div>
-        {/* Colonne 2 : PRODUITS */}
         <div>
-          <h3 className="font-semibold mb-2">PRODUITS</h3>
+          <h3 className="font-semibold mb-2">{t('productsHeading')}</h3>
           <ul className="space-y-1 text-sm">
-            <li>Démaquillants & Nettoyants</li>
-            <li>Sérums</li>
-            <li>Masques & Exfoliants</li>
-            <li>Essences</li>
-            <li>Crèmes de jour</li>
-            <li>Crèmes de nuit</li>
-            <li>Soins yeux</li>
-            <li>Soins lèvres</li>
-            <li>Soins UV</li>
+            <li>{t('products.cleansers')}</li>
+            <li>{t('products.serums')}</li>
+            <li>{t('products.masks')}</li>
+            <li>{t('products.essences')}</li>
+            <li>{t('products.dayCreams')}</li>
+            <li>{t('products.nightCreams')}</li>
+            <li>{t('products.eyeCare')}</li>
+            <li>{t('products.lipCare')}</li>
+            <li>{t('products.uvCare')}</li>
           </ul>
         </div>
-        {/* Colonne 3 : BESOINS */}
         <div>
-          <h3 className="font-semibold mb-2">BESOINS</h3>
+          <h3 className="font-semibold mb-2">{t('needsHeading')}</h3>
           <ul className="space-y-1 text-sm">
-            <li>Rides</li>
-            <li>Hydratation</li>
-            <li>Fermeté</li>
-            <li>Cernes, rides et poches</li>
-            <li>Régénération</li>
-            <li>Anti-âge global</li>
-            <li>Éclat</li>
-            <li>Nettoyant</li>
-            <li>Protection solaire</li>
-            <li>Rides & Imperfections</li>
-            <li>Taches</li>
+            <li>{t('needs.wrinkles')}</li>
+            <li>{t('needs.hydration')}</li>
+            <li>{t('needs.firmness')}</li>
+            <li>{t('needs.darkCircles')}</li>
+            <li>{t('needs.regeneration')}</li>
+            <li>{t('needs.antiAging')}</li>
+            <li>{t('needs.radiance')}</li>
+            <li>{t('needs.cleansing')}</li>
+            <li>{t('needs.sunProtection')}</li>
+            <li>{t('needs.wrinklesImperfections')}</li>
+            <li>{t('needs.spots')}</li>
           </ul>
         </div>
-        {/* Colonne 4 : SERVICE + MARQUE */}
         <div>
-          <h3 className="font-semibold mb-2">SERVICE</h3>
+          <h3 className="font-semibold mb-2">{t('serviceHeading')}</h3>
           <ul className="space-y-1 text-sm">
-            <li><Link href="/contact" className="hover:underline">Contact</Link></li>
-            <li>Nos points de vente</li>
+            <li><Link href="/contact" className="hover:underline">{t('service.contact')}</Link></li>
+            <li>{t('service.stores')}</li>
           </ul>
-          <h3 className="font-semibold mt-4 mb-2">MARQUE</h3>
+          <h3 className="font-semibold mt-4 mb-2">{t('brandHeading')}</h3>
           <ul className="space-y-1 text-sm">
-            <li>À propos de nous</li>
-            <li>Nos valeurs</li>
-            <li>Notre équipe</li>
+            <li>{t('brand.about')}</li>
+            <li>{t('brand.values')}</li>
+            <li>{t('brand.team')}</li>
           </ul>
         </div>
       </div>
-      {/* Ligne 2 : copyright */}
       <div className="border-t border-sand-300 text-center p-4 text-sm">
-        © 2026 FARMAU. Tous droits réservés.
+        {t('copyright')}
       </div>
     </footer>
   )

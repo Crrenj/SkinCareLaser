@@ -13,13 +13,18 @@
     }
   },
   "Nav": {
+    "languageLabel": "Language",
+    "languageSelectAriaLabel": "Select language",
+    "homeAriaLabel": "FARMAU home",
+    "logoAlt": "FARMAU logo",
+    "contactAriaLabel": "Email contact",
+    "adminDashboardAriaLabel": "Admin dashboard",
+    "signOut": "Sign out",
+    "signIn": "Sign in",
     "home": "Home",
     "catalogue": "Catalogue",
     "about": "About",
-    "contact": "Contact",
-    "login": "Sign in",
-    "logout": "Sign out",
-    "cart": "Cart",
+    "mainNavAriaLabel": "Main navigation",
     "skipToMain": "Skip to main content"
   },
   "LocaleSwitcher": {
@@ -27,5 +32,86 @@
     "fr": "Français",
     "es": "Español",
     "en": "English"
+  },
+  "Footer": {
+    "logoAlt": "Logo",
+    "productsHeading": "PRODUCTS",
+    "needsHeading": "NEEDS",
+    "serviceHeading": "SERVICE",
+    "brandHeading": "BRAND",
+    "products": {
+      "cleansers": "Cleansers & Makeup removers",
+      "serums": "Serums",
+      "masks": "Masks & Exfoliants",
+      "essences": "Essences",
+      "dayCreams": "Day creams",
+      "nightCreams": "Night creams",
+      "eyeCare": "Eye care",
+      "lipCare": "Lip care",
+      "uvCare": "UV care"
+    },
+    "needs": {
+      "wrinkles": "Wrinkles",
+      "hydration": "Hydration",
+      "firmness": "Firmness",
+      "darkCircles": "Dark circles, wrinkles & bags",
+      "regeneration": "Regeneration",
+      "antiAging": "Global anti-aging",
+      "radiance": "Radiance",
+      "cleansing": "Cleansing",
+      "sunProtection": "Sun protection",
+      "wrinklesImperfections": "Wrinkles & blemishes",
+      "spots": "Dark spots"
+    },
+    "service": {
+      "contact": "Contact",
+      "stores": "Our stores"
+    },
+    "brand": {
+      "about": "About us",
+      "values": "Our values",
+      "team": "Our team"
+    },
+    "copyright": "© 2026 FARMAU. All rights reserved."
+  },
+  "AddToCart": {
+    "quickAddAriaLabel": "Quick add to cart",
+    "unavailable": "Unavailable",
+    "adding": "Adding…",
+    "added": "Added!",
+    "add": "Add",
+    "addToCart": "Add to cart"
+  },
+  "Cart": {
+    "emptyTitle": "Your cart is empty",
+    "emptyDescription": "Discover our products and start shopping!",
+    "continueShopping": "Continue shopping",
+    "title": "Your cart",
+    "summary": "{count, plural, =0 {No products in your cart} =1 {1 product in your cart} other {# products in your cart}}",
+    "productsHeading": "Products",
+    "summaryHeading": "Order summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "decreaseQuantityAriaLabel": "Decrease quantity",
+    "increaseQuantityAriaLabel": "Increase quantity",
+    "removeAriaLabel": "Remove {name} from cart",
+    "removeTitle": "Remove from cart",
+    "noImage": "No image",
+    "reserveButton": "Reserve",
+    "reserving": "Reserving…",
+    "reserveSubtext": "No online payment. We'll contact you via WhatsApp to schedule pickup.",
+    "errors": {
+      "alreadyActive": "You already have an active reservation. Wait for its resolution or contact us via WhatsApp.",
+      "cartEmpty": "Your cart is empty.",
+      "generic": "Error during reservation, please try again.",
+      "network": "Network error, please try again."
+    }
+  },
+  "Reservation": {
+    "successTitle": "Reservation confirmed!",
+    "referenceLabel": "Reference:",
+    "successDescription": "We'll contact you via <strong>WhatsApp</strong> within the next 24h to schedule pickup at the pharmacy. After this delay, the reservation is automatically cancelled.",
+    "backToCatalogue": "Back to catalogue"
   }
 }

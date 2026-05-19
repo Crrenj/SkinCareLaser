@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react'
 import { Mail, User as UserIcon, ChevronDown, Shield } from 'lucide-react'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { CartIcon } from './CartIcon'
 import { CartDrawer } from './CartDrawer'
@@ -9,6 +10,8 @@ import { supabase } from '@/lib/supabaseClient'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export default function NavBar() {
+  const t = useTranslations('Nav')
+  const tLocale = useTranslations('LocaleSwitcher')
   const [open, setOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const { user, isAdmin } = useIsAdmin()
@@ -43,9 +46,9 @@ export default function NavBar() {
             className="bg-transparent text-ink-700 p-2 cursor-pointer flex items-center hover:text-ink-800 transition-colors focus:outline-none rounded"
             aria-expanded={open}
             aria-haspopup="true"
-            aria-label="Sélectionner la langue"
+            aria-label={t('languageSelectAriaLabel')}
           >
-            Langue
+            {t('languageLabel')}
             <ChevronDown className={`w-4 h-4 ml-1 text-ink-700 transition-transform ${open ? 'rotate-180' : ''}`} />
           </button>
           {open && (
@@ -53,19 +56,19 @@ export default function NavBar() {
               className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg text-sm z-30 min-w-[120px] border border-sand-300"
               role="menu"
             >
-              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-t-lg">Français</li>
-              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer">English</li>
-              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-b-lg">Español</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-t-lg">{tLocale('fr')}</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer">{tLocale('en')}</li>
+              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-b-lg">{tLocale('es')}</li>
             </ul>
           )}
         </div>
 
         {/* logo centré (z-index inférieur) */}
         <div className="absolute inset-x-0 -top-4 flex justify-center">
-          <Link href="/" aria-label="Accueil FARMAU" className="focus:outline-none">
+          <Link href="/" aria-label={t('homeAriaLabel')} className="focus:outline-none">
             <Image
               src="/image/logo_trans.png"
-              alt="Logo FARMAU"
+              alt={t('logoAlt')}
               width={140}
               height={140}
               className="w-36 h-36 object-contain"
@@ -79,7 +82,7 @@ export default function NavBar() {
           <Link
             href="/contact"
             className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
-            aria-label="Contact par email"
+            aria-label={t('contactAriaLabel')}
           >
             <Mail className="w-6 h-6" />
           </Link>
@@ -96,7 +99,7 @@ export default function NavBar() {
                 <Link
                   href="/admin/product"
                   className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
-                  aria-label="Dashboard admin"
+                  aria-label={t('adminDashboardAriaLabel')}
                 >
                   <Shield className="w-6 h-6" />
                 </Link>
@@ -104,9 +107,9 @@ export default function NavBar() {
               <button
                 onClick={handleLogout}
                 className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded px-2 py-1"
-                aria-label="Se déconnecter"
+                aria-label={t('signOut')}
               >
-                Se déconnecter
+                {t('signOut')}
               </button>
             </>
           ) : (
@@ -114,15 +117,15 @@ export default function NavBar() {
               <Link
                 href="/login"
                 className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
-                aria-label="Se connecter"
+                aria-label={t('signIn')}
               >
                 <UserIcon className="w-6 h-6" />
               </Link>
-              <Link 
+              <Link
                 href="/login"
                 className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded"
               >
-                Se connecter
+                {t('signIn')}
               </Link>
             </>
           )}
@@ -130,10 +133,10 @@ export default function NavBar() {
       </div>
 
       {/* ligne 2 */}
-      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-ink-800" role="navigation" aria-label="Navigation principale">
-        <Link href="/" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">Accueil</Link>
-        <Link href="/catalogue" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">Catalogue</Link>
-        <Link href="/a-propos" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">À propos</Link>
+      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-ink-800" role="navigation" aria-label={t('mainNavAriaLabel')}>
+        <Link href="/" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">{t('home')}</Link>
+        <Link href="/catalogue" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">{t('catalogue')}</Link>
+        <Link href="/a-propos" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">{t('about')}</Link>
       </nav>
 
       {/* CartDrawer */}
