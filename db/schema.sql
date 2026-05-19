@@ -511,6 +511,34 @@ GRANT EXECUTE ON FUNCTION public.create_reservation(UUID) TO authenticated;
 COMMENT ON FUNCTION public.create_reservation IS
   'Convertit le panier d''un user en réservation pending (TTL 24h). Snapshot du téléphone et des items.';
 
+-- Auto-expiration via pg_cron : passe pending -> expired toutes les 5 min
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+CREATE OR REPLACE FUNCTION public.expire_stale_reservations()
+RETURNS INT AS $$
+DECLARE
+  v_count INT;
+BEGIN
+  UPDATE public.reservations
+  SET status = 'expired'
+  WHERE status = 'pending'
+    AND expires_at < NOW();
+
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+REVOKE ALL ON FUNCTION public.expire_stale_reservations() FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.expire_stale_reservations() TO service_role;
+
+-- Schedule pg_cron (idempotent par jobname)
+SELECT cron.schedule(
+  'expire-stale-reservations',
+  '*/5 * * * *',
+  $job$ SELECT public.expire_stale_reservations(); $job$
+);
+
 -- ======================================================================
 -- 8. STORAGE — buckets et policies
 -- ======================================================================
