@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/database.types'
 
 /**
  * Client Supabase avec la clé service-role qui bypass les RLS.
@@ -13,9 +14,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
 
-export const supabaseAdmin: SupabaseClient | null =
+export const supabaseAdmin: SupabaseClient<Database> | null =
   supabaseUrl && supabaseServiceKey
-    ? createClient(supabaseUrl, supabaseServiceKey, {
+    ? createClient<Database>(supabaseUrl, supabaseServiceKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       })
     : null

@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
     const stockItems = (products || []).map((product) => {
       const range = product.product_ranges?.[0]?.ranges as { id?: string; name?: string; brands?: { id?: string; name?: string } | null } | null | undefined
       const brand = range?.brands || null
-      const itemStatus = getStockStatus(product.stock)
+      const itemStatus = getStockStatus(product.stock ?? 0)
 
       return {
         id: product.id,

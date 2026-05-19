@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 
 // POST /api/contact - Envoyer un message de contact
 export async function POST(request: NextRequest) {
@@ -23,6 +21,13 @@ export async function POST(request: NextRequest) {
           status: 429,
           headers: { 'Retry-After': String(rl.retryAfter) },
         },
+      )
+    }
+
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Configuration serveur manquante' },
+        { status: 500 },
       )
     }
 
@@ -70,21 +75,29 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Vérifier le résultat de la fonction
-    if (!result.success) {
+    // La RPC create_contact_message renvoie un Json non typé côté client.
+    // On le narrow ici pour conserver les types stricts du singleton.
+    const r = result as {
+      success: boolean
+      error?: string
+      message_id?: string
+      message?: string
+    } | null
+
+    if (!r || !r.success) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          error: result.error 
+          error: r?.error ?? 'Erreur lors de l\'envoi du message',
         },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
     return NextResponse.json({
       success: true,
       message: 'Message envoyé avec succès!',
-      messageId: result.message_id
+      messageId: r.message_id,
     })
 
   } catch (error) {
