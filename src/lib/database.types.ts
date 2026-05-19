@@ -714,6 +714,7 @@ export type Database = {
         Args: { p_email: string; p_message: string; p_subject: string }
         Returns: Json
       }
+      create_reservation: { Args: { p_cart_id: string }; Returns: string }
       get_messages_stats: { Args: never; Returns: Json }
       get_or_create_cart: {
         Args: { p_anonymous_id?: string; p_user_id?: string }
