@@ -17,7 +17,8 @@
     "prices:import": "node scripts/prices-import.cjs",
     "prices:default": "node scripts/prices-set-default.cjs",
     "seed-import": "node scripts/seed-import.cjs",
-    "create-admin": "node scripts/create-admin-user.js"
+    "create-admin": "node scripts/create-admin-user.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -48,8 +49,13 @@
     "eslint-config-next": "^15.5.18",
     "glob": "^11.0.3",
     "happy-dom": "^18.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix --no-warn-ignored"
   }
 }
