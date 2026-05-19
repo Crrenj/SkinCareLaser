@@ -1,24 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
-
-const supabaseAdmin = supabaseUrl && supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+import { requireAdmin } from '@/lib/requireAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 const VALID_BANNER_TYPES = ['image_left', 'image_right', 'image_full', 'card_style', 'minimal', 'gradient_overlay']
 
-function configError() {
-  return NextResponse.json(
-    { error: 'Configuration manquante', message: 'SUPABASE_SERVICE_KEY ou SUPABASE_SERVICE_ROLE_KEY non configurée' },
-    { status: 500 }
-  )
-}
-
 export async function GET(request: NextRequest) {
-  if (!supabaseAdmin) return configError()
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const activeOnly = searchParams.get('active') === 'true'
@@ -50,18 +42,23 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!supabaseAdmin) return configError()
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
     const body = await request.json()
     const {
       title, description, image_url, link_url, link_text,
-      banner_type, position, is_active, start_date, end_date
+      banner_type, position, is_active, start_date, end_date,
     } = body
 
     if (!title || !description || !image_url || !banner_type) {
       return NextResponse.json(
         { error: 'Titre, description, image et type de bannière sont requis' },
-        { status: 400 }
+        { status: 400 },
       )
     }
 
@@ -85,7 +82,7 @@ export async function POST(request: NextRequest) {
         title, description, image_url, link_url, link_text,
         banner_type, position: finalPosition,
         is_active: is_active ?? true,
-        start_date, end_date
+        start_date, end_date,
       }])
       .select()
       .single()
@@ -103,12 +100,17 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  if (!supabaseAdmin) return configError()
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
     const body = await request.json()
     const {
       id, title, description, image_url, link_url, link_text,
-      banner_type, position, is_active, start_date, end_date
+      banner_type, position, is_active, start_date, end_date,
     } = body
 
     if (!id) {
@@ -130,7 +132,7 @@ export async function PUT(request: NextRequest) {
         await supabaseAdmin.rpc('reorder_banners', {
           banner_id: id,
           old_position: currentBanner.position,
-          new_position: position
+          new_position: position,
         })
       }
     }
@@ -139,7 +141,7 @@ export async function PUT(request: NextRequest) {
       .from('banners')
       .update({
         title, description, image_url, link_url, link_text,
-        banner_type, position, is_active, start_date, end_date
+        banner_type, position, is_active, start_date, end_date,
       })
       .eq('id', id)
       .select()
@@ -158,7 +160,12 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!supabaseAdmin) return configError()
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
@@ -167,10 +174,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID de la bannière requis' }, { status: 400 })
     }
 
-    const { error } = await supabaseAdmin
-      .from('banners')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabaseAdmin.from('banners').delete().eq('id', id)
 
     if (error) {
       console.error('Erreur lors de la suppression de la bannière:', error)

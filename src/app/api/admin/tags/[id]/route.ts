@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+import { requireAdmin } from '@/lib/requireAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
-    }
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
 
+  try {
     const { id } = await params
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
     const { name, slug } = body
 
-    // Valider les données
     if (!name || !slug) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
     }
 
-    // Mettre à jour le tag
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('tags')
       .update({ name, slug })
       .eq('id', id)
@@ -33,7 +30,7 @@ export async function PATCH(
 
     if (error) {
       console.error('Erreur mise à jour tag:', error)
-      if (error.code === '23505') { // Unique constraint violation
+      if (error.code === '23505') {
         return NextResponse.json({ error: 'Ce slug existe déjà' }, { status: 409 })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -47,22 +44,19 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
-    if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
-    }
-
     const { id } = await params
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Supprimer le tag
-    const { error } = await supabase
-      .from('tags')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabaseAdmin.from('tags').delete().eq('id', id)
 
     if (error) {
       console.error('Erreur suppression tag:', error)
@@ -74,4 +68,4 @@ export async function DELETE(
     console.error('Erreur API suppression tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
-} 
+}

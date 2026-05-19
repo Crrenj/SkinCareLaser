@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+import { requireAdmin } from '@/lib/requireAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  try {
-    if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
-    }
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
 
+  try {
     const { id } = await params
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
     const { name, slug, icon, color } = body
 
-    // Valider les données
     if (!name || !slug) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
     }
 
-    // Mettre à jour le type de tag
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('tag_types')
       .update({ name, slug, icon, color })
       .eq('id', id)
@@ -47,19 +44,19 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
-    if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
-    }
-
     const { id } = await params
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Vérifier s'il y a des tags associés
-    const { data: tags, error: checkError } = await supabase
+    const { data: tags, error: checkError } = await supabaseAdmin
       .from('tags')
       .select('id')
       .eq('tag_type_id', id)
@@ -71,16 +68,13 @@ export async function DELETE(
     }
 
     if (tags && tags.length > 0) {
-      return NextResponse.json({ 
-        error: 'Impossible de supprimer ce type car il contient des tags' 
-      }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Impossible de supprimer ce type car il contient des tags' },
+        { status: 400 },
+      )
     }
 
-    // Supprimer le type de tag
-    const { error } = await supabase
-      .from('tag_types')
-      .delete()
-      .eq('id', id)
+    const { error } = await supabaseAdmin.from('tag_types').delete().eq('id', id)
 
     if (error) {
       console.error('Erreur suppression type de tag:', error)
@@ -92,4 +86,4 @@ export async function DELETE(
     console.error('Erreur API suppression type de tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
-} 
+}

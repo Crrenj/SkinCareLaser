@@ -1,19 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+import { requireAdmin } from '@/lib/requireAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export async function GET() {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
-    if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    // Récupérer tous les types de tags avec le nombre de tags
-    const { data: tagTypes, error } = await supabase
+    const { data: tagTypes, error } = await supabaseAdmin
       .from('tag_types')
       .select(`
         *,
@@ -34,23 +31,21 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
+  }
+
   try {
-    if (!supabaseServiceKey) {
-      return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
-
     const { name, slug, icon, color, initial_tag } = body
 
-    // Valider les données
     if (!name || !slug) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
     }
 
-    // Créer le type de tag
-    const { data: tagType, error: typeError } = await supabase
+    const { data: tagType, error: typeError } = await supabaseAdmin
       .from('tag_types')
       .insert({ name, slug, icon, color })
       .select()
@@ -64,14 +59,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: typeError.message }, { status: 500 })
     }
 
-    // Si un tag initial est fourni, le créer
     if (initial_tag && tagType) {
-      const { error: tagError } = await supabase
+      const { error: tagError } = await supabaseAdmin
         .from('tags')
         .insert({
           name: initial_tag.name,
           slug: initial_tag.slug,
-          tag_type_id: tagType.id
+          tag_type_id: tagType.id,
         })
 
       if (tagError) {
@@ -85,4 +79,4 @@ export async function POST(request: NextRequest) {
     console.error('Erreur API création type de tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
-} 
+}

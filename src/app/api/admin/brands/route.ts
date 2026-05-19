@@ -1,33 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { requireAdmin } from '@/lib/requireAdmin'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
-// Vérifier les variables d'environnement
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-// Accepter les deux noms possibles pour la clé de service
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ Configuration manquante:', {
-    url: !!supabaseUrl,
-    serviceKey: !!supabaseServiceKey
-  })
-}
-
-// Créer un client Supabase avec la clé service
-const supabaseAdmin = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
-
-// GET /api/admin/brands -> liste des marques avec leurs gammes
 export async function GET() {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
   if (!supabaseAdmin) {
-    return NextResponse.json(
-      { 
-        error: 'Configuration manquante', 
-        message: 'SUPABASE_SERVICE_KEY ou SUPABASE_SERVICE_ROLE_KEY non configurée. Consultez GUIDE_ADMIN_PRODUCTS.md' 
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
   }
 
   try {
@@ -35,67 +14,49 @@ export async function GET() {
       .from('brands')
       .select('*, ranges(*)')
       .order('name')
-    
+
     if (error) throw error
-    
     return NextResponse.json(data)
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Erreur lors de la récupération des marques' },
-      { status: 500 }
-    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Erreur lors de la récupération des marques'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
-// POST /api/admin/brands -> création d'une nouvelle marque
 export async function POST(req: NextRequest) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
   if (!supabaseAdmin) {
-    return NextResponse.json(
-      { 
-        error: 'Configuration manquante', 
-        message: 'SUPABASE_SERVICE_KEY ou SUPABASE_SERVICE_ROLE_KEY non configurée' 
-      },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
   }
 
   try {
     const body = await req.json()
     const { name, slug } = body
 
-    // Validation des données
     if (!name || !slug) {
-      return NextResponse.json(
-        { error: 'Le nom et le slug sont requis' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Le nom et le slug sont requis' }, { status: 400 })
     }
 
-    // Créer la marque
     const { data: brand, error } = await supabaseAdmin
       .from('brands')
-      .insert({
-        name: name.trim(),
-        slug: slug.trim().toLowerCase()
-      })
+      .insert({ name: name.trim(), slug: slug.trim().toLowerCase() })
       .select()
       .single()
 
     if (error) {
-      if (error.code === '23505') { // Unique constraint violation
+      if (error.code === '23505') {
         return NextResponse.json(
           { error: 'Une marque avec ce nom ou ce slug existe déjà' },
-          { status: 409 }
+          { status: 409 },
         )
       }
       throw error
     }
 
     return NextResponse.json(brand, { status: 201 })
-  } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message || 'Erreur lors de la création de la marque' },
-      { status: 500 }
-    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Erreur lors de la création de la marque'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-} 
+}
