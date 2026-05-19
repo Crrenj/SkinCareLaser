@@ -125,6 +125,13 @@ CREATE TABLE IF NOT EXISTS public.product_images (
 );
 ALTER TABLE public.product_images ENABLE ROW LEVEL SECURITY;
 
+-- Indexes FK manquants (perf RLS + jointures catalogue)
+-- product_ranges(product_id) et product_tags(product_id) sont déjà couverts
+-- par leurs PKs composites (leading column = product_id).
+CREATE INDEX IF NOT EXISTS idx_product_ranges_range_id   ON public.product_ranges(range_id);
+CREATE INDEX IF NOT EXISTS idx_product_tags_tag_id       ON public.product_tags(tag_id);
+CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON public.product_images(product_id);
+
 -- ======================================================================
 -- 3. VUE tags_with_types (utilisée par le front catalogue & product)
 -- ======================================================================
@@ -165,6 +172,9 @@ CREATE TABLE IF NOT EXISTS public.cart_items (
   CONSTRAINT unique_cart_product UNIQUE (cart_id, product_id)
 );
 ALTER TABLE public.cart_items ENABLE ROW LEVEL SECURITY;
+
+-- cart_items(cart_id) déjà couvert par unique_cart_product (leading col = cart_id)
+CREATE INDEX IF NOT EXISTS idx_cart_items_product_id ON public.cart_items(product_id);
 
 -- ======================================================================
 -- 5. COMMANDES
