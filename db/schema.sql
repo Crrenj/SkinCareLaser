@@ -369,7 +369,9 @@ BEGIN
   INSERT INTO public.cart_items (cart_id, product_id, quantity)
   VALUES (p_cart_id, p_product_id, p_quantity)
   ON CONFLICT (cart_id, product_id)
-  DO UPDATE SET quantity = EXCLUDED.quantity;
+  DO UPDATE SET
+    quantity   = public.cart_items.quantity + EXCLUDED.quantity,
+    updated_at = NOW();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
