@@ -510,6 +510,105 @@ export type Database = {
         }
         Relationships: []
       }
+      reservation_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          reservation_id: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name: string
+          quantity: number
+          reservation_id: string
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          reservation_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_items_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reservations: {
+        Row: {
+          admin_notes: string | null
+          collected_at: string | null
+          confirmed_at: string | null
+          contact_email: string
+          contact_name: string | null
+          contact_phone: string
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          status: Database["public"]["Enums"]["reservation_status"]
+          total_items: number
+          total_price: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          collected_at?: string | null
+          confirmed_at?: string | null
+          contact_email: string
+          contact_name?: string | null
+          contact_phone: string
+          created_at?: string
+          currency?: string
+          expires_at: string
+          id?: string
+          status?: Database["public"]["Enums"]["reservation_status"]
+          total_items: number
+          total_price: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          collected_at?: string | null
+          confirmed_at?: string | null
+          contact_email?: string
+          contact_name?: string | null
+          contact_phone?: string
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["reservation_status"]
+          total_items?: number
+          total_price?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tag_types: {
         Row: {
           color: string | null
@@ -633,6 +732,12 @@ export type Database = {
     }
     Enums: {
       order_status: "pending" | "paid" | "shipped" | "completed" | "cancelled"
+      reservation_status:
+        | "pending"
+        | "confirmed"
+        | "collected"
+        | "expired"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -761,6 +866,13 @@ export const Constants = {
   public: {
     Enums: {
       order_status: ["pending", "paid", "shipped", "completed", "cancelled"],
+      reservation_status: [
+        "pending",
+        "confirmed",
+        "collected",
+        "expired",
+        "cancelled",
+      ],
     },
   },
 } as const

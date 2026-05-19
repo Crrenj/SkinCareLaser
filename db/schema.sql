@@ -319,6 +319,93 @@ REVOKE ALL ON FUNCTION public.check_rate_limit(TEXT, INT, INT) FROM PUBLIC, anon
 GRANT EXECUTE ON FUNCTION public.check_rate_limit(TEXT, INT, INT) TO service_role;
 
 -- ======================================================================
+-- 7c. RÉSERVATIONS (catalogue + réservation, PAS de paiement)
+-- ======================================================================
+-- Modèle "click & collect" : user connecté convertit son panier en réservation.
+-- L'admin contacte ensuite via WhatsApp pour fixer le créneau. TTL 24h,
+-- auto-expiration via pg_cron. Stock NON bloqué (admin arbitre les conflits).
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type WHERE typname = 'reservation_status'
+  ) THEN
+    CREATE TYPE public.reservation_status AS ENUM (
+      'pending',     -- créée, en attente que l'admin contacte
+      'confirmed',   -- admin a contacté, créneau fixé
+      'collected',   -- client a récupéré
+      'expired',     -- TTL dépassé sans action
+      'cancelled'    -- annulée explicitement
+    );
+  END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS public.reservations (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  status          public.reservation_status NOT NULL DEFAULT 'pending',
+  expires_at      TIMESTAMPTZ NOT NULL,
+  contact_phone   TEXT NOT NULL,
+  contact_email   TEXT NOT NULL,
+  contact_name    TEXT,
+  total_items     INT  NOT NULL CHECK (total_items > 0),
+  total_price     NUMERIC(10,2) NOT NULL CHECK (total_price >= 0),
+  currency        TEXT NOT NULL DEFAULT 'DOP',
+  admin_notes     TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  confirmed_at    TIMESTAMPTZ,
+  collected_at    TIMESTAMPTZ
+);
+ALTER TABLE public.reservations ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS public.reservation_items (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reservation_id  UUID NOT NULL REFERENCES public.reservations(id) ON DELETE CASCADE,
+  product_id      UUID REFERENCES public.products(id) ON DELETE SET NULL,
+  product_name    TEXT NOT NULL,
+  unit_price      NUMERIC(10,2) NOT NULL CHECK (unit_price >= 0),
+  quantity        INT NOT NULL CHECK (quantity > 0),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE public.reservation_items ENABLE ROW LEVEL SECURITY;
+
+-- Indexes (admin par status, user, cron par expires)
+CREATE INDEX IF NOT EXISTS idx_reservations_user_id            ON public.reservations(user_id);
+CREATE INDEX IF NOT EXISTS idx_reservations_status_created     ON public.reservations(status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reservations_pending_expires    ON public.reservations(expires_at) WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS idx_reservation_items_reservation_id ON public.reservation_items(reservation_id);
+
+-- Garantie DB : un user a au plus 1 réservation active (pending|confirmed)
+DROP INDEX IF EXISTS public.uniq_active_reservation_per_user;
+CREATE UNIQUE INDEX uniq_active_reservation_per_user
+  ON public.reservations(user_id)
+  WHERE status IN ('pending', 'confirmed');
+
+DROP TRIGGER IF EXISTS update_reservations_updated_at ON public.reservations;
+CREATE TRIGGER update_reservations_updated_at
+  BEFORE UPDATE ON public.reservations
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+-- RLS : un user voit ses propres réservations + items. Admin (service_role) bypasse.
+-- INSERT/UPDATE/DELETE pour les users : exclusivement via RPC create_reservation (à venir).
+DROP POLICY IF EXISTS "Users read own reservations" ON public.reservations;
+CREATE POLICY "Users read own reservations" ON public.reservations
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users read own reservation items" ON public.reservation_items;
+CREATE POLICY "Users read own reservation items" ON public.reservation_items
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.reservations r
+      WHERE r.id = reservation_items.reservation_id
+        AND r.user_id = auth.uid()
+    )
+  );
+
+-- ======================================================================
 -- 8. STORAGE — buckets et policies
 -- ======================================================================
 -- Bucket des images produits
