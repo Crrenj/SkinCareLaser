@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -9,6 +10,22 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 // POST /api/contact - Envoyer un message de contact
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit : 5 requêtes / minute / IP (anti-spam + anti-énumération)
+    const ip = getClientIp(request)
+    const rl = await checkRateLimit(`contact:${ip}`, 5, 60)
+    if (!rl.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Trop de requêtes. Réessayez dans quelques instants.',
+        },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rl.retryAfter) },
+        },
+      )
+    }
+
     const body = await request.json()
     const { email, subject, message } = body
 
