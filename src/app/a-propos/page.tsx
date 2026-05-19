@@ -32,7 +32,7 @@ export default async function AProposPage() {
         </div>
       </section>
 
-      <main className="flex-1 p-6">
+      <main id="main-content" className="flex-1 p-6">
 
         <section className="mt-12">
           <div className="flex justify-between items-center mb-4">

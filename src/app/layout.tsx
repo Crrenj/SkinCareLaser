@@ -28,11 +28,17 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="fr" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="antialiased">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2 focus:rounded focus:shadow focus:outline focus:outline-2 focus:outline-blue-600"
+        >
+          Aller au contenu principal
+        </a>
         <SWRProvider>
           <AuthProvider>
-            <main className="flex-1 bg-[color:var(--background)]">{children}</main>
+            <div className="flex-1 bg-[color:var(--background)]">{children}</div>
           </AuthProvider>
         </SWRProvider>
       </body>

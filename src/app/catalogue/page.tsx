@@ -89,7 +89,7 @@ export default async function Catalogue() {
   return (
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
-      <main className="flex-grow p-6">
+      <main id="main-content" className="flex-grow p-6">
         <CatalogueClient
           products={mappedProducts}
           itemsByType={itemsByType}

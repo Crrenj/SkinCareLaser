@@ -8,7 +8,7 @@ export default function ContactPage() {
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
 
-      <main className="flex-1 p-6">
+      <main id="main-content" className="flex-1 p-6">
         {/* Header */}
         <section className="text-center py-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Contactez-nous</h1>

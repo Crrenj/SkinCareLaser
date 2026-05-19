@@ -37,7 +37,7 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
       <NavBar />
 
-      <main className="flex-1 p-6">
+      <main id="main-content" className="flex-1 p-6">
         {/* ---------- BANNIÈRES DYNAMIQUES ---------- */}
         {activeBanners.length > 0 && (
           <section className="mt-8">
