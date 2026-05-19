@@ -234,5 +234,92 @@
     "phoneRequiredError": "Le téléphone est obligatoire",
     "saveSuccess": "Profil mis à jour avec succès.",
     "redirecting": "Redirection en cours…"
+  },
+  "Contact": {
+    "headerTitle": "Contactez-nous",
+    "headerSubtitle": "Notre équipe de pharmaciens-dermatologues est à votre disposition pour répondre à vos questions",
+    "contactInfoHeading": "Nos coordonnées",
+    "addressHeading": "Adresse",
+    "addressLine1": "Calle Jesus de Galindez Esq. Calle 3",
+    "addressLine2": "Cerros de Gurabo, Santiago, R.D.",
+    "phoneHeading": "Téléphone",
+    "emailHeading": "Email",
+    "hoursHeading": "Horaires",
+    "hoursWeekday": "Lundi - Vendredi : 6h30 - 17h00",
+    "hoursSaturday": "Samedi : 8h00 - 16h00",
+    "hoursSunday": "Dimanche : Fermé",
+    "whatsappHeading": "Contact WhatsApp",
+    "whatsappDescription": "Pour une réponse rapide, contactez-nous directement via WhatsApp",
+    "whatsappButton": "Contacter via WhatsApp",
+    "mapHeading": "Notre localisation",
+    "mapIframeTitle": "Localisation FARMAU"
+  },
+  "ContactForm": {
+    "title": "Contactez-nous",
+    "intro": "Envoyez-nous un message. Vous devez avoir un compte pour nous contacter.",
+    "success": "Votre message a été envoyé avec succès ! Nous vous répondrons rapidement.",
+    "emailLabel": "Adresse email *",
+    "emailPlaceholder": "votre@email.com",
+    "emailHint": "Utilisez l'email de votre compte utilisateur",
+    "subjectLabel": "Sujet *",
+    "subjectPlaceholder": "Quel est l'objet de votre message ?",
+    "messageLabel": "Message *",
+    "messagePlaceholder": "Décrivez votre demande en détail...",
+    "submitButton": "Envoyer le message",
+    "submitLoading": "Envoi en cours...",
+    "conditionsHeading": "Conditions d'envoi",
+    "conditions": {
+      "haveAccount": "Vous devez avoir un compte utilisateur",
+      "useAccountEmail": "Utilisez l'email associé à votre compte",
+      "replyTime": "Nous répondons sous 24-48h ouvrées",
+      "allFieldsRequired": "Tous les champs sont obligatoires"
+    },
+    "errors": {
+      "generic": "Erreur lors de l'envoi du message",
+      "network": "Erreur de connexion. Veuillez réessayer."
+    }
+  },
+  "About": {
+    "buildingAlt": "Façade de la pharmacie",
+    "heroTitlePrefix": "À propos de ",
+    "heroBrand": "FARMAU",
+    "heroDescription": "Première pharmacie 100 % dermatologique de République Dominicaine, FARMAU met l'expertise médicale au service de votre peau. Nos pharmaciens-dermatologues vous accompagnent avec des conseils personnalisés et une sélection rigoureuse de soins cliniquement prouvés.",
+    "popularProductsHeading": "Produits Populaires",
+    "seeTrend": "Voir la tendance",
+    "teamImageAlt": "Équipe FARMAU",
+    "teamDescription": "Nos pharmaciens-dermatologues, formés en Europe et aux États-Unis, sont disponibles en continu pour analyser votre peau, décrypter les listes INCI et bâtir une routine sur-mesure.",
+    "reviewsHeading": "Avis sur la Pharmacie",
+    "seeMore": "Voir plus",
+    "productImageAlt": "Présentation produit",
+    "qualityDescription": "Parce que votre peau mérite le meilleur, nous importons uniquement des soins certifiés FDA / EMA, testés sous contrôle dermatologique et conformes aux normes européennes.",
+    "hoursContactHeading": "Horaires & Contact",
+    "hoursLabel": "Horaires :",
+    "hoursValue": "Lundi – Vendredi : 6 h 30 – 17 h 00",
+    "addressLabel": "Adresse :",
+    "addressValue": "Calle Jesus de Galindez Esq. Calle 3, Cerros de Gurabo, Santiago, R.D.",
+    "phoneLabel": "Téléphone :",
+    "whatsappLabel": "WhatsApp Commandes :",
+    "emailLabel": "Email :",
+    "valuesHeading": "Nos Valeurs",
+    "value1Title": "Qualité Certifiée",
+    "value1Description": "Produits approuvés FDA/EMA, testés cliniquement pour votre sécurité.",
+    "value2Title": "Expertise Médicale",
+    "value2Description": "Pharmaciens-dermatologues formés en Europe et États-Unis.",
+    "value3Title": "Accompagnement Personnalisé",
+    "value3Description": "Analyse de peau, routines sur-mesure et suivi continu pour des résultats optimaux.",
+    "products": {
+      "cicaName": "Cica-Crème Réparatrice",
+      "cicaDesc": "79 % de réparation cutanée en 48 h*",
+      "vitCName": "Sérum Vitamine C 15 %",
+      "vitCDesc": "Éclat immédiat, rides lissées en 4 sem.",
+      "spfName": "Fluide Solaire SPF 50+",
+      "spfDesc": "Protection UVA/UVB, fini invisible"
+    },
+    "reviews": {
+      "r1Content": "Diagnostic de peau précis ! Une différence après deux semaines.",
+      "r2Content": "Grande variété de marques dermatologiques introuvables ailleurs.",
+      "r3Content": "Protocole post-acné efficace : taches atténuées de moitié !",
+      "r4Content": "Commande WhatsApp prête en 10 min, très pratique."
+    }
   }
 }

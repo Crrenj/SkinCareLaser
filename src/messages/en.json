@@ -234,5 +234,92 @@
     "phoneRequiredError": "Phone is required",
     "saveSuccess": "Profile updated successfully.",
     "redirecting": "Redirecting…"
+  },
+  "Contact": {
+    "headerTitle": "Contact us",
+    "headerSubtitle": "Our team of pharmacist-dermatologists is at your disposal to answer your questions",
+    "contactInfoHeading": "Our details",
+    "addressHeading": "Address",
+    "addressLine1": "Calle Jesus de Galindez Esq. Calle 3",
+    "addressLine2": "Cerros de Gurabo, Santiago, D.R.",
+    "phoneHeading": "Phone",
+    "emailHeading": "Email",
+    "hoursHeading": "Opening hours",
+    "hoursWeekday": "Monday - Friday: 6:30am - 5:00pm",
+    "hoursSaturday": "Saturday: 8:00am - 4:00pm",
+    "hoursSunday": "Sunday: Closed",
+    "whatsappHeading": "WhatsApp contact",
+    "whatsappDescription": "For a quick reply, contact us directly via WhatsApp",
+    "whatsappButton": "Contact via WhatsApp",
+    "mapHeading": "Our location",
+    "mapIframeTitle": "FARMAU location"
+  },
+  "ContactForm": {
+    "title": "Contact us",
+    "intro": "Send us a message. You must have an account to contact us.",
+    "success": "Your message has been sent successfully! We'll reply quickly.",
+    "emailLabel": "Email address *",
+    "emailPlaceholder": "your@email.com",
+    "emailHint": "Use the email of your user account",
+    "subjectLabel": "Subject *",
+    "subjectPlaceholder": "What is the subject of your message?",
+    "messageLabel": "Message *",
+    "messagePlaceholder": "Describe your request in detail...",
+    "submitButton": "Send message",
+    "submitLoading": "Sending...",
+    "conditionsHeading": "Sending conditions",
+    "conditions": {
+      "haveAccount": "You must have a user account",
+      "useAccountEmail": "Use the email associated with your account",
+      "replyTime": "We reply within 24-48 business hours",
+      "allFieldsRequired": "All fields are required"
+    },
+    "errors": {
+      "generic": "Error sending the message",
+      "network": "Connection error. Please try again."
+    }
+  },
+  "About": {
+    "buildingAlt": "Pharmacy facade",
+    "heroTitlePrefix": "About ",
+    "heroBrand": "FARMAU",
+    "heroDescription": "The first 100% dermatological pharmacy in the Dominican Republic, FARMAU puts medical expertise at the service of your skin. Our pharmacist-dermatologists support you with personalized advice and a rigorous selection of clinically proven treatments.",
+    "popularProductsHeading": "Popular Products",
+    "seeTrend": "See trend",
+    "teamImageAlt": "FARMAU team",
+    "teamDescription": "Our pharmacist-dermatologists, trained in Europe and the United States, are continuously available to analyze your skin, decipher INCI lists and build a tailored routine.",
+    "reviewsHeading": "Pharmacy reviews",
+    "seeMore": "See more",
+    "productImageAlt": "Product presentation",
+    "qualityDescription": "Because your skin deserves the best, we import only FDA / EMA certified treatments, tested under dermatological control and compliant with European standards.",
+    "hoursContactHeading": "Hours & Contact",
+    "hoursLabel": "Hours:",
+    "hoursValue": "Monday – Friday: 6:30am – 5:00pm",
+    "addressLabel": "Address:",
+    "addressValue": "Calle Jesus de Galindez Esq. Calle 3, Cerros de Gurabo, Santiago, D.R.",
+    "phoneLabel": "Phone:",
+    "whatsappLabel": "WhatsApp orders:",
+    "emailLabel": "Email:",
+    "valuesHeading": "Our Values",
+    "value1Title": "Certified Quality",
+    "value1Description": "FDA/EMA approved products, clinically tested for your safety.",
+    "value2Title": "Medical Expertise",
+    "value2Description": "Pharmacist-dermatologists trained in Europe and the United States.",
+    "value3Title": "Personalized Support",
+    "value3Description": "Skin analysis, custom routines and continuous follow-up for optimal results.",
+    "products": {
+      "cicaName": "Cica Repair Cream",
+      "cicaDesc": "79% skin repair in 48h*",
+      "vitCName": "Vitamin C 15% Serum",
+      "vitCDesc": "Instant glow, wrinkles smoothed in 4 weeks",
+      "spfName": "Sunscreen Fluid SPF 50+",
+      "spfDesc": "UVA/UVB protection, invisible finish"
+    },
+    "reviews": {
+      "r1Content": "Accurate skin diagnosis! A difference after two weeks.",
+      "r2Content": "Wide variety of dermatological brands unavailable elsewhere.",
+      "r3Content": "Effective post-acne protocol: dark spots halved!",
+      "r4Content": "WhatsApp order ready in 10 min, very convenient."
+    }
   }
 }
