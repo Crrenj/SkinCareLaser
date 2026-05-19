@@ -3,6 +3,8 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import CatalogueClient from '@/components/CatalogueClient'
 
+export const revalidate = 60
+
 type TagItem = { name: string; tag_type: string }
 type RangeJoin = {
   range: { id: string; name: string; brand: { id: string; name: string } | null } | null

@@ -4,6 +4,8 @@ import Banner from '@/components/Banner'
 import Link from 'next/link'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
+export const revalidate = 60
+
 interface BannerData {
   id: string
   title: string

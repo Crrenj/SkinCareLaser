@@ -5,6 +5,8 @@ import ProductClient from '@/components/ProductClient'
 import { notFound } from 'next/navigation'
 import { JSX } from 'react'
 
+export const revalidate = 60
+
 type TagItem = { name: string; tag_type: string }
 
 // Forme retournée par Supabase pour les jointures :
