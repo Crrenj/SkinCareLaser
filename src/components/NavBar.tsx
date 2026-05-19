@@ -11,6 +11,7 @@ import { CartDrawer } from './CartDrawer'
 import { MobileDrawer } from './MobileDrawer'
 import { NavSearch, type NavSearchHandle } from './NavSearch'
 import Logo from './Logo'
+import { LocaleSwitcher } from './LocaleSwitcher'
 
 const NAV_LINKS = [
   { href: '/', labelKey: 'home' as const },
@@ -66,7 +67,7 @@ export default function NavBar() {
           </Link>
         </div>
         <div className="flex items-center gap-3">
-          {/* Placeholder pour le futur LangSwitcher — laissé silencieux tant que non câblé */}
+          <LocaleSwitcher variant="inline" />
         </div>
       </div>
 

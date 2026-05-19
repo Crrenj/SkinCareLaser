@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import type { User } from '@supabase/supabase-js'
 import { Link, usePathname } from '@/i18n/navigation'
 import Logo from './Logo'
+import { LocaleSwitcher } from './LocaleSwitcher'
 
 const NAV_LINKS = [
   { href: '/', labelKey: 'home' as const },
@@ -129,6 +130,14 @@ export function MobileDrawer({
           >
             {t('utility.help')}
           </Link>
+        </div>
+
+        {/* Language switcher */}
+        <div className="px-5 py-4 border-b border-sand-200">
+          <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-500 font-medium mb-2">
+            {t('languageLabel')}
+          </div>
+          <LocaleSwitcher variant="block" onBeforeSwitch={onClose} />
         </div>
 
         {/* Footer */}
