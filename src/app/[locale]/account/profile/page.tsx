@@ -8,18 +8,25 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 export const dynamic = 'force-dynamic'
 
 export default async function ProfilePage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ locale: string }>
   searchParams: Promise<{ required?: string; from?: string }>
 }) {
+  const { locale } = await params
   const supabase = await createSupabaseServerClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
   if (!session) {
-    redirect('/login?redirectedFrom=/account/profile')
+    redirect(
+      `/${locale}/login?redirectedFrom=${encodeURIComponent(`/${locale}/account/profile`)}`,
+    )
   }
+  // locale is read but TS doesn't see it via redirect() control-flow; suppress unused warning
+  void locale
 
   const { data: profile, error } = await supabase
     .from('profiles')

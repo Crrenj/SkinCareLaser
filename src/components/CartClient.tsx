@@ -2,8 +2,7 @@
 
 import React, { useMemo, useCallback, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { Trash2, ArrowLeft, ShoppingBag, CheckCircle, Loader2 } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 

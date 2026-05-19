@@ -2,8 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import Link from 'next/link'
 import { Mail, Lock, User, ArrowRight } from 'lucide-react'
 
 /**

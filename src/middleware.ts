@@ -8,19 +8,18 @@ const intlMiddleware = createIntlMiddleware(routing)
 
 /**
  * Middleware Next.js qui chaîne :
- *   - /admin/*           -> check session + admin (Supabase SSR)
- *   - / et /(fr|es|en)/* -> next-intl (routing locale)
- *   - autres             -> passthrough
+ *   - /admin/*       -> check session + admin (Supabase SSR)
+ *   - /auth/callback -> passthrough (OAuth Supabase, URL système non-localisée)
+ *   - tout le reste  -> next-intl (routing locale)
  *
- * Pendant la migration i18n progressive, les pages publiques pas encore
- * sous `[locale]/` (ex: /catalogue, /cart, /contact, /a-propos) sont
- * laissées passer telles quelles. Elles seront déplacées au palier 2.
+ * Toutes les pages publiques sont sous `[locale]/`. Un hit sur un path
+ * non-préfixé (ex: `/catalogue`) est redirigé vers `/<locale>/catalogue`
+ * par next-intl, avec la locale détectée depuis Accept-Language.
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Static / API / fichiers : passthrough (le matcher devrait déjà filtrer
-  // mais on défense en profondeur)
+  // Static / API / fichiers : passthrough
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
@@ -29,19 +28,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Admin : auth check existant
+  // OAuth Supabase callback : URL système, ne pas localiser
+  if (pathname.startsWith('/auth/')) {
+    return NextResponse.next()
+  }
+
+  // Admin : auth check existant (jamais localisé)
   if (pathname.startsWith('/admin')) {
     return adminAuthMiddleware(request)
   }
 
-  // Intl : racine + routes localisées
-  const isLocalePrefixed = /^\/(fr|es|en)(\/|$)/.test(pathname)
-  if (pathname === '/' || isLocalePrefixed) {
-    return intlMiddleware(request)
-  }
-
-  // Routes publiques pas encore migrées sous [locale] : passthrough
-  return NextResponse.next()
+  // Tout le reste : intl gère (préfixe locale, redirige si manquant)
+  return intlMiddleware(request)
 }
 
 async function adminAuthMiddleware(request: NextRequest) {

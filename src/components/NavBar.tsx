@@ -2,12 +2,11 @@
 import { useState, useCallback } from 'react'
 import { Mail, User as UserIcon, ChevronDown, Shield } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link, useRouter } from '@/i18n/navigation'
 import { CartIcon } from './CartIcon'
 import { CartDrawer } from './CartDrawer'
 import { supabase } from '@/lib/supabaseClient'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
-import { useRouter } from 'next/navigation'
 
 export default function NavBar() {
   const [open, setOpen] = useState(false)

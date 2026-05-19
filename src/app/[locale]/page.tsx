@@ -1,7 +1,7 @@
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import Banner from '@/components/Banner'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 
@@ -70,7 +70,7 @@ export default async function LocaleHome({
             {t('servicesTitle')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link href={`/${locale}/catalogue`} className="group">
+            <Link href="/catalogue" className="group">
               <div className="text-center p-6 rounded-lg border border-sand-300 hover:border-clay-600 hover:shadow-lg transition-all duration-200">
                 <div className="w-16 h-16 bg-sand-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-sand-200">
                   <svg
@@ -96,7 +96,7 @@ export default async function LocaleHome({
               </div>
             </Link>
 
-            <Link href={`/${locale}/a-propos`} className="group">
+            <Link href="/a-propos" className="group">
               <div className="text-center p-6 rounded-lg border border-sand-300 hover:border-clay-600 hover:shadow-lg transition-all duration-200">
                 <div className="w-16 h-16 bg-sand-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-sand-200">
                   <svg

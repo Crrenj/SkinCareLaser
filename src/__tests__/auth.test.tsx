@@ -21,6 +21,26 @@ vi.mock('next/navigation', () => ({
   }),
 }))
 
+// Login + signup utilisent maintenant `@/i18n/navigation` (locale-aware)
+// On mock identique au mock next/navigation pour que les tests passent.
+vi.mock('@/i18n/navigation', async () => {
+  const React = await import('react')
+  type LinkProps = {
+    href: string
+    children: React.ReactNode
+  } & React.AnchorHTMLAttributes<HTMLAnchorElement>
+  return {
+    useRouter: () => ({
+      push: mockPush,
+      replace: mockReplace,
+      back: mockBack,
+    }),
+    usePathname: () => '/',
+    Link: ({ href, children, ...rest }: LinkProps) =>
+      React.createElement('a', { href, ...rest }, children),
+  }
+})
+
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: {
     auth: {
@@ -31,8 +51,8 @@ vi.mock('@/lib/supabaseClient', () => ({
   },
 }))
 
-import LoginPage from '@/app/(auth)/login/page'
-import SignupPage from '@/app/(auth)/signup/page'
+import LoginPage from '@/app/[locale]/(auth)/login/page'
+import SignupPage from '@/app/[locale]/(auth)/signup/page'
 
 // Helpers — les inputs n'ont pas de placeholder uniforme, on cible par label
 const getEmailInput = () => screen.getByLabelText(/adresse email/i)
