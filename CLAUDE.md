@@ -38,7 +38,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...    # ou SUPABASE_SERVICE_KEY (les 2 noms acceptés)
 ```
 
-Pas de `.env.local.example` versionné (à créer — finding DX #1).
+Template versionné : `.env.local.example` (copier en `.env.local` et remplir).
 
 ## Architecture
 
@@ -68,7 +68,16 @@ La table `admin_users` est la **source de vérité RLS** (évite la récursion s
 
 ### Données
 
-Schéma canonique unique : **`db/schema.sql`** (520 lignes idempotent). À exécuter dans Supabase SQL Editor sur un projet neuf.
+Source de vérité : **`supabase/migrations/`** (fichiers SQL timestampés, ordonnés).
+Baseline `00000000000000_baseline.sql` + une migration par changement de schéma. Le remote (Supabase project `adxpoxcynrpnbbxnncsk`) trace les migrations appliquées dans `supabase_migrations.schema_migrations` ; rejouer un fichier déjà appliqué est idempotent (toutes les migrations utilisent `IF NOT EXISTS` / `CREATE OR REPLACE`).
+
+`db/schema.sql` reste comme **snapshot de lecture** (utile pour avoir tout le schéma sous les yeux). Il est dérivé des migrations et regénérable. Ne pas l'éditer sans aussi écrire une migration correspondante.
+
+**Ajouter une migration :**
+1. Écrire le SQL dans un nouveau fichier `supabase/migrations/YYYYMMDDHHMMSS_<nom_court>.sql` (timestamp UTC, snake_case).
+2. Appliquer via MCP `apply_migration` (le `name` doit matcher la partie nom du fichier, le `query` doit matcher son contenu). MCP track l'entrée dans `supabase_migrations`.
+3. Mettre à jour `db/schema.sql` à la main pour refléter le changement (ou regénérer le snapshot plus tard via dump).
+4. Si la migration touche les types : regénérer `src/lib/database.types.ts` via MCP `generate_typescript_types`.
 
 Modèle :
 - `brands` → `ranges` → `products` via `product_ranges` (n-n)
@@ -134,6 +143,6 @@ Voir **`docs/audits/INDEX.md`** pour l'audit complet 9 dimensions (142 findings,
 
 - Audit complet : `docs/audits/INDEX.md` + 9 rapports thématiques
 - Plan post-audit : phase 1 sécu → phase 2 quick wins → phase 3 a11y/UX → phase 4 hygiène
-- Schéma DB : `db/schema.sql` (canonique, idempotent)
+- Schéma DB : `supabase/migrations/` (canonique) + `db/schema.sql` (snapshot dérivé)
 - Seed pipeline : `parse-pdfs` → `catalog.json` → optionnel `prices:*` → `seed-import`
 - Vercel : auto-deploy sur push `main`, env vars à synchroniser via Dashboard

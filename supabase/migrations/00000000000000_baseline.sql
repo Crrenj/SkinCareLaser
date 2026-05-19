@@ -1,15 +1,8 @@
 -- ======================================================================
--- SCHÉMA — Skincare Laser / FARMAU (snapshot dérivé)
+-- SCHÉMA CANONIQUE — Skincare Laser / FARMAU
 -- ======================================================================
--- ⚠️ La source de vérité est désormais `supabase/migrations/`.
--- Ce fichier est un snapshot de lecture, regénérable, utile pour
--- visualiser tout le schéma en une fois. Toute modification ici doit
--- aussi exister dans une migration sous supabase/migrations/.
---
--- Pour un projet vierge, on peut soit :
---   a) Appliquer les migrations dans l'ordre (supabase/migrations/*.sql)
---   b) Exécuter ce fichier dans Supabase SQL Editor (équivalent, plus rapide).
--- Idempotent : CREATE IF NOT EXISTS / CREATE OR REPLACE partout.
+-- Source de vérité unique. À exécuter dans Supabase SQL Editor sur un
+-- projet vierge. Idempotent (CREATE IF NOT EXISTS / DROP IF EXISTS).
 --
 -- Contenu :
 --   0. Extensions
@@ -132,13 +125,6 @@ CREATE TABLE IF NOT EXISTS public.product_images (
 );
 ALTER TABLE public.product_images ENABLE ROW LEVEL SECURITY;
 
--- Indexes FK manquants (perf RLS + jointures catalogue)
--- product_ranges(product_id) et product_tags(product_id) sont déjà couverts
--- par leurs PKs composites (leading column = product_id).
-CREATE INDEX IF NOT EXISTS idx_product_ranges_range_id   ON public.product_ranges(range_id);
-CREATE INDEX IF NOT EXISTS idx_product_tags_tag_id       ON public.product_tags(tag_id);
-CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON public.product_images(product_id);
-
 -- ======================================================================
 -- 3. VUE tags_with_types (utilisée par le front catalogue & product)
 -- ======================================================================
@@ -179,9 +165,6 @@ CREATE TABLE IF NOT EXISTS public.cart_items (
   CONSTRAINT unique_cart_product UNIQUE (cart_id, product_id)
 );
 ALTER TABLE public.cart_items ENABLE ROW LEVEL SECURITY;
-
--- cart_items(cart_id) déjà couvert par unique_cart_product (leading col = cart_id)
-CREATE INDEX IF NOT EXISTS idx_cart_items_product_id ON public.cart_items(product_id);
 
 -- ======================================================================
 -- 5. COMMANDES
@@ -260,63 +243,6 @@ ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_contact_messages_email   ON public.contact_messages(user_email);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_status  ON public.contact_messages(status);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_created ON public.contact_messages(created_at DESC);
-
--- ======================================================================
--- 7b. RATE LIMITING (buckets fixed-window, service_role only)
--- ======================================================================
-CREATE TABLE IF NOT EXISTS public.rate_limit_buckets (
-  key          TEXT PRIMARY KEY,
-  count        INT NOT NULL DEFAULT 0,
-  window_start TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-ALTER TABLE public.rate_limit_buckets ENABLE ROW LEVEL SECURITY;
--- Aucune policy : RLS active + 0 policy = anon/auth bloqués, seul service_role bypasse.
-
-COMMENT ON TABLE public.rate_limit_buckets IS
-  'Buckets de rate limiting (fixed window). Accessible uniquement service_role.';
-
-CREATE OR REPLACE FUNCTION public.check_rate_limit(
-  p_key        TEXT,
-  p_max        INT,
-  p_window_sec INT
-) RETURNS TABLE(allowed BOOLEAN, retry_after INT) AS $$
-DECLARE
-  v_now          TIMESTAMPTZ := NOW();
-  v_count        INT;
-  v_window_start TIMESTAMPTZ;
-  v_window_iv    INTERVAL    := (p_window_sec || ' seconds')::INTERVAL;
-BEGIN
-  INSERT INTO public.rate_limit_buckets (key, count, window_start)
-  VALUES (p_key, 1, v_now)
-  ON CONFLICT (key) DO UPDATE SET
-    count = CASE
-      WHEN public.rate_limit_buckets.window_start + v_window_iv < v_now THEN 1
-      ELSE public.rate_limit_buckets.count + 1
-    END,
-    window_start = CASE
-      WHEN public.rate_limit_buckets.window_start + v_window_iv < v_now THEN v_now
-      ELSE public.rate_limit_buckets.window_start
-    END
-  RETURNING public.rate_limit_buckets.count, public.rate_limit_buckets.window_start
-  INTO v_count, v_window_start;
-
-  -- Cleanup probabiliste (1% des appels) : supprime les buckets
-  -- expirés depuis > 1h pour empêcher la table de gonfler.
-  IF random() < 0.01 THEN
-    DELETE FROM public.rate_limit_buckets
-    WHERE window_start + INTERVAL '1 hour' < v_now;
-  END IF;
-
-  allowed := v_count <= p_max;
-  retry_after := GREATEST(0,
-    EXTRACT(EPOCH FROM (v_window_start + v_window_iv - v_now))::INT
-  );
-  RETURN NEXT;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
-
-REVOKE ALL ON FUNCTION public.check_rate_limit(TEXT, INT, INT) FROM PUBLIC, anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.check_rate_limit(TEXT, INT, INT) TO service_role;
 
 -- ======================================================================
 -- 8. STORAGE — buckets et policies
@@ -443,9 +369,7 @@ BEGIN
   INSERT INTO public.cart_items (cart_id, product_id, quantity)
   VALUES (p_cart_id, p_product_id, p_quantity)
   ON CONFLICT (cart_id, product_id)
-  DO UPDATE SET
-    quantity   = public.cart_items.quantity + EXCLUDED.quantity,
-    updated_at = NOW();
+  DO UPDATE SET quantity = EXCLUDED.quantity;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
