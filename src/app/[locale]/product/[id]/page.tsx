@@ -1,11 +1,67 @@
+import type { Metadata } from 'next'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductClient from '@/components/ProductClient'
 import { notFound } from 'next/navigation'
 import { JSX } from 'react'
+import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>
+}): Promise<Metadata> {
+  const { locale, id } = await params
+  const supabase = await createSupabaseServerClient()
+  const { data: prod } = await supabase
+    .from('products')
+    .select('name, description, image_url, product_images(url), product_ranges(range:ranges(name, brand:brands(name)))')
+    .eq('id', id)
+    .maybeSingle()
+
+  const t = await getTranslations({ locale, namespace: 'PageMeta.product' })
+
+  if (!prod) {
+    return { title: t('titleTemplate', { name: '', brand: '' }) }
+  }
+
+  const ranges = (prod.product_ranges ?? []) as unknown as Array<{
+    range: { name: string; brand: { name: string } | null } | null
+  }>
+  const brandName = ranges[0]?.range?.brand?.name ?? ''
+  const productName = prod.name
+  const description = (prod.description ?? '').trim()
+
+  const title = t('titleTemplate', { name: productName, brand: brandName })
+  const desc = description
+    ? t('descriptionWithDesc', { name: productName, brand: brandName, description })
+    : t('descriptionFallback', { name: productName, brand: brandName })
+
+  const imageUrl =
+    prod.image_url ??
+    (Array.isArray(prod.product_images) && prod.product_images[0]?.url) ??
+    undefined
+
+  return {
+    title,
+    description: desc,
+    alternates: {
+      canonical: localizedPath(locale, `/product/${id}`),
+      languages: buildLanguageAlternates(`/product/${id}`),
+    },
+    openGraph: {
+      title,
+      description: desc,
+      locale,
+      type: 'website',
+      images: imageUrl ? [{ url: imageUrl }] : undefined,
+    },
+  }
+}
 
 type TagItem = { name: string; tag_type: string }
 
@@ -143,9 +199,9 @@ export default async function ProductPage({
   const similarProducts: MappedProduct[] = [...(sameRange ?? []), ...stepB].map(mapProduct)
 
   return (
-    <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
+    <div className="flex flex-col min-h-screen bg-sand-50">
       <NavBar />
-      <main id="main-content" className="flex-grow p-6">
+      <main id="main-content" className="flex-grow">
         <ProductClient
           product={mainProduct}
           similarProducts={similarProducts}

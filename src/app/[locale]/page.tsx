@@ -1,11 +1,36 @@
+import type { Metadata } from 'next'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import Banner from '@/components/Banner'
 import { Link } from '@/i18n/navigation'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'PageMeta.home' })
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: localizedPath(locale, '/'),
+      languages: buildLanguageAlternates('/'),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      locale,
+      type: 'website',
+    },
+  }
+}
 
 interface BannerData {
   id: string

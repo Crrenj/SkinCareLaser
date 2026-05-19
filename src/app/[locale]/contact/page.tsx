@@ -1,8 +1,33 @@
+import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ContactForm from '@/components/ContactForm'
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'PageMeta.contact' })
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: localizedPath(locale, '/contact'),
+      languages: buildLanguageAlternates('/contact'),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      locale,
+      type: 'website',
+    },
+  }
+}
 
 export default async function ContactPage({
   params,

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
@@ -7,6 +8,21 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
 // User-scoped page, never cacher
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'PageMeta.profile' })
+  return {
+    title: t('title'),
+    description: t('description'),
+    // Profil = user-spécifique : pas d'indexation
+    robots: { index: false, follow: false },
+  }
+}
 
 export default async function ProfilePage({
   params,

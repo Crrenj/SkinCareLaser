@@ -358,11 +358,108 @@
     "notFound": "Product not found",
     "noImage": "No image available",
     "rangeLabel": "Range {range}",
+    "rangePrefix": "Range",
     "descriptionHeading": "Description",
     "characteristicsHeading": "Features",
     "quantityHeading": "Quantity",
     "totalPriceLabel": "Total price:",
     "addToCart": "Add to cart ({count})",
-    "similarProductsHeading": "Similar products"
+    "similarProductsHeading": "Similar products",
+    "breadcrumb": {
+      "home": "Home",
+      "catalogue": "Catalogue"
+    },
+    "stock": {
+      "inStock": "In stock · ships in 24h",
+      "outOfStock": "Out of stock"
+    },
+    "gallery": {
+      "zoomHint": "Click to zoom",
+      "thumbAriaLabel": "View image {n}"
+    },
+    "quantity": {
+      "decreaseAriaLabel": "Decrease quantity",
+      "increaseAriaLabel": "Increase quantity"
+    },
+    "addToCartCta": "Add to cart",
+    "wishlistAriaLabel": "Add to favorites",
+    "trust": {
+      "deliveryTitle": "Free shipping · 1500 DOP+",
+      "deliveryBody": "Santo Domingo in 24h · rest of the country 2-3 days",
+      "returnsTitle": "Free returns — 30 days",
+      "returnsBody": "If the product doesn't suit you, we'll exchange it",
+      "askPharmacistTitle": "A question about this product?",
+      "askPharmacistCta": "Ask our pharmacist →"
+    },
+    "accordions": {
+      "description": "Description",
+      "descriptionMeta": "{min} min read",
+      "benefits": "Benefits",
+      "usage": "How to use",
+      "composition": "Composition · INCI",
+      "compositionMeta": "{count} ingredients",
+      "technical": "Technical sheet",
+      "inciLabel": "Full INCI:",
+      "downloadPdf": "Download full leaflet (PDF)"
+    },
+    "pharmacist": {
+      "eyebrow": "Pharmacist's advice",
+      "askCta": "Ask for personalized advice",
+      "fallbackQuote": "For any question about this product, contact our pharmacist team.",
+      "fallbackAttrib": "FARMAU team"
+    },
+    "reviews": {
+      "heading": "Customer reviews",
+      "verifiedCount": "{count, plural, =0 {No reviews yet} =1 {1 verified review} other {# verified reviews}}",
+      "seeAll": "Read all →",
+      "emptyState": "Be the first to leave a review on this product.",
+      "outOf": "out of 5"
+    },
+    "similar": {
+      "heading": "You might also like",
+      "seeRange": "See the full {range} range →"
+    },
+    "sticky": {
+      "addToCart": "Add to cart"
+    }
+  },
+  "PageMeta": {
+    "home": {
+      "title": "FARMAU — Pharmacist-grade dermocosmetics",
+      "description": "Dermocosmetic selection certified by pharmacist-dermatologists. Click & collect in Santiago, Dominican Republic."
+    },
+    "catalogue": {
+      "title": "Catalogue — FARMAU",
+      "description": "Our catalogue of FDA/EMA certified dermocosmetic products. WhatsApp reservation for pickup at the pharmacy."
+    },
+    "contact": {
+      "title": "Contact — FARMAU",
+      "description": "Contact our pharmacist-dermatologists. Address, phone, WhatsApp, hours."
+    },
+    "about": {
+      "title": "About — FARMAU",
+      "description": "First 100% dermatological pharmacy in the Dominican Republic. Our values, our team, our quality commitments."
+    },
+    "login": {
+      "title": "Sign in — FARMAU",
+      "description": "Sign in to your FARMAU account to reserve dermocosmetic products."
+    },
+    "signup": {
+      "title": "Sign up — FARMAU",
+      "description": "Create your FARMAU account to reserve certified dermocosmetic products."
+    },
+    "profile": {
+      "title": "My profile — FARMAU",
+      "description": "Manage your personal information."
+    },
+    "cart": {
+      "title": "My cart — FARMAU",
+      "description": "Your products in selection at FARMAU."
+    },
+    "product": {
+      "titleTemplate": "{name} — {brand} | FARMAU",
+      "descriptionWithDesc": "{name} by {brand}. {description}",
+      "descriptionFallback": "{name} by {brand}. Available for reservation at FARMAU, dermatological pharmacy in the Dominican Republic."
+    }
   }
 }

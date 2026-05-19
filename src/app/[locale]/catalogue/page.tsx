@@ -1,10 +1,35 @@
+import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import CatalogueClient from '@/components/CatalogueClient'
+import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 
 export const revalidate = 60
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'PageMeta.catalogue' })
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: localizedPath(locale, '/catalogue'),
+      languages: buildLanguageAlternates('/catalogue'),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      locale,
+      type: 'website',
+    },
+  }
+}
 
 type TagItem = { name: string; tag_type: string }
 type RangeJoin = {

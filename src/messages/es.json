@@ -358,11 +358,108 @@
     "notFound": "Producto no encontrado",
     "noImage": "Sin imagen disponible",
     "rangeLabel": "Gama {range}",
+    "rangePrefix": "Gama",
     "descriptionHeading": "Descripción",
     "characteristicsHeading": "Características",
     "quantityHeading": "Cantidad",
     "totalPriceLabel": "Precio total:",
     "addToCart": "Añadir al carrito ({count})",
-    "similarProductsHeading": "Productos similares"
+    "similarProductsHeading": "Productos similares",
+    "breadcrumb": {
+      "home": "Inicio",
+      "catalogue": "Catálogo"
+    },
+    "stock": {
+      "inStock": "En stock · envío en 24h",
+      "outOfStock": "Agotado"
+    },
+    "gallery": {
+      "zoomHint": "Haz clic para ampliar",
+      "thumbAriaLabel": "Ver imagen {n}"
+    },
+    "quantity": {
+      "decreaseAriaLabel": "Disminuir cantidad",
+      "increaseAriaLabel": "Aumentar cantidad"
+    },
+    "addToCartCta": "Añadir al carrito",
+    "wishlistAriaLabel": "Añadir a favoritos",
+    "trust": {
+      "deliveryTitle": "Envío gratuito · 1500 DOP+",
+      "deliveryBody": "Santo Domingo en 24h · resto del país 2-3 días",
+      "returnsTitle": "Devoluciones gratuitas — 30 días",
+      "returnsBody": "Si el producto no te conviene, te lo cambiamos",
+      "askPharmacistTitle": "¿Una pregunta sobre este producto?",
+      "askPharmacistCta": "Consulta a nuestro farmacéutico →"
+    },
+    "accordions": {
+      "description": "Descripción",
+      "descriptionMeta": "{min} min de lectura",
+      "benefits": "Beneficios",
+      "usage": "Modo de uso",
+      "composition": "Composición · INCI",
+      "compositionMeta": "{count} ingredientes",
+      "technical": "Ficha técnica",
+      "inciLabel": "INCI completo:",
+      "downloadPdf": "Descargar el folleto completo (PDF)"
+    },
+    "pharmacist": {
+      "eyebrow": "Consejo del farmacéutico",
+      "askCta": "Pedir un consejo personalizado",
+      "fallbackQuote": "Para cualquier pregunta sobre este producto, contacta a nuestro equipo de farmacéuticos.",
+      "fallbackAttrib": "Equipo FARMAU"
+    },
+    "reviews": {
+      "heading": "Reseñas de clientes",
+      "verifiedCount": "{count, plural, =0 {Sin reseñas} =1 {1 reseña verificada} other {# reseñas verificadas}}",
+      "seeAll": "Leer todo →",
+      "emptyState": "Sé el primero en dejar una reseña de este producto.",
+      "outOf": "sobre 5"
+    },
+    "similar": {
+      "heading": "También te gustará",
+      "seeRange": "Ver toda la gama {range} →"
+    },
+    "sticky": {
+      "addToCart": "Añadir al carrito"
+    }
+  },
+  "PageMeta": {
+    "home": {
+      "title": "FARMAU — Dermocosmética de experto farmacéutico",
+      "description": "Selección dermocosmética certificada por farmacéuticos-dermatólogos. Click & collect en Santiago, República Dominicana."
+    },
+    "catalogue": {
+      "title": "Catálogo — FARMAU",
+      "description": "Nuestro catálogo de productos dermocosméticos certificados FDA/EMA. Reserva por WhatsApp para recoger en farmacia."
+    },
+    "contact": {
+      "title": "Contacto — FARMAU",
+      "description": "Contacte a nuestros farmacéuticos-dermatólogos. Dirección, teléfono, WhatsApp, horarios."
+    },
+    "about": {
+      "title": "Acerca de — FARMAU",
+      "description": "Primera farmacia 100% dermatológica de República Dominicana. Nuestros valores, nuestro equipo, nuestros compromisos de calidad."
+    },
+    "login": {
+      "title": "Iniciar sesión — FARMAU",
+      "description": "Inicia sesión en tu cuenta FARMAU para reservar productos dermocosméticos."
+    },
+    "signup": {
+      "title": "Registro — FARMAU",
+      "description": "Crea tu cuenta FARMAU para reservar productos dermocosméticos certificados."
+    },
+    "profile": {
+      "title": "Mi perfil — FARMAU",
+      "description": "Gestiona tu información personal."
+    },
+    "cart": {
+      "title": "Mi carrito — FARMAU",
+      "description": "Tus productos en selección en FARMAU."
+    },
+    "product": {
+      "titleTemplate": "{name} — {brand} | FARMAU",
+      "descriptionWithDesc": "{name} por {brand}. {description}",
+      "descriptionFallback": "{name} por {brand}. Disponible en reserva en FARMAU, farmacia dermatológica en República Dominicana."
+    }
   }
 }
