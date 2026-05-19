@@ -321,5 +321,48 @@
       "r3Content": "Protocolo post-acné eficaz: ¡manchas atenuadas a la mitad!",
       "r4Content": "Pedido WhatsApp listo en 10 min, muy práctico."
     }
+  },
+  "Catalogue": {
+    "loadError": "Error de carga",
+    "searchPlaceholder": "Buscar un producto...",
+    "searchAriaLabel": "Buscar un producto",
+    "noResults": "Ningún producto encontrado con los criterios seleccionados.",
+    "resetFilters": "Reiniciar los filtros",
+    "paginationAriaLabel": "Paginación",
+    "previousPage": "Anterior",
+    "nextPage": "Siguiente",
+    "previousPageAriaLabel": "Página anterior",
+    "nextPageAriaLabel": "Página siguiente",
+    "pageAriaLabel": "Página {page}"
+  },
+  "Filters": {
+    "sortHeading": "ORDENAR POR",
+    "filterHeading": "FILTRAR POR",
+    "reset": "REINICIAR",
+    "brands": "MARCAS",
+    "sortOptions": {
+      "bestsellers": "MÁS VENDIDOS",
+      "az": "ALFABÉTICO, DE A A Z",
+      "za": "ALFABÉTICO, DE Z A A",
+      "priceAsc": "PRECIO: DE MENOR A MAYOR",
+      "priceDesc": "PRECIO: DE MAYOR A MENOR"
+    },
+    "tagTypes": {
+      "categories": "CATEGORÍAS",
+      "besoins": "NECESIDADES",
+      "typesPeau": "TIPO DE PIEL",
+      "ingredients": "INGREDIENTES"
+    }
+  },
+  "Product": {
+    "notFound": "Producto no encontrado",
+    "noImage": "Sin imagen disponible",
+    "rangeLabel": "Gama {range}",
+    "descriptionHeading": "Descripción",
+    "characteristicsHeading": "Características",
+    "quantityHeading": "Cantidad",
+    "totalPriceLabel": "Precio total:",
+    "addToCart": "Añadir al carrito ({count})",
+    "similarProductsHeading": "Productos similares"
   }
 }

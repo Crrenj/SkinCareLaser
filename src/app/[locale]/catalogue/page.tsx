@@ -1,3 +1,4 @@
+import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
@@ -20,7 +21,14 @@ type RawProduct = {
   product_tags: { tag: TagItem | null }[] | null
 }
 
-export default async function Catalogue() {
+export default async function Catalogue({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations('Catalogue')
   const supabase = await createSupabaseServerClient()
 
   // 1. Produits + marques/gammes + tags
@@ -55,7 +63,7 @@ export default async function Catalogue() {
 
   if (pErr || tErr) {
     console.error(pErr || tErr)
-    return <p className="p-6">Erreur de chargement</p>
+    return <p className="p-6">{t('loadError')}</p>
   }
 
   // 3. Regrouper les tags par type

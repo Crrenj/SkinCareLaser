@@ -321,5 +321,48 @@
       "r3Content": "Effective post-acne protocol: dark spots halved!",
       "r4Content": "WhatsApp order ready in 10 min, very convenient."
     }
+  },
+  "Catalogue": {
+    "loadError": "Load error",
+    "searchPlaceholder": "Search for a product...",
+    "searchAriaLabel": "Search for a product",
+    "noResults": "No products found with the selected criteria.",
+    "resetFilters": "Reset filters",
+    "paginationAriaLabel": "Pagination",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "previousPageAriaLabel": "Previous page",
+    "nextPageAriaLabel": "Next page",
+    "pageAriaLabel": "Page {page}"
+  },
+  "Filters": {
+    "sortHeading": "SORT BY",
+    "filterHeading": "FILTER BY",
+    "reset": "RESET",
+    "brands": "BRANDS",
+    "sortOptions": {
+      "bestsellers": "BESTSELLERS",
+      "az": "ALPHABETICAL, A TO Z",
+      "za": "ALPHABETICAL, Z TO A",
+      "priceAsc": "PRICE: LOW TO HIGH",
+      "priceDesc": "PRICE: HIGH TO LOW"
+    },
+    "tagTypes": {
+      "categories": "CATEGORIES",
+      "besoins": "NEEDS",
+      "typesPeau": "SKIN TYPE",
+      "ingredients": "INGREDIENTS"
+    }
+  },
+  "Product": {
+    "notFound": "Product not found",
+    "noImage": "No image available",
+    "rangeLabel": "Range {range}",
+    "descriptionHeading": "Description",
+    "characteristicsHeading": "Features",
+    "quantityHeading": "Quantity",
+    "totalPriceLabel": "Total price:",
+    "addToCart": "Add to cart ({count})",
+    "similarProductsHeading": "Similar products"
   }
 }

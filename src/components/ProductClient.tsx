@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import ProductCard from '@/components/ProductCard'
 import { useCart } from '@/hooks/useCart'
 
@@ -25,6 +26,7 @@ export default function ProductClient({
   product,
   similarProducts,
 }: ProductClientProps) {
+  const t = useTranslations('Product')
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
 
@@ -32,7 +34,7 @@ export default function ProductClient({
   if (!product) {
     return (
       <div className="text-center py-12">
-        <p className="text-ink-500">Produit non trouvé</p>
+        <p className="text-ink-500">{t('notFound')}</p>
       </div>
     )
   }
@@ -88,7 +90,7 @@ export default function ProductClient({
               </div>
             ) : (
               <div className="aspect-square bg-sand-100 rounded-lg flex items-center justify-center">
-                <p className="text-ink-500">Aucune image disponible</p>
+                <p className="text-ink-500">{t('noImage')}</p>
               </div>
             )}
           </div>
@@ -104,7 +106,7 @@ export default function ProductClient({
               )}
               {product.range && (
                 <p className="text-sm text-ink-700">
-                  Gamme {product.range}
+                  {t('rangeLabel', { range: product.range })}
                 </p>
               )}
             </div>
@@ -122,7 +124,7 @@ export default function ProductClient({
             {/* Description */}
             {product.description && (
               <div>
-                <h3 className="text-lg font-semibold text-ink-900 mb-2">Description</h3>
+                <h3 className="text-lg font-semibold text-ink-900 mb-2">{t('descriptionHeading')}</h3>
                 <p className="text-ink-800 leading-relaxed">{product.description}</p>
               </div>
             )}
@@ -130,7 +132,7 @@ export default function ProductClient({
             {/* Tags par catégorie */}
             {Object.entries(product.tagsByCategory).length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-ink-900">Caractéristiques</h3>
+                <h3 className="text-lg font-semibold text-ink-900">{t('characteristicsHeading')}</h3>
                 {Object.entries(product.tagsByCategory).map(([category, tags]) => (
                   <div key={category}>
                     <span className="text-sm font-medium text-ink-700 capitalize block mb-2">
@@ -153,7 +155,7 @@ export default function ProductClient({
 
             {/* Section quantité */}
             <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-ink-900">Quantité</h3>
+              <h3 className="text-lg font-semibold text-ink-900">{t('quantityHeading')}</h3>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center border border-sand-300 rounded-lg">
                   <button
@@ -175,7 +177,7 @@ export default function ProductClient({
                   </button>
                 </div>
                 <div className="text-sm text-ink-700">
-                  Prix total: <span className="font-semibold text-ink-900">{totalPrice.toFixed(2)} {product.currency.toUpperCase()}</span>
+                  {t('totalPriceLabel')} <span className="font-semibold text-ink-900">{totalPrice.toFixed(2)} {product.currency.toUpperCase()}</span>
                 </div>
               </div>
             </div>
@@ -186,7 +188,7 @@ export default function ProductClient({
                 onClick={handleAddToCart}
                 className="w-full bg-clay-700 text-white py-4 px-6 rounded-lg hover:bg-clay-800 transition-colors font-semibold text-lg"
               >
-                Ajouter au panier ({quantity})
+                {t('addToCart', { count: quantity })}
               </button>
             </div>
           </div>
@@ -196,7 +198,7 @@ export default function ProductClient({
       {/* Produits similaires */}
       {similarProducts && similarProducts.length > 0 && (
         <section className="mb-12">
-          <h2 className="text-2xl font-bold text-ink-900 mb-6">Produits similaires</h2>
+          <h2 className="text-2xl font-bold text-ink-900 mb-6">{t('similarProductsHeading')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {similarProducts.map((p) => (
               <ProductCard 

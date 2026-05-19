@@ -321,5 +321,48 @@
       "r3Content": "Protocole post-acné efficace : taches atténuées de moitié !",
       "r4Content": "Commande WhatsApp prête en 10 min, très pratique."
     }
+  },
+  "Catalogue": {
+    "loadError": "Erreur de chargement",
+    "searchPlaceholder": "Rechercher un produit...",
+    "searchAriaLabel": "Rechercher un produit",
+    "noResults": "Aucun produit trouvé avec les critères sélectionnés.",
+    "resetFilters": "Réinitialiser les filtres",
+    "paginationAriaLabel": "Pagination",
+    "previousPage": "Précédent",
+    "nextPage": "Suivant",
+    "previousPageAriaLabel": "Page précédente",
+    "nextPageAriaLabel": "Page suivante",
+    "pageAriaLabel": "Page {page}"
+  },
+  "Filters": {
+    "sortHeading": "TRIER PAR",
+    "filterHeading": "FILTRER PAR",
+    "reset": "RÉINITIALISER",
+    "brands": "MARQUES",
+    "sortOptions": {
+      "bestsellers": "MEILLEURES VENTES",
+      "az": "ALPHABÉTIQUE, DE A À Z",
+      "za": "ALPHABÉTIQUE, DE Z À A",
+      "priceAsc": "PRIX: FAIBLE À ÉLEVÉ",
+      "priceDesc": "PRIX: ÉLEVÉ À FAIBLE"
+    },
+    "tagTypes": {
+      "categories": "CATÉGORIES",
+      "besoins": "BESOINS",
+      "typesPeau": "TYPE DE PEAU",
+      "ingredients": "INGRÉDIENTS"
+    }
+  },
+  "Product": {
+    "notFound": "Produit non trouvé",
+    "noImage": "Aucune image disponible",
+    "rangeLabel": "Gamme {range}",
+    "descriptionHeading": "Description",
+    "characteristicsHeading": "Caractéristiques",
+    "quantityHeading": "Quantité",
+    "totalPriceLabel": "Prix total :",
+    "addToCart": "Ajouter au panier ({count})",
+    "similarProductsHeading": "Produits similaires"
   }
 }

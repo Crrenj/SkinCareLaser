@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import ProductCard from '@/components/ProductCard'
 import Filters from '@/components/Filters'
 
@@ -24,6 +25,7 @@ export default function CatalogueClient({
   products,
   itemsByType,
 }: CatalogueClientProps) {
+  const t = useTranslations('Catalogue')
   // Reprend ?q= depuis l'URL (arrivée depuis NavSearch) pour pré-remplir le champ.
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get('q') ?? ''
@@ -292,11 +294,11 @@ export default function CatalogueClient({
         <div className="relative">
           <input
             type="text"
-            placeholder="Rechercher un produit..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={handleSearchChange}
             className="w-full px-4 py-3 border border-sand-300 rounded-lg focus:outline-none focus:border-clay-600 transition-colors"
-            aria-label="Rechercher un produit"
+            aria-label={t('searchAriaLabel')}
           />
           <svg
             className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400 pointer-events-none"
@@ -348,12 +350,12 @@ export default function CatalogueClient({
           
           {currentProducts.length === 0 && (
             <div className="text-center py-12 text-ink-500">
-              <p>Aucun produit trouvé avec les critères sélectionnés.</p>
+              <p>{t('noResults')}</p>
               <button
                 onClick={clearAllFilters}
                 className="mt-4 px-4 py-2 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
               >
-                Réinitialiser les filtres
+                {t('resetFilters')}
               </button>
             </div>
           )}
@@ -362,16 +364,16 @@ export default function CatalogueClient({
 
       {/* Ligne 3: Pagination */}
       {totalPages > 1 && (
-        <nav className="flex justify-center items-center space-x-2" aria-label="Pagination">
+        <nav className="flex justify-center items-center space-x-2" aria-label={t('paginationAriaLabel')}>
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
             className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus:outline-none"
-            aria-label="Page précédente"
+            aria-label={t('previousPageAriaLabel')}
           >
-            Précédent
+            {t('previousPage')}
           </button>
-          
+
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
             <button
               key={page}
@@ -381,20 +383,20 @@ export default function CatalogueClient({
                   ? 'bg-clay-700 text-white border-clay-600'
                   : 'hover:bg-sand-50'
               }`}
-              aria-label={`Page ${page}`}
+              aria-label={t('pageAriaLabel', { page })}
               aria-current={currentPage === page ? 'page' : undefined}
             >
               {page}
             </button>
           ))}
-          
+
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
             className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus:outline-none"
-            aria-label="Page suivante"
+            aria-label={t('nextPageAriaLabel')}
           >
-            Suivant
+            {t('nextPage')}
           </button>
         </nav>
       )}

@@ -1,6 +1,7 @@
 'use client'
 import React, { FC, useState } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
 
 interface FiltersProps {
   // Sort
@@ -32,13 +33,12 @@ interface FiltersProps {
   }
 }
 
-// Mapping des noms d'affichage pour les types de tags
-const TAG_TYPE_LABELS: Record<string, string> = {
-  'categories': 'CATÉGORIES',
-  'besoins': 'BESOINS',
-  'types-peau': 'TYPE DE PEAU',
-  'ingredients': 'INGRÉDIENTS',
-  // Fallback pour d'autres types
+// Mapping slug DB -> clé i18n du namespace Filters.tagTypes
+const TAG_TYPE_KEY: Record<string, 'categories' | 'besoins' | 'typesPeau' | 'ingredients'> = {
+  'categories': 'categories',
+  'besoins': 'besoins',
+  'types-peau': 'typesPeau',
+  'ingredients': 'ingredients',
 }
 
 const Filters: FC<FiltersProps> = ({
@@ -57,8 +57,9 @@ const Filters: FC<FiltersProps> = ({
   onClearFilters,
   productCounts,
 }) => {
+  const t = useTranslations('Filters')
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['sort']))
-  
+
   const toggleSection = (section: string) => {
     const newExpanded = new Set(expandedSections)
     if (newExpanded.has(section)) {
@@ -68,13 +69,13 @@ const Filters: FC<FiltersProps> = ({
     }
     setExpandedSections(newExpanded)
   }
-  
+
   const sortOptions = [
-    { value: 'bestsellers', label: 'MEILLEURES VENTES' },
-    { value: 'az', label: 'ALPHABÉTIQUE, DE A À Z' },
-    { value: 'za', label: 'ALPHABÉTIQUE, DE Z À A' },
-    { value: 'price-asc', label: 'PRIX: FAIBLE À ÉLEVÉ' },
-    { value: 'price-desc', label: 'PRIX: ÉLEVÉ À FAIBLE' },
+    { value: 'bestsellers', label: t('sortOptions.bestsellers') },
+    { value: 'az', label: t('sortOptions.az') },
+    { value: 'za', label: t('sortOptions.za') },
+    { value: 'price-asc', label: t('sortOptions.priceAsc') },
+    { value: 'price-desc', label: t('sortOptions.priceDesc') },
   ]
   
   return (
@@ -85,7 +86,7 @@ const Filters: FC<FiltersProps> = ({
           onClick={() => toggleSection('sort')}
           className="w-full flex items-center justify-between py-4 border-b border-sand-300 text-left focus:outline-none"
         >
-          <span className="text-base font-semibold tracking-wide">TRIER PAR</span>
+          <span className="text-base font-semibold tracking-wide">{t('sortHeading')}</span>
           {expandedSections.has('sort') ? (
             <ChevronUpIcon className="h-5 w-5 text-ink-700" />
           ) : (
@@ -126,12 +127,12 @@ const Filters: FC<FiltersProps> = ({
       {/* FILTRER PAR */}
       <div className="mb-6">
         <div className="flex items-center justify-between py-4">
-          <span className="text-base font-semibold tracking-wide">FILTRER PAR</span>
+          <span className="text-base font-semibold tracking-wide">{t('filterHeading')}</span>
           <button
             onClick={onClearFilters}
             className="text-sm font-medium underline hover:no-underline focus:outline-none"
           >
-            RÉINITIALISER
+            {t('reset')}
           </button>
         </div>
         
@@ -142,7 +143,7 @@ const Filters: FC<FiltersProps> = ({
               onClick={() => toggleSection('brands')}
               className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
             >
-              <span className="text-sm font-medium tracking-wide">MARQUES</span>
+              <span className="text-sm font-medium tracking-wide">{t('brands')}</span>
               {expandedSections.has('brands') ? (
                 <ChevronUpIcon className="h-5 w-5 text-ink-700" />
               ) : (
@@ -247,7 +248,8 @@ const Filters: FC<FiltersProps> = ({
           if (tagNames.length === 0) return null
           
           const sectionKey = `tags-${tagType}`
-          const displayLabel = TAG_TYPE_LABELS[tagType] || tagType.toUpperCase()
+          const tagKey = TAG_TYPE_KEY[tagType]
+          const displayLabel = tagKey ? t(`tagTypes.${tagKey}`) : tagType.toUpperCase()
           const selectedTagsForType = selectedTags[tagType] || new Set()
           
           return (
