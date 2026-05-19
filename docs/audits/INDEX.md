@@ -1,8 +1,12 @@
 # Audit complet — FARMAU / Skincare Laser
 
 Date : 2026-05-19
-Branche : `main` @ `33b8191` (Next.js 15.5.18, Supabase, 353 produits)
+Branche : `main` @ `8c6bf63` (Next.js 15.5.18, Supabase, 353 produits)
 Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
+
+> **État** : voir `docs/HANDOFF.md` pour la suite à reprendre.
+> Findings critiques fermés : ✅ #1 (auth /api/admin/*), ✅ #5 (UUID admin hardcodé), ✅ Next.js CVE.
+> Findings critiques restants : bug `add_to_cart`, checkout cassé, `lang="en"`, image storage dupliqué.
 
 ---
 
@@ -27,14 +31,14 @@ Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
 
 Les audits ont convergé sur 5 problèmes qui apparaissent dans plusieurs rapports :
 
-### 1. API admin entièrement ouvertes sur Internet
+### ~~1. API admin entièrement ouvertes sur Internet~~ ✅ FIXÉ (commit `8c6bf63`)
 **Audits concernés** : Sécurité (Critical), Architecture (High)
-- Le middleware (`src/middleware.ts:33-43`) protège `/admin/*` mais **exclut explicitement `/api`**
-- Les 15 routes `/api/admin/*` instancient un client `SUPABASE_SERVICE_ROLE_KEY` qui **bypasse RLS**
-- Seul `/api/admin/upload/route.ts` vérifie l'identité
-- **Conséquence** : `curl https://farmau.vercel.app/api/admin/products -X DELETE -d '{"id":"..."}'` fonctionne sans auth → CRUD complet du catalogue, bannières, messages exposé à Internet
-
-→ Voir [security.md#finding-1](./security.md), [architecture.md#1](./architecture.md)
+- ~~Le middleware (`src/middleware.ts:33-43`) protège `/admin/*` mais **exclut explicitement `/api`**~~
+- ✅ Helper `src/lib/requireAdmin.ts` créé, appelé en tête des 16 routes `/api/admin/*`
+- ✅ Client service-role centralisé dans `src/lib/supabaseAdmin.ts` (singleton)
+- ✅ UUID admin hardcodé dans `/api/admin/messages` remplacé par `auth.userId`
+- ✅ -320 lignes de duplication, -34 warnings lint
+- **Vérification** : `curl https://farmau.vercel.app/api/admin/products -X DELETE` → `401 Non authentifié`
 
 ### 2. Tunnel d'achat cassé
 **Audits concernés** : UX (Critical), Architecture

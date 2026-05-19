@@ -1,73 +1,139 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guide pour les futures instances de Claude Code sur ce repo.
 
-## Common commands
+## Stack
 
-- `npm run dev` — start Next.js (Turbopack) on http://localhost:3000
-- `npm run build` / `npm run start` — production build / serve
-- `npm run lint` — Next.js ESLint
-- `npm run test:unit` — Vitest (happy-dom). Watch mode: `npm run test:unit:watch`. Single file: `npx vitest run src/__tests__/auth.test.tsx`
-- `npm run test` — Playwright E2E (auto-starts `npm run dev`; specs in `tests/`). Single spec: `npx playwright test tests/cart.spec.ts --project=chromium`
-- `npm run check-products` / `npm run test:cart` / `npm run setup-cart` — one-off Node scripts in `scripts/`
+Next.js 15.5.18 (App Router) + React 19 + Supabase (Auth, Postgres + RLS, Storage) + Tailwind 4. Tout le texte UI est en **français**. Marché cible : République Dominicaine (devise `DOP`).
 
-## Required environment
+## Commandes courantes
 
-`.env.local` must define:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_KEY` **or** `SUPABASE_SERVICE_ROLE_KEY` — admin API routes accept either; they refuse to start without one (see `src/app/api/admin/products/route.ts:7`).
+```bash
+npm run dev                  # http://localhost:3000 (Turbopack)
+npm run build && npm start   # build prod
+npm run lint                 # ESLint (~39 warnings actuels, non bloquants)
+npm run test:unit            # Vitest, 8/8 tests passent
+npm run test                 # Playwright (auto-start dev server)
+npx tsc --noEmit             # 0 erreur TS
+
+# Scripts métier (voir scripts/)
+npm run create-admin -- email pwd          # bootstrap admin
+npm run parse-pdfs                         # contenu_bd/fiche/*.pdf → db/catalog.json
+npm run validate-catalog                   # rapport anomalies du parser
+npm run prices:export                      # → data/prices.csv (saisie en masse)
+npm run prices:import                      # CSV → catalog.json
+npm run prices:default 100                 # uniformise les prix (placeholder)
+npm run seed-import -- --dry-run           # simulation
+npm run seed-import                        # import réel (+ uploads Storage)
+npm run seed-import -- --brands isdin,acm  # re-jouer marques spécifiques
+```
+
+## Variables d'environnement requises
+
+`.env.local` doit contenir :
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...    # ou SUPABASE_SERVICE_KEY (les 2 noms acceptés)
+```
+
+Pas de `.env.local.example` versionné (à créer — finding DX #1).
 
 ## Architecture
 
-Next.js 15 App Router + React 19 + Supabase (Auth, Postgres with RLS, Storage). All UI text is in French.
+### Trois clients Supabase — choisir le bon
 
-### Three Supabase clients — pick the right one
+| Client | Fichier | Usage |
+|---|---|---|
+| Browser | `src/lib/supabaseClient.ts` | Client Components uniquement. Inclut un fallback `localStorage` pour la navigation privée (**finding security #4 critique** — exfiltration XSS possible). |
+| Server (cookies) | `src/lib/supabaseServer.ts` | Server Components, route handlers agissant pour le user. |
+| Service-role | `src/lib/supabaseAdmin.ts` | Singleton. Routes `/api/admin/*` uniquement. Bypasse RLS. |
 
-1. **`src/lib/supabaseClient.ts`** — browser client (`createBrowserClient` from `@supabase/ssr`). Wraps cookie get/set with `typeof window` guards and a `localStorage` fallback for private-browsing mode. Use in client components only.
-2. **`src/lib/supabaseServer.ts`** — `createSupabaseServerClient()` async helper using `next/headers` cookies. Use in Server Components and route handlers that act on behalf of the user.
-3. **Service-role client** — instantiated inline in `src/app/api/admin/*/route.ts` with `SUPABASE_SERVICE_KEY`/`SUPABASE_SERVICE_ROLE_KEY` to bypass RLS for admin operations.
+### Auth & gating admin (deux couches)
 
-Both `supabaseClient.ts` and `src/middleware.ts` carry “DO NOT MODIFY WITHOUT AUTHORIZATION” banners — they encode hard-won fixes for SSR `document is not defined`, private-browsing cookie loss, and Supabase cookie sync. Touch them only when the change is the actual task, and re-test login in both normal and private windows + middleware redirects after.
+1. **`src/middleware.ts`** sur `/admin/:path*` — lit session, vérifie `profiles.is_admin`, redirige si non admin.
+2. **`src/app/admin/layout.tsx`** — re-check côté client via `useIsAdmin` hook.
+3. **`src/lib/requireAdmin.ts`** — helper pour les routes `/api/admin/*` (ajouté pour fix sécurité #1 — toutes les 16 routes admin sont maintenant gardées).
 
-### Auth & admin gating (two layers, both required)
-
-- **`src/middleware.ts`** runs on `/admin/:path*`. It uses `createServerClient`, reads the session, then queries `profiles.is_admin`. No session → `/login`; not admin → `/login?error=unauthorized`. The matcher explicitly skips `/api`, `/_next`, and asset paths.
-- **`src/app/admin/layout.tsx`** repeats the check client-side via `supabase.auth.getSession()` + `profiles.is_admin` (also accepts `app_metadata.role === 'admin'`). This double-check is intentional — the middleware protects the request, the layout protects the rendered UI before children mount.
-
-The `admin_users` table exists specifically to avoid recursive RLS policies on `profiles` — see header comments in `db/schema_complet.sql`. When writing RLS, prefer checking `admin_users` over `profiles.is_admin` inside policy expressions.
+La table `admin_users` est la **source de vérité RLS** (évite la récursion sur `profiles`). Toujours utiliser `is_user_admin(auth.uid())` dans les policies.
 
 ### Route map
 
-- `src/app/(auth)/login`, `(auth)/signup` — auth group (no layout chrome)
-- `src/app/admin/*` — gated dashboard: `overview`, `product`, `marques`, `stock`, `tags`, `commande`, `messages`, `annonce`, `my-team`, `statistics`, `settings`, `setup`
-- `src/app/api/admin/*` — service-role-backed CRUD: `products` (+ `[id]`, `with-tags`), `brands`, `ranges`, `tags`, `tag-types`, `stock`, `banners`, `messages`, `upload`
-- `src/app/api/cart/route.ts`, `src/app/api/contact/route.ts` — public APIs
-- Public pages: `catalogue`, `product/[…]`, `cart`, `a-propos`, `contact`, plus debug pages (`debug`, `test-auth`, `test-redirect`, `login-private`, `login-simple`) used for live troubleshooting — do not delete without checking.
+- `src/app/(auth)/{login,signup}` — auth group sans chrome
+- `src/app/admin/*` — dashboard gated. **Sections câblées** : `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `setup`. **Pages démo (badge jaune)** : `my-team`, `settings`.
+- `src/app/api/admin/*` — 16 routes service-role, toutes commencent par `requireAdmin()`
+- `src/app/api/{cart,contact}` — APIs publiques
+- Pages publiques : `/`, `/catalogue`, `/product/[id]`, `/cart`, `/contact`, `/a-propos`
 
-### Data model
+### Données
 
-Schema lives in `db/schema_complet.sql` (single source of truth — run it in Supabase SQL editor); `db/populate_catalog.sql` seeds the catalog. Key relations:
+Schéma canonique unique : **`db/schema.sql`** (520 lignes idempotent). À exécuter dans Supabase SQL Editor sur un projet neuf.
 
-- `products` ←→ `ranges` ←→ `brands` via `product_ranges` (many-to-many; products usually have one range, exposed as `product.brand`/`product.range` after flattening in API responses).
-- `product_images` stores ordered URLs; admin product GET falls back to `image_url` when `product_images` is empty.
-- Tags use a `tag_types` → `tags` → `product_tags` structure (see `GUIDE_MIGRATION_TAGS.md`).
-- Cart uses `carts` + `cart_items`; guest carts are supported.
+Modèle :
+- `brands` → `ranges` → `products` via `product_ranges` (n-n)
+- `tag_types` → `tags` → `product_tags` (tags polymorphes)
+- `product_images` (multi-images par produit ; **doublon avec `products.image_url`** — finding archi #3)
+- `carts` + `cart_items` (guest via `anonymous_id`, authenticated via `user_id`)
+- `orders` + `order_items` (pas de checkout encore)
+- `banners`, `contact_messages` (CMS + admin)
 
-### Client state
+État BDD actuel (sur projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à 100 DOP placeholder**, 299 product_images, 36 tags, 844 product_tags, 1 admin.
 
-- **`src/contexts/CartContext.tsx`** — in-memory cart state with `addToCart` / popup logic. Wrapped by `SWRProvider` and `AuthProvider` in `src/app/layout.tsx`.
-- **`src/hooks/useAuth.ts`**, **`src/hooks/useCart.ts`** — shared hooks.
-- SWR (`swr` package) is used for client-side data fetching; the global provider is in `src/components/SWRProvider.tsx`.
+### State client
+
+- **`src/hooks/useCart.ts`** — SWR sur `/api/cart`, optimistic updates.
+- **`src/hooks/useIsAdmin.ts`** — session + check admin factorisé (utilisé par admin/layout + NavBar).
+- **`src/hooks/useAuth.ts`** — onAuthStateChange + merge panier anonyme→authentifié.
 
 ## Conventions
 
-- All user-facing strings, error messages, and admin labels are in **French**. Keep new strings in French unless explicitly told otherwise.
-- The repo has many troubleshooting markdown files at the root (`SOLUTION_*.md`, `GUIDE_*.md`, `DOCUMENTATION_*.md`) — they document past incidents (login in private mode, RLS recursion, storage policies, etc.). Skim the relevant one before re-solving a “tricky” problem in auth, RLS, or storage.
-- `db/` contains many `fix_*.sql` / `final_fix_*.sql` files representing iterative migrations. Treat `schema_complet.sql` as canonical; the `fix_*` files are historical patches that should already be subsumed.
-- TypeScript path alias `@/*` → `src/*` (configured in `tsconfig.json` and `vitest.config.ts`).
-- ESLint rules in `eslint.config.mjs` downgrade `no-explicit-any`, `no-unused-vars`, `no-unescaped-entities`, `react-hooks/exhaustive-deps` to warnings — `npm run lint` rarely fails, but warnings still matter.
+- Tout en **français** (UI, erreurs, commits, docs internes).
+- Path alias `@/*` → `src/*`.
+- TypeScript `strict: true`, **0 erreur tsc**. Lint : 39 warnings restants (mostly `any` dans admin pages, non bloquants).
+- ESLint warnings non bloquants au build (cf `eslint.config.mjs`).
+- **Ne jamais commit sans demande explicite** (règle Cursor `alwaysApply`).
 
-## Do not commit unless asked
+## État du projet (2026-05-19)
 
-The `.cursor/rules/rules.mdc` rule (alwaysApply) instructs: never create git commits unless the user explicitly requests one. Respect this.
+Voir **`docs/audits/INDEX.md`** pour l'audit complet 9 dimensions (142 findings, 5740 lignes). Status :
+
+### Fait ✅
+
+- Cleanup massif : 22 SQL legacy → 1 `schema.sql`, 11 routes mortes supprimées, 44 scripts obsolètes nettoyés (commit `d032574`)
+- Quick wins lint+types+tests : 99→39 warnings, types propres sur server components, hook `useIsAdmin` factorisé (commit `583dbcb`)
+- Outils prix CSV + audit catalog + dédup slugs parser (commit `61c65c3`)
+- Next.js 15.3.4 → 15.5.18 (CVE fix) (commit `33b8191`)
+- Audit complet 9 dimensions livré dans `docs/audits/` (commit `5458d59`)
+- **Auth sur les 16 routes `/api/admin/*`** via `requireAdmin` + suppression UUID admin hardcodé (commit `8c6bf63`)
+
+### Reste critique / important — voir `docs/audits/INDEX.md`
+
+- **Bug RPC `add_to_cart`** : `db/schema.sql:328` écrase la quantité (`= EXCLUDED.quantity`) au lieu d'incrémenter
+- **`<html lang="en">`** dans `src/app/layout.tsx:31` alors que tout est en français
+- **Rate limit absent** sur `/api/contact` (énumération emails + spam possible)
+- **Checkout cassé** : bouton "Procéder au paiement" sur `/cart` sans handler ni disabled (UX #1)
+- **`.limit(100)` dans catalogue** : 253 produits sur 353 invisibles
+- **7 indexes DB manquants** sur FKs (perf)
+- **5 `<img>` à migrer vers `next/image`** (CartDrawer, ProductClient×2, DirectImageUpload, ImageUpload)
+- **Stockage image dupliqué** : `products.image_url` + `product_images` cohabitent (finding archi #3)
+- **Pas de sitemap.ts / robots.ts / metadataBase / generateMetadata** (SEO)
+- **Pas de CI ni pre-commit hook**
+- **Types Supabase non générés** (`supabase gen types typescript`)
+
+## Pièges & règles non évidentes
+
+- **Pas de commit sauf demande explicite** (Cursor rule `alwaysApply`).
+- **Bash deny list** dans `.claude/settings.local.json` bloque `rm`, `git --force`, `git rebase`, `git reset --hard`, etc. Utiliser `git rm` + `git reset --soft` à la place.
+- **Storage MCP Supabase** : le `.mcp.json` à la racine scope le MCP au projet `adxpoxcynrpnbbxnncsk`. Re-auth si token expiré : `/mcp` → supabase → Authenticate.
+- **Le `.next/types/`** est un cache TS — quand on supprime des routes, `.next/` doit être effacé pour que `tsc --noEmit` arrête de râler (move out → rebuild).
+- **`scripts/*.cjs`** : on a `"type": "module"` dans `scripts/package.json`, donc les nouveaux scripts doivent être `.cjs` ou utiliser la syntaxe ES.
+- **bd1/, bd2/, contenu_bd/** sont gitignorés (203 MB) — c'est de la donnée source pour `seed-import.cjs`.
+
+## Référence rapide
+
+- Audit complet : `docs/audits/INDEX.md` + 9 rapports thématiques
+- Plan post-audit : phase 1 sécu → phase 2 quick wins → phase 3 a11y/UX → phase 4 hygiène
+- Schéma DB : `db/schema.sql` (canonique, idempotent)
+- Seed pipeline : `parse-pdfs` → `catalog.json` → optionnel `prices:*` → `seed-import`
+- Vercel : auto-deploy sur push `main`, env vars à synchroniser via Dashboard
