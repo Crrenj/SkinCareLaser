@@ -1,21 +1,73 @@
 'use client'
 
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Trash2, ArrowLeft, ShoppingBag } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Trash2, ArrowLeft, ShoppingBag, CheckCircle, Loader2 } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 
 export default function CartClient() {
-  const { 
-    items, 
-    updateQuantity, 
-    removeFromCart, 
-    totalPrice 
+  const router = useRouter()
+  const {
+    items,
+    updateQuantity,
+    removeFromCart,
+    totalPrice,
+    refreshCart,
   } = useCart()
 
   const shipping = useMemo(() => items.length > 0 ? 5.99 : 0, [items.length])
   const total = useMemo(() => totalPrice + shipping, [totalPrice, shipping])
+
+  // État de réservation
+  const [reserving, setReserving] = useState(false)
+  const [reserveError, setReserveError] = useState<string | null>(null)
+  const [reservationId, setReservationId] = useState<string | null>(null)
+
+  const handleReserve = useCallback(async () => {
+    setReserving(true)
+    setReserveError(null)
+
+    try {
+      const res = await fetch('/api/cart/reserve', { method: 'POST' })
+      const json = await res.json()
+
+      if (!res.ok) {
+        switch (json.code) {
+          case 'auth_required':
+            router.push('/login?redirectedFrom=/cart')
+            return
+          case 'phone_required':
+            router.push(
+              '/account/profile?required=phone&from=/cart',
+            )
+            return
+          case 'already_active':
+            setReserveError(
+              'Vous avez déjà une réservation active. Attendez sa résolution ou contactez-nous via WhatsApp.',
+            )
+            return
+          case 'cart_empty':
+            setReserveError('Votre panier est vide.')
+            return
+          default:
+            setReserveError(
+              json.error || 'Erreur lors de la réservation, veuillez réessayer.',
+            )
+            return
+        }
+      }
+
+      setReservationId(json.reservationId)
+      // Refresh le cart côté SWR (sera vide après création réservation)
+      await refreshCart()
+    } catch {
+      setReserveError('Erreur réseau, veuillez réessayer.')
+    } finally {
+      setReserving(false)
+    }
+  }, [router, refreshCart])
 
   const handleQuantityUpdate = useCallback((productId: string, newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= 99) {
@@ -27,6 +79,41 @@ export default function CartClient() {
     removeFromCart(productId)
   }, [removeFromCart])
 
+  // Branche 1 : confirmation post-réservation
+  if (reservationId) {
+    const shortRef = reservationId.slice(0, 8).toUpperCase()
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div className="mb-6 flex justify-center">
+            <CheckCircle className="h-16 w-16 text-olive-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-ink-900 mb-3">
+            Réservation enregistrée !
+          </h1>
+          <p className="text-ink-700 mb-2">
+            Référence : <span className="font-mono font-semibold">#{shortRef}</span>
+          </p>
+          <p className="text-ink-700 mb-6">
+            Nous vous contacterons via <strong>WhatsApp</strong> dans les
+            prochaines 24h pour fixer l&apos;heure de collecte en pharmacie.
+            Passé ce délai, la réservation est automatiquement annulée.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/catalogue"
+              className="inline-flex items-center justify-center px-6 py-3 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Retour au catalogue
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Branche 2 : panier vide
   if (items.length === 0) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -179,9 +266,34 @@ export default function CartClient() {
               </div>
             </div>
 
-            <button className="w-full bg-clay-700 text-white py-3 px-6 rounded-lg hover:bg-clay-800 transition-colors font-semibold mb-4 focus:outline-none">
-              Procéder au paiement
+            {reserveError && (
+              <div
+                role="alert"
+                className="mb-4 bg-clay-50 border-l-4 border-brick-600 p-3 rounded text-sm text-brick-600"
+              >
+                {reserveError}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleReserve}
+              disabled={reserving}
+              className="w-full bg-clay-700 text-white py-3 px-6 rounded-lg hover:bg-clay-800 transition-colors font-semibold mb-4 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+            >
+              {reserving ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Réservation en cours…
+                </>
+              ) : (
+                'Réserver'
+              )}
             </button>
+            <p className="text-xs text-ink-500 text-center mb-4">
+              Pas de paiement en ligne. Vous serez contacté via WhatsApp pour
+              fixer l&apos;heure de collecte.
+            </p>
 
             <Link
               href="/catalogue"
