@@ -17,9 +17,11 @@ import {
   MegaphoneIcon,
   BuildingStorefrontIcon,
   EnvelopeIcon,
+  ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline'
 
 const NAVIGATION = [
+  { name: 'Réservations', href: '/admin/reservations', icon: ClipboardDocumentCheckIcon },
   { name: 'Produits',     href: '/admin/product',  icon: CubeIcon },
   { name: 'Marques',      href: '/admin/marques',  icon: BuildingStorefrontIcon },
   { name: 'Stock',        href: '/admin/stock',    icon: ArchiveBoxIcon },
