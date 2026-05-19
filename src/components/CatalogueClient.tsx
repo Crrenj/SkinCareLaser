@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import ProductCard from '@/components/ProductCard'
 import Filters from '@/components/Filters'
 
@@ -23,13 +24,25 @@ export default function CatalogueClient({
   products,
   itemsByType,
 }: CatalogueClientProps) {
+  // Reprend ?q= depuis l'URL (arrivée depuis NavSearch) pour pré-remplir le champ.
+  const searchParams = useSearchParams()
+  const initialQuery = searchParams.get('q') ?? ''
+
   // États pour la recherche et le tri
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(initialQuery)
   const [sortBy, setSortBy] = useState('bestsellers')
 
   // États pour la pagination
   const [currentPage, setCurrentPage] = useState(1)
   const productsPerPage = 18 // 3 produits par ligne × 6 lignes
+
+  // Si l'utilisateur navigue d'un /catalogue à un autre /catalogue?q=… via NavSearch
+  // sans re-mount, on resync le champ depuis l'URL.
+  useEffect(() => {
+    const q = searchParams.get('q') ?? ''
+    setSearchTerm(q)
+    setCurrentPage(1)
+  }, [searchParams])
 
   // listes dynamiques
   const brands = useMemo(

@@ -1,149 +1,216 @@
 'use client'
-import { useState, useCallback } from 'react'
-import { Mail, User as UserIcon, ChevronDown, Shield } from 'lucide-react'
-import Image from 'next/image'
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Mail, ShoppingBag, User as UserIcon, Heart, Menu, Shield } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { Link, useRouter } from '@/i18n/navigation'
-import { CartIcon } from './CartIcon'
-import { CartDrawer } from './CartDrawer'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { useCart } from '@/hooks/useCart'
+import { CartDrawer } from './CartDrawer'
+import { MobileDrawer } from './MobileDrawer'
+import { NavSearch, type NavSearchHandle } from './NavSearch'
+import Logo from './Logo'
+
+const NAV_LINKS = [
+  { href: '/', labelKey: 'home' as const },
+  { href: '/catalogue', labelKey: 'catalogue' as const },
+  { href: '/a-propos', labelKey: 'about' as const },
+]
 
 export default function NavBar() {
   const t = useTranslations('Nav')
-  const tLocale = useTranslations('LocaleSwitcher')
-  const [open, setOpen] = useState(false)
-  const [isCartOpen, setIsCartOpen] = useState(false)
-  const { user, isAdmin } = useIsAdmin()
+  const pathname = usePathname()
   const router = useRouter()
+  const { user, isAdmin } = useIsAdmin()
+  const { totalItems } = useCart()
 
-  const handleLanguageToggle = useCallback(() => {
-    setOpen(prev => !prev)
-  }, [])
+  const [cartOpen, setCartOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const searchRefDesktop = useRef<NavSearchHandle>(null)
+  const searchRefMobile = useRef<NavSearchHandle>(null)
 
-  const handleCartOpen = useCallback(() => {
-    setIsCartOpen(true)
-  }, [])
-
-  const handleCartClose = useCallback(() => {
-    setIsCartOpen(false)
-  }, [])
-
-  const handleLogout = async () => {
+  const handleSignOut = useCallback(async () => {
     await supabase.auth.signOut()
     router.push('/')
-  }
+  }, [router])
+
+  // ⌘K / Ctrl+K → focus search
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        const target = window.innerWidth >= 1024 ? searchRefDesktop.current : searchRefMobile.current
+        target?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
-    <header className="h-32 relative bg-sand-400">
-      {/* ligne 1 */}
-      <div className="h-20 flex items-center px-4">
-        {/* wrapper relatif pour bouton + dropdown, avec z-index */}
-        <div className="relative z-30">
-          <button
-            type="button"
-            onClick={handleLanguageToggle}
-            className="bg-transparent text-ink-700 p-2 cursor-pointer flex items-center hover:text-ink-800 transition-colors focus:outline-none rounded"
-            aria-expanded={open}
-            aria-haspopup="true"
-            aria-label={t('languageSelectAriaLabel')}
-          >
-            {t('languageLabel')}
-            <ChevronDown className={`w-4 h-4 ml-1 text-ink-700 transition-transform ${open ? 'rotate-180' : ''}`} />
-          </button>
-          {open && (
-            <ul
-              className="absolute left-0 top-full mt-2 bg-white shadow-lg rounded-lg text-sm z-30 min-w-[120px] border border-sand-300"
-              role="menu"
-            >
-              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-t-lg">{tLocale('fr')}</li>
-              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer">{tLocale('en')}</li>
-              <li role="menuitem" className="px-3 py-2 hover:bg-sand-100 cursor-pointer rounded-b-lg">{tLocale('es')}</li>
-            </ul>
-          )}
-        </div>
-
-        {/* logo centré (z-index inférieur) */}
-        <div className="absolute inset-x-0 -top-4 flex justify-center">
-          <Link href="/" aria-label={t('homeAriaLabel')} className="focus:outline-none">
-            <Image
-              src="/image/logo_trans.png"
-              alt={t('logoAlt')}
-              width={140}
-              height={140}
-              className="w-36 h-36 object-contain"
-              priority
-            />
+    <header className="sticky top-0 z-40 bg-sand-400">
+      {/* ── Utility row (≥ lg uniquement) ── */}
+      <div className="hidden lg:flex items-center justify-between bg-sand-300 border-b border-sand-400 px-6 py-1.5 text-[11px] text-ink-700">
+        <div className="flex items-center gap-3">
+          <Link href="/contact" className="hover:text-ink-900 transition-colors">
+            {t('utility.delivery')}
+          </Link>
+          <span className="text-ink-400">·</span>
+          <Link href="/a-propos" className="hover:text-ink-900 transition-colors">
+            {t('utility.pharmacists')}
+          </Link>
+          <span className="text-ink-400">·</span>
+          <Link href="/contact" className="hover:text-ink-900 transition-colors">
+            {t('utility.help')}
           </Link>
         </div>
-
-        {/* icônes + texte à droite */}
-        <div className="absolute right-4 flex items-center gap-4">
-          <Link
-            href="/contact"
-            className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
-            aria-label={t('contactAriaLabel')}
-          >
-            <Mail className="w-6 h-6" />
-          </Link>
-          
-          {/* Nouveau CartIcon avec ouverture du drawer */}
-          <CartIcon 
-            onClick={handleCartOpen}
-            className="relative"
-          />
-          
-          {user ? (
-            <>
-              {isAdmin && (
-                <Link
-                  href="/admin/product"
-                  className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
-                  aria-label={t('adminDashboardAriaLabel')}
-                >
-                  <Shield className="w-6 h-6" />
-                </Link>
-              )}
-              <button
-                onClick={handleLogout}
-                className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded px-2 py-1"
-                aria-label={t('signOut')}
-              >
-                {t('signOut')}
-              </button>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded p-1"
-                aria-label={t('signIn')}
-              >
-                <UserIcon className="w-6 h-6" />
-              </Link>
-              <Link
-                href="/login"
-                className="text-ink-700 hover:text-ink-800 transition-colors focus:outline-none rounded"
-              >
-                {t('signIn')}
-              </Link>
-            </>
-          )}
+        <div className="flex items-center gap-3">
+          {/* Placeholder pour le futur LangSwitcher — laissé silencieux tant que non câblé */}
         </div>
       </div>
 
-      {/* ligne 2 */}
-      <nav className="relative z-20 flex justify-center gap-6 h-16 items-center text-lg text-ink-800" role="navigation" aria-label={t('mainNavAriaLabel')}>
-        <Link href="/" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">{t('home')}</Link>
-        <Link href="/catalogue" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">{t('catalogue')}</Link>
-        <Link href="/a-propos" className="hover:text-ink-900 transition-colors focus:outline-none rounded px-2 py-1">{t('about')}</Link>
-      </nav>
+      {/* ── Main row (logo + actions) ── */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 lg:gap-8 px-4 lg:px-6 py-3 lg:py-4">
+        {/* Gauche : burger (mobile) + actions compte/favoris (desktop) */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(true)}
+            aria-label={t('menuAriaLabel')}
+            className="lg:hidden h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+          >
+            <Menu size={22} strokeWidth={1.6} />
+          </button>
+          <div className="hidden lg:flex items-center gap-1.5">
+            <IconLinkButton
+              href={user ? '/account/profile' : '/login'}
+              icon={<UserIcon size={22} strokeWidth={1.6} />}
+              label={t('myAccountAriaLabel')}
+            />
+            <IconLinkButton
+              href="/account/profile"
+              icon={<Heart size={22} strokeWidth={1.6} />}
+              label={t('favoritesAriaLabel')}
+            />
+          </div>
+        </div>
 
-      {/* CartDrawer */}
-      <CartDrawer 
-        isOpen={isCartOpen}
-        onClose={handleCartClose}
+        {/* Centre : Logo */}
+        <div className="flex justify-center">
+          <Logo size={64} />
+        </div>
+
+        {/* Droite : contact (≥ md) + admin + panier */}
+        <div className="flex items-center justify-end gap-1.5">
+          <IconLinkButton
+            href="/contact"
+            icon={<Mail size={22} strokeWidth={1.6} />}
+            label={t('contactAriaLabel')}
+            className="hidden md:inline-flex"
+          />
+          {isAdmin && (
+            <IconLinkButton
+              href="/admin/product"
+              icon={<Shield size={22} strokeWidth={1.6} />}
+              label={t('adminDashboardAriaLabel')}
+              className="hidden md:inline-flex"
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setCartOpen(true)}
+            aria-label={t('cartAriaLabel')}
+            className="relative h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+          >
+            <ShoppingBag size={22} strokeWidth={1.6} />
+            {totalItems > 0 && (
+              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-clay-700 text-sand-50 text-[10px] font-semibold flex items-center justify-center">
+                {totalItems > 99 ? '99+' : totalItems}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Nav + Search row (≥ lg) ── */}
+      <div className="hidden lg:flex items-center gap-8 px-6 py-3 border-t border-sand-500">
+        <nav className="flex items-center gap-1" aria-label={t('mainNavAriaLabel')}>
+          {NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.href}
+              href={link.href}
+              active={pathname === link.href}
+              label={t(link.labelKey)}
+            />
+          ))}
+        </nav>
+        <NavSearch ref={searchRefDesktop} className="ml-auto max-w-[520px] flex-1" />
+      </div>
+
+      {/* ── Search row mobile (< lg) ── */}
+      <div className="lg:hidden px-4 pb-3">
+        <NavSearch ref={searchRefMobile} className="w-full" />
+      </div>
+
+      {/* Drawers */}
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <MobileDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        user={user}
+        isAdmin={isAdmin}
+        onSignOut={handleSignOut}
       />
     </header>
+  )
+}
+
+function NavLink({
+  href,
+  active,
+  label,
+}: {
+  href: string
+  active: boolean
+  label: string
+}) {
+  return (
+    <Link
+      href={href}
+      className={`relative px-3 py-2 text-[15px] -tracking-[0.005em] rounded-sm transition-colors ${
+        active ? 'text-ink-900 font-semibold' : 'text-ink-800 font-medium hover:text-ink-900'
+      }`}
+    >
+      {label}
+      <span
+        aria-hidden
+        className={`absolute left-3 right-3 bottom-0.5 h-[2px] origin-left transition-transform duration-200 ${
+          active ? 'scale-x-100 bg-clay-700' : 'scale-x-0 bg-ink-900'
+        }`}
+      />
+    </Link>
+  )
+}
+
+function IconLinkButton({
+  href,
+  icon,
+  label,
+  className = '',
+}: {
+  href: string
+  icon: React.ReactNode
+  label: string
+  className?: string
+}) {
+  return (
+    <Link
+      href={href}
+      aria-label={label}
+      className={`h-10 w-10 inline-flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors ${className}`}
+    >
+      {icon}
+    </Link>
   )
 }
