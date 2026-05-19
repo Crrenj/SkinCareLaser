@@ -63,6 +63,12 @@ export default function SignupPage() {
       return
     }
 
+    // Téléphone obligatoire (requis pour la réservation)
+    if (!formData.phone || !formData.phone.trim()) {
+      setError('Le téléphone est obligatoire (requis pour la réservation)')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -130,18 +136,18 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12" style={{ backgroundColor: '#EDEAE5' }}>
+    <div className="min-h-screen flex items-center justify-center py-12 bg-sand-200">
       <div className="w-full max-w-md mx-4">
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
           {/* En-tête avec couleur du navbar */}
-          <div className="px-8 py-6" style={{ backgroundColor: '#CCC5BD' }}>
+          <div className="px-8 py-6 bg-sand-400">
             <div className="flex items-center justify-center mb-2">
-              <User className="w-12 h-12 text-gray-700" />
+              <User className="w-12 h-12 text-ink-800" />
             </div>
-            <h2 className="text-center text-2xl font-bold text-gray-800">
+            <h2 className="text-center text-2xl font-bold text-ink-800">
               Créer un nouveau compte
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-700">
+            <p className="mt-2 text-center text-sm text-ink-800">
               Rejoignez la communauté FARMAU
             </p>
           </div>
@@ -149,14 +155,14 @@ export default function SignupPage() {
           {/* Formulaire */}
           <form className="px-8 py-6 space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="bg-clay-50 border-l-4 border-brick-600 p-4 rounded">
+                <p className="text-sm text-brick-600">{error}</p>
               </div>
             )}
 
             {success && (
-              <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                <p className="text-sm text-green-700">Inscription réussie ! Redirection vers la page de connexion...</p>
+              <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
+                <p className="text-sm text-olive-600">Inscription réussie ! Redirection vers la page de connexion...</p>
               </div>
             )}
 
@@ -164,7 +170,7 @@ export default function SignupPage() {
               {/* Nom et Prénom */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="firstName" className="block text-sm font-medium text-ink-800 mb-1">
                     Prénom *
                   </label>
                   <input
@@ -174,12 +180,12 @@ export default function SignupPage() {
                     required
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="Jean"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="lastName" className="block text-sm font-medium text-ink-800 mb-1">
                     Nom *
                   </label>
                   <input
@@ -189,7 +195,7 @@ export default function SignupPage() {
                     required
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
+                    className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
                     placeholder="Dupont"
                   />
                 </div>
@@ -197,11 +203,11 @@ export default function SignupPage() {
 
               {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
                   Adresse email *
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="email"
                     name="email"
@@ -216,32 +222,35 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              {/* Téléphone */}
+              {/* Téléphone (obligatoire pour la réservation) */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Téléphone
+                <label htmlFor="phone" className="block text-sm font-medium text-ink-800 mb-1">
+                  Téléphone *
                 </label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="phone"
                     name="phone"
                     type="tel"
+                    autoComplete="tel"
+                    required
                     value={formData.phone}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC5BD] focus:border-transparent text-gray-900"
-                    placeholder="+33 6 12 34 56 78 (optionnel)"
+                    placeholder="+1 809 123 4567"
                   />
                 </div>
+                <p className="mt-1 text-xs text-ink-500">Requis pour la confirmation de réservation via WhatsApp</p>
               </div>
 
               {/* Date de naissance */}
               <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="birthDate" className="block text-sm font-medium text-ink-800 mb-1">
                   Date de naissance
                 </label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="birthDate"
                     name="birthDate"
@@ -255,11 +264,11 @@ export default function SignupPage() {
 
               {/* Mot de passe */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-ink-800 mb-1">
                   Mot de passe *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="password"
                     name="password"
@@ -272,16 +281,16 @@ export default function SignupPage() {
                     placeholder="••••••••"
                   />
                 </div>
-                <p className="mt-1 text-xs text-gray-500">Minimum 6 caractères</p>
+                <p className="mt-1 text-xs text-ink-500">Minimum 6 caractères</p>
               </div>
 
               {/* Confirmer mot de passe */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink-800 mb-1">
                   Confirmer le mot de passe *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -301,12 +310,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading || success}
-                className="w-full flex items-center justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ 
-                  backgroundColor: '#CCC5BD'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B8B1A8'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#CCC5BD'}
+                className="w-full flex items-center justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   'Inscription...'
@@ -319,16 +323,16 @@ export default function SignupPage() {
               </button>
             </div>
 
-            <div className="text-center text-xs text-gray-500">
+            <div className="text-center text-xs text-ink-500">
               * Champs obligatoires
             </div>
           </form>
 
           {/* Lien connexion */}
           <div className="px-8 pb-6">
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center text-sm text-ink-700">
               Déjà inscrit ?{' '}
-              <Link href="/login" className="font-medium text-[#CCC5BD] hover:text-[#B8B1A8] transition-colors">
+              <Link href="/login" className="font-medium text-clay-700 hover:text-clay-800 transition-colors">
                 Connectez-vous
               </Link>
             </div>

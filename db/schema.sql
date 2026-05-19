@@ -586,19 +586,29 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Création automatique du profil lors de l'inscription
+-- Lit display_name, first_name, last_name, phone, birth_date depuis raw_user_meta_data
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, is_admin, display_name, role)
+  INSERT INTO public.profiles (
+    id, is_admin, role,
+    display_name, first_name, last_name, phone, birth_date
+  )
   VALUES (
-    NEW.id, false,
-    COALESCE(NEW.raw_user_meta_data->>'display_name', split_part(NEW.email, '@', 1)),
-    'user'
+    NEW.id, false, 'user',
+    COALESCE(
+      NULLIF(TRIM(NEW.raw_user_meta_data->>'display_name'), ''),
+      split_part(NEW.email, '@', 1)
+    ),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'first_name'), ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'last_name'),  ''),
+    NULLIF(TRIM(NEW.raw_user_meta_data->>'phone'),      ''),
+    NULLIF(NEW.raw_user_meta_data->>'birth_date', '')::date
   )
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created

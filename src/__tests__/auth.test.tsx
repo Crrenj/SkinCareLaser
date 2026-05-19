@@ -165,6 +165,7 @@ describe('Authentication Tests', () => {
       await userEvent.type(screen.getByLabelText(/prénom/i), 'Jean')
       await userEvent.type(screen.getByLabelText(/^nom \*/i), 'Dupont')
       await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+      await userEvent.type(screen.getByLabelText(/^téléphone \*/i), '+1 809 123 4567')
       await userEvent.type(screen.getByLabelText(/^mot de passe \*/i), 'password123')
       await userEvent.type(screen.getByLabelText(/confirmer le mot de passe/i), 'password456')
       await userEvent.click(screen.getByRole('button', { name: /s'inscrire/i }))
@@ -178,6 +179,7 @@ describe('Authentication Tests', () => {
       await userEvent.type(screen.getByLabelText(/prénom/i), 'Jean')
       await userEvent.type(screen.getByLabelText(/^nom \*/i), 'Dupont')
       await userEvent.type(screen.getByLabelText(/adresse email/i), 'test@example.com')
+      await userEvent.type(screen.getByLabelText(/^téléphone \*/i), '+1 809 123 4567')
       await userEvent.type(screen.getByLabelText(/^mot de passe \*/i), '12345')
       await userEvent.type(screen.getByLabelText(/confirmer le mot de passe/i), '12345')
       await userEvent.click(screen.getByRole('button', { name: /s'inscrire/i }))
@@ -202,6 +204,7 @@ describe('Authentication Tests', () => {
       await userEvent.type(screen.getByLabelText(/prénom/i), 'Jean')
       await userEvent.type(screen.getByLabelText(/^nom \*/i), 'Dupont')
       await userEvent.type(screen.getByLabelText(/adresse email/i), 'newuser@example.com')
+      await userEvent.type(screen.getByLabelText(/^téléphone \*/i), '+1 809 123 4567')
       await userEvent.type(screen.getByLabelText(/^mot de passe \*/i), 'password123')
       await userEvent.type(screen.getByLabelText(/confirmer le mot de passe/i), 'password123')
       await userEvent.click(screen.getByRole('button', { name: /s'inscrire/i }))
@@ -215,6 +218,7 @@ describe('Authentication Tests', () => {
             data: expect.objectContaining({
               first_name: 'Jean',
               last_name: 'Dupont',
+              phone: '+1 809 123 4567',
             }),
           }),
         }))
