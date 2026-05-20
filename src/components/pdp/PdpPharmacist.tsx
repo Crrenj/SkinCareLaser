@@ -1,29 +1,23 @@
 'use client'
 
-import { ArrowRight, User as UserIcon } from 'lucide-react'
+import { User as UserIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 interface PdpPharmacistProps {
   quote?: string
   name?: string
-  /** Lien WhatsApp/contact pour le CTA "demander conseil". Défaut /contact. */
-  askHref?: string
 }
 
 /**
  * Variantes (spec §04) :
  *   - A · Citation nominale (quote + name fournis)
  *   - B · Note clinique (quote fourni, sans name → attribué à "Équipe FARMAU")
- *   - C · CTA "Demander conseil" (rien → on rend juste le CTA WhatsApp)
+ *   - Pas de variant C : sans quote ni name, on n'affiche rien (décision actée
+ *     du brief sprint 2 — pas de CTA "Demander conseil").
  */
-export function PdpPharmacist({
-  quote,
-  name,
-  askHref = '/contact',
-}: PdpPharmacistProps) {
+export function PdpPharmacist({ quote, name }: PdpPharmacistProps) {
   const t = useTranslations('Product.pharmacist')
 
-  // Variant C : pas de contenu → on n'affiche rien (la fiche reste compacte).
   if (!quote && !name) return null
 
   const displayQuote = quote ?? t('fallbackQuote')
@@ -48,13 +42,6 @@ export function PdpPharmacist({
             <p className="text-[13px] text-ink-500">
               <strong className="text-ink-900 font-semibold">{displayName}</strong>
             </p>
-            <a
-              href={askHref}
-              className="mt-4 inline-flex items-center gap-2 self-start text-clay-700 hover:text-clay-800 text-[13.5px] font-medium border-b border-clay-200 hover:border-clay-600 pb-px transition-colors"
-            >
-              {t('askCta')}
-              <ArrowRight size={16} strokeWidth={1.8} />
-            </a>
           </div>
         </div>
       </div>
