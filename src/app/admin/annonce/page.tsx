@@ -16,6 +16,17 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline'
 
+type BannerType =
+  | 'editorial'
+  | 'hero'
+  | 'quote'
+  | 'image_left'
+  | 'image_right'
+  | 'image_full'
+  | 'card_style'
+  | 'minimal'
+  | 'gradient_overlay'
+
 interface BannerData {
   id: string
   title: string
@@ -23,7 +34,7 @@ interface BannerData {
   image_url: string
   link_url: string | null
   link_text: string | null
-  banner_type: 'image_left' | 'image_right' | 'image_full' | 'card_style' | 'minimal' | 'gradient_overlay'
+  banner_type: BannerType
   position: number
   is_active: boolean
   start_date: string | null
@@ -32,6 +43,10 @@ interface BannerData {
   updated_at: string
   click_count: number
   view_count: number
+  direction: 'left' | 'right' | null
+  attribution_name: string | null
+  attribution_title: string | null
+  attribution_photo_url: string | null
 }
 
 export default function AnnoncePage() {
@@ -49,11 +64,15 @@ export default function AnnoncePage() {
     image_url: '',
     link_url: '',
     link_text: '',
-    banner_type: 'image_left' as 'image_left' | 'image_right' | 'image_full' | 'card_style' | 'minimal' | 'gradient_overlay',
+    banner_type: 'editorial' as BannerType,
     position: 1,
     is_active: true,
     start_date: '',
-    end_date: ''
+    end_date: '',
+    direction: 'left' as 'left' | 'right',
+    attribution_name: '',
+    attribution_title: '',
+    attribution_photo_url: '',
   })
 
   useEffect(() => {
@@ -81,17 +100,36 @@ export default function AnnoncePage() {
   const openModal = (banner?: BannerData) => {
     if (banner) {
       setEditingBanner(banner)
+      // Migration silencieuse : si banner_type est un ancien type,
+      // on suggere le nouveau equivalent dans le form (l UPDATE l ecrit en DB).
+      const legacyMap: Partial<Record<BannerType, BannerType>> = {
+        image_left: 'editorial',
+        image_right: 'editorial',
+        card_style: 'editorial',
+        minimal: 'editorial',
+        image_full: 'hero',
+        gradient_overlay: 'hero',
+      }
+      const normalizedType = legacyMap[banner.banner_type] ?? banner.banner_type
+      const inferredDirection =
+        banner.direction ??
+        (banner.banner_type === 'image_right' ? 'right' : 'left')
+
       setFormData({
         title: banner.title,
         description: banner.description,
         image_url: banner.image_url,
         link_url: banner.link_url || '',
         link_text: banner.link_text || '',
-        banner_type: banner.banner_type,
+        banner_type: normalizedType,
         position: banner.position,
         is_active: banner.is_active,
         start_date: banner.start_date || '',
-        end_date: banner.end_date || ''
+        end_date: banner.end_date || '',
+        direction: inferredDirection,
+        attribution_name: banner.attribution_name || '',
+        attribution_title: banner.attribution_title || '',
+        attribution_photo_url: banner.attribution_photo_url || '',
       })
     } else {
       setEditingBanner(null)
@@ -101,11 +139,15 @@ export default function AnnoncePage() {
         image_url: '',
         link_url: '',
         link_text: '',
-        banner_type: 'image_left',
+        banner_type: 'editorial',
         position: banners.length + 1,
         is_active: true,
         start_date: '',
-        end_date: ''
+        end_date: '',
+        direction: 'left',
+        attribution_name: '',
+        attribution_title: '',
+        attribution_photo_url: '',
       })
     }
     setShowModal(true)
@@ -488,41 +530,130 @@ export default function AnnoncePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  {formData.banner_type === 'quote' ? 'Citation (le texte du quote)' : 'Description'}
+                </label>
                 <textarea
-                  required
+                  required={formData.banner_type !== 'quote'}
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   rows={3}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  placeholder={
+                    formData.banner_type === 'quote'
+                      ? 'La citation peut aussi rester dans le champ Titre — Description est optionnelle.'
+                      : ''
+                  }
                 />
+                {formData.banner_type !== 'hero' && formData.banner_type !== 'quote' && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Astuce : utilisez <code>&lt;em&gt;mot&lt;/em&gt;</code> dans le titre pour mettre un mot en italique clay.
+                  </p>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Type de bannière</label>
-                <select
-                  value={formData.banner_type}
-                  onChange={(e) => setFormData(prev => ({ ...prev, banner_type: e.target.value as any }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                >
-                  <optgroup label="Styles classiques">
-                    <option value="image_left">Image à gauche</option>
-                    <option value="image_right">Image à droite</option>
-                    <option value="image_full">Image pleine largeur</option>
-                  </optgroup>
-                  <optgroup label="Nouveaux styles">
-                    <option value="card_style">Style carte</option>
-                    <option value="minimal">Style minimal</option>
-                    <option value="gradient_overlay">Gradient overlay</option>
-                  </optgroup>
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type de bannière</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['editorial', 'hero', 'quote'] as const).map((type) => (
+                    <label
+                      key={type}
+                      className={`flex items-center justify-center gap-2 px-3 py-2 border rounded-md cursor-pointer text-sm transition-colors ${
+                        formData.banner_type === type
+                          ? 'border-ink-900 bg-ink-900 text-white'
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="banner_type"
+                        value={type}
+                        checked={formData.banner_type === type}
+                        onChange={() => setFormData(prev => ({ ...prev, banner_type: type }))}
+                        className="sr-only"
+                      />
+                      <span className="font-medium capitalize">{type}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {formData.banner_type === 'editorial' && 'Image + texte 2 colonnes, 320px. Pour mettre en avant un produit ou une gamme.'}
+                  {formData.banner_type === 'hero' && 'Plein-bleed avec overlay sombre, 480px. Pour le hero de la home ou une campagne.'}
+                  {formData.banner_type === 'quote' && 'Citation pharmacien sur fond ink-900, 220px. Pas de CTA, pas d image requise.'}
+                </p>
               </div>
 
+              {/* Direction (editorial uniquement) */}
+              {formData.banner_type === 'editorial' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Direction</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['left', 'right'] as const).map((dir) => (
+                      <label
+                        key={dir}
+                        className={`flex items-center justify-center gap-2 px-3 py-2 border rounded-md cursor-pointer text-sm transition-colors ${
+                          formData.direction === dir
+                            ? 'border-ink-900 bg-gray-100'
+                            : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="direction"
+                          value={dir}
+                          checked={formData.direction === dir}
+                          onChange={() => setFormData(prev => ({ ...prev, direction: dir }))}
+                          className="sr-only"
+                        />
+                        Image à {dir === 'left' ? 'gauche' : 'droite'}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Attribution (quote uniquement) */}
+              {formData.banner_type === 'quote' && (
+                <div className="space-y-3 bg-gray-50 p-4 rounded-md">
+                  <div className="text-sm font-medium text-gray-700">Attribution</div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Nom (ex: Dra. María Rosa Cabrera)</label>
+                    <input
+                      type="text"
+                      value={formData.attribution_name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, attribution_name: e.target.value }))}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Titre (ex: Pharmacienne-dermatologue, Santo Domingo)</label>
+                    <input
+                      type="text"
+                      value={formData.attribution_title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, attribution_title: e.target.value }))}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Photo URL (optionnelle)</label>
+                    <input
+                      type="url"
+                      value={formData.attribution_photo_url}
+                      onChange={(e) => setFormData(prev => ({ ...prev, attribution_photo_url: e.target.value }))}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      placeholder="https://…"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">URL de l'image</label>
+                <label className="block text-sm font-medium text-gray-700">
+                  URL de l&apos;image {formData.banner_type === 'quote' && <span className="text-gray-400 text-xs">(optionnelle pour quote)</span>}
+                </label>
                 <input
                   type="url"
-                  required
+                  required={formData.banner_type !== 'quote'}
                   value={formData.image_url}
                   onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -531,18 +662,14 @@ export default function AnnoncePage() {
                 <div className="mt-2 p-3 bg-blue-50 rounded-md">
                   <p className="text-sm text-blue-800 font-medium mb-1">📏 Tailles recommandées :</p>
                   <div className="text-xs text-blue-700 space-y-1">
-                    {formData.banner_type === 'image_left' || formData.banner_type === 'image_right' ? (
-                      <p>• <strong>Images latérales :</strong> 400x300 pixels (ratio 4:3) pour un affichage optimal</p>
-                    ) : formData.banner_type === 'image_full' ? (
-                      <p>• <strong>Image pleine largeur :</strong> 1200x500 pixels (ratio 2.4:1) pour couvrir toute la largeur</p>
-                    ) : formData.banner_type === 'card_style' ? (
-                      <p>• <strong>Style carte :</strong> 400x300 pixels (ratio 4:3) pour un format carte</p>
-                    ) : formData.banner_type === 'minimal' ? (
-                      <p>• <strong>Style minimal :</strong> 64x64 pixels (carré) pour un petit avatar</p>
-                    ) : formData.banner_type === 'gradient_overlay' ? (
-                      <p>• <strong>Gradient overlay :</strong> 1200x400 pixels (ratio 3:1) pour un format panoramique</p>
-                    ) : (
-                      <p>• <strong>Taille standard :</strong> 400x300 pixels (ratio 4:3)</p>
+                    {formData.banner_type === 'editorial' && (
+                      <p>• <strong>Editorial :</strong> 400×400 pixels (carré ou portrait), object-contain — packshot ou ambiance.</p>
+                    )}
+                    {formData.banner_type === 'hero' && (
+                      <p>• <strong>Hero :</strong> 1200×600 pixels (ratio 2:1), object-cover plein-bleed — ambiance, pas packshot.</p>
+                    )}
+                    {formData.banner_type === 'quote' && (
+                      <p>• <strong>Quote :</strong> image non utilisée. Si fournie, sert d&apos;avatar 140×140 (rond). Sinon, le bloc passe en pleine largeur.</p>
                     )}
                     <p>• Format recommandé : JPG ou PNG</p>
                     <p>• Poids maximum : 500 KB pour des performances optimales</p>

@@ -2,7 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
-const VALID_BANNER_TYPES = ['image_left', 'image_right', 'image_full', 'card_style', 'minimal', 'gradient_overlay']
+// 3 nouveaux types (sprint 2 livrable 4) + 6 anciens conserves pour
+// retrocompat des lignes DB existantes. Le composant Banner les
+// normalise vers les 3 nouveaux a l affichage.
+const VALID_BANNER_TYPES = [
+  'editorial',
+  'hero',
+  'quote',
+  'image_left',
+  'image_right',
+  'image_full',
+  'card_style',
+  'minimal',
+  'gradient_overlay',
+]
+
+const VALID_DIRECTIONS = ['left', 'right']
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin()
@@ -53,17 +68,38 @@ export async function POST(request: NextRequest) {
     const {
       title, description, image_url, link_url, link_text,
       banner_type, position, is_active, start_date, end_date,
+      direction, attribution_name, attribution_title, attribution_photo_url,
     } = body
 
-    if (!title || !description || !image_url || !banner_type) {
+    // Quote n'a pas besoin de description ni d'image (juste le titre = citation)
+    const requiresImage = banner_type !== 'quote'
+    const requiresDescription = banner_type !== 'quote'
+
+    if (!title || !banner_type) {
       return NextResponse.json(
-        { error: 'Titre, description, image et type de bannière sont requis' },
+        { error: 'Titre et type de bannière sont requis' },
+        { status: 400 },
+      )
+    }
+    if (requiresDescription && !description) {
+      return NextResponse.json(
+        { error: 'Description requise pour ce type' },
+        { status: 400 },
+      )
+    }
+    if (requiresImage && !image_url) {
+      return NextResponse.json(
+        { error: 'Image requise pour ce type' },
         { status: 400 },
       )
     }
 
     if (!VALID_BANNER_TYPES.includes(banner_type)) {
       return NextResponse.json({ error: 'Type de bannière invalide' }, { status: 400 })
+    }
+
+    if (direction && !VALID_DIRECTIONS.includes(direction)) {
+      return NextResponse.json({ error: 'Direction invalide (left|right)' }, { status: 400 })
     }
 
     let finalPosition = position
@@ -83,6 +119,10 @@ export async function POST(request: NextRequest) {
         banner_type, position: finalPosition,
         is_active: is_active ?? true,
         start_date, end_date,
+        direction: direction || null,
+        attribution_name: attribution_name || null,
+        attribution_title: attribution_title || null,
+        attribution_photo_url: attribution_photo_url || null,
       }])
       .select()
       .single()
@@ -111,6 +151,7 @@ export async function PUT(request: NextRequest) {
     const {
       id, title, description, image_url, link_url, link_text,
       banner_type, position, is_active, start_date, end_date,
+      direction, attribution_name, attribution_title, attribution_photo_url,
     } = body
 
     if (!id) {
@@ -119,6 +160,10 @@ export async function PUT(request: NextRequest) {
 
     if (banner_type && !VALID_BANNER_TYPES.includes(banner_type)) {
       return NextResponse.json({ error: 'Type de bannière invalide' }, { status: 400 })
+    }
+
+    if (direction && !VALID_DIRECTIONS.includes(direction)) {
+      return NextResponse.json({ error: 'Direction invalide (left|right)' }, { status: 400 })
     }
 
     if (position !== undefined) {
@@ -142,6 +187,10 @@ export async function PUT(request: NextRequest) {
       .update({
         title, description, image_url, link_url, link_text,
         banner_type, position, is_active, start_date, end_date,
+        direction: direction === undefined ? undefined : direction || null,
+        attribution_name: attribution_name === undefined ? undefined : attribution_name || null,
+        attribution_title: attribution_title === undefined ? undefined : attribution_title || null,
+        attribution_photo_url: attribution_photo_url === undefined ? undefined : attribution_photo_url || null,
       })
       .eq('id', id)
       .select()
