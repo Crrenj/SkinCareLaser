@@ -267,59 +267,134 @@
     "emptyDescription": "You haven't added any favorites yet. Browse the catalogue and click the heart to save your favorite products.",
     "emptyCta": "Browse the catalogue"
   },
+  "Auth": {
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "backToLogin": "← Back to sign in",
+    "strength": {
+      "empty": "",
+      "weak": "Weak · add more characters.",
+      "fair": "Fair · add a number or a symbol.",
+      "good": "Good · you can strengthen it further with a symbol.",
+      "strong": "Very strong."
+    }
+  },
+  "AuthAside": {
+    "location": "Santo Domingo · Dominican Republic"
+  },
+  "OAuth": {
+    "continueWith": "Continue with {provider}",
+    "signupWith": "Sign up with {provider}",
+    "dividerLabel": "or with your email"
+  },
   "Login": {
-    "loadingFallback": "Loading...",
-    "title": "Sign in to your account",
+    "loadingFallback": "Loading…",
+    "title": "Sign in",
     "welcome": "Welcome to FARMAU",
-    "emailLabel": "Email address",
-    "emailPlaceholder": "your@email.com",
+    "lede": "Sign in to find your orders, your wishlist and speed up your next reservations.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@email.com",
     "passwordLabel": "Password",
     "passwordPlaceholder": "••••••••",
     "submitButton": "Sign in",
-    "submitLoading": "Signing in...",
-    "submitRedirecting": "Redirecting...",
-    "successMessage": "Signed in! Redirecting...",
+    "submitLoading": "Signing in…",
+    "submitRedirecting": "Redirecting…",
+    "successMessage": "Signed in. Redirecting…",
     "forgotPassword": "Forgot your password?",
     "newCustomer": "New customer?",
     "createAccount": "Create an account",
+    "aside": {
+      "quote": "Pharmaceutical-grade dermo-cosmetics, explained by the people who practice them every day.",
+      "cite": "— Dra. María Pérez · Pharmacist"
+    },
     "errors": {
       "unauthorized": "Access denied. You must be an administrator.",
-      "invalidCredentials": "Incorrect email or password",
-      "generic": "An error occurred while signing in"
+      "invalidCredentials": "Incorrect email or password.",
+      "oauth_failed": "We couldn't complete the sign-in. Try again or use your email.",
+      "session_error": "Session lost. Please sign in again.",
+      "callback_error": "An error occurred after authentication.",
+      "middleware_error": "Security error. Please sign in again.",
+      "generic": "An error occurred while signing in."
     }
   },
   "Signup": {
-    "title": "Create a new account",
+    "title": "Create an account",
     "subtitle": "Join the FARMAU community",
-    "successMessage": "Signup successful! Redirecting to the sign-in page...",
-    "firstNameLabel": "First name *",
-    "firstNamePlaceholder": "John",
-    "lastNameLabel": "Last name *",
-    "lastNamePlaceholder": "Doe",
-    "emailLabel": "Email address *",
-    "emailPlaceholder": "your@email.com",
-    "phoneLabel": "Phone *",
+    "lede": "An account to save your orders, your wishlist and speed up your next reservations.",
+    "successMessage": "Signup successful. Check your inbox to confirm your account.",
+    "firstNameLabel": "First name",
+    "firstNamePlaceholder": "María",
+    "lastNameLabel": "Last name",
+    "lastNamePlaceholder": "Pérez",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@email.com",
+    "phoneLabel": "Phone",
     "phonePlaceholder": "+1 809 123 4567",
-    "phoneHint": "Required to confirm reservation via WhatsApp",
+    "phoneHint": "Required to confirm your reservation via WhatsApp.",
     "birthDateLabel": "Date of birth",
-    "passwordLabel": "Password *",
+    "passwordLabel": "Password",
+    "passwordHintInline": "min. 8 characters",
     "passwordPlaceholder": "••••••••",
-    "passwordHint": "At least 6 characters",
-    "confirmPasswordLabel": "Confirm password *",
-    "submitButton": "Sign up",
-    "submitLoading": "Signing up...",
-    "requiredFields": "* Required fields",
+    "passwordHint": "At least 8 characters.",
+    "confirmPasswordLabel": "Confirm password",
+    "submitButton": "Create account",
+    "submitLoading": "Creating…",
+    "requiredFields": "All fields are required except date of birth.",
     "alreadySignedUp": "Already have an account?",
     "signInLink": "Sign in",
+    "termsAccept": "By signing up you accept our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
+    "aside": {
+      "quote": "Every product in the catalog has been hand-picked by a pharmacist-dermatologist.",
+      "cite": "— FARMAU scientific committee"
+    },
     "errors": {
-      "passwordsMismatch": "Passwords do not match",
-      "passwordTooShort": "Password must be at least 6 characters",
-      "missingFields": "Please fill in all required fields",
-      "phoneRequired": "Phone is required (needed for reservation)",
-      "emailAlreadyUsed": "This email is already in use. Please sign in or use another email.",
-      "invalidEmail": "Invalid email format. Please check your email address.",
-      "disposableEmail": "Disposable email addresses are not accepted. Please use a valid address.",
-      "generic": "An error occurred during signup"
+      "passwordsMismatch": "Passwords do not match.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "missingFields": "Please fill in all required fields.",
+      "phoneRequired": "Phone is required (needed for reservation).",
+      "emailAlreadyUsed": "This address already has an account. <signin>Sign in</signin> instead.",
+      "invalidEmail": "Invalid email format.",
+      "disposableEmail": "Disposable email addresses are not accepted.",
+      "generic": "An error occurred during signup."
+    }
+  },
+  "ForgotPassword": {
+    "title": "Recover password",
+    "lede": "We'll send you a link by email to create a new password.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@email.com",
+    "submitButton": "Send link",
+    "submitLoading": "Sending…",
+    "successTitle": "Message sent.",
+    "successBody": "If this address is registered, you'll receive a link shortly. Don't forget to check your spam folder.",
+    "retryHint": "Not receiving it? Wait 2 minutes before requesting a new link.",
+    "aside": {
+      "quote": "Your pharmacist knows you. Your password, not so much."
+    }
+  },
+  "ResetPassword": {
+    "title": "New password",
+    "lede": "Choose a password of at least 8 characters.",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm password",
+    "passwordHintInline": "min. 8 characters",
+    "submitButton": "Save new password",
+    "submitLoading": "Saving…",
+    "successMessage": "Password updated. Redirecting…",
+    "expiredTitle": "Link expired",
+    "expiredBody": "Recovery links expire after 1 hour. Request a new one.",
+    "requestNewLink": "Request a new link",
+    "signInLink": "← Sign in",
+    "verifying": "Verifying link…",
+    "aside": {
+      "quote": "Choose a memorable password."
+    },
+    "errors": {
+      "tooShort": "Password must be at least 8 characters.",
+      "mismatch": "Passwords do not match.",
+      "expired": "This link is no longer valid.",
+      "missingToken": "Recovery link invalid or expired.",
+      "generic": "An error occurred. Please try again."
     }
   },
   "Profile": {

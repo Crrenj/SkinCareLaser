@@ -267,59 +267,134 @@
     "emptyDescription": "Vous n'avez encore aucun favori. Explorez le catalogue et cliquez sur le cœur pour épingler vos produits préférés.",
     "emptyCta": "Explorer le catalogue"
   },
+  "Auth": {
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "backToLogin": "← Retour à la connexion",
+    "strength": {
+      "empty": "",
+      "weak": "Faible · ajoutez plus de caractères.",
+      "fair": "Correct · ajoutez un chiffre ou un symbole.",
+      "good": "Bon · vous pouvez encore renforcer avec un symbole.",
+      "strong": "Très fort."
+    }
+  },
+  "AuthAside": {
+    "location": "Santo Domingo · République Dominicaine"
+  },
+  "OAuth": {
+    "continueWith": "Continuer avec {provider}",
+    "signupWith": "S'inscrire avec {provider}",
+    "dividerLabel": "ou avec votre email"
+  },
   "Login": {
-    "loadingFallback": "Chargement...",
-    "title": "Connexion à votre compte",
+    "loadingFallback": "Chargement…",
+    "title": "Se connecter",
     "welcome": "Bienvenue chez FARMAU",
-    "emailLabel": "Adresse email",
-    "emailPlaceholder": "votre@email.com",
+    "lede": "Retrouvez vos commandes, vos favoris et accélérez vos prochaines réservations.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@email.com",
     "passwordLabel": "Mot de passe",
     "passwordPlaceholder": "••••••••",
     "submitButton": "Se connecter",
-    "submitLoading": "Connexion...",
-    "submitRedirecting": "Redirection...",
-    "successMessage": "Connexion réussie ! Redirection en cours...",
+    "submitLoading": "Connexion…",
+    "submitRedirecting": "Redirection…",
+    "successMessage": "Connexion réussie. Redirection en cours…",
     "forgotPassword": "Mot de passe oublié ?",
     "newCustomer": "Nouveau client ?",
     "createAccount": "Créer un compte",
+    "aside": {
+      "quote": "La dermo-cosmétique de qualité pharmaceutique, expliquée par celles et ceux qui la pratiquent chaque jour.",
+      "cite": "— Dra. María Pérez · Pharmacienne"
+    },
     "errors": {
       "unauthorized": "Accès non autorisé. Vous devez être administrateur.",
-      "invalidCredentials": "Email ou mot de passe incorrect",
-      "generic": "Une erreur est survenue lors de la connexion"
+      "invalidCredentials": "Email ou mot de passe incorrect.",
+      "oauth_failed": "Connexion via le fournisseur impossible. Réessayez ou utilisez votre email.",
+      "session_error": "Session perdue. Veuillez vous reconnecter.",
+      "callback_error": "Une erreur s'est produite après l'authentification.",
+      "middleware_error": "Erreur de sécurité. Veuillez vous reconnecter.",
+      "generic": "Une erreur est survenue lors de la connexion."
     }
   },
   "Signup": {
-    "title": "Créer un nouveau compte",
+    "title": "Créer un compte",
     "subtitle": "Rejoignez la communauté FARMAU",
-    "successMessage": "Inscription réussie ! Redirection vers la page de connexion...",
-    "firstNameLabel": "Prénom *",
-    "firstNamePlaceholder": "Jean",
-    "lastNameLabel": "Nom *",
-    "lastNamePlaceholder": "Dupont",
-    "emailLabel": "Adresse email *",
-    "emailPlaceholder": "votre@email.com",
-    "phoneLabel": "Téléphone *",
+    "lede": "Un compte pour conserver vos commandes, vos favoris et accélérer vos prochaines réservations.",
+    "successMessage": "Inscription réussie. Vérifiez votre email pour confirmer votre compte.",
+    "firstNameLabel": "Prénom",
+    "firstNamePlaceholder": "María",
+    "lastNameLabel": "Nom",
+    "lastNamePlaceholder": "Pérez",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@email.com",
+    "phoneLabel": "Téléphone",
     "phonePlaceholder": "+1 809 123 4567",
-    "phoneHint": "Requis pour la confirmation de réservation via WhatsApp",
+    "phoneHint": "Requis pour la confirmation de réservation via WhatsApp.",
     "birthDateLabel": "Date de naissance",
-    "passwordLabel": "Mot de passe *",
+    "passwordLabel": "Mot de passe",
+    "passwordHintInline": "min. 8 caractères",
     "passwordPlaceholder": "••••••••",
-    "passwordHint": "Minimum 6 caractères",
-    "confirmPasswordLabel": "Confirmer le mot de passe *",
-    "submitButton": "S'inscrire",
-    "submitLoading": "Inscription...",
-    "requiredFields": "* Champs obligatoires",
-    "alreadySignedUp": "Déjà inscrit ?",
-    "signInLink": "Connectez-vous",
+    "passwordHint": "Au minimum 8 caractères.",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "submitButton": "Créer un compte",
+    "submitLoading": "Création…",
+    "requiredFields": "Tous les champs sont obligatoires sauf la date de naissance.",
+    "alreadySignedUp": "Vous avez déjà un compte ?",
+    "signInLink": "Se connecter",
+    "termsAccept": "En créant un compte vous acceptez nos <terms>Conditions</terms> et notre <privacy>Politique de confidentialité</privacy>.",
+    "aside": {
+      "quote": "Chaque produit du catalogue a été sélectionné par un pharmacien-dermatologue.",
+      "cite": "— Comité scientifique FARMAU"
+    },
     "errors": {
-      "passwordsMismatch": "Les mots de passe ne correspondent pas",
-      "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
-      "missingFields": "Veuillez remplir tous les champs obligatoires",
-      "phoneRequired": "Le téléphone est obligatoire (requis pour la réservation)",
-      "emailAlreadyUsed": "Cet email est déjà utilisé. Veuillez vous connecter ou utiliser un autre email.",
-      "invalidEmail": "Format d'email invalide. Veuillez vérifier votre adresse email.",
-      "disposableEmail": "Les adresses email temporaires ne sont pas acceptées. Veuillez utiliser une adresse email valide.",
-      "generic": "Une erreur est survenue lors de l'inscription"
+      "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "missingFields": "Veuillez remplir tous les champs obligatoires.",
+      "phoneRequired": "Le téléphone est obligatoire (requis pour la réservation).",
+      "emailAlreadyUsed": "Cette adresse a déjà un compte. <signin>Se connecter</signin> à la place.",
+      "invalidEmail": "Format d'email invalide.",
+      "disposableEmail": "Les adresses email temporaires ne sont pas acceptées.",
+      "generic": "Une erreur est survenue lors de l'inscription."
+    }
+  },
+  "ForgotPassword": {
+    "title": "Récupérer votre mot de passe",
+    "lede": "Nous vous enverrons un lien par email pour créer un nouveau mot de passe.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "vous@email.com",
+    "submitButton": "Envoyer le lien",
+    "submitLoading": "Envoi…",
+    "successTitle": "Message envoyé.",
+    "successBody": "Si cette adresse est enregistrée, vous recevrez un lien sous peu. Pensez à vérifier vos spams.",
+    "retryHint": "Vous ne recevez rien ? Attendez 2 minutes avant de demander un nouveau lien.",
+    "aside": {
+      "quote": "Votre pharmacien vous connaît. Votre mot de passe, lui, non."
+    }
+  },
+  "ResetPassword": {
+    "title": "Nouveau mot de passe",
+    "lede": "Choisissez un mot de passe d'au moins 8 caractères.",
+    "newPasswordLabel": "Nouveau mot de passe",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "passwordHintInline": "min. 8 caractères",
+    "submitButton": "Enregistrer le nouveau mot de passe",
+    "submitLoading": "Enregistrement…",
+    "successMessage": "Mot de passe mis à jour. Redirection en cours…",
+    "expiredTitle": "Lien expiré",
+    "expiredBody": "Les liens de récupération expirent après 1 heure. Demandez-en un nouveau.",
+    "requestNewLink": "Demander un nouveau lien",
+    "signInLink": "← Se connecter",
+    "verifying": "Vérification du lien…",
+    "aside": {
+      "quote": "Choisissez un mot de passe mémorable."
+    },
+    "errors": {
+      "tooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "mismatch": "Les mots de passe ne correspondent pas.",
+      "expired": "Ce lien n'est plus valide.",
+      "missingToken": "Lien de récupération invalide ou expiré.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
     }
   },
   "Profile": {

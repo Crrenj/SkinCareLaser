@@ -1,20 +1,32 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { Mail, Lock, User, Phone, Calendar, ArrowRight } from 'lucide-react'
+import { AuthLayout, AuthDivider, AuthNotice } from '@/components/auth/AuthLayout'
+import { OAuthButtons } from '@/components/auth/OAuthButtons'
+import { PasswordInput } from '@/components/auth/PasswordInput'
+import { PasswordStrength } from '@/components/auth/PasswordStrength'
 
-/**
- * Page d'inscription
- * Permet aux utilisateurs de créer un nouveau compte
- * @returns Page d'inscription avec formulaire
- */
+type SignupErrorKey =
+  | 'passwordsMismatch'
+  | 'passwordTooShort'
+  | 'missingFields'
+  | 'phoneRequired'
+  | 'emailAlreadyUsed'
+  | 'invalidEmail'
+  | 'disposableEmail'
+  | 'generic'
+
+const MIN_PASSWORD_LENGTH = 8
+
 export default function SignupPage() {
   const t = useTranslations('Signup')
+  const tOAuth = useTranslations('OAuth')
   const router = useRouter()
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,95 +34,91 @@ export default function SignupPage() {
     firstName: '',
     lastName: '',
     phone: '',
-    birthDate: ''
+    birthDate: '',
   })
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<SignupErrorKey | null>(null)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  /**
-   * Gère les changements dans les champs du formulaire
-   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  /**
-   * Gère la soumission du formulaire d'inscription
-   * @param e - Event du formulaire
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    if (formData.password !== formData.confirmPassword) {
-      setError(t('errors.passwordsMismatch'))
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError(t('errors.passwordTooShort'))
-      return
-    }
-
     if (!formData.firstName || !formData.lastName) {
-      setError(t('errors.missingFields'))
+      setError('missingFields')
       return
     }
-
-    if (!formData.phone || !formData.phone.trim()) {
-      setError(t('errors.phoneRequired'))
+    if (!formData.phone.trim()) {
+      setError('phoneRequired')
+      return
+    }
+    if (formData.password.length < MIN_PASSWORD_LENGTH) {
+      setError('passwordTooShort')
+      return
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('passwordsMismatch')
       return
     }
 
     setLoading(true)
 
     try {
-      // Inscription avec Supabase
-      const { data, error } = await supabase.auth.signUp({
+      const origin =
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        (typeof window !== 'undefined' ? window.location.origin : '')
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${origin}/auth/callback`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
             phone: formData.phone,
-            birth_date: formData.birthDate
-          }
-        }
+            birth_date: formData.birthDate || null,
+          },
+        },
       })
 
-      if (error) {
-        // Gérer spécifiquement l'erreur d'email déjà utilisé
-        if (error.message.includes('already registered') ||
-            error.message.includes('already exists') ||
-            error.message.includes('duplicate key') ||
-            error.code === '23505') {
-          setError(t('errors.emailAlreadyUsed'))
-        } else if (error.message.includes('invalid') && error.message.includes('email')) {
-          setError(t('errors.invalidEmail'))
-        } else if (error.message.includes('disposable') || error.message.includes('fake')) {
-          setError(t('errors.disposableEmail'))
+      if (signUpError) {
+        if (
+          signUpError.message.includes('already registered') ||
+          signUpError.message.includes('already exists') ||
+          signUpError.message.includes('duplicate key') ||
+          signUpError.code === '23505'
+        ) {
+          setError('emailAlreadyUsed')
+        } else if (
+          signUpError.message.includes('invalid') &&
+          signUpError.message.includes('email')
+        ) {
+          setError('invalidEmail')
+        } else if (
+          signUpError.message.includes('disposable') ||
+          signUpError.message.includes('fake')
+        ) {
+          setError('disposableEmail')
         } else {
-          setError(error.message)
+          setError('generic')
         }
         return
       }
 
       if (data.user) {
-        // Mettre à jour le profil avec les informations supplémentaires
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
             first_name: formData.firstName,
             last_name: formData.lastName,
             phone: formData.phone,
-            birth_date: formData.birthDate || null
+            birth_date: formData.birthDate || null,
           })
           .eq('id', data.user.id)
 
@@ -119,224 +127,198 @@ export default function SignupPage() {
         }
 
         setSuccess(true)
-        
-        // Redirection vers login après 2 secondes
-        setTimeout(() => {
-          router.push('/login')
-        }, 2000)
+        setTimeout(() => router.push('/login'), 2200)
       }
     } catch (err) {
-      setError(t('errors.generic'))
+      setError('generic')
       console.error('Erreur signup:', err)
     } finally {
       setLoading(false)
     }
   }
 
+  // Le bouton reste cliquable pour que l'utilisateur reçoive un message
+  // d'erreur explicite (validation déclenchée dans `handleSubmit`).
+  const canSubmit = !loading && !success
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 bg-sand-200">
-      <div className="w-full max-w-md mx-4">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* En-tête avec couleur du navbar */}
-          <div className="px-8 py-6 bg-sand-400">
-            <div className="flex items-center justify-center mb-2">
-              <User className="w-12 h-12 text-ink-800" />
-            </div>
-            <h2 className="text-center text-2xl font-bold text-ink-800">
-              {t('title')}
-            </h2>
-            <p className="mt-2 text-center text-sm text-ink-800">
-              {t('subtitle')}
-            </p>
+    <AuthLayout quote={t('aside.quote')} cite={t('aside.cite')}>
+      <div>
+        <h1 className="font-serif text-[36px] leading-[1.1] tracking-[-0.01em] text-ink-900">
+          {t('title')}
+        </h1>
+        <p className="text-[14.5px] text-ink-700 leading-relaxed mt-2">
+          {t('lede')}
+        </p>
+      </div>
+
+      <OAuthButtons intent="signup" />
+
+      <AuthDivider label={tOAuth('dividerLabel')} />
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="firstName" className="text-[13px] font-medium text-ink-700">
+              {t('firstNameLabel')}
+            </label>
+            <input
+              id="firstName"
+              name="firstName"
+              type="text"
+              required
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder={t('firstNamePlaceholder')}
+              className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
+                         text-[14.5px] text-ink-900 placeholder:text-ink-500
+                         focus:outline-none focus:border-clay-700
+                         focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+            />
           </div>
-
-          {/* Formulaire */}
-          <form className="px-8 py-6 space-y-4" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-clay-50 border-l-4 border-brick-600 p-4 rounded">
-                <p className="text-sm text-brick-600">{error}</p>
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
-                <p className="text-sm text-olive-600">{t('successMessage')}</p>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {/* Nom et Prénom */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-ink-800 mb-1">
-                    {t('firstNameLabel')}
-                  </label>
-                  <input
-                    id="firstName"
-                    name="firstName"
-                    type="text"
-                    required
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('firstNamePlaceholder')}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-ink-800 mb-1">
-                    {t('lastNameLabel')}
-                  </label>
-                  <input
-                    id="lastName"
-                    name="lastName"
-                    type="text"
-                    required
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('lastNamePlaceholder')}
-                  />
-                </div>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('emailLabel')}
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('emailPlaceholder')}
-                  />
-                </div>
-              </div>
-
-              {/* Téléphone (obligatoire pour la réservation) */}
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('phoneLabel')}
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    required
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('phonePlaceholder')}
-                  />
-                </div>
-                <p className="mt-1 text-xs text-ink-500">{t('phoneHint')}</p>
-              </div>
-
-              {/* Date de naissance */}
-              <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('birthDateLabel')}
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="birthDate"
-                    name="birthDate"
-                    type="date"
-                    value={formData.birthDate}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                  />
-                </div>
-              </div>
-
-              {/* Mot de passe */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('passwordLabel')}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('passwordPlaceholder')}
-                  />
-                </div>
-                <p className="mt-1 text-xs text-ink-500">{t('passwordHint')}</p>
-              </div>
-
-              {/* Confirmer mot de passe */}
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('confirmPasswordLabel')}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    autoComplete="new-password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('passwordPlaceholder')}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={loading || success}
-                className="w-full flex items-center justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  t('submitLoading')
-                ) : (
-                  <>
-                    {t('submitButton')}
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="text-center text-xs text-ink-500">
-              {t('requiredFields')}
-            </div>
-          </form>
-
-          {/* Lien connexion */}
-          <div className="px-8 pb-6">
-            <div className="text-center text-sm text-ink-700">
-              {t('alreadySignedUp')}{' '}
-              <Link href="/login" className="font-medium text-clay-700 hover:text-clay-800 transition-colors">
-                {t('signInLink')}
-              </Link>
-            </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="lastName" className="text-[13px] font-medium text-ink-700">
+              {t('lastNameLabel')}
+            </label>
+            <input
+              id="lastName"
+              name="lastName"
+              type="text"
+              required
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder={t('lastNamePlaceholder')}
+              className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
+                         text-[14.5px] text-ink-900 placeholder:text-ink-500
+                         focus:outline-none focus:border-clay-700
+                         focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+            />
           </div>
         </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className="text-[13px] font-medium text-ink-700">
+            {t('emailLabel')}
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            placeholder={t('emailPlaceholder')}
+            className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
+                       text-[14.5px] text-ink-900 placeholder:text-ink-500
+                       focus:outline-none focus:border-clay-700
+                       focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="phone" className="text-[13px] font-medium text-ink-700">
+            {t('phoneLabel')}
+          </label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            required
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder={t('phonePlaceholder')}
+            className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
+                       text-[14.5px] text-ink-900 placeholder:text-ink-500
+                       focus:outline-none focus:border-clay-700
+                       focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+          />
+          <p className="text-[12px] text-ink-500">{t('phoneHint')}</p>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="birthDate" className="text-[13px] font-medium text-ink-700">
+            {t('birthDateLabel')}
+          </label>
+          <input
+            id="birthDate"
+            name="birthDate"
+            type="date"
+            value={formData.birthDate}
+            onChange={handleChange}
+            className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
+                       text-[14.5px] text-ink-900 placeholder:text-ink-500
+                       focus:outline-none focus:border-clay-700
+                       focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+          />
+        </div>
+
+        <div>
+          <PasswordInput
+            id="password"
+            name="password"
+            autoComplete="new-password"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            placeholder={t('passwordPlaceholder')}
+            label={t('passwordLabel')}
+            hint={t('passwordHintInline')}
+          />
+          <PasswordStrength password={formData.password} />
+        </div>
+
+        <PasswordInput
+          id="confirmPassword"
+          name="confirmPassword"
+          autoComplete="new-password"
+          required
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          placeholder={t('passwordPlaceholder')}
+          label={t('confirmPasswordLabel')}
+        />
+
+        {error && <AuthNotice variant="error">{t(`errors.${error}`)}</AuthNotice>}
+        {success && <AuthNotice variant="ok">{t('successMessage')}</AuthNotice>}
+
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="h-11 rounded-lg bg-clay-700 text-sand-50 text-[14.5px] font-medium
+                     hover:bg-clay-800 transition-colors
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? t('submitLoading') : t('submitButton')}
+        </button>
+
+        <p className="text-[12px] text-ink-500 leading-relaxed">
+          {t.rich('termsAccept', {
+            terms: (chunks) => (
+              <Link href="/cgv" className="text-clay-700 underline underline-offset-4 hover:text-clay-800">
+                {chunks}
+              </Link>
+            ),
+            privacy: (chunks) => (
+              <Link href="/confidentialite" className="text-clay-700 underline underline-offset-4 hover:text-clay-800">
+                {chunks}
+              </Link>
+            ),
+          })}
+        </p>
+      </form>
+
+      <div className="flex items-center justify-center gap-2 text-[13px]">
+        <span className="text-ink-700">{t('alreadySignedUp')}</span>
+        <Link
+          href="/login"
+          className="text-clay-700 underline underline-offset-4 hover:text-clay-800 font-medium"
+        >
+          {t('signInLink')}
+        </Link>
       </div>
-    </div>
+
+    </AuthLayout>
   )
-} 
+}

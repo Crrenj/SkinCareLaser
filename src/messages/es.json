@@ -267,59 +267,134 @@
     "emptyDescription": "Aún no tienes favoritos. Explora el catálogo y haz clic en el corazón para guardar tus productos preferidos.",
     "emptyCta": "Explorar el catálogo"
   },
+  "Auth": {
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "backToLogin": "← Volver a iniciar sesión",
+    "strength": {
+      "empty": "",
+      "weak": "Débil · añade más caracteres.",
+      "fair": "Aceptable · agrega un número o símbolo.",
+      "good": "Buena · puedes reforzarla con un símbolo.",
+      "strong": "Muy fuerte."
+    }
+  },
+  "AuthAside": {
+    "location": "Santo Domingo · República Dominicana"
+  },
+  "OAuth": {
+    "continueWith": "Continuar con {provider}",
+    "signupWith": "Registrarse con {provider}",
+    "dividerLabel": "o con tu correo"
+  },
   "Login": {
-    "loadingFallback": "Cargando...",
-    "title": "Inicia sesión en tu cuenta",
+    "loadingFallback": "Cargando…",
+    "title": "Iniciar sesión",
     "welcome": "Bienvenido a FARMAU",
-    "emailLabel": "Correo electrónico",
-    "emailPlaceholder": "tu@email.com",
+    "lede": "Accede para encontrar tus pedidos, tu lista de favoritos y agilizar tus próximas reservas.",
+    "emailLabel": "Correo",
+    "emailPlaceholder": "tu@correo.com",
     "passwordLabel": "Contraseña",
     "passwordPlaceholder": "••••••••",
     "submitButton": "Iniciar sesión",
-    "submitLoading": "Iniciando sesión...",
-    "submitRedirecting": "Redirigiendo...",
-    "successMessage": "¡Sesión iniciada! Redirigiendo...",
+    "submitLoading": "Iniciando…",
+    "submitRedirecting": "Redirigiendo…",
+    "successMessage": "Sesión iniciada. Redirigiendo…",
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "newCustomer": "¿Nuevo cliente?",
-    "createAccount": "Crear una cuenta",
+    "createAccount": "Crear cuenta",
+    "aside": {
+      "quote": "La dermocosmética de calidad farmacéutica, explicada por quienes la practican cada día.",
+      "cite": "— Dra. María Pérez · Farmacéutica"
+    },
     "errors": {
       "unauthorized": "Acceso no autorizado. Debes ser administrador.",
-      "invalidCredentials": "Correo o contraseña incorrectos",
-      "generic": "Se produjo un error al iniciar sesión"
+      "invalidCredentials": "Correo o contraseña incorrectos.",
+      "oauth_failed": "No pudimos completar el inicio de sesión. Inténtalo de nuevo o usa tu correo.",
+      "session_error": "Sesión perdida. Vuelve a iniciar sesión.",
+      "callback_error": "Ocurrió un error después de la autenticación.",
+      "middleware_error": "Error de seguridad. Vuelve a iniciar sesión.",
+      "generic": "Se produjo un error al iniciar sesión."
     }
   },
   "Signup": {
-    "title": "Crear una nueva cuenta",
+    "title": "Crear cuenta",
     "subtitle": "Únete a la comunidad FARMAU",
-    "successMessage": "¡Registro exitoso! Redirigiendo a la página de inicio de sesión...",
-    "firstNameLabel": "Nombre *",
-    "firstNamePlaceholder": "Juan",
-    "lastNameLabel": "Apellido *",
+    "lede": "Una cuenta para guardar tus pedidos, tu lista de favoritos y agilizar tus próximas reservas.",
+    "successMessage": "Registro exitoso. Revisa tu correo para confirmar la cuenta.",
+    "firstNameLabel": "Nombre",
+    "firstNamePlaceholder": "María",
+    "lastNameLabel": "Apellido",
     "lastNamePlaceholder": "Pérez",
-    "emailLabel": "Correo electrónico *",
-    "emailPlaceholder": "tu@email.com",
-    "phoneLabel": "Teléfono *",
+    "emailLabel": "Correo",
+    "emailPlaceholder": "tu@correo.com",
+    "phoneLabel": "Teléfono",
     "phonePlaceholder": "+1 809 123 4567",
-    "phoneHint": "Requerido para confirmar la reserva por WhatsApp",
+    "phoneHint": "Requerido para confirmar la reserva por WhatsApp.",
     "birthDateLabel": "Fecha de nacimiento",
-    "passwordLabel": "Contraseña *",
+    "passwordLabel": "Contraseña",
+    "passwordHintInline": "mínimo 8 caracteres",
     "passwordPlaceholder": "••••••••",
-    "passwordHint": "Mínimo 6 caracteres",
-    "confirmPasswordLabel": "Confirmar contraseña *",
-    "submitButton": "Registrarse",
-    "submitLoading": "Registrando...",
-    "requiredFields": "* Campos obligatorios",
+    "passwordHint": "Mínimo 8 caracteres.",
+    "confirmPasswordLabel": "Confirmar contraseña",
+    "submitButton": "Crear cuenta",
+    "submitLoading": "Creando…",
+    "requiredFields": "Todos los campos son obligatorios excepto la fecha de nacimiento.",
     "alreadySignedUp": "¿Ya tienes cuenta?",
-    "signInLink": "Inicia sesión",
+    "signInLink": "Iniciar sesión",
+    "termsAccept": "Al registrarte aceptas nuestros <terms>Términos</terms> y la <privacy>Política de privacidad</privacy>.",
+    "aside": {
+      "quote": "Cada producto del catálogo ha sido seleccionado por un farmacéutico-dermatólogo.",
+      "cite": "— Comité científico FARMAU"
+    },
     "errors": {
-      "passwordsMismatch": "Las contraseñas no coinciden",
-      "passwordTooShort": "La contraseña debe tener al menos 6 caracteres",
-      "missingFields": "Por favor completa todos los campos obligatorios",
-      "phoneRequired": "El teléfono es obligatorio (requerido para la reserva)",
-      "emailAlreadyUsed": "Este correo ya está en uso. Por favor inicia sesión o usa otro correo.",
-      "invalidEmail": "Formato de correo no válido. Por favor verifica tu dirección.",
-      "disposableEmail": "No se aceptan correos temporales. Por favor usa una dirección válida.",
-      "generic": "Se produjo un error al registrarse"
+      "passwordsMismatch": "Las contraseñas no coinciden.",
+      "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "missingFields": "Por favor completa todos los campos obligatorios.",
+      "phoneRequired": "El teléfono es obligatorio (requerido para la reserva).",
+      "emailAlreadyUsed": "Esta dirección ya tiene una cuenta. <signin>Inicia sesión</signin> en su lugar.",
+      "invalidEmail": "Formato de correo no válido.",
+      "disposableEmail": "No se aceptan correos temporales.",
+      "generic": "Se produjo un error al registrarse."
+    }
+  },
+  "ForgotPassword": {
+    "title": "Recuperar contraseña",
+    "lede": "Te enviaremos un enlace por correo para crear una nueva contraseña.",
+    "emailLabel": "Correo",
+    "emailPlaceholder": "tu@correo.com",
+    "submitButton": "Enviar enlace",
+    "submitLoading": "Enviando…",
+    "successTitle": "Mensaje enviado.",
+    "successBody": "Si esta dirección está registrada, recibirás un enlace en breve. Revisa también la carpeta de spam.",
+    "retryHint": "¿No te llega? Espera 2 minutos antes de pedir un nuevo enlace.",
+    "aside": {
+      "quote": "Tu farmacéutico te conoce. Tu contraseña, no."
+    }
+  },
+  "ResetPassword": {
+    "title": "Nueva contraseña",
+    "lede": "Elige una contraseña de al menos 8 caracteres.",
+    "newPasswordLabel": "Nueva contraseña",
+    "confirmPasswordLabel": "Confirmar contraseña",
+    "passwordHintInline": "mínimo 8 caracteres",
+    "submitButton": "Guardar nueva contraseña",
+    "submitLoading": "Guardando…",
+    "successMessage": "Contraseña actualizada. Redirigiendo…",
+    "expiredTitle": "Enlace caducado",
+    "expiredBody": "Los enlaces de recuperación expiran después de 1 hora. Solicita uno nuevo.",
+    "requestNewLink": "Solicitar un nuevo enlace",
+    "signInLink": "← Iniciar sesión",
+    "verifying": "Verificando enlace…",
+    "aside": {
+      "quote": "Elige una contraseña memorable."
+    },
+    "errors": {
+      "tooShort": "La contraseña debe tener al menos 8 caracteres.",
+      "mismatch": "Las contraseñas no coinciden.",
+      "expired": "Este enlace ya no es válido.",
+      "missingToken": "Enlace de recuperación inválido o caducado.",
+      "generic": "Ocurrió un error. Vuelve a intentarlo."
     }
   },
   "Profile": {

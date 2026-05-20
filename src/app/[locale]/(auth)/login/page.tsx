@@ -5,83 +5,73 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { Mail, Lock, User, ArrowRight } from 'lucide-react'
+import { AuthLayout, AuthDivider, AuthNotice } from '@/components/auth/AuthLayout'
+import { OAuthButtons } from '@/components/auth/OAuthButtons'
+import { PasswordInput } from '@/components/auth/PasswordInput'
 
-/**
- * ⚠️ ATTENTION - PAGE DE LOGIN PRINCIPALE ⚠️
- * 
- * Cette page gère la connexion utilisateur avec des corrections spéciales.
- * 
- * 🚨 NE PAS MODIFIER SANS AUTORISATION 🚨
- * 
- * Problèmes résolus :
- * - Redirection directe (pas via callback)
- * - Gestion des ports (3000 vs 3001)
- * - Sessions perdues après connexion
- * - Erreurs de navigation privée
- * - Vérification du statut admin
- * 
- * Fonctionnalités :
- * - Détection automatique du port
- * - Redirection intelligente
- * - Gestion des erreurs
- * - Support navigation privée limité
- * 
- * Si vous devez modifier ce code :
- * 1. Demandez l'autorisation
- * 2. Testez en navigation normale ET privée
- * 3. Vérifiez les redirections admin/user
- * 4. Testez avec différents ports
- */
+type LoginErrorKey =
+  | 'unauthorized'
+  | 'invalidCredentials'
+  | 'oauth_failed'
+  | 'session_error'
+  | 'callback_error'
+  | 'middleware_error'
+  | 'generic'
 
-/**
- * Composant de connexion avec gestion des search params
- */
 function LoginForm() {
   const t = useTranslations('Login')
+  const tOAuth = useTranslations('OAuth')
   const router = useRouter()
   const searchParams = useSearchParams()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<LoginErrorKey | null>(null)
   const [loading, setLoading] = useState(false)
   const [redirecting, setRedirecting] = useState(false)
 
-  // Récupérer la redirection et l'erreur depuis les params
-  const redirectedFrom = searchParams.get('redirectedFrom')
   const errorParam = searchParams.get('error')
+  const next = searchParams.get('next') ?? searchParams.get('redirectedFrom') ?? null
 
   useEffect(() => {
-    if (errorParam === 'unauthorized') {
-      setError(t('errors.unauthorized'))
+    if (errorParam) {
+      const known: LoginErrorKey[] = [
+        'unauthorized',
+        'oauth_failed',
+        'session_error',
+        'callback_error',
+        'middleware_error',
+      ]
+      if (known.includes(errorParam as LoginErrorKey)) {
+        setError(errorParam as LoginErrorKey)
+      }
     }
-    if (redirectedFrom) {
-      sessionStorage.setItem('redirect_to', redirectedFrom)
+    if (next) {
+      try {
+        sessionStorage.setItem('redirect_to', next)
+      } catch {
+        // sessionStorage indisponible (navigation privée) — ignoré
+      }
     }
-  }, [redirectedFrom, errorParam, t])
+  }, [errorParam, next])
 
-  /**
-   * Gère la soumission du formulaire de connexion
-   * @param e - Event du formulaire
-   */
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setLoading(true)
 
     try {
-      // Connexion avec Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setError(t('errors.invalidCredentials'))
-        } else {
-          setError(error.message)
-        }
+      if (signInError) {
+        setError(
+          signInError.message.includes('Invalid login credentials')
+            ? 'invalidCredentials'
+            : 'generic',
+        )
         setLoading(false)
         return
       }
@@ -96,173 +86,136 @@ function LoginForm() {
             .select('is_admin')
             .eq('id', data.session.user.id)
             .single()
-
           isAdmin = profile?.is_admin === true
         }
 
         setRedirecting(true)
         setLoading(false)
 
+        const savedRedirect =
+          typeof window !== 'undefined' ? sessionStorage.getItem('redirect_to') : null
         const redirectPath = isAdmin
           ? '/admin/product'
-          : sessionStorage.getItem('redirect_to') || '/'
+          : savedRedirect ?? next ?? '/'
 
-        // Pause courte pour laisser les cookies de session se poser avant la nav
-        await new Promise(resolve => setTimeout(resolve, 500))
-
-        router.push(redirectPath)
+        // Laisser un instant aux cookies de session de se poser
+        await new Promise((resolve) => setTimeout(resolve, 400))
 
         if (!isAdmin) {
-          sessionStorage.removeItem('redirect_to')
+          try {
+            sessionStorage.removeItem('redirect_to')
+          } catch {
+            // ignored
+          }
         }
+
+        router.push(redirectPath)
       }
     } catch (err) {
       console.error('Erreur login:', err)
-      setError(t('errors.generic'))
+      setError('generic')
       setLoading(false)
       setRedirecting(false)
     }
   }
 
+  const signupHref = next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-sand-200">
-      <div className="w-full max-w-md mx-4">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* En-tête avec couleur du navbar */}
-          <div className="px-8 py-6 bg-sand-400">
-            <div className="flex items-center justify-center mb-2">
-              <User className="w-12 h-12 text-ink-800" />
-            </div>
-            <h2 className="text-center text-2xl font-bold text-ink-800">
-              {t('title')}
-            </h2>
-            <p className="mt-2 text-center text-sm text-ink-800">
-              {t('welcome')}
-            </p>
-          </div>
+    <AuthLayout quote={t('aside.quote')} cite={t('aside.cite')}>
+      <h1 className="font-serif text-[36px] leading-[1.1] tracking-[-0.01em] text-ink-900">
+        {t('title')}
+      </h1>
 
-          {/* Formulaire */}
-          <form className="px-8 py-6 space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-clay-50 border-l-4 border-brick-600 p-4 rounded">
-                <p className="text-sm text-brick-600">{error}</p>
-              </div>
-            )}
+      <OAuthButtons intent="login" next={next ?? '/'} />
 
-            {redirecting && (
-              <div className="bg-sand-50 border-l-4 border-olive-600 p-4 rounded">
-                <p className="text-sm text-olive-600">{t('successMessage')}</p>
-              </div>
-            )}
+      <AuthDivider label={tOAuth('dividerLabel')} />
 
-            <div className="space-y-5">
-              {/* Email */}
-              <div className="relative">
-                <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('emailLabel')}
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('emailPlaceholder')}
-                    disabled={redirecting}
-                  />
-                </div>
-              </div>
-
-              {/* Mot de passe */}
-              <div className="relative">
-                <label htmlFor="password" className="block text-sm font-medium text-ink-800 mb-1">
-                  {t('passwordLabel')}
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 focus:border-transparent text-ink-900"
-                    placeholder={t('passwordPlaceholder')}
-                    disabled={redirecting}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading || redirecting}
-                className="w-full flex items-center justify-center py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  t('submitLoading')
-                ) : redirecting ? (
-                  t('submitRedirecting')
-                ) : (
-                  <>
-                    {t('submitButton')}
-                    <ArrowRight className="ml-2 w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Lien mot de passe oublié */}
-            <div className="text-center">
-              <Link href="#" className="text-sm text-ink-700 hover:text-ink-800 transition-colors">
-                {t('forgotPassword')}
-              </Link>
-            </div>
-          </form>
-
-          {/* Séparateur */}
-          <div className="px-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-sand-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-ink-500">{t('newCustomer')}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Lien inscription */}
-          <div className="px-8 py-6">
-            <Link
-              href="/signup"
-              className="w-full flex items-center justify-center py-3 px-4 border-2 border-clay-700 text-clay-700 font-medium rounded-lg hover:bg-clay-700 hover:text-white transition-colors duration-200"
-            >
-              {t('createAccount')}
-            </Link>
-          </div>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className="text-[13px] font-medium text-ink-700">
+            {t('emailLabel')}
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t('emailPlaceholder')}
+            disabled={redirecting}
+            className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
+                       text-[14.5px] text-ink-900 placeholder:text-ink-500
+                       focus:outline-none focus:border-clay-700
+                       focus:ring-[3px] focus:ring-clay-700/20 transition-colors
+                       disabled:opacity-60"
+          />
         </div>
 
+        <PasswordInput
+          id="password"
+          name="password"
+          autoComplete="current-password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder={t('passwordPlaceholder')}
+          label={t('passwordLabel')}
+          disabled={redirecting}
+        />
+
+        {error && <AuthNotice variant="error">{t(`errors.${error}`)}</AuthNotice>}
+
+        {redirecting && (
+          <AuthNotice variant="ok">{t('successMessage')}</AuthNotice>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || redirecting}
+          className="h-11 rounded-lg bg-clay-700 text-sand-50 text-[14.5px] font-medium
+                     hover:bg-clay-800 transition-colors
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading
+            ? t('submitLoading')
+            : redirecting
+              ? t('submitRedirecting')
+              : t('submitButton')}
+        </button>
+      </form>
+
+      <div className="flex items-center justify-between text-[13px]">
+        <Link
+          href="/forgot-password"
+          className="text-ink-700 border-b border-transparent hover:border-current pb-0.5 transition-colors"
+        >
+          {t('forgotPassword')}
+        </Link>
+        <Link
+          href={signupHref}
+          className="text-clay-700 underline underline-offset-4 hover:text-clay-800 font-medium"
+        >
+          {t('createAccount')}
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   )
 }
 
-/**
- * Page de connexion avec Suspense boundary
- */
 export default function LoginPage() {
+  const t = useTranslations('Login')
   return (
-    <Suspense fallback={<div>Chargement...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-sand-100 text-ink-700">
+          {t('loadingFallback')}
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   )
-} 
+}
