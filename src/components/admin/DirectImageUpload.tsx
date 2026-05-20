@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { PhotoIcon } from '@heroicons/react/24/outline'
 import { supabase } from '@/lib/supabaseClient'
 
@@ -116,9 +117,12 @@ export default function DirectImageUpload({
       
       {imageToShow ? (
         <div className="relative w-32 h-32 border rounded-lg overflow-hidden group">
-          <img 
-            src={imageToShow} 
-            alt="Preview" 
+          <Image
+            src={imageToShow}
+            alt="Preview"
+            width={128}
+            height={128}
+            unoptimized
             className="w-full h-full object-cover"
           />
           {currentImageUrl && (

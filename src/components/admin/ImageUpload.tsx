@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { PhotoIcon } from '@heroicons/react/24/outline'
 
 interface ImageUploadProps {
@@ -93,9 +94,12 @@ export default function ImageUpload({
       {/* Preview */}
       {imageToShow ? (
         <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
-          <img 
-            src={imageToShow} 
-            alt="Preview" 
+          <Image
+            src={imageToShow}
+            alt="Preview"
+            width={128}
+            height={128}
+            unoptimized
             className="w-full h-full object-cover"
           />
         </div>
