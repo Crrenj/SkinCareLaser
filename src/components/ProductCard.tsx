@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { Link } from '@/i18n/navigation'
 import { AddToCartButton } from './AddToCartButton'
+import { ProductCardHeart } from './ProductCardHeart'
 
 type ProductImage = { url: string; alt: string | null }
 export type ProductCardBadge = 'new' | 'promo' | 'best'
@@ -49,6 +50,10 @@ export default function ProductCard({ product }: Props) {
               price={product.price}
             />
           )}
+          <ProductCardHeart
+            productId={product.id}
+            className="absolute top-2.5 right-2.5 z-10"
+          />
           <div
             className={`flex items-center justify-center w-full h-full p-[18%] ${
               !inStock ? 'opacity-35' : ''

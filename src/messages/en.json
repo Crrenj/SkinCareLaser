@@ -259,6 +259,14 @@
     "successDescription": "We'll contact you via <strong>WhatsApp</strong> within the next 24h to schedule pickup at the pharmacy. After this delay, the reservation is automatically cancelled.",
     "backToCatalogue": "Back to catalogue"
   },
+  "Favoris": {
+    "pageTitle": "My favorites · FARMAU",
+    "pageDescription": "Find the products you've added to your favorites.",
+    "heading": "My favorites",
+    "count": "{count, plural, =0 {No favorites} =1 {1 favorite product} other {# favorite products}}",
+    "emptyDescription": "You haven't added any favorites yet. Browse the catalogue and click the heart to save your favorite products.",
+    "emptyCta": "Browse the catalogue"
+  },
   "Login": {
     "loadingFallback": "Loading...",
     "title": "Sign in to your account",

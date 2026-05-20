@@ -259,6 +259,14 @@
     "successDescription": "Nous vous contacterons via <strong>WhatsApp</strong> dans les prochaines 24h pour fixer l'heure de collecte en pharmacie. Passé ce délai, la réservation est automatiquement annulée.",
     "backToCatalogue": "Retour au catalogue"
   },
+  "Favoris": {
+    "pageTitle": "Mes favoris · FARMAU",
+    "pageDescription": "Retrouvez les produits que vous avez ajoutés à vos favoris.",
+    "heading": "Mes favoris",
+    "count": "{count, plural, =0 {Aucun favori} =1 {1 produit favori} other {# produits favoris}}",
+    "emptyDescription": "Vous n'avez encore aucun favori. Explorez le catalogue et cliquez sur le cœur pour épingler vos produits préférés.",
+    "emptyCta": "Explorer le catalogue"
+  },
   "Login": {
     "loadingFallback": "Chargement...",
     "title": "Connexion à votre compte",
