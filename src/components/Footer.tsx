@@ -1,72 +1,181 @@
-'use client'
-
-import Image from 'next/image'
-import { Link } from '@/i18n/navigation'
-import { Instagram, Facebook, Youtube } from 'lucide-react'
-import { SiTiktok } from 'react-icons/si'
+import { Instagram, Facebook } from 'lucide-react'
+import { SiTiktok, SiWhatsapp } from 'react-icons/si'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
+import { FooterNewsletter } from './footer/FooterNewsletter'
+
+const NEED_SLUGS = [
+  'hydratation',
+  'anti-age',
+  'protection-solaire',
+  'acne',
+  'taches',
+  'nettoyage',
+  'reparation',
+  'apaisant',
+  'cernes',
+  'eclat',
+  'rosacee',
+  'chute-de-cheveux',
+  'exfoliation',
+  'pellicules',
+] as const
+
+const SERVICE_LINKS = [
+  { key: 'contact', href: '/contact' },
+  { key: 'delivery', href: '/contact' },
+  { key: 'pharmacists', href: '/a-propos' },
+  { key: 'faq', href: '/contact' },
+  { key: 'help', href: '/contact' },
+] as const
+
+const BRAND_LINKS = [
+  { key: 'about', href: '/a-propos' },
+  { key: 'manifesto', href: '/a-propos' },
+  { key: 'brands', href: '/catalogue' },
+  { key: 'blog', href: '/a-propos' },
+  { key: 'stores', href: '/contact' },
+] as const
 
 export default function Footer() {
   const t = useTranslations('Footer')
+
   return (
-    <footer className="bg-sand-400 text-ink-800">
-      <div className="grid grid-cols-4 gap-8 p-8">
-        <div className="flex flex-col items-center">
-          <Image src="/image/logo_trans.png" alt={t('logoAlt')} width={100} height={100} />
-          <div className="flex gap-6 mt-4">
-            <Instagram className="w-6 h-6 cursor-pointer" />
-            <SiTiktok className="w-6 h-6 cursor-pointer" />
-            <Facebook className="w-6 h-6 cursor-pointer" />
-            <Youtube className="w-6 h-6 cursor-pointer" />
+    <footer className="bg-ink-900 text-sand-200 px-6 lg:px-16 pt-16 lg:pt-20">
+      <FooterNewsletter />
+
+      {/* Grid 4 colonnes (2fr + 3×1fr) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 lg:gap-12 mb-14">
+        {/* Brand column */}
+        <div className="flex flex-col gap-5 max-w-[320px]">
+          <span
+            className="inline-flex flex-col items-center justify-center w-14 h-14 rounded-full border-[1.5px] border-clay-400"
+            aria-label="FARMAU"
+          >
+            <span className="font-serif italic text-[24px] text-clay-400 leading-none">F</span>
+            <span className="font-sans text-[6.5px] uppercase tracking-[0.18em] text-clay-400 mt-px">
+              FARMAU
+            </span>
+          </span>
+          <p
+            className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-400"
+            dangerouslySetInnerHTML={{ __html: t.raw('tagline') as string }}
+          />
+          <div className="flex gap-2.5 mt-1">
+            <SocialIcon href="https://instagram.com" label={t('socials.instagram')}>
+              <Instagram size={16} strokeWidth={1.6} />
+            </SocialIcon>
+            <SocialIcon href="https://wa.me/18094122468" label={t('socials.whatsapp')}>
+              <SiWhatsapp size={16} />
+            </SocialIcon>
+            <SocialIcon href="https://facebook.com" label={t('socials.facebook')}>
+              <Facebook size={16} strokeWidth={1.6} />
+            </SocialIcon>
+            <SocialIcon href="https://tiktok.com" label={t('socials.tiktok')}>
+              <SiTiktok size={16} />
+            </SocialIcon>
           </div>
         </div>
-        <div>
-          <h3 className="font-semibold mb-2">{t('productsHeading')}</h3>
-          <ul className="space-y-1 text-sm">
-            <li>{t('products.cleansers')}</li>
-            <li>{t('products.serums')}</li>
-            <li>{t('products.masks')}</li>
-            <li>{t('products.essences')}</li>
-            <li>{t('products.dayCreams')}</li>
-            <li>{t('products.nightCreams')}</li>
-            <li>{t('products.eyeCare')}</li>
-            <li>{t('products.lipCare')}</li>
-            <li>{t('products.uvCare')}</li>
-          </ul>
-        </div>
-        <div>
-          <h3 className="font-semibold mb-2">{t('needsHeading')}</h3>
-          <ul className="space-y-1 text-sm">
-            <li>{t('needs.wrinkles')}</li>
-            <li>{t('needs.hydration')}</li>
-            <li>{t('needs.firmness')}</li>
-            <li>{t('needs.darkCircles')}</li>
-            <li>{t('needs.regeneration')}</li>
-            <li>{t('needs.antiAging')}</li>
-            <li>{t('needs.radiance')}</li>
-            <li>{t('needs.cleansing')}</li>
-            <li>{t('needs.sunProtection')}</li>
-            <li>{t('needs.wrinklesImperfections')}</li>
-            <li>{t('needs.spots')}</li>
-          </ul>
-        </div>
-        <div>
-          <h3 className="font-semibold mb-2">{t('serviceHeading')}</h3>
-          <ul className="space-y-1 text-sm">
-            <li><Link href="/contact" className="hover:underline">{t('service.contact')}</Link></li>
-            <li>{t('service.stores')}</li>
-          </ul>
-          <h3 className="font-semibold mt-4 mb-2">{t('brandHeading')}</h3>
-          <ul className="space-y-1 text-sm">
-            <li>{t('brand.about')}</li>
-            <li>{t('brand.values')}</li>
-            <li>{t('brand.team')}</li>
-          </ul>
-        </div>
+
+        <FooterColumn heading={t('needsHeading')}>
+          {NEED_SLUGS.map((slug) => (
+            <FooterLink key={slug} href={`/besoins/${slug}`} label={t(`needs.${slug}`)} />
+          ))}
+        </FooterColumn>
+
+        <FooterColumn heading={t('serviceHeading')}>
+          {SERVICE_LINKS.map((link) => (
+            <FooterLink key={link.key} href={link.href} label={t(`service.${link.key}`)} />
+          ))}
+        </FooterColumn>
+
+        <FooterColumn heading={t('brandHeading')}>
+          {BRAND_LINKS.map((link) => (
+            <FooterLink key={link.key} href={link.href} label={t(`brand.${link.key}`)} />
+          ))}
+        </FooterColumn>
       </div>
-      <div className="border-t border-sand-300 text-center p-4 text-sm">
-        {t('copyright')}
+
+      {/* Bottom bar */}
+      <div className="py-6 border-t border-ink-800 flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11.5px] text-ink-500">
+        <div>{t('bottom.copyright')}</div>
+        <div className="flex flex-wrap gap-5">
+          <FooterLegalLink href="/contact" label={t('bottom.terms')} />
+          <FooterLegalLink href="/contact" label={t('bottom.privacy')} />
+          <FooterLegalLink href="/contact" label={t('bottom.cookies')} />
+          <FooterLegalLink href="/contact" label={t('bottom.legal')} />
+        </div>
+        <div className="flex gap-2">
+          {['Visa', 'Mastercard', 'PayPal', 'Azul'].map((label) => (
+            <span
+              key={label}
+              className="font-mono text-[10px] px-2 py-1 border border-ink-700 rounded-sm text-ink-400"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
       </div>
     </footer>
+  )
+}
+
+function FooterColumn({
+  heading,
+  children,
+}: {
+  heading: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-clay-400 font-semibold mb-4">
+        {heading}
+      </div>
+      <ul className="list-none p-0 m-0 grid gap-2.5">{children}</ul>
+    </div>
+  )
+}
+
+function FooterLink({ href, label }: { href: string; label: string }) {
+  return (
+    <li>
+      <Link
+        href={href}
+        className="text-[13px] text-ink-400 hover:text-sand-50 transition-colors"
+      >
+        {label}
+      </Link>
+    </li>
+  )
+}
+
+function FooterLegalLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link href={href} className="text-ink-500 hover:text-sand-200 transition-colors">
+      {label}
+    </Link>
+  )
+}
+
+function SocialIcon({
+  href,
+  label,
+  children,
+}: {
+  href: string
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      className="w-9 h-9 rounded-full border border-ink-700 flex items-center justify-center text-sand-200 hover:bg-ink-800 hover:border-clay-600 hover:text-clay-400 transition-colors"
+    >
+      {children}
+    </a>
   )
 }
