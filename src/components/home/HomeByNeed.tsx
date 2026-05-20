@@ -2,30 +2,60 @@ import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { HomeSectionHeader } from './HomeSectionHeader'
 
-const CARDS = [
-  {
-    key: 'sun' as const,
-    href: '/catalogue?need=sunProtection',
-    gradient: 'from-sand-100 via-[#D89A75] to-clay-600',
-    icon: 'sun' as const,
-  },
-  {
-    key: 'repair' as const,
-    href: '/catalogue?need=sensitive',
-    gradient: 'from-sand-100 via-sand-400 to-ink-500',
-    icon: 'shield' as const,
-  },
-  {
-    key: 'brightness' as const,
-    href: '/catalogue?need=radiance',
-    gradient: 'from-sand-50 via-clay-200 to-clay-400',
-    icon: 'glow' as const,
-  },
-]
+export interface FeaturedNeed {
+  slug: string
+  name: string
+  count: number
+}
 
-/** 3 cards "Besoins" — illustrations gradient sand/clay + icône blanche. */
-export async function HomeByNeed() {
+interface HomeByNeedProps {
+  /** Tags marqués `featured_on_home` en DB. Si vide, on tombe sur le set statique. */
+  featured?: FeaturedNeed[]
+}
+
+/** Set statique de secours quand aucun tag n'est marqué featured_on_home. */
+const STATIC_CARDS = [
+  { slug: 'sunProtection', key: 'sun' as const },
+  { slug: 'sensitive', key: 'repair' as const },
+  { slug: 'radiance', key: 'brightness' as const },
+] as const
+
+/** Mapping slug → visual (gradient + icon). Inconnu = défaut sand neutre. */
+const VISUAL_BY_SLUG: Record<string, { gradient: string; icon: 'sun' | 'shield' | 'glow' }> = {
+  // Slugs habituels (statique + tags potentiels en DB)
+  sunProtection: { gradient: 'from-sand-100 via-[#D89A75] to-clay-600', icon: 'sun' },
+  'protection-solaire': { gradient: 'from-sand-100 via-[#D89A75] to-clay-600', icon: 'sun' },
+  sensitive: { gradient: 'from-sand-100 via-sand-400 to-ink-500', icon: 'shield' },
+  reparation: { gradient: 'from-sand-100 via-sand-400 to-ink-500', icon: 'shield' },
+  apaisant: { gradient: 'from-sand-100 via-sand-400 to-ink-500', icon: 'shield' },
+  radiance: { gradient: 'from-sand-50 via-clay-200 to-clay-400', icon: 'glow' },
+  eclat: { gradient: 'from-sand-50 via-clay-200 to-clay-400', icon: 'glow' },
+}
+
+const DEFAULT_VISUAL = { gradient: 'from-sand-100 to-sand-400', icon: 'glow' as const }
+
+/** 3 cards "Besoins". Source : tags featured_on_home, ou fallback statique. */
+export async function HomeByNeed({ featured = [] }: HomeByNeedProps) {
   const t = await getTranslations('Home.byNeed')
+
+  // Si la DB n'a pas (encore) marqué 3 tags en featured, on tombe sur le statique
+  // — mais on conserve le nombre de produits = 0 (le compteur est juste si DB feed).
+  const cards = featured.length >= 3
+    ? featured.slice(0, 3).map((tag) => ({
+        slug: tag.slug,
+        name: tag.name,
+        count: tag.count,
+        visual: VISUAL_BY_SLUG[tag.slug] ?? DEFAULT_VISUAL,
+        useStatic: false as const,
+      }))
+    : STATIC_CARDS.map((c) => ({
+        slug: c.slug,
+        name: '', // les strings sont dans la traduction
+        count: 0,
+        visual: VISUAL_BY_SLUG[c.slug] ?? DEFAULT_VISUAL,
+        useStatic: true as const,
+        key: c.key,
+      }))
 
   return (
     <section className="px-6 lg:px-14 py-16 bg-sand-100">
@@ -36,33 +66,45 @@ export async function HomeByNeed() {
         ctaHref="/catalogue"
       />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {CARDS.map((card) => (
-          <Link
-            key={card.key}
-            href={card.href}
-            className="group block bg-white rounded-md border border-sand-300 overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_36px_-16px_rgba(31,27,22,0.16)]"
-          >
-            <div
-              className={`aspect-[4/3] bg-gradient-to-br ${card.gradient} flex items-center justify-center`}
+        {cards.map((card) => {
+          const title = card.useStatic ? t(`cards.${card.key}.title`) : card.name
+          const description = card.useStatic
+            ? t(`cards.${card.key}.description`)
+            : `${card.count} ${t('productCountSuffix')}`
+          const eyebrow = card.useStatic
+            ? t(`cards.${card.key}.eyebrow`)
+            : `${card.count} ${t('productCountSuffix')}`
+          const cta = card.useStatic ? t(`cards.${card.key}.cta`) : t('cards.sun.cta')
+          const href = `/catalogue?need=${encodeURIComponent(card.slug)}`
+
+          return (
+            <Link
+              key={card.slug}
+              href={href}
+              className="group block bg-white rounded-md border border-sand-300 overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_36px_-16px_rgba(31,27,22,0.16)]"
             >
-              <NeedIcon name={card.icon} />
-            </div>
-            <div className="p-6">
-              <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-clay-700 font-semibold mb-2">
-                {t(`cards.${card.key}.eyebrow`)}
+              <div
+                className={`aspect-[4/3] bg-gradient-to-br ${card.visual.gradient} flex items-center justify-center`}
+              >
+                <NeedIcon name={card.visual.icon} />
               </div>
-              <h3 className="font-serif text-[24px] md:text-[26px] leading-tight -tracking-[0.015em] text-ink-900 mb-2.5">
-                {t(`cards.${card.key}.title`)}
-              </h3>
-              <p className="text-[13.5px] leading-relaxed text-ink-700 mb-3.5">
-                {t(`cards.${card.key}.description`)}
-              </p>
-              <span className="text-[12px] font-semibold uppercase tracking-wider text-clay-700">
-                {t(`cards.${card.key}.cta`)}
-              </span>
-            </div>
-          </Link>
-        ))}
+              <div className="p-6">
+                <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-clay-700 font-semibold mb-2">
+                  {eyebrow}
+                </div>
+                <h3 className="font-serif text-[24px] md:text-[26px] leading-tight -tracking-[0.015em] text-ink-900 mb-2.5">
+                  {title}
+                </h3>
+                <p className="text-[13.5px] leading-relaxed text-ink-700 mb-3.5">
+                  {description}
+                </p>
+                <span className="text-[12px] font-semibold uppercase tracking-wider text-clay-700">
+                  {cta}
+                </span>
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </section>
   )

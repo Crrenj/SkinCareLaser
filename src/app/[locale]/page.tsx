@@ -58,8 +58,13 @@ interface BannerRow {
   position: number
 }
 
+interface BestsellerIdRow {
+  id: string | null
+}
+
 interface RawBestseller {
   id: string
+  slug: string | null
   name: string
   description: string | null
   price: string | number
@@ -72,6 +77,7 @@ interface RawBestseller {
 
 interface MappedBestseller {
   id: string
+  slug?: string
   name: string
   description?: string
   price: number
@@ -79,6 +85,12 @@ interface MappedBestseller {
   images: { url: string; alt: string | null }[]
   brand?: string
   range?: string
+}
+
+interface FeaturedNeedTag {
+  slug: string
+  name: string
+  count: number
 }
 
 interface BrandRow {
@@ -103,34 +115,20 @@ export default async function LocaleHome({
 
   const supabase = await createSupabaseServerClient()
 
-  // Fetch en parallèle : bannières CMS + bestsellers + marques + quote.
-  const [bannersRes, bestsellersRes, brandsRes, quoteRes] = await Promise.all([
+  // Fetch en parallèle : bannières CMS + bestsellers + marques + quote + featured needs.
+  const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds] = await Promise.all([
     supabase
       .from('banners')
       .select('id, title, description, image_url, link_url, link_text, banner_type, position')
       .eq('is_active', true)
       .order('position', { ascending: true }),
-    supabase
-      .from('products')
-      .select(`
-        id,
-        name,
-        description,
-        price,
-        currency,
-        product_images ( url, alt ),
-        product_ranges (
-          range:ranges ( name, brand:brands ( name ) )
-        )
-      `)
-      .limit(4)
-      .returns<RawBestseller[]>(),
+    fetchBestsellers(supabase),
     supabase.from('brands').select('id, name, slug').order('name', { ascending: true }),
     fetchHomeQuote(supabase),
+    fetchFeaturedNeeds(supabase),
   ])
 
   const activeBanners = (bannersRes.data ?? []) as BannerRow[]
-  const bestsellers: MappedBestseller[] = (bestsellersRes.data ?? []).map(mapBestseller)
   const brands = (brandsRes.data ?? []) as BrandRow[]
 
   return (
@@ -140,7 +138,7 @@ export default async function LocaleHome({
       <main id="main-content" className="flex-1">
         <HomeHero />
         <HomeBestsellers products={bestsellers} />
-        <HomeByNeed />
+        <HomeByNeed featured={featuredNeeds} />
 
         {/* Pharmacist quote — si un produit a une advice */}
         {quoteRes && (
@@ -187,6 +185,7 @@ function mapBestseller(p: RawBestseller): MappedBestseller {
   const firstRange = p.product_ranges?.[0]?.range ?? null
   return {
     id: p.id,
+    slug: p.slug ?? undefined,
     name: p.name,
     description: p.description ?? undefined,
     price: Number(p.price),
@@ -195,6 +194,54 @@ function mapBestseller(p: RawBestseller): MappedBestseller {
     brand: firstRange?.brand?.name ?? undefined,
     range: firstRange?.name ?? undefined,
   }
+}
+
+/**
+ * Bestsellers via la vue v_bestsellers (tri sold_30d desc + is_featured + created_at).
+ * En 2 requêtes : 4 IDs de la vue, puis détails produits avec joins brand/range.
+ */
+async function fetchBestsellers(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<MappedBestseller[]> {
+  const { data: idRows, error: viewErr } = await supabase
+    .from('v_bestsellers')
+    .select('id')
+    .limit(4)
+    .returns<BestsellerIdRow[]>()
+
+  if (viewErr || !idRows || idRows.length === 0) {
+    // Fallback : vue absente ou vide → premiers 4 produits actifs (degraded).
+    const { data } = await supabase
+      .from('products')
+      .select(`
+        id, slug, name, description, price, currency,
+        product_images ( url, alt ),
+        product_ranges ( range:ranges ( name, brand:brands ( name ) ) )
+      `)
+      .limit(4)
+      .returns<RawBestseller[]>()
+    return (data ?? []).map(mapBestseller)
+  }
+
+  const ids = idRows.map((r) => r.id).filter((id): id is string => !!id)
+  if (ids.length === 0) return []
+
+  const { data } = await supabase
+    .from('products')
+    .select(`
+      id, slug, name, description, price, currency,
+      product_images ( url, alt ),
+      product_ranges ( range:ranges ( name, brand:brands ( name ) ) )
+    `)
+    .in('id', ids)
+    .returns<RawBestseller[]>()
+
+  // Preserve l'ordre de la vue (sold_30d desc).
+  const byId = new Map((data ?? []).map((p) => [p.id, p]))
+  return ids
+    .map((id) => byId.get(id))
+    .filter((p): p is RawBestseller => p !== undefined)
+    .map(mapBestseller)
 }
 
 /**
@@ -212,7 +259,6 @@ async function fetchHomeQuote(
     .limit(10)
     .returns<QuoteProductRow[]>()
 
-  // Colonne manquante ou erreur → on cache silencieusement la section.
   if (error || !data || data.length === 0) return null
 
   const random = data[Math.floor(Math.random() * data.length)]
@@ -222,4 +268,44 @@ async function fetchHomeQuote(
     quote: random.pharmacist_advice,
     name: random.pharmacist_name ?? 'Équipe FARMAU',
   }
+}
+
+/**
+ * 3 tags marqués `featured_on_home` + count produits associés.
+ * Si moins de 3, le composant HomeByNeed complète avec son fallback statique.
+ */
+interface FeaturedTagRow {
+  id: string
+  slug: string
+  name: string
+}
+
+async function fetchFeaturedNeeds(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<FeaturedNeedTag[]> {
+  const { data: tagRows, error } = await supabase
+    .from('tags')
+    .select('id, slug, name')
+    .eq('featured_on_home', true)
+    .limit(3)
+    .returns<FeaturedTagRow[]>()
+
+  if (error || !tagRows || tagRows.length === 0) return []
+
+  // Compte produits par tag — 1 query par tag (3 max, négligeable).
+  const counts = await Promise.all(
+    tagRows.map(async (t) => {
+      const { count } = await supabase
+        .from('product_tags')
+        .select('product_id', { count: 'exact', head: true })
+        .eq('tag_id', t.id)
+      return count ?? 0
+    }),
+  )
+
+  return tagRows.map((t, i) => ({
+    slug: t.slug,
+    name: t.name,
+    count: counts[i],
+  }))
 }
