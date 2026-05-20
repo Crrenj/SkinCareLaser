@@ -37,11 +37,10 @@ export default async function ConfirmationPage({
     redirect(`/${locale}/login?next=/reservation/confirmation/${id}`)
   }
 
-  // Charge la réservation pour valider l'appartenance + récupérer le snapshot
   const { data: reservation } = await supabase
     .from('reservations')
     .select(
-      'id, user_id, contact_name, contact_phone, total_price, currency, status, created_at',
+      'id, user_id, contact_name, contact_phone, total_items, total_price, currency, status, created_at',
     )
     .eq('id', id)
     .maybeSingle()
@@ -49,6 +48,56 @@ export default async function ConfirmationPage({
   if (!reservation || reservation.user_id !== session.user.id) {
     redirect(`/${locale}/account/profile`)
   }
+
+  const { data: items } = await supabase
+    .from('reservation_items')
+    .select(
+      `
+      id,
+      product_id,
+      product_name,
+      unit_price,
+      quantity,
+      products (
+        product_images (url, alt),
+        product_ranges (
+          ranges (
+            brands (name)
+          )
+        )
+      )
+    `,
+    )
+    .eq('reservation_id', reservation.id)
+    .order('created_at', { ascending: true })
+
+  const enrichedItems = (items ?? []).map((row) => {
+    const item = row as unknown as {
+      id: string
+      product_id: string | null
+      product_name: string
+      unit_price: number
+      quantity: number
+      products?: {
+        product_images?: Array<{ url: string; alt: string | null }>
+        product_ranges?: Array<{
+          ranges?: { brands?: { name?: string | null } | null } | null
+        }>
+      } | null
+    }
+    const brandName =
+      item.products?.product_ranges?.[0]?.ranges?.brands?.name ?? null
+    const image = item.products?.product_images?.[0]?.url ?? null
+    return {
+      id: item.id,
+      productId: item.product_id,
+      name: item.product_name,
+      brand: brandName,
+      image,
+      unitPrice: Number(item.unit_price),
+      quantity: item.quantity,
+    }
+  })
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-100">
@@ -59,6 +108,8 @@ export default async function ConfirmationPage({
           contactName={reservation.contact_name ?? ''}
           contactPhone={reservation.contact_phone ?? ''}
           totalPrice={Number(reservation.total_price ?? 0)}
+          createdAt={reservation.created_at ?? null}
+          items={enrichedItems}
         />
       </main>
       <Footer />
