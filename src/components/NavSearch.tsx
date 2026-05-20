@@ -85,6 +85,16 @@ export const NavSearch = forwardRef<NavSearchHandle, NavSearchProps>(
       { revalidateOnFocus: false, keepPreviousData: true },
     )
     const hits = data?.hits ?? []
+    const hasResults = hits.length > 0
+    const showNoResults = shouldFetch && !isLoading && !hasResults
+
+    // Bestsellers fallback : prefetché quand l'utilisateur n'a aucun résultat.
+    const { data: bestsellersData } = useSWR<SearchResponse>(
+      showNoResults ? '/api/search?bestsellers=1&limit=3' : null,
+      fetcher,
+      { revalidateOnFocus: false, revalidateOnReconnect: false },
+    )
+    const bestsellerHits = bestsellersData?.hits ?? []
 
     // Fermeture sur clic extérieur.
     useEffect(() => {
@@ -200,9 +210,6 @@ export const NavSearch = forwardRef<NavSearchHandle, NavSearchProps>(
       [navItems, highlighted, openProduct, runSearch, query],
     )
 
-    const hasResults = hits.length > 0
-    const showNoResults = shouldFetch && !isLoading && !hasResults
-
     let highlightCursor = 0
 
     return (
@@ -254,26 +261,47 @@ export const NavSearch = forwardRef<NavSearchHandle, NavSearchProps>(
                   </div>
                 )}
                 {showNoResults && (
-                  <div className="px-4 py-5 text-center">
-                    <div className="font-serif italic text-[20px] text-ink-900 mb-1.5">
-                      {t('noResultsTitle')}{' '}
-                      <span className="not-italic">&ldquo;{debouncedQuery}&rdquo;</span>
+                  <>
+                    <div className="px-4 py-5 text-center">
+                      <div className="font-serif italic text-[20px] text-ink-900 mb-1.5">
+                        {t('noResultsTitle')}{' '}
+                        <span className="not-italic">&ldquo;{debouncedQuery}&rdquo;</span>
+                      </div>
+                      <div className="text-[12.5px] text-ink-500">
+                        {t('noResultsHelp')}{' '}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOpen(false)
+                            router.push('/catalogue')
+                          }}
+                          className="text-clay-700 font-medium"
+                        >
+                          {t('noResultsCategoriesLink')}
+                        </button>
+                        .
+                      </div>
                     </div>
-                    <div className="text-[12.5px] text-ink-500">
-                      {t('noResultsHelp')}{' '}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpen(false)
-                          router.push('/catalogue')
-                        }}
-                        className="text-clay-700 font-medium"
-                      >
-                        {t('noResultsCategoriesLink')}
-                      </button>
-                      .
-                    </div>
-                  </div>
+                    {bestsellerHits.length > 0 && (
+                      <div className="px-4 pb-2 border-t border-sand-200 pt-3 mt-1">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.12em] text-ink-500 py-2">
+                          {t('bestsellersHeading')}
+                        </div>
+                        {bestsellerHits.map((hit) => (
+                          <SearchResultRow
+                            key={hit.id}
+                            hit={hit}
+                            query=""
+                            active={false}
+                            onMouseEnter={() => {
+                              /* noop : bestsellers ne sont pas dans navItems */
+                            }}
+                            onClick={() => openProduct(hit)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </>
             ) : (
