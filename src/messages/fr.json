@@ -91,6 +91,7 @@
     "homeAriaLabel": "Accueil FARMAU",
     "logoAlt": "Logo FARMAU",
     "contactAriaLabel": "Contact par email",
+    "whatsappAriaLabel": "Nous contacter par WhatsApp",
     "adminDashboardAriaLabel": "Dashboard admin",
     "signOut": "Se déconnecter",
     "signIn": "Se connecter",

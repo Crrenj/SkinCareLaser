@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Mail, ShoppingBag, User as UserIcon, Heart, Menu, Shield } from 'lucide-react'
+import { ShoppingBag, User as UserIcon, Heart, Menu, Shield } from 'lucide-react'
+import { SiWhatsapp } from 'react-icons/si'
 import { useTranslations } from 'next-intl'
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -16,6 +17,7 @@ import { LocaleSwitcher } from './LocaleSwitcher'
 const NAV_LINKS = [
   { href: '/', labelKey: 'home' as const },
   { href: '/catalogue', labelKey: 'catalogue' as const },
+  { href: '/marques', labelKey: 'brands' as const },
   { href: '/a-propos', labelKey: 'about' as const },
 ]
 
@@ -90,7 +92,7 @@ export default function NavBar() {
               label={t('myAccountAriaLabel')}
             />
             <IconLinkButton
-              href="/account/profile"
+              href="/favoris"
               icon={<Heart size={22} strokeWidth={1.6} />}
               label={t('favoritesAriaLabel')}
             />
@@ -102,14 +104,17 @@ export default function NavBar() {
           <Logo size={64} />
         </div>
 
-        {/* Droite : contact (≥ md) + admin + panier */}
+        {/* Droite : WhatsApp (≥ md) + admin + panier */}
         <div className="flex items-center justify-end gap-1.5">
-          <IconLinkButton
-            href="/contact"
-            icon={<Mail size={22} strokeWidth={1.6} />}
-            label={t('contactAriaLabel')}
-            className="hidden md:inline-flex"
-          />
+          <a
+            href="https://wa.me/18094122468"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t('whatsappAriaLabel')}
+            className="hidden md:inline-flex h-10 w-10 items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+          >
+            <SiWhatsapp size={22} />
+          </a>
           {isAdmin && (
             <IconLinkButton
               href="/admin/product"
