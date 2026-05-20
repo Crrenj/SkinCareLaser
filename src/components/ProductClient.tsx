@@ -98,8 +98,11 @@ export default function ProductClient({
       <Breadcrumb items={breadcrumbItems} />
 
       {/* ── HERO ── */}
-      <section className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 px-6 lg:px-8 py-10 lg:py-14 max-w-7xl mx-auto">
-        <PdpGallery images={product.images} name={product.name} />
+      <section className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 px-6 lg:px-8 py-10 lg:py-14 max-w-7xl mx-auto lg:items-start">
+        {/* Gallery sticky pendant le scroll de la colonne info à droite */}
+        <div className="lg:sticky lg:top-32">
+          <PdpGallery images={product.images} name={product.name} />
+        </div>
 
         <div className="pt-2">
           {product.brand && (
