@@ -37,6 +37,7 @@ type RangeJoin = {
 }
 type RawProduct = {
   id: string
+  slug: string
   name: string
   description: string | null
   price: string | number
@@ -61,6 +62,7 @@ export default async function Catalogue({
     .from('products')
     .select(`
       id,
+      slug,
       name,
       description,
       price,
@@ -106,6 +108,7 @@ export default async function Catalogue({
     const firstRange = p.product_ranges?.[0]?.range ?? null
     return {
       id: p.id,
+      slug: p.slug,
       name: p.name,
       description: p.description ?? '',
       price: Number(p.price),

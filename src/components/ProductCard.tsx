@@ -7,6 +7,9 @@ export type ProductCardBadge = 'new' | 'promo' | 'best'
 
 type Product = {
   id: string
+  /** Optional: when missing, the link falls back to the UUID and /product/[slug]
+   *  performs a 308 redirect to the canonical slug URL. */
+  slug?: string
   name: string
   price: number
   oldPrice?: number
@@ -29,7 +32,7 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <Link
-      href={`/product/${product.id}`}
+      href={`/product/${product.slug ?? product.id}`}
       prefetch={false}
       className="group block h-full"
     >

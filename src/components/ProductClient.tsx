@@ -17,6 +17,7 @@ import { PdpStickyBar } from '@/components/pdp/PdpStickyBar'
 
 export type MappedProduct = {
   id: string
+  slug: string
   name: string
   description?: string
   price: number
@@ -187,6 +188,7 @@ export default function ProductClient({
                 key={p.id}
                 product={{
                   id: p.id,
+                  slug: p.slug,
                   name: p.name,
                   description: p.description,
                   price: p.price,

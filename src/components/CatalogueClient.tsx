@@ -8,6 +8,7 @@ import Filters from '@/components/Filters'
 interface TagItem { label: string; category: string }
 interface Product {
   id: string
+  slug: string
   name: string
   price: number
   currency: string

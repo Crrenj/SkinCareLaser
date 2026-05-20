@@ -11,6 +11,7 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
  */
 type SearchHit = {
   id: string
+  slug: string
   name: string
   brand: string
   price: number
@@ -20,6 +21,7 @@ type SearchHit = {
 
 interface RawHit {
   id: string
+  slug: string
   name: string
   price: string | number
   currency: string
@@ -47,6 +49,7 @@ export async function GET(request: NextRequest) {
     .from('products')
     .select(`
       id,
+      slug,
       name,
       price,
       currency,
@@ -71,6 +74,7 @@ export async function GET(request: NextRequest) {
     const image = p.product_images?.[0] ?? null
     return {
       id: p.id,
+      slug: p.slug,
       name: p.name,
       brand,
       price: Number(p.price),

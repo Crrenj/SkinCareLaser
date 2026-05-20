@@ -39,13 +39,13 @@ test.describe('Golden path', () => {
       timeout: 60_000,
     })
 
-    const firstHeading = page.locator('[data-testid="product-card"] h2').first()
+    const firstHeading = page.locator('[data-testid="product-card"] h3').first()
     const productName = (await firstHeading.innerText()).trim()
 
     // Click + attente navigation en une seule étape (Next.js Link compile
-    // /product/[id] à froid au premier hit -> bump 60s).
+    // /product/[slug] à froid au premier hit -> bump 60s).
     await Promise.all([
-      page.waitForURL(/\/product\/[a-f0-9-]{36}/, { timeout: 60_000 }),
+      page.waitForURL(/\/product\/[a-z0-9][a-z0-9-]*/i, { timeout: 60_000 }),
       firstHeading.click(),
     ])
 

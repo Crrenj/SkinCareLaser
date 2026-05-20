@@ -4,23 +4,43 @@ import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductClient from '@/components/ProductClient'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { JSX } from 'react'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 
 export const revalidate = 60
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+async function redirectIfUuid(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  locale: string,
+  handle: string,
+): Promise<void> {
+  if (!UUID_RE.test(handle)) return
+  const { data } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('id', handle)
+    .maybeSingle()
+  if (data?.slug) {
+    permanentRedirect(`/${locale}/product/${data.slug}`)
+  }
+}
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
-  const { locale, id } = await params
+  const { locale, slug } = await params
   const supabase = await createSupabaseServerClient()
+  await redirectIfUuid(supabase, locale, slug)
+
   const { data: prod } = await supabase
     .from('products')
     .select('name, description, image_url, product_images(url), product_ranges(range:ranges(name, brand:brands(name)))')
-    .eq('id', id)
+    .eq('slug', slug)
     .maybeSingle()
 
   const t = await getTranslations({ locale, namespace: 'PageMeta.product' })
@@ -50,8 +70,8 @@ export async function generateMetadata({
     title,
     description: desc,
     alternates: {
-      canonical: localizedPath(locale, `/product/${id}`),
-      languages: buildLanguageAlternates(`/product/${id}`),
+      canonical: localizedPath(locale, `/product/${slug}`),
+      languages: buildLanguageAlternates(`/product/${slug}`),
     },
     openGraph: {
       title,
@@ -65,9 +85,6 @@ export async function generateMetadata({
 
 type TagItem = { name: string; tag_type: string }
 
-// Forme retournée par Supabase pour les jointures :
-// PostgREST renvoie un object pour 1-1 et un array pour 1-n, mais nos relations
-// (range, brand, tag) sont aliasées avec `name:relation` ce qui force un object.
 type RangeJoin = {
   range: { id: string; name: string; brand: { id: string; name: string } | null } | null
 }
@@ -79,6 +96,7 @@ type RawProduct = {
   description: string | null
   price: string | number
   currency: string
+  slug: string
   product_images: { url: string; alt: string | null }[] | null
   product_ranges: RangeJoin[] | null
   product_tags: TagJoin[] | null
@@ -90,6 +108,7 @@ type MappedProduct = {
   description: string
   price: number
   currency: string
+  slug: string
   images: { url: string; alt: string | null }[]
   brand: string
   range: string
@@ -102,6 +121,7 @@ const PRODUCT_SELECT = `
   description,
   price,
   currency,
+  slug,
   product_images ( url, alt ),
   product_ranges (
     range:ranges (
@@ -132,6 +152,7 @@ function mapProduct(raw: RawProduct): MappedProduct {
     description: raw.description ?? '',
     price: Number(raw.price),
     currency: raw.currency,
+    slug: raw.slug,
     images: raw.product_images ?? [],
     brand: firstRange?.brand?.name ?? '',
     range: firstRange?.name ?? '',
@@ -142,16 +163,18 @@ function mapProduct(raw: RawProduct): MappedProduct {
 export default async function ProductPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ locale: string; slug: string }>
 }): Promise<JSX.Element> {
-  const { id } = await params
+  const { locale, slug } = await params
   const supabase = await createSupabaseServerClient()
+
+  await redirectIfUuid(supabase, locale, slug)
 
   // 1. Fetch produit principal
   const { data: prodRaw, error: pErr } = await supabase
     .from('products')
     .select(PRODUCT_SELECT)
-    .eq('id', id)
+    .eq('slug', slug)
     .single<RawProduct>()
 
   if (pErr || !prodRaw) {
@@ -168,7 +191,7 @@ export default async function ProductPage({
         .from('products')
         .select(PRODUCT_SELECT)
         .eq('product_ranges.range_id', rangeId)
-        .neq('id', id)
+        .neq('id', prodRaw.id)
         .limit(3)
         .returns<RawProduct[]>()
     : { data: null }
@@ -177,7 +200,7 @@ export default async function ProductPage({
   const { data: candidates } = await supabase
     .from('products')
     .select(PRODUCT_SELECT)
-    .neq('id', id)
+    .neq('id', prodRaw.id)
     .limit(50)
     .returns<RawProduct[]>()
 

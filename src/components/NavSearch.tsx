@@ -16,6 +16,7 @@ import { useRouter } from '@/i18n/navigation'
 
 type SearchHit = {
   id: string
+  slug: string
   name: string
   brand: string
   price: number
@@ -128,7 +129,7 @@ export const NavSearch = forwardRef<NavSearchHandle, NavSearchProps>(
         persistRecent(hit.name)
         setOpen(false)
         inputRef.current?.blur()
-        router.push(`/product/${hit.id}`)
+        router.push(`/product/${hit.slug}`)
       },
       [persistRecent, router],
     )
