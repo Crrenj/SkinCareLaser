@@ -335,12 +335,12 @@ export default function AnnoncePage() {
               <Banner
                 key={banner.id}
                 id={banner.id}
+                type={banner.banner_type}
                 title={banner.title}
-                description={banner.description}
-                imageUrl={banner.image_url}
-                linkUrl={banner.link_url || undefined}
-                linkText={banner.link_text || undefined}
-                bannerType={banner.banner_type}
+                description={banner.description || undefined}
+                imageUrl={banner.image_url || undefined}
+                ctaHref={banner.link_url || undefined}
+                ctaLabel={banner.link_text || undefined}
               />
             ))}
           </div>
@@ -382,12 +382,15 @@ export default function AnnoncePage() {
                           {banner.is_active ? 'Actif' : 'Inactif'}
                         </span>
                         <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                          {banner.banner_type === 'image_left' ? 'Image gauche' : 
-                           banner.banner_type === 'image_right' ? 'Image droite' : 
-                           banner.banner_type === 'image_full' ? 'Image pleine' :
-                           banner.banner_type === 'card_style' ? 'Carte' :
-                           banner.banner_type === 'minimal' ? 'Minimal' :
-                           banner.banner_type === 'gradient_overlay' ? 'Gradient' :
+                          {banner.banner_type === 'image_left' ? 'Image gauche → Editorial' :
+                           banner.banner_type === 'image_right' ? 'Image droite → Editorial' :
+                           banner.banner_type === 'image_full' ? 'Image pleine → Hero' :
+                           banner.banner_type === 'card_style' ? 'Carte → Editorial' :
+                           banner.banner_type === 'minimal' ? 'Minimal → Editorial' :
+                           banner.banner_type === 'gradient_overlay' ? 'Gradient → Hero' :
+                           banner.banner_type === 'editorial' ? 'Editorial' :
+                           banner.banner_type === 'hero' ? 'Hero' :
+                           banner.banner_type === 'quote' ? 'Quote' :
                            'Autre'}
                         </span>
                       </div>

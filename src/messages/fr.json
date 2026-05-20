@@ -354,6 +354,10 @@
       "ingredients": "INGRÉDIENTS"
     }
   },
+  "Banner": {
+    "ctaArrowAlt": "Flèche",
+    "quotePhotoAlt": "Photo de {name}"
+  },
   "Product": {
     "notFound": "Produit non trouvé",
     "noImage": "Aucune image disponible",

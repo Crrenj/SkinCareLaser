@@ -32,14 +32,24 @@ export async function generateMetadata({
   }
 }
 
-interface BannerData {
+interface BannerRow {
   id: string
   title: string
-  description: string
-  image_url: string
+  description: string | null
+  image_url: string | null
   link_url: string | null
   link_text: string | null
-  banner_type: 'image_left' | 'image_right' | 'image_full'
+  /** 6 anciens types (pré-migration) ou 3 nouveaux. Le composant Banner les normalise. */
+  banner_type:
+    | 'image_left'
+    | 'image_right'
+    | 'image_full'
+    | 'card_style'
+    | 'minimal'
+    | 'gradient_overlay'
+    | 'editorial'
+    | 'hero'
+    | 'quote'
   position: number
   is_active: boolean
   start_date: string | null
@@ -74,16 +84,16 @@ export default async function LocaleHome({
         {activeBanners.length > 0 && (
           <section className="mt-8">
             <div className="space-y-8">
-              {activeBanners.map((banner: BannerData) => (
+              {activeBanners.map((banner: BannerRow) => (
                 <Banner
                   key={banner.id}
                   id={banner.id}
+                  type={banner.banner_type}
                   title={banner.title}
-                  description={banner.description}
-                  imageUrl={banner.image_url}
-                  linkUrl={banner.link_url || undefined}
-                  linkText={banner.link_text || undefined}
-                  bannerType={banner.banner_type}
+                  description={banner.description || undefined}
+                  imageUrl={banner.image_url || undefined}
+                  ctaLabel={banner.link_text || undefined}
+                  ctaHref={banner.link_url || undefined}
                 />
               ))}
             </div>
