@@ -1,5 +1,5 @@
 import { Instagram, Facebook } from 'lucide-react'
-import { SiTiktok, SiWhatsapp } from 'react-icons/si'
+import { SiWhatsapp } from 'react-icons/si'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { FooterNewsletter } from './footer/FooterNewsletter'
@@ -70,9 +70,6 @@ export default function Footer() {
             </SocialIcon>
             <SocialIcon href="https://facebook.com" label={t('socials.facebook')}>
               <Facebook size={16} strokeWidth={1.6} />
-            </SocialIcon>
-            <SocialIcon href="https://tiktok.com" label={t('socials.tiktok')}>
-              <SiTiktok size={16} />
             </SocialIcon>
           </div>
         </div>
