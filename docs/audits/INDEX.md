@@ -1,12 +1,12 @@
 # Audit complet — FARMAU / Skincare Laser
 
-Date : 2026-05-19
-Branche : `main` @ `8c6bf63` (Next.js 15.5.18, Supabase, 353 produits)
+Date d'audit : 2026-05-19
+Date dernière mise à jour : 2026-05-20
+Branche : `main`
 Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
 
-> **État** : voir `docs/HANDOFF.md` pour la suite à reprendre.
-> Findings critiques fermés : ✅ #1 (auth /api/admin/*), ✅ #5 (UUID admin hardcodé), ✅ Next.js CVE.
-> Findings critiques restants : bug `add_to_cart`, checkout cassé, `lang="en"`, image storage dupliqué.
+> **État** : voir `docs/HANDOFF.md` pour la punch list courante.
+> **142 findings au total** dont une grosse majorité **fermés** lors des sessions 2026-05-19 et 2026-05-20.
 
 ---
 
@@ -29,177 +29,180 @@ Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
 
 ## 🚨 Findings critiques (à corriger AVANT prod publique)
 
-Les audits ont convergé sur 5 problèmes qui apparaissent dans plusieurs rapports :
+Les audits ont convergé sur 5 problèmes qui apparaissaient dans plusieurs rapports :
 
 ### ~~1. API admin entièrement ouvertes sur Internet~~ ✅ FIXÉ (commit `8c6bf63`)
-**Audits concernés** : Sécurité (Critical), Architecture (High)
-- ~~Le middleware (`src/middleware.ts:33-43`) protège `/admin/*` mais **exclut explicitement `/api`**~~
-- ✅ Helper `src/lib/requireAdmin.ts` créé, appelé en tête des 16 routes `/api/admin/*`
-- ✅ Client service-role centralisé dans `src/lib/supabaseAdmin.ts` (singleton)
-- ✅ UUID admin hardcodé dans `/api/admin/messages` remplacé par `auth.userId`
-- ✅ -320 lignes de duplication, -34 warnings lint
-- **Vérification** : `curl https://farmau.vercel.app/api/admin/products -X DELETE` → `401 Non authentifié`
+- Helper `src/lib/requireAdmin.ts` créé, appelé en tête des 16 routes `/api/admin/*`
+- Client service-role centralisé dans `src/lib/supabaseAdmin.ts` (singleton, typé `Database`)
+- UUID admin hardcodé supprimé
+- **Vérification** : `curl https://farmau.do/api/admin/products -X DELETE` → `401 Non authentifié`
 
-### 2. Tunnel d'achat cassé
-**Audits concernés** : UX (Critical), Architecture
-- Le `CartDrawer` désactive "Procéder au paiement (à venir)"
-- Mais `/cart` (`CartClient.tsx`) a le même bouton **sans `disabled` ni handler** → clic = rien
-- `.limit(100)` dans `src/app/catalogue/page.tsx:45` → 253 produits sur 353 invisibles
-- Footer : 24 liens (catégories, besoins, marques, réseaux) tous non cliquables
+### ~~2. Tunnel d'achat cassé~~ ✅ REMPLACÉ PAR SYSTÈME DE RÉSERVATION
+**Décision produit** : pas de paiement en ligne, modèle "click & collect" avec confirmation WhatsApp.
 
-→ Voir [ux.md#flux-utilisateur-principal](./ux.md)
+Livré en 8 commits (`5be92fa` → `5e51720`) :
+- Tables `reservations` + `reservation_items` + enum status + RLS + indexes + partial unique (1 active par user)
+- RPC `create_reservation` (snapshot phone + items, vide cart, TTL 24h)
+- `pg_cron` toutes les 5 min pour `expire_stale_reservations`
+- `POST /api/cart/reserve` avec ERRCODE mapping
+- Signup form téléphone obligatoire + `handle_new_user` étendu
+- `/account/profile` + ProfileEditForm pour reseigner téléphone manquant
+- Bouton "Réserver" sur `/cart` + écran de confirmation
+- `/admin/reservations` avec onglets status + lien WhatsApp pré-rempli
 
-### 3. Bug RPC `add_to_cart` — écrase la quantité au lieu d'incrémenter
-**Audits concernés** : Base de données (High)
-- `db/schema.sql:328-342` : `ON CONFLICT DO UPDATE SET quantity = EXCLUDED.quantity` au lieu de `+ EXCLUDED.quantity`
-- Cliquer "Ajouter au panier" 2 fois sur le même produit ne donne **pas** 2 unités
+Plus :
+- ✅ `.limit(100)` → `.limit(500)` sur catalogue (commit `4f4db48`, 253 produits débloqués)
+- ❌ Footer 24 liens morts — **PENDING**
 
-→ Voir [database.md#10](./database.md)
+### ~~3. Bug RPC `add_to_cart` — écrase la quantité~~ ✅ FIXÉ (commit `b8ea667`)
+- `quantity = public.cart_items.quantity + EXCLUDED.quantity` + bump `updated_at`
+- Test SQL : 2 PERFORM successifs (qty=1+2) → qty=3 ✅
 
-### 4. Accessibilité non conforme WCAG AA
-**Audits concernés** : Accessibilité (Critical), SEO
-- `<html lang="en">` mais contenu **100 % français** — Google se trompe de langue
-- `focus:outline-none` dans ~50 endroits sans alternative `focus-visible` → site inutilisable au clavier
-- Modales sans `role="dialog"`, sans focus trap, sans Escape (CartDrawer + 6 modales admin)
-- Spinners de chargement sans `role="status"`
-- Contraste `#CCC5BD` (beige) + texte blanc = 1.96:1 (échec WCAG, requis 4.5:1)
+### 4. Accessibilité non conforme WCAG AA — PARTIEL
+- ✅ `<html lang="fr">` (commit `0d0f432`)
+- ✅ Skip link "Aller au contenu principal" sur toutes les pages publiques
+- ❌ `focus:outline-none` (~50 endroits) → focus-visible — **PENDING**
+- ❌ Modales sans `role="dialog"` + focus trap — **PENDING**
+- ❌ Contraste `#CCC5BD` + texte blanc (1.96:1, fail WCAG) — **PENDING** (peut avoir changé avec refonte design)
 
-→ Voir [accessibility.md](./accessibility.md), [seo.md#7](./seo.md)
-
-### 5. Stockage d'images dupliqué
-**Audits concernés** : Architecture, Base de données
-- `products.image_url` (TEXT) **ET** table `product_images` (1-n) coexistent
-- Le fallback `image_url || product_images?.[0]?.url` est dispersé sur 11 sites
-- L'admin écrit dans les deux, le catalogue public ne lit que `product_images`
-- → divergences silencieuses possibles
-
-→ Voir [architecture.md#3](./architecture.md), [database.md#6](./database.md)
+### 5. Stockage d'images dupliqué — **PENDING**
+- `products.image_url` + table `product_images` cohabitent
+- Le fallback `image_url || product_images?.[0]?.url` est dispersé
 
 ---
 
 ## 📊 Findings importants par dimension
 
 ### Sécurité (15)
-- `.env.local` versionne `SUPABASE_SERVICE_ROLE_KEY` (à révoquer)
-- Fallback `localStorage` pour tokens Supabase = exfiltration XSS triviale
-- UUID admin hardcodé dans `/api/admin/messages/route.ts:74` (vieille policy de l'ancien projet)
-- RPC `SECURITY DEFINER` sans `SET search_path` — risque d'injection de schéma
-- `/api/contact` permet énumération d'emails utilisateurs + spam (pas de rate limit)
-- Pas de validation des champs côté API (`...productData` propage tout)
-- Pas de protection CSRF
+- ✅ Auth `/api/admin/*` (`requireAdmin`)
+- ✅ Rate limit `/api/contact` (5/min/IP, table + RPC `check_rate_limit`)
+- ✅ Next.js 15.3.4 → 15.5.18 (CVE)
+- ✅ UUID admin hardcodé supprimé
+- ❌ Énumération emails via `create_contact_message` (réponse différentielle selon email existant) — rate limit ralentit mais ne ferme pas le trou — **PENDING (P2)**
+- ❌ Fallback `localStorage` pour tokens Supabase (XSS exfiltration triviale)
+- ❌ RPC `SECURITY DEFINER` sans `SET search_path` (à auditer fonction par fonction ; `check_rate_limit`, `create_reservation`, `expire_stale_reservations`, `handle_new_user` sont OK)
+- ❌ Pas de validation des champs côté API (`...productData` propage tout)
+- ❌ Pas de protection CSRF
 
 ### Performance (12)
-- **0 page utilise `revalidate`/`unstable_cache`/`force-static`** — tout est SSR à chaque requête
-- **0 index sur les FK** `product_ranges`, `product_tags`, `product_images` (7 indexes recommandés)
-- 5 balises `<img>` au lieu de `next/image` (LCP dégradé sur fiche produit)
-- Middleware admin = 2 round-trips DB par requête + double check côté layout
-- `splitChunks` custom → un vendor chunk de **864 KB** invalidé en bloc
-- `framer-motion` et `@supabase/auth-helpers-nextjs` listés mais jamais importés
-- `FiltersNew.tsx` (394 lignes) jamais importé
+- ✅ `revalidate = 60` sur `/`, `/catalogue`, `/product/[id]` (commit `bcefbbe`)
+- ✅ 4 indexes FK manquants créés (commit `0dd8721`) — sur les 8 proposés, 4 étaient déjà couverts par des PKs composites
+- ❌ 5 balises `<img>` au lieu de `next/image` — **PENDING (P2)**
+- ❌ `splitChunks` custom → vendor chunk 864 KB
+- ❌ `framer-motion` listé mais jamais importé
+- ❌ `FiltersNew.tsx` jamais importé (mort)
 
 ### Architecture (15)
-- `createClient(url, serviceKey)` répété **16 fois** (~300 LOC à factoriser dans `src/lib/supabase/admin.ts`)
-- Auth admin vérifiée à 5 endroits avec 4 formulations différentes
-- Pages admin obèses : tags 753, marques 708, product 703, annonce 668 lignes
-- NavBar couple CartDrawer (drawer devrait être au layout)
-- `<button>` dans `<Link>` (HTML invalide)
-- Types `Product`/`Brand`/`Tag`/`Banner` redéfinis 5-10 fois ad-hoc
+- ✅ `supabaseAdmin` singleton typé avec `Database` (commit `2348950`) + factorisation contact route
+- ✅ Auth vérifiée 1 place (`requireAdmin`)
+- ❌ Pages admin obèses (tags 753, marques 708, product 703, annonce 668 LOC)
+- ❌ NavBar couplée à CartDrawer (drawer devrait être au layout) — peut avoir changé avec refonte design
+- ❌ Types `Product`/`Brand`/`Tag`/`Banner` redéfinis 5-10 fois ad-hoc (mitigé par génération automatique des types Supabase mais usage non systématique)
 
 ### Base de données (20)
-- Pas de FK indexes sauf sur banners/contact_messages
-- `auth.uid()` non wrappé dans `(SELECT auth.uid())` → évalué par ligne (perf RLS)
-- `is_user_admin` pas marquée STABLE
-- `products.image_url` + `product_images` doublon
-- `is_admin` + `role='admin'` + `admin_users` = triple source de vérité
-- `CHAR(3) currency` → texte fixe brittle (préférer enum ou ISO check)
-- `tags_with_types` est une VUE non matérialisée — pas d'index possible
-- Migration consolidée prête en annexe du rapport
+- ✅ 4 indexes FK posés
+- ✅ `add_to_cart` fix
+- ✅ Migrations versionnées (`supabase/migrations/`)
+- ✅ Types TS générés (`src/lib/database.types.ts`)
+- ✅ Tables `reservations` + `reservation_items` + `rate_limit_buckets` ajoutées
+- ❌ `auth.uid()` non wrappé dans `(SELECT auth.uid())` → évalué par ligne (perf RLS)
+- ❌ `is_user_admin` pas marquée STABLE
+- ❌ Stockage image dupliqué — **PENDING**
+- ❌ `tags_with_types` est une VUE non matérialisée
 
-### Accessibilité (18) — note 38/100
-- 3 blockers critiques (lang erroné, focus invisible, modales non conformes)
-- 50% des composants nécessitent des correctifs
-- Roadmap 5 sprints pour atteindre ~88% conformité ; sprint 1 (1-2 jours) gagne +20 points
+### Accessibilité (18) — note 38/100 (à re-mesurer après refonte design)
+- ✅ `<html lang>`
+- ✅ Skip link
+- ❌ `focus:outline-none` global — **PENDING**
+- ❌ Modales sans rôle dialog — **PENDING**
+- ❌ Roadmap 5 sprints pour atteindre ~88 % conformité
 
-### SEO (15) — note 65-75/100
-- Pas de `sitemap.ts`, pas de `robots.ts`, pas de `metadataBase`
-- Pas de `generateMetadata()` pour les pages produits
-- 0 JSON-LD structured data
-- URLs `/product/[uuid]` au lieu de `/product/[slug]` (slug existe en BDD)
-- `NEXT_PUBLIC_SITE_URL` manquant
-- 7 snippets prêts à copier dans le rapport
+### SEO (15) — ✅ majoritairement FIXÉ (commit `3521c21`)
+- ✅ `sitemap.ts` dynamique (routes × locales + produits avec hreflang)
+- ✅ `robots.ts`
+- ✅ `metadataBase` (`https://farmau.do`)
+- ✅ `generateMetadata` sur home, catalogue, contact, a-propos, product (dynamique), cart, profile
+- ✅ hreflang alternates + `x-default`
+- ✅ openGraph par page
+- ❌ URLs `/product/[uuid]` au lieu de `/product/[slug]` — **PENDING (P2)**
+- ❌ Pas de JSON-LD structured data (Product schema)
 
-### Developer Experience (15) — note 6/10
-- `.env.local.example` manquant → onboarding cassé
-- Aucune CI (`.github/workflows/` vide)
-- Aucun pre-commit hook (Husky/lint-staged)
-- 73 warnings ESLint, 32 `any` dans src/, 120 console.log/error
-- Types Supabase non générés (`supabase gen types` non utilisé)
-- Pas de validation runtime des env vars (`process.env.X!` partout)
-- 15 templates prêts à coller (CI, Husky, env validation Zod, supabaseAdmin singleton, logger…)
+### Developer Experience (15) — ✅ majoritairement FIXÉ
+- ✅ `.env.local.example` (commit `acc2326`)
+- ✅ CI GitHub Actions lint+tsc+vitest (commit `5cbe1e9`)
+- ✅ Pre-commit hook Husky + lint-staged (commit `795e8ee`)
+- ✅ Types Supabase générés (commit `507e7e2`)
+- ✅ Migrations versionnées (commit `02edb94`)
+- ✅ Smoke tests Playwright (commit `7bd0050`)
+- ❌ 38 warnings ESLint restants (mostly `any` dans admin)
+- ❌ Couverture tests < 5 % (smoke + auth seulement)
+- ❌ Pas de validation runtime des env vars (Zod)
+- ❌ 35 `alert()` natifs dans l'admin
 
-### UX (14) — note 4/10
-- 3 frictions bloquantes (checkout cassé, limit 100, conflit palette)
-- 100% des liens du Footer morts
-- Dropdown langue NavBar non fonctionnel
-- Filtres catalogue 100% client-side (mauvais SEO + perf sur tag changes)
-- 35 `alert()` natifs dans l'admin
-- `localeCompare` utilisé pour le tri "meilleures ventes" (faux)
-- Quick win proposé : remplacer checkout par lien WhatsApp (`wa.me/`) en attendant
+### UX (14) — note 4/10 (à re-mesurer)
+- ✅ Catalogue débloqué (limit 500)
+- ✅ Tunnel de réservation fonctionnel end-to-end
+- ✅ i18n FR/EN/ES complet avec LocaleSwitcher
+- ❌ Footer 100 % liens morts — **PENDING (P2)**
+- ❌ NavBar dropdown langue — ✅ FIXÉ via LocaleSwitcher
+- ❌ Filtres catalogue 100 % client-side (perf sur tag changes)
+- ❌ 35 `alert()` natifs dans l'admin
+- ❌ `localeCompare` utilisé pour le tri "meilleures ventes" (faux)
 
 ### Qualité de code (18)
-- 63 warnings ESLint, dont 33 `no-explicit-any`
-- 320 lignes dupliquées (boilerplate `supabaseAdmin` × 16)
-- `FiltersNew.tsx`, `ProductDetailCard.tsx`, `admin/ImageUpload.tsx` = code mort
-- Couverture tests < 5%
-- `generateSlug` copié 4 fois
-- Magic numbers/strings : `'DOP'`, `5.99`, `10`, `5MB`, `25`, `100`
+- ✅ -300 LOC duplication via factorisation `supabaseAdmin`
+- ✅ Test files mockés correctement pour next-intl
+- ❌ 38 warnings ESLint dont ~30 `no-explicit-any` dans admin
+- ❌ Code mort : `FiltersNew.tsx` (394 LOC), `ProductDetailCard.tsx`, `admin/ImageUpload.tsx`
+- ❌ Couverture tests faible
+- ❌ Magic numbers/strings : `'DOP'`, `5.99`, `5MB`, etc.
 
 ---
 
-## 🛠️ Plan de remédiation recommandé
+## 🛠️ Plan de remédiation — état d'avancement
 
-### Phase 1 — Sécurité bloquante (1-2 jours, AVANT toute prod publique)
+### ✅ Phase 1 — Sécurité bloquante (FAIT)
+1. ✅ Sécuriser routes `/api/admin/*` (`requireAdmin`)
+2. ✅ Bug `add_to_cart`
+3. ✅ `<html lang="fr">`
+4. ✅ Rate limit `/api/contact`
+5. ⚠️ Anti-énumération `create_contact_message` — **PENDING**
 
-1. **Sécuriser les routes `/api/admin/*`** — ajouter check `is_user_admin` ou middleware sur ces routes
-2. **Révoquer + régénérer** `SUPABASE_SERVICE_ROLE_KEY` (versionné dans `.env.local`)
-3. **Corriger le bug `add_to_cart`** (quantité écrasée → incrémentée)
-4. **Fixer `<html lang="fr">`** et `Site URL` dans Supabase Auth
-5. **Activer rate limit** sur `/api/contact` (Vercel ou Upstash)
+### ✅ Phase 2 — Quick wins (FAIT)
+6. ✅ Indexes DB (4 sur les 8 proposés)
+7. ✅ `sitemap.ts` + `robots.ts` + `metadataBase`
+8. ✅ `generateMetadata` pour `/product/[id]` (et toutes les autres pages publiques)
+9. ✅ `revalidate` sur pages publiques
+10. ❌ Migrer 5 `<img>` vers `next/image` — **PENDING**
+11. ✅ `.env.local.example`
+12. ❌ Supprimer code mort (`FiltersNew`, `framer-motion`) — **PENDING**
+13. ✅ Factoriser `supabaseAdmin` en singleton
 
-### Phase 2 — Quick wins haut impact (3-5 jours)
+### Phase 3 — Accessibilité / UX (PARTIEL)
+14. ⚠️ Skip link OK, `focus-visible` global et modales `role="dialog"` — **PENDING**
+15. ❌ CartDrawer resize mobile — peut être OK avec refonte design
+16. ✅ Réservation branchée (équivalent du checkout WhatsApp suggéré)
+17. ✅ `.limit(100) → 500`
+18. ❌ Footer cleanup — **PENDING**
 
-6. **Indexes DB** : 7 indexes manquants sur FKs (script SQL prêt dans database.md)
-7. **`sitemap.ts` + `robots.ts` + `metadataBase`** + lang fix (gain SEO immédiat)
-8. **`generateMetadata` pour /product/[id]**
-9. **`revalidate` sur /catalogue, /product/[id], /` (60s)
-10. **Migrer 5 `<img>` vers `next/image`**
-11. **`.env.local.example` + validation Zod**
-12. **Supprimer code mort** : `FiltersNew.tsx`, `ProductDetailCard.tsx`, `framer-motion`
-13. **Factoriser `supabaseAdmin`** en singleton (`src/lib/supabase/admin.ts`)
+### Phase 4 — Hygiène long terme (PARTIEL)
+19. ✅ CI GitHub Actions
+20. ✅ Husky + lint-staged
+21. ❌ Tests d'intégration admin Playwright — **PENDING**
+22. ❌ Splitter pages admin > 500 LOC — **PENDING**
+23. ✅ Générer types Supabase
+24. ❌ URLs `/product/[slug]` — **PENDING (P2)**
+25. ❌ Bumper deps obsolètes (`npm audit` 19 vulns) — **PENDING**
 
-### Phase 3 — Accessibilité / UX (1-2 semaines)
-
-14. **Skip link + focus-visible global** + correctifs modales
-15. **Resize CartDrawer pour mobile** (`w-full sm:w-96`)
-16. **Brancher checkout via WhatsApp** ou désactiver bouton sur /cart aussi
-17. **`.limit(100)` → `.limit(500)` ou pagination réelle**
-18. **Nettoyer le Footer** (vrais liens ou retrait)
-
-### Phase 4 — Hygiène long terme (3-4 semaines)
-
-19. **CI GitHub Actions** (lint + typecheck + vitest sur PR)
-20. **Husky + lint-staged**
-21. **Tests d'intégration** des routes API admin (Playwright)
-22. **Splitter pages admin > 500 lignes** en composants
-23. **Générer types Supabase** automatiquement
-24. **Migrer URLs produits vers slug** (`/product/[slug]`)
-25. **Bumper deps obsolètes** (Tailwind 4 → check, supabase-js, etc.)
+### Phase 5 — Nouveau (post-audit) — FAIT
+26. ✅ Système de réservation complet (8 étapes)
+27. ✅ i18n FR/EN/ES (4 paliers : foundation, migration routes, traductions, LocaleSwitcher)
+28. ✅ Migrations versionnées (`supabase/migrations/`)
+29. ✅ Smoke tests Playwright golden path
 
 ---
 
-## 📌 Points forts identifiés
-
-Les audits ont aussi relevé ce qui est **bien fait** :
+## 📌 Points forts identifiés (toujours valides)
 
 - TypeScript strict, 0 erreur `tsc`
 - Schéma BDD bien normalisé (3NF sauf cas justifiés)
@@ -207,25 +210,27 @@ Les audits ont aussi relevé ce qui est **bien fait** :
 - App Router + Server Components utilisés correctement pour catalogue/product
 - `next/image` avec `remotePatterns: '**'` (compatible Storage)
 - Path alias `@/*` utilisé partout, 0 import relatif
-- Tests Vitest qui passent (8/8 après les corrections)
-- Documentation interne récente (`CLAUDE.md`, `db/README.md`)
+- Tests Vitest qui passent (8/8) + smoke Playwright (4/4)
+- Documentation interne à jour (`CLAUDE.md`, `db/README.md`, `docs/HANDOFF.md`)
 - Scripts CLI bien structurés (`parse-pdfs`, `seed-import`, `prices:default`, etc.)
 - `ContactForm`, login, signup ont des labels HTML corrects
 - `globals.css` gère `prefers-reduced-motion`
+- **(Nouveau)** i18n complet avec next-intl, hreflang SEO clean
+- **(Nouveau)** CI verte sur chaque PR + push main
 
 ---
 
 ## Comment lire les rapports
 
-Chaque rapport suit la même structure :
+Chaque rapport thématique suit la même structure :
 - **Synthèse** en tête (note + top 3)
 - **Findings** numérotés avec severity (Critical/High/Medium/Low), file:line, problème, fix
 - **Snippets prêts à coller** pour SEO, DX, Database
 
 Ouvrir dans l'ordre selon ton intérêt :
-- Tu déploies bientôt en prod publique → **security.md** d'abord
-- Tu veux du gain rapide → **performance.md** + **seo.md** (quick wins)
+- Tu déploies bientôt en prod publique → **security.md** d'abord (mais critiques majeurs fermés)
+- Tu veux du gain rapide → **performance.md** (le SEO est déjà fait)
 - Tu veux comprendre la dette → **architecture.md** + **code-quality.md**
-- Tu veux améliorer le produit → **ux.md** + **accessibility.md**
-- Tu veux installer du tooling → **developer-experience.md**
-- Tu vas migrer la BDD → **database.md**
+- Tu veux améliorer l'a11y → **accessibility.md**
+- Tu veux installer du tooling → **developer-experience.md** (largement fait, reste 38 warnings + tests admin)
+- Tu vas migrer la BDD → **database.md** (snapshot pattern réservations à étudier en exemple)
