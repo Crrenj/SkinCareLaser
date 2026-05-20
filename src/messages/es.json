@@ -10,6 +10,79 @@
       "aboutDescription": "Conozca más sobre nuestro equipo y nuestra experiencia",
       "consultationTitle": "Consulta",
       "consultationDescription": "Consulte a nuestros farmacéuticos-dermatólogos"
+    },
+    "hero": {
+      "eyebrow": "Selección de farmacéuticos",
+      "title": "El cuidado de tu piel,<br><em>certificado.</em>",
+      "description": "Una farmacia dermo-cosmética curada por especialistas. ISDIN, La Roche-Posay, Filorga y 10 marcas más.",
+      "primaryCta": "Explorar el catálogo",
+      "ghostCta": "Nuestros farmacéuticos"
+    },
+    "bestsellers": {
+      "eyebrow": "Vendidos esta semana",
+      "title": "Los <em>best-sellers</em>",
+      "seeAll": "Ver todo el catálogo →"
+    },
+    "byNeed": {
+      "eyebrow": "Por preocupación",
+      "title": "Encontrar una <em>respuesta</em>",
+      "seeAll": "Ver todas las necesidades →",
+      "cards": {
+        "sun": {
+          "eyebrow": "Protección solar",
+          "title": "Protección solar",
+          "description": "SPF 30 a 50+, texturas fluidas pensadas para el clima tropical de la República Dominicana.",
+          "cta": "Explorar →"
+        },
+        "repair": {
+          "eyebrow": "Reparación",
+          "title": "Reparación y apaciguamiento",
+          "description": "Bálsamos, sueros y fórmulas dirigidas a pieles sensibles, irritadas o dañadas.",
+          "cta": "Explorar →"
+        },
+        "brightness": {
+          "eyebrow": "Luminosidad",
+          "title": "Luminosidad y uniformidad",
+          "description": "Sueros antimanchas, vitamina C, niacinamida. Para un tono más luminoso y uniforme.",
+          "cta": "Explorar →"
+        }
+      },
+      "productCountSuffix": "productos"
+    },
+    "brands": {
+      "eyebrowSuffix": "marcas seleccionadas",
+      "title": "Nuestras <em>marcas</em>",
+      "seeAll": "Ver todas las marcas →"
+    },
+    "expertise": {
+      "eyebrow": "Nuestro enfoque",
+      "title": "Una <em>farmacia,</em><br>no un comercio.",
+      "p1": "Cada producto de nuestro catálogo es seleccionado, probado y recomendado por nuestros farmacéuticos-dermatólogos. No vendemos lo que nos ofrecen — vendemos lo que recetaríamos.",
+      "p2": "Si tienes una pregunta sobre tu piel, escríbenos. Un humano real, formado en dermo-cosmética, te responderá en el día.",
+      "cta": "Conocer más sobre FARMAU",
+      "signature": "— Una iniciativa dirigida por un colectivo de farmacéuticos dominicanos."
+    },
+    "routine": {
+      "eyebrow": "Construir tu rutina",
+      "title": "Tres <em>momentos,</em> tres gestos",
+      "seeAll": "La guía completa →",
+      "steps": {
+        "morning": {
+          "when": "Mañana · 7h",
+          "title": "Limpiar y proteger",
+          "description": "Gel limpiador suave, sérum de vitamina C, protector solar SPF 50. El ritual mínimo para empezar el día bajo el sol tropical."
+        },
+        "evening": {
+          "when": "Noche · 21h",
+          "title": "Desmaquillar y regenerar",
+          "description": "Agua micelar, sérum de ácido hialurónico, crema de noche. El momento en que la piel acepta los activos más potentes."
+        },
+        "weekly": {
+          "when": "Semanal · 1×/sem",
+          "title": "Exfoliar y nutrir",
+          "description": "Mascarilla de arcilla o exfoliante suave. Un gesto semanal para reactivar la regeneración celular."
+        }
+      }
     }
   },
   "Nav": {
@@ -77,44 +150,64 @@
   },
   "Footer": {
     "logoAlt": "Logo",
-    "productsHeading": "PRODUCTOS",
-    "needsHeading": "NECESIDADES",
-    "serviceHeading": "SERVICIO",
-    "brandHeading": "MARCA",
-    "products": {
-      "cleansers": "Desmaquillantes y limpiadores",
-      "serums": "Sueros",
-      "masks": "Mascarillas y exfoliantes",
-      "essences": "Esencias",
-      "dayCreams": "Cremas de día",
-      "nightCreams": "Cremas de noche",
-      "eyeCare": "Cuidado de ojos",
-      "lipCare": "Cuidado de labios",
-      "uvCare": "Cuidado UV"
+    "tagline": "Dermocosmética de experto farmacéutico.<br>República Dominicana.",
+    "needsHeading": "Necesidades",
+    "serviceHeading": "Servicio",
+    "brandHeading": "FARMAU",
+    "newsletter": {
+      "title": "Una vez al mes,<br><em>nada más.</em>",
+      "description": "Novedades, consejos de farmacéuticos y ofertas para suscriptores. Prometido, será corto.",
+      "placeholder": "tu@email.com",
+      "submit": "Suscribirse",
+      "submitting": "…",
+      "success": "¡Gracias! Te escribiremos pronto.",
+      "errorEmail": "Correo electrónico no válido.",
+      "errorGeneric": "Se produjo un error, inténtalo de nuevo.",
+      "errorRateLimit": "Demasiados intentos, inténtalo en un momento."
     },
     "needs": {
-      "wrinkles": "Arrugas",
-      "hydration": "Hidratación",
-      "firmness": "Firmeza",
-      "darkCircles": "Ojeras, arrugas y bolsas",
-      "regeneration": "Regeneración",
-      "antiAging": "Antiedad global",
-      "radiance": "Luminosidad",
-      "cleansing": "Limpiador",
-      "sunProtection": "Protección solar",
-      "wrinklesImperfections": "Arrugas e imperfecciones",
-      "spots": "Manchas"
+      "hydratation": "Hidratación",
+      "anti-age": "Antiedad",
+      "protection-solaire": "Protección solar",
+      "acne": "Acné e imperfecciones",
+      "taches": "Manchas y pigmentación",
+      "nettoyage": "Limpieza",
+      "reparation": "Reparación",
+      "apaisant": "Calmante",
+      "cernes": "Ojeras y bolsas",
+      "eclat": "Luminosidad",
+      "rosacee": "Rosácea",
+      "chute-de-cheveux": "Caída del cabello",
+      "exfoliation": "Exfoliación",
+      "pellicules": "Caspa"
     },
     "service": {
       "contact": "Contacto",
-      "stores": "Nuestros puntos de venta"
+      "delivery": "Envío y devoluciones",
+      "pharmacists": "Nuestros farmacéuticos",
+      "faq": "FAQ",
+      "help": "Centro de ayuda"
     },
     "brand": {
-      "about": "Acerca de nosotros",
-      "values": "Nuestros valores",
-      "team": "Nuestro equipo"
+      "about": "Quiénes somos",
+      "manifesto": "Nuestro manifiesto",
+      "brands": "Todas las marcas",
+      "blog": "Journal",
+      "stores": "Puntos de venta"
     },
-    "copyright": "© 2026 FARMAU. Todos los derechos reservados."
+    "socials": {
+      "instagram": "Instagram",
+      "whatsapp": "WhatsApp",
+      "facebook": "Facebook",
+      "tiktok": "TikTok"
+    },
+    "bottom": {
+      "copyright": "© 2026 FARMAU · Todos los derechos reservados.",
+      "terms": "Términos",
+      "privacy": "Privacidad",
+      "cookies": "Cookies",
+      "legal": "Aviso legal"
+    }
   },
   "AddToCart": {
     "quickAddAriaLabel": "Añadir rápido al carrito",
@@ -256,11 +349,11 @@
   },
   "ContactForm": {
     "title": "Contáctenos",
-    "intro": "Envíenos un mensaje. Debe tener una cuenta para contactarnos.",
+    "intro": "¿Una pregunta, un consejo o una solicitud de presupuesto? Nuestro equipo responde en 24-48h.",
     "success": "¡Su mensaje fue enviado con éxito! Le responderemos rápidamente.",
     "emailLabel": "Correo electrónico *",
     "emailPlaceholder": "tu@email.com",
-    "emailHint": "Use el correo de su cuenta de usuario",
+    "emailHint": "Lo usaremos únicamente para responderle.",
     "subjectLabel": "Asunto *",
     "subjectPlaceholder": "¿Cuál es el motivo de su mensaje?",
     "messageLabel": "Mensaje *",
@@ -269,8 +362,8 @@
     "submitLoading": "Enviando...",
     "conditionsHeading": "Condiciones de envío",
     "conditions": {
-      "haveAccount": "Debe tener una cuenta de usuario",
-      "useAccountEmail": "Use el correo asociado a su cuenta",
+      "haveAccount": "No necesita una cuenta para escribirnos",
+      "useAccountEmail": "Indique un correo válido donde responder",
       "replyTime": "Respondemos en 24-48h hábiles",
       "allFieldsRequired": "Todos los campos son obligatorios"
     },
@@ -464,6 +557,24 @@
       "titleTemplate": "{name} — {brand} | FARMAU",
       "descriptionWithDesc": "{name} por {brand}. {description}",
       "descriptionFallback": "{name} por {brand}. Disponible en reserva en FARMAU, farmacia dermatológica en República Dominicana."
+    },
+    "brand": {
+      "titleTemplate": "{name} — Productos dermocosméticos | FARMAU",
+      "description": "Descubra la selección {name} en FARMAU, farmacia dermocosmética en República Dominicana. Reserva por WhatsApp para retirada en tienda."
+    },
+    "need": {
+      "titleTemplate": "{name} — Cuidados dermocosméticos | FARMAU",
+      "description": "Productos dermocosméticos para {name}. Selección certificada por nuestros farmacéuticos-dermatólogos, disponibles en reserva en FARMAU."
     }
+  },
+  "BrandPage": {
+    "eyebrow": "Marca",
+    "intro": "Todos los productos {name} disponibles en reserva. {count, plural, =1 {1 producto} other {# productos}}.",
+    "empty": "Ningún producto disponible para esta marca por el momento."
+  },
+  "NeedPage": {
+    "eyebrow": "Necesidad",
+    "intro": "Nuestra selección para {name}. {count, plural, =1 {1 producto recomendado} other {# productos recomendados}} por nuestros farmacéuticos.",
+    "empty": "Ningún producto está asociado a esta necesidad por el momento."
   }
 }

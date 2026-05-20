@@ -2,10 +2,16 @@ import type { Metadata } from 'next'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import Banner from '@/components/Banner'
-import { Link } from '@/i18n/navigation'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import { HomeHero } from '@/components/home/HomeHero'
+import { HomeBestsellers } from '@/components/home/HomeBestsellers'
+import { HomeByNeed } from '@/components/home/HomeByNeed'
+import { HomeBrands } from '@/components/home/HomeBrands'
+import { HomeExpertise } from '@/components/home/HomeExpertise'
+import { HomeRoutine } from '@/components/home/HomeRoutine'
+import { BannerQuote } from '@/components/banners/BannerQuote'
 
 export const revalidate = 60
 
@@ -39,7 +45,6 @@ interface BannerRow {
   image_url: string | null
   link_url: string | null
   link_text: string | null
-  /** 6 anciens types (pré-migration) ou 3 nouveaux. Le composant Banner les normalise. */
   banner_type:
     | 'image_left'
     | 'image_right'
@@ -51,11 +56,41 @@ interface BannerRow {
     | 'hero'
     | 'quote'
   position: number
-  is_active: boolean
-  start_date: string | null
-  end_date: string | null
-  click_count: number
-  view_count: number
+}
+
+interface RawBestseller {
+  id: string
+  name: string
+  description: string | null
+  price: string | number
+  currency: string
+  product_images: { url: string; alt: string | null }[] | null
+  product_ranges:
+    | { range: { name: string; brand: { name: string } | null } | null }[]
+    | null
+}
+
+interface MappedBestseller {
+  id: string
+  name: string
+  description?: string
+  price: number
+  currency: string
+  images: { url: string; alt: string | null }[]
+  brand?: string
+  range?: string
+}
+
+interface BrandRow {
+  id: string
+  name: string
+  slug: string | null
+}
+
+interface QuoteProductRow {
+  id: string
+  pharmacist_advice: string | null
+  pharmacist_name: string | null
 }
 
 export default async function LocaleHome({
@@ -65,124 +100,126 @@ export default async function LocaleHome({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
-  const t = await getTranslations('Home')
 
   const supabase = await createSupabaseServerClient()
-  const { data: banners } = await supabase
-    .from('banners')
-    .select('*')
-    .eq('is_active', true)
-    .order('position', { ascending: true })
 
-  const activeBanners = banners || []
+  // Fetch en parallèle : bannières CMS + bestsellers + marques + quote.
+  const [bannersRes, bestsellersRes, brandsRes, quoteRes] = await Promise.all([
+    supabase
+      .from('banners')
+      .select('id, title, description, image_url, link_url, link_text, banner_type, position')
+      .eq('is_active', true)
+      .order('position', { ascending: true }),
+    supabase
+      .from('products')
+      .select(`
+        id,
+        name,
+        description,
+        price,
+        currency,
+        product_images ( url, alt ),
+        product_ranges (
+          range:ranges ( name, brand:brands ( name ) )
+        )
+      `)
+      .limit(4)
+      .returns<RawBestseller[]>(),
+    supabase.from('brands').select('id, name, slug').order('name', { ascending: true }),
+    fetchHomeQuote(supabase),
+  ])
+
+  const activeBanners = (bannersRes.data ?? []) as BannerRow[]
+  const bestsellers: MappedBestseller[] = (bestsellersRes.data ?? []).map(mapBestseller)
+  const brands = (brandsRes.data ?? []) as BrandRow[]
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-200" lang={locale}>
       <NavBar />
 
-      <main id="main-content" className="flex-1 p-6">
-        {activeBanners.length > 0 && (
-          <section className="mt-8">
-            <div className="space-y-8">
-              {activeBanners.map((banner: BannerRow) => (
-                <Banner
-                  key={banner.id}
-                  id={banner.id}
-                  type={banner.banner_type}
-                  title={banner.title}
-                  description={banner.description || undefined}
-                  imageUrl={banner.image_url || undefined}
-                  ctaLabel={banner.link_text || undefined}
-                  ctaHref={banner.link_url || undefined}
-                />
-              ))}
-            </div>
+      <main id="main-content" className="flex-1">
+        <HomeHero />
+        <HomeBestsellers products={bestsellers} />
+        <HomeByNeed />
+
+        {/* Pharmacist quote — si un produit a une advice */}
+        {quoteRes && (
+          <section className="px-6 lg:px-14 py-12 bg-sand-50">
+            <BannerQuote
+              id="home-pharmacist-quote"
+              title={quoteRes.quote}
+              attribution={{
+                name: quoteRes.name,
+              }}
+            />
           </section>
         )}
 
-        <section className="mt-12 bg-white rounded-lg p-8 shadow-md">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            {t('servicesTitle')}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Link href="/catalogue" className="group">
-              <div className="text-center p-6 rounded-lg border border-sand-300 hover:border-clay-600 hover:shadow-lg transition-all duration-200">
-                <div className="w-16 h-16 bg-sand-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-sand-200">
-                  <svg
-                    className="w-8 h-8 text-clay-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="font-semibold mb-2">
-                  {t('services.catalogueTitle')}
-                </h3>
-                <p className="text-sm text-ink-700">
-                  {t('services.catalogueDescription')}
-                </p>
-              </div>
-            </Link>
+        <HomeBrands brands={brands} />
+        <HomeExpertise />
+        <HomeRoutine />
 
-            <Link href="/a-propos" className="group">
-              <div className="text-center p-6 rounded-lg border border-sand-300 hover:border-clay-600 hover:shadow-lg transition-all duration-200">
-                <div className="w-16 h-16 bg-sand-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-sand-200">
-                  <svg
-                    className="w-8 h-8 text-clay-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="font-semibold mb-2">{t('services.aboutTitle')}</h3>
-                <p className="text-sm text-ink-700">
-                  {t('services.aboutDescription')}
-                </p>
-              </div>
-            </Link>
-
-            <div className="text-center p-6 rounded-lg border border-sand-300 hover:border-clay-600 hover:shadow-lg transition-all duration-200 cursor-pointer">
-              <div className="w-16 h-16 bg-sand-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-8 h-8 text-clay-700"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-              </div>
-              <h3 className="font-semibold mb-2">
-                {t('services.consultationTitle')}
-              </h3>
-              <p className="text-sm text-ink-700">
-                {t('services.consultationDescription')}
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* Bannières CMS optionnelles — en complément, jamais en remplacement du hero */}
+        {activeBanners.length > 0 && (
+          <section className="px-6 lg:px-14 py-12 bg-sand-50 space-y-8">
+            {activeBanners.map((banner) => (
+              <Banner
+                key={banner.id}
+                id={banner.id}
+                type={banner.banner_type}
+                title={banner.title}
+                description={banner.description || undefined}
+                imageUrl={banner.image_url || undefined}
+                ctaLabel={banner.link_text || undefined}
+                ctaHref={banner.link_url || undefined}
+              />
+            ))}
+          </section>
+        )}
       </main>
 
       <Footer />
     </div>
   )
+}
+
+function mapBestseller(p: RawBestseller): MappedBestseller {
+  const firstRange = p.product_ranges?.[0]?.range ?? null
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description ?? undefined,
+    price: Number(p.price),
+    currency: p.currency,
+    images: p.product_images ?? [],
+    brand: firstRange?.brand?.name ?? undefined,
+    range: firstRange?.name ?? undefined,
+  }
+}
+
+/**
+ * Sélectionne 1 produit aléatoire avec un `pharmacist_advice` non vide
+ * pour intercaler une citation dans la home. Si la colonne n'existe pas
+ * encore ou si rien ne matche, on retourne null (le bloc disparaît).
+ */
+async function fetchHomeQuote(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+): Promise<{ quote: string; name: string } | null> {
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, pharmacist_advice, pharmacist_name')
+    .not('pharmacist_advice', 'is', null)
+    .limit(10)
+    .returns<QuoteProductRow[]>()
+
+  // Colonne manquante ou erreur → on cache silencieusement la section.
+  if (error || !data || data.length === 0) return null
+
+  const random = data[Math.floor(Math.random() * data.length)]
+  if (!random.pharmacist_advice) return null
+
+  return {
+    quote: random.pharmacist_advice,
+    name: random.pharmacist_name ?? 'Équipe FARMAU',
+  }
 }
