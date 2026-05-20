@@ -703,6 +703,23 @@
       "ingredients": "INGREDIENTS"
     }
   },
+  "MobileFilters": {
+    "pillLabel": "Filters",
+    "sheetTitle": "Filters",
+    "productCount": "{count, plural, =0 {0 products} =1 {1 product} other {# products}}",
+    "clearAll": "Clear all",
+    "closeAriaLabel": "Close",
+    "sortLabel": "Sort by",
+    "brandsLabel": "Brands",
+    "needsLabel": "Needs",
+    "applyButton": "Apply",
+    "applyCount": "({count})",
+    "cancel": "Cancel",
+    "noResultsTitle": "No product",
+    "noResultsTitleEmphasis": "matches.",
+    "noResultsHint": "Try fewer brands or widen the selection.",
+    "removeFilterAriaLabel": "Remove filter {label}"
+  },
   "Banner": {
     "ctaArrowAlt": "Arrow",
     "quotePhotoAlt": "Photo of {name}"

@@ -4,6 +4,8 @@ import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import ProductCard from '@/components/ProductCard'
 import Filters from '@/components/Filters'
+import { FiltersMobileSheet } from '@/components/catalogue/FiltersMobileSheet'
+import { FiltersPill, type ActiveFilterPill } from '@/components/catalogue/FiltersPill'
 
 interface TagItem { label: string; category: string }
 interface Product {
@@ -98,6 +100,9 @@ export default function CatalogueClient({
     })
     setCurrentPage(1)
   }, [])
+
+  // ─── Filtres mobile : sheet + pilule ───
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   // Handler pour toggle une marque
   const handleBrandToggle = useCallback((brand: string) => {
@@ -272,6 +277,56 @@ export default function CatalogueClient({
   const endIndex = startIndex + productsPerPage
   const currentProducts = filtered.slice(startIndex, endIndex)
 
+  // ─── Décompte pour la pilule mobile ───
+  // Compte le nombre de GROUPES de filtres actifs (pas le total d'options).
+  // ex: 2 marques + 1 besoin + 0 prix → groupCount = 2 (marques + besoins).
+  const groupCount = useMemo(() => {
+    let count = 0
+    if (selectedBrands.size > 0) count += 1
+    if (selectedRanges.size > 0) count += 1
+    for (const set of Object.values(selectedTags)) {
+      if (set.size > 0) count += 1
+    }
+    return count
+  }, [selectedBrands, selectedRanges, selectedTags])
+
+  // Liste des filtres actifs individuels pour la barre de pills au-dessus
+  // de la pilule (chacun retirable au clic ×).
+  const activeFilters = useMemo<ActiveFilterPill[]>(() => {
+    const pills: ActiveFilterPill[] = []
+    selectedBrands.forEach((brand) =>
+      pills.push({
+        id: `brand:${brand}`,
+        label: brand,
+        onRemove: () => handleBrandToggle(brand),
+      }),
+    )
+    selectedRanges.forEach((range) =>
+      pills.push({
+        id: `range:${range}`,
+        label: range,
+        onRemove: () => handleRangeToggle(range),
+      }),
+    )
+    for (const [tagType, set] of Object.entries(selectedTags)) {
+      set.forEach((name) =>
+        pills.push({
+          id: `${tagType}:${name}`,
+          label: name,
+          onRemove: () => handleTagToggle(tagType, name),
+        }),
+      )
+    }
+    return pills
+  }, [
+    selectedBrands,
+    selectedRanges,
+    selectedTags,
+    handleBrandToggle,
+    handleRangeToggle,
+    handleTagToggle,
+  ])
+
   // Gestionnaires de pagination
   const handlePreviousPage = useCallback(() => {
     setCurrentPage(prev => Math.max(prev - 1, 1))
@@ -320,8 +375,8 @@ export default function CatalogueClient({
 
       {/* Ligne 2: Filtres à gauche et produits à droite */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
-        {/* Colonne des filtres */}
-        <div className="lg:col-span-1">
+        {/* Colonne des filtres : desktop only, mobile utilise la pilule + sheet */}
+        <div className="hidden lg:block lg:col-span-1">
           <Filters
             sortOption={sortBy}
             onSortChange={setSortBy}
@@ -341,9 +396,9 @@ export default function CatalogueClient({
           />
         </div>
 
-        {/* Colonne des produits */}
-        <div className="lg:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Colonne des produits — pleine largeur sous lg */}
+        <div className="lg:col-span-3 pb-24 lg:pb-0">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
             {currentProducts.map(p => (
               <ProductCard key={p.id} product={p} />
             ))}
@@ -401,6 +456,29 @@ export default function CatalogueClient({
           </button>
         </nav>
       )}
+
+      {/* ─── Mobile-only : pilule sticky + bottom sheet via <dialog> natif ─── */}
+      <FiltersPill
+        groupCount={groupCount}
+        activeFilters={activeFilters}
+        onOpen={() => setSheetOpen(true)}
+        hidden={products.length === 0}
+      />
+      <FiltersMobileSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        matchedCount={filtered.length}
+        availableBrands={brands}
+        itemsByType={itemsByType}
+        sort={sortBy}
+        selectedBrands={selectedBrands}
+        selectedTags={selectedTags}
+        onSortChange={setSortBy}
+        onBrandToggle={handleBrandToggle}
+        onTagToggle={handleTagToggle}
+        onClearAll={clearAllFilters}
+        productCounts={productCounts}
+      />
     </div>
   )
 }

@@ -703,6 +703,23 @@
       "ingredients": "INGRÉDIENTS"
     }
   },
+  "MobileFilters": {
+    "pillLabel": "Filtres",
+    "sheetTitle": "Filtres",
+    "productCount": "{count, plural, =0 {0 produit} =1 {1 produit} other {# produits}}",
+    "clearAll": "Tout effacer",
+    "closeAriaLabel": "Fermer",
+    "sortLabel": "Trier par",
+    "brandsLabel": "Marques",
+    "needsLabel": "Besoins",
+    "applyButton": "Appliquer",
+    "applyCount": "({count})",
+    "cancel": "Annuler",
+    "noResultsTitle": "Aucun produit",
+    "noResultsTitleEmphasis": "ne correspond.",
+    "noResultsHint": "Essayez avec moins de marques ou élargissez la sélection.",
+    "removeFilterAriaLabel": "Retirer le filtre {label}"
+  },
   "Banner": {
     "ctaArrowAlt": "Flèche",
     "quotePhotoAlt": "Photo de {name}"
