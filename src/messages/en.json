@@ -279,10 +279,107 @@
     }
   },
   "Reservation": {
+    "pageTitle": "Reserve · FARMAU",
+    "pageDescription": "FARMAU reservation tunnel. No online payment — coordination via WhatsApp.",
+    "step": "Reservation · step {n}/{total}",
+    "stepIndicator": {
+      "address": "Address",
+      "shipping": "Shipping",
+      "review": "Review",
+      "edit": "Edit"
+    },
+    "address": {
+      "title": "Delivery address",
+      "lede": "We need your phone number to coordinate delivery via WhatsApp.",
+      "firstNameLabel": "First name",
+      "firstNamePlaceholder": "María",
+      "lastNameLabel": "Last name",
+      "lastNamePlaceholder": "Pérez",
+      "streetLabel": "Address",
+      "streetPlaceholder": "Street, number, building",
+      "streetHint": "Add the building name or any landmark if needed.",
+      "cityLabel": "City",
+      "cityPlaceholder": "Santo Domingo",
+      "postalCodeLabel": "Postal code",
+      "postalCodePlaceholder": "10101",
+      "postalCodeHint": "Determines the shipping zone.",
+      "phoneLabel": "Phone (WhatsApp)",
+      "phonePlaceholder": "+1 809 / 829 / 849 XXX-XXXX",
+      "phoneHintStrong": "Required.",
+      "phoneHint": "We'll contact you at this number to coordinate payment and delivery.",
+      "errors": {
+        "missingFields": "Please fill in all required fields.",
+        "invalidPhone": "Invalid phone number."
+      },
+      "continue": "Continue to shipping",
+      "backToCart": "← Back to cart"
+    },
+    "shipping": {
+      "title": "How would you like to receive your order?",
+      "lede": "We pre-selected the zone based on your postal code. You can switch to in-pharmacy pickup.",
+      "zones": {
+        "santo_domingo": {
+          "title": "Santo Domingo",
+          "subtitle": "24-48h delivery · Distrito Nacional + Greater Santo Domingo · CP 10000-11999"
+        },
+        "interior": {
+          "title": "Rest of the country",
+          "subtitle": "3-5 day delivery · Anywhere else in the Dominican Republic"
+        },
+        "pickup": {
+          "title": "Pharmacy pickup",
+          "subtitle": "Free · Pick up when it suits you",
+          "free": "Free"
+        }
+      },
+      "pickupHeader": "Choose the pickup point",
+      "continue": "Continue to review",
+      "backToAddress": "← Edit address"
+    },
+    "review": {
+      "title": "Confirm your reservation",
+      "lede": "Review everything is correct. Then we'll open WhatsApp with a message ready to send.",
+      "itemsHeading": "Items · {count, plural, =1 {1 product} other {# products}}",
+      "addressHeading": "Address",
+      "shippingHeading": "Shipping",
+      "noteHeading": "Note for the team",
+      "noteOptional": "optional",
+      "noteLede": "A preferred time? A question for our pharmacists?",
+      "notePlaceholder": "E.g. Call me before stopping by.",
+      "totalHeading": "Total",
+      "subtotalBreakdown": "Subtotal · {count, plural, =1 {1 product} other {# products}}",
+      "shippingBreakdown": "Shipping · {label}",
+      "totalToCoordinate": "Total to coordinate",
+      "cta": "Reserve and contact via WhatsApp",
+      "ctaSubLabel": "We'll open WhatsApp with a message ready to send",
+      "consent": "By reserving, you agree we may contact you on WhatsApp at the number provided.",
+      "backToShipping": "← Edit shipping",
+      "submitting": "Creating reservation…"
+    },
+    "disclaimer": "<strong>This is a reservation, not a payment.</strong> Our team will contact you via WhatsApp to confirm availability and coordinate the payment (cash, bank transfer or in pharmacy).",
+    "deliveryLabels": {
+      "santo_domingo": "Santo Domingo delivery",
+      "santo_domingo_subtitle": "You receive within <strong>24 to 48 hours</strong> after confirmation.",
+      "interior": "Interior delivery",
+      "interior_subtitle": "You receive within <strong>3 to 5 days</strong> after confirmation.",
+      "pickup": "In-pharmacy pickup",
+      "pickup_subtitle": "Pick up when it suits you."
+    },
+    "errors": {
+      "auth_required": "You must be signed in to reserve.",
+      "phone_required": "Phone number required before reserving.",
+      "cart_empty": "Your cart is empty.",
+      "already_active": "You already have an active reservation.",
+      "shipping_required": "Please choose a shipping option.",
+      "pickup_required": "Please choose a pickup location.",
+      "generic": "Reservation failed, please try again."
+    },
     "successTitle": "Reservation confirmed!",
     "referenceLabel": "Reference:",
     "successDescription": "We'll contact you via <strong>WhatsApp</strong> within the next 24h to schedule pickup at the pharmacy. After this delay, the reservation is automatically cancelled.",
-    "backToCatalogue": "Back to catalogue"
+    "backToCatalogue": "Back to catalogue",
+    "openWhatsapp": "Open WhatsApp",
+    "confirmationLede": "Click the button below: we've prepared a message with every detail of your reservation."
   },
   "Favoris": {
     "pageTitle": "My favorites · FARMAU",

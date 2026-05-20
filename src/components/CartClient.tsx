@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useCart } from '@/hooks/useCart'
 import { CartLineItem } from '@/components/cart/CartLineItem'
@@ -11,50 +10,23 @@ import { CartEmpty } from '@/components/cart/CartEmpty'
 
 export default function CartClient() {
   const t = useTranslations('Cart')
-  const tRes = useTranslations('Reservation')
   const router = useRouter()
-  const { items, updateQuantity, removeFromCart, clearCart, totalPrice, refreshCart } = useCart()
+  const { items, updateQuantity, removeFromCart, clearCart, totalPrice } = useCart()
 
   const productsCount = items.length
   const unitsCount = useMemo(() => items.reduce((acc, it) => acc + it.quantity, 0), [items])
 
   const [reserving, setReserving] = useState(false)
   const [reserveError, setReserveError] = useState<string | null>(null)
-  const [reservationId, setReservationId] = useState<string | null>(null)
 
-  const handleReserve = useCallback(async () => {
+  // "Reservar" depuis /cart → ouvre simplement le tunnel /reservation.
+  // Les guards auth + phone + cart_empty + already_active sont gérés en
+  // amont par le Server Component de la page /reservation.
+  const handleReserve = useCallback(() => {
     setReserving(true)
     setReserveError(null)
-    try {
-      const res = await fetch('/api/cart/reserve', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) {
-        switch (json.code) {
-          case 'auth_required':
-            router.push('/login?next=/cart')
-            return
-          case 'phone_required':
-            router.push('/account/profile?required=phone&from=/cart')
-            return
-          case 'already_active':
-            setReserveError(t('errors.alreadyActive'))
-            return
-          case 'cart_empty':
-            setReserveError(t('errors.cartEmpty'))
-            return
-          default:
-            setReserveError(json.error || t('errors.generic'))
-            return
-        }
-      }
-      setReservationId(json.reservationId)
-      await refreshCart()
-    } catch {
-      setReserveError(t('errors.network'))
-    } finally {
-      setReserving(false)
-    }
-  }, [router, refreshCart, t])
+    router.push('/reservation')
+  }, [router])
 
   const handleClearCart = useCallback(() => {
     if (typeof window !== 'undefined' && window.confirm(t('clearCartConfirm'))) {
@@ -62,43 +34,12 @@ export default function CartClient() {
     }
   }, [clearCart, t])
 
-  /* ─────────── Branche 1 : confirmation post-réservation ─────────── */
-  if (reservationId) {
-    const shortRef = reservationId.slice(0, 8).toUpperCase()
-    return (
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-sand-50 border border-sand-300 rounded-2xl shadow-sm p-8 text-center">
-          <div className="mb-6 flex justify-center">
-            <CheckCircle className="h-16 w-16 text-olive-600" />
-          </div>
-          <h1 className="font-serif text-[28px] text-ink-900 mb-3">{tRes('successTitle')}</h1>
-          <p className="text-ink-700 mb-2">
-            {tRes('referenceLabel')}{' '}
-            <span className="font-mono font-semibold">#{shortRef}</span>
-          </p>
-          <p className="text-ink-700 mb-6">
-            {tRes.rich('successDescription', {
-              strong: (chunks) => <strong>{chunks}</strong>,
-            })}
-          </p>
-          <Link
-            href="/catalogue"
-            className="inline-flex items-center justify-center px-6 py-3 bg-clay-700 text-sand-50 rounded-lg hover:bg-clay-800 transition-colors"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {tRes('backToCatalogue')}
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  /* ─────────── Branche 2 : panier vide ─────────── */
+  /* ─────────── Branche 1 : panier vide ─────────── */
   if (items.length === 0) {
     return <CartEmpty />
   }
 
-  /* ─────────── Branche 3 : panier rempli ─────────── */
+  /* ─────────── Branche 2 : panier rempli ─────────── */
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-12 py-4 lg:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 lg:gap-12">

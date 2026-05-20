@@ -16,11 +16,10 @@ interface CartDrawerProps {
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const t = useTranslations('Cart')
   const router = useRouter()
-  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, clearCart, refreshCart } =
-    useCart()
+  const { items, totalItems, totalPrice, updateQuantity, removeFromCart, clearCart } = useCart()
 
   const [reserving, setReserving] = useState(false)
-  const [reserveError, setReserveError] = useState<string | null>(null)
+  const [reserveError] = useState<string | null>(null)
 
   /* Scroll-lock + Esc */
   useEffect(() => {
@@ -38,42 +37,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     }
   }, [isOpen, onClose])
 
-  const handleReserve = useCallback(async () => {
+  // "Reservar" depuis le drawer → ferme + ouvre le tunnel /reservation
+  const handleReserve = useCallback(() => {
     setReserving(true)
-    setReserveError(null)
-    try {
-      const res = await fetch('/api/cart/reserve', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) {
-        switch (json.code) {
-          case 'auth_required':
-            onClose()
-            router.push('/login?next=/cart')
-            return
-          case 'phone_required':
-            onClose()
-            router.push('/account/profile?required=phone&from=/cart')
-            return
-          case 'already_active':
-            setReserveError(t('errors.alreadyActive'))
-            return
-          case 'cart_empty':
-            setReserveError(t('errors.cartEmpty'))
-            return
-          default:
-            setReserveError(json.error || t('errors.generic'))
-            return
-        }
-      }
-      await refreshCart()
-      onClose()
-      router.push('/cart')
-    } catch {
-      setReserveError(t('errors.network'))
-    } finally {
-      setReserving(false)
-    }
-  }, [router, refreshCart, onClose, t])
+    onClose()
+    router.push('/reservation')
+  }, [router, onClose])
 
   const handleClearCart = useCallback(() => {
     if (typeof window !== 'undefined' && window.confirm(t('clearCartConfirm'))) {
