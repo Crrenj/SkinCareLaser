@@ -31,10 +31,14 @@ export type Database = {
       }
       banners: {
         Row: {
+          attribution_name: string | null
+          attribution_photo_url: string | null
+          attribution_title: string | null
           banner_type: string
           click_count: number | null
           created_at: string | null
           description: string | null
+          direction: string | null
           end_date: string | null
           id: string
           image_url: string | null
@@ -48,10 +52,14 @@ export type Database = {
           view_count: number | null
         }
         Insert: {
+          attribution_name?: string | null
+          attribution_photo_url?: string | null
+          attribution_title?: string | null
           banner_type?: string
           click_count?: number | null
           created_at?: string | null
           description?: string | null
+          direction?: string | null
           end_date?: string | null
           id?: string
           image_url?: string | null
@@ -65,10 +73,14 @@ export type Database = {
           view_count?: number | null
         }
         Update: {
+          attribution_name?: string | null
+          attribution_photo_url?: string | null
+          attribution_title?: string | null
           banner_type?: string
           click_count?: number | null
           created_at?: string | null
           description?: string | null
+          direction?: string | null
           end_date?: string | null
           id?: string
           image_url?: string | null
@@ -142,6 +154,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
         ]
@@ -282,6 +301,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       orders: {
@@ -343,6 +369,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_ranges: {
@@ -364,6 +397,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_ranges_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
           {
@@ -397,6 +437,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "product_tags_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "product_tags_tag_id_fkey"
             columns: ["tag_id"]
             isOneToOne: false
@@ -414,43 +461,79 @@ export type Database = {
       }
       products: {
         Row: {
+          benefits: string[] | null
           created_at: string | null
           currency: string | null
           description: string | null
           id: string
           image_url: string | null
+          inci: string | null
           is_active: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
           name: string
+          old_price: number | null
+          pharmacist_advice: string | null
+          pharmacist_name: string | null
           price: number
+          skin_type: string[] | null
           slug: string | null
           stock: number | null
+          technical_pdf_url: string | null
+          texture: string | null
           updated_at: string | null
+          usage: string | null
+          volume: string | null
         }
         Insert: {
+          benefits?: string[] | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          inci?: string | null
           is_active?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
           name: string
+          old_price?: number | null
+          pharmacist_advice?: string | null
+          pharmacist_name?: string | null
           price: number
+          skin_type?: string[] | null
           slug?: string | null
           stock?: number | null
+          technical_pdf_url?: string | null
+          texture?: string | null
           updated_at?: string | null
+          usage?: string | null
+          volume?: string | null
         }
         Update: {
+          benefits?: string[] | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          inci?: string | null
           is_active?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
           name?: string
+          old_price?: number | null
+          pharmacist_advice?: string | null
+          pharmacist_name?: string | null
           price?: number
+          skin_type?: string[] | null
           slug?: string | null
           stock?: number | null
+          technical_pdf_url?: string | null
+          texture?: string | null
           updated_at?: string | null
+          usage?: string | null
+          volume?: string | null
         }
         Relationships: []
       }
@@ -577,6 +660,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reservation_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "reservation_items_reservation_id_fkey"
             columns: ["reservation_id"]
             isOneToOne: false
@@ -671,18 +761,21 @@ export type Database = {
       }
       tags: {
         Row: {
+          featured_on_home: boolean | null
           id: string
           name: string
           slug: string
           tag_type_id: string
         }
         Insert: {
+          featured_on_home?: boolean | null
           id?: string
           name: string
           slug: string
           tag_type_id: string
         }
         Update: {
+          featured_on_home?: boolean | null
           id?: string
           name?: string
           slug?: string
@@ -694,6 +787,39 @@ export type Database = {
             columns: ["tag_type_id"]
             isOneToOne: false
             referencedRelation: "tag_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlists: {
+        Row: {
+          created_at: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlists_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlists_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
         ]
@@ -721,6 +847,35 @@ export type Database = {
           },
         ]
       }
+      v_bestsellers: {
+        Row: {
+          benefits: string[] | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string | null
+          image_url: string | null
+          inci: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          is_new: boolean | null
+          name: string | null
+          old_price: number | null
+          pharmacist_advice: string | null
+          pharmacist_name: string | null
+          price: number | null
+          skin_type: string[] | null
+          slug: string | null
+          sold_30d: number | null
+          stock: number | null
+          technical_pdf_url: string | null
+          texture: string | null
+          updated_at: string | null
+          usage: string | null
+          volume: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_to_cart: {
@@ -745,6 +900,7 @@ export type Database = {
         Returns: Json
       }
       create_reservation: { Args: { p_cart_id: string }; Returns: string }
+      expire_stale_reservations: { Args: never; Returns: number }
       get_messages_stats: { Args: never; Returns: Json }
       get_or_create_cart: {
         Args: { p_anonymous_id?: string; p_user_id?: string }
