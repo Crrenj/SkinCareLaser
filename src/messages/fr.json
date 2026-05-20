@@ -152,9 +152,18 @@
   "Footer": {
     "logoAlt": "Logo",
     "tagline": "Dermo-cosmétique d'expert pharmacien.<br>República Dominicana.",
+    "productsHeading": "Produits",
     "needsHeading": "Besoins",
     "serviceHeading": "Service",
     "brandHeading": "FARMAU",
+    "products": {
+      "cleansers": "Nettoyants",
+      "serums": "Sérums",
+      "creams": "Crèmes & soins",
+      "masks": "Masques",
+      "sunCare": "Protection solaire",
+      "bodyCare": "Soins corps"
+    },
     "newsletter": {
       "title": "Une fois par mois,<br><em>pas plus.</em>",
       "description": "Nouveautés, conseils pharmaciens, et offres réservées aux abonnés. Promis, c'est court.",

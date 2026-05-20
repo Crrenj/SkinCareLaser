@@ -152,9 +152,18 @@
   "Footer": {
     "logoAlt": "Logo",
     "tagline": "Dermocosmética de experto farmacéutico.<br>República Dominicana.",
+    "productsHeading": "Productos",
     "needsHeading": "Necesidades",
     "serviceHeading": "Servicio",
     "brandHeading": "FARMAU",
+    "products": {
+      "cleansers": "Limpiadores",
+      "serums": "Sueros",
+      "creams": "Cremas y cuidados",
+      "masks": "Mascarillas",
+      "sunCare": "Protección solar",
+      "bodyCare": "Cuidado corporal"
+    },
     "newsletter": {
       "title": "Una vez al mes,<br><em>nada más.</em>",
       "description": "Novedades, consejos de farmacéuticos y ofertas para suscriptores. Prometido, será corto.",

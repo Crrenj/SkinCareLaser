@@ -152,9 +152,18 @@
   "Footer": {
     "logoAlt": "Logo",
     "tagline": "Pharmacist-grade dermocosmetics.<br>Dominican Republic.",
+    "productsHeading": "Products",
     "needsHeading": "Concerns",
     "serviceHeading": "Service",
     "brandHeading": "FARMAU",
+    "products": {
+      "cleansers": "Cleansers",
+      "serums": "Serums",
+      "creams": "Creams & care",
+      "masks": "Masks",
+      "sunCare": "Sun protection",
+      "bodyCare": "Body care"
+    },
     "newsletter": {
       "title": "Once a month,<br><em>no more.</em>",
       "description": "New releases, pharmacist tips, and subscriber-only offers. Promise it's short.",

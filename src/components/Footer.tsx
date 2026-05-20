@@ -4,6 +4,15 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { FooterNewsletter } from './footer/FooterNewsletter'
 
+const PRODUCT_LINKS = [
+  { key: 'cleansers', href: '/catalogue?category=cleansers' },
+  { key: 'serums', href: '/catalogue?category=serums' },
+  { key: 'creams', href: '/catalogue?category=creams' },
+  { key: 'masks', href: '/catalogue?category=masks' },
+  { key: 'sunCare', href: '/catalogue?category=sunCare' },
+  { key: 'bodyCare', href: '/catalogue?category=bodyCare' },
+] as const
+
 const NEED_SLUGS = [
   'hydratation',
   'anti-age',
@@ -44,8 +53,8 @@ export default function Footer() {
     <footer className="bg-ink-900 text-sand-200 px-6 lg:px-16 pt-16 lg:pt-20">
       <FooterNewsletter />
 
-      {/* Grid 4 colonnes (2fr + 3×1fr) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 lg:gap-12 mb-14">
+      {/* Grid 5 colonnes (2fr + 4×1fr) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-12 mb-14">
         {/* Brand column */}
         <div className="flex flex-col gap-5 max-w-[320px]">
           <span
@@ -73,6 +82,16 @@ export default function Footer() {
             </SocialIcon>
           </div>
         </div>
+
+        <FooterColumn heading={t('productsHeading')}>
+          {PRODUCT_LINKS.map((link) => (
+            <FooterLink
+              key={link.key}
+              href={link.href}
+              label={t(`products.${link.key}`)}
+            />
+          ))}
+        </FooterColumn>
 
         <FooterColumn heading={t('needsHeading')}>
           {NEED_SLUGS.map((slug) => (
