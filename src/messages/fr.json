@@ -228,15 +228,15 @@
     "addToCart": "Ajouter au panier"
   },
   "Cart": {
-    "emptyTitle": "Votre panier est vide",
-    "emptyDescription": "Découvrez nos produits et commencez votre shopping !",
-    "continueShopping": "Continuer les achats",
     "title": "Votre panier",
+    "subtitle": "{products, plural, =1 {1 produit} other {# produits}} · {units, plural, =1 {1 unité} other {# unités}}",
     "summary": "{count, plural, =0 {Aucun produit dans votre panier} =1 {1 produit dans votre panier} other {# produits dans votre panier}}",
     "productsHeading": "Produits",
-    "summaryHeading": "Résumé de commande",
+    "summaryHeading": "Résumé",
     "subtotal": "Sous-total",
-    "shipping": "Frais de livraison",
+    "shipping": "Livraison",
+    "shippingHint": "Calculé à l'étape suivante",
+    "subtotalCaps": "SOUS-TOTAL",
     "total": "Total",
     "decreaseQuantityAriaLabel": "Diminuer la quantité",
     "increaseQuantityAriaLabel": "Augmenter la quantité",
@@ -244,8 +244,33 @@
     "removeTitle": "Supprimer du panier",
     "noImage": "Pas d'image",
     "reserveButton": "Réserver",
+    "reserveSubLabel": "Nous vous contacterons par WhatsApp",
     "reserving": "Réservation en cours…",
     "reserveSubtext": "Pas de paiement en ligne. Vous serez contacté via WhatsApp pour fixer l'heure de collecte.",
+    "continueShopping": "← Continuer les achats",
+    "clearCart": "Vider le panier",
+    "clearCartConfirm": "Vider le panier ?",
+    "drawerClose": "Fermer le panier",
+    "drawerTitle": "Panier",
+    "drawerProductsCount": "{count, plural, =0 {0 produit} =1 {1 produit} other {# produits}}",
+    "trustNoPayment": {
+      "title": "Sans paiement en ligne",
+      "body": "Vous coordonnez par WhatsApp après la réservation."
+    },
+    "trustPharmacist": {
+      "title": "Conseil pharmacien",
+      "body": "Notre équipe vous contactera en cas de doute."
+    },
+    "empty": {
+      "title": "Votre panier est",
+      "titleEmphasis": "vide",
+      "lede": "C'est le moment de commencer votre routine. Explorez le catalogue ou demandez conseil à un pharmacien.",
+      "ctaCatalogue": "Découvrir le catalogue",
+      "ctaPharmacist": "Parler à un pharmacien",
+      "bestsellersEyebrow": "Une idée ?",
+      "bestsellersTitle": "Les favoris de nos pharmaciens",
+      "mobileLede": "Explorez le catalogue ou demandez conseil à un pharmacien."
+    },
     "errors": {
       "alreadyActive": "Vous avez déjà une réservation active. Attendez sa résolution ou contactez-nous via WhatsApp.",
       "cartEmpty": "Votre panier est vide.",

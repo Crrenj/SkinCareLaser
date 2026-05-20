@@ -21,9 +21,9 @@ export async function generateMetadata({
 
 export default function CartPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
+    <div className="flex flex-col min-h-screen bg-sand-100">
       <NavBar />
-      <main id="main-content" className="flex-grow p-6">
+      <main id="main-content" className="flex-grow">
         <CartClient />
       </main>
       <Footer />

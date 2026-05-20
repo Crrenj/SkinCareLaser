@@ -56,11 +56,17 @@ export async function GET() {
           price,
           currency,
           stock,
-          product_images (url, alt)
+          volume,
+          product_images (url, alt),
+          product_ranges (
+            ranges (
+              brands (name)
+            )
+          )
         )
       `)
       .eq('cart_id', cartId)
-    
+
     if (itemsError) {
       console.error('Erreur récupération items:', itemsError)
       return NextResponse.json(
@@ -68,22 +74,30 @@ export async function GET() {
         { status: 500 }
       )
     }
-    
+
     // Formater la réponse avec typage correct
-    const items = (cartItems as any[])?.map(item => ({
-      id: item.id,
-      cart_id: item.cart_id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      product: item.products ? {
-        id: item.products.id,
-        name: item.products.name,
-        price: item.products.price,
-        currency: item.products.currency,
-        stock: item.products.stock,
-        images: item.products.product_images || []
-      } : undefined
-    })) || []
+    const items = (cartItems as any[])?.map(item => {
+      // Le brand vient via product_ranges → ranges → brands (m:m). On prend
+      // le premier dispo pour l'eyebrow d'affichage.
+      const brandName =
+        item.products?.product_ranges?.[0]?.ranges?.brands?.name ?? null
+      return {
+        id: item.id,
+        cart_id: item.cart_id,
+        product_id: item.product_id,
+        quantity: item.quantity,
+        product: item.products ? {
+          id: item.products.id,
+          name: item.products.name,
+          price: item.products.price,
+          currency: item.products.currency,
+          stock: item.products.stock,
+          volume: item.products.volume ?? null,
+          brand: brandName,
+          images: item.products.product_images || []
+        } : undefined,
+      }
+    }) || []
     
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = items.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0)

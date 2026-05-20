@@ -228,15 +228,15 @@
     "addToCart": "Añadir al carrito"
   },
   "Cart": {
-    "emptyTitle": "Tu carrito está vacío",
-    "emptyDescription": "¡Descubre nuestros productos y empieza a comprar!",
-    "continueShopping": "Seguir comprando",
     "title": "Tu carrito",
+    "subtitle": "{products, plural, =1 {1 producto} other {# productos}} · {units, plural, =1 {1 unidad} other {# unidades}}",
     "summary": "{count, plural, =0 {Ningún producto en tu carrito} =1 {1 producto en tu carrito} other {# productos en tu carrito}}",
     "productsHeading": "Productos",
-    "summaryHeading": "Resumen del pedido",
+    "summaryHeading": "Resumen",
     "subtotal": "Subtotal",
-    "shipping": "Gastos de envío",
+    "shipping": "Envío",
+    "shippingHint": "Calculado en el siguiente paso",
+    "subtotalCaps": "SUBTOTAL",
     "total": "Total",
     "decreaseQuantityAriaLabel": "Disminuir cantidad",
     "increaseQuantityAriaLabel": "Aumentar cantidad",
@@ -244,8 +244,33 @@
     "removeTitle": "Eliminar del carrito",
     "noImage": "Sin imagen",
     "reserveButton": "Reservar",
+    "reserveSubLabel": "Coordinaremos por WhatsApp",
     "reserving": "Reservando…",
-    "reserveSubtext": "No hay pago en línea. Le contactaremos por WhatsApp para fijar la hora de recogida.",
+    "reserveSubtext": "Sin pago en línea. Te contactaremos por WhatsApp para fijar la hora de recogida.",
+    "continueShopping": "← Seguir comprando",
+    "clearCart": "Vaciar el carrito",
+    "clearCartConfirm": "¿Vaciar el carrito?",
+    "drawerClose": "Cerrar el carrito",
+    "drawerTitle": "Carrito",
+    "drawerProductsCount": "{count, plural, =0 {0 productos} =1 {1 producto} other {# productos}}",
+    "trustNoPayment": {
+      "title": "Sin pago en línea",
+      "body": "Coordinas por WhatsApp tras la reserva."
+    },
+    "trustPharmacist": {
+      "title": "Asesoría farmacéutica",
+      "body": "Nuestro equipo te contactará si tiene dudas."
+    },
+    "empty": {
+      "title": "Tu carrito está",
+      "titleEmphasis": "vacío",
+      "lede": "Es el momento de empezar tu rutina. Explora el catálogo o pídele consejo a un farmacéutico.",
+      "ctaCatalogue": "Descubrir el catálogo",
+      "ctaPharmacist": "Hablar con un farmacéutico",
+      "bestsellersEyebrow": "¿Quieres una idea?",
+      "bestsellersTitle": "Los favoritos de nuestros farmacéuticos",
+      "mobileLede": "Explora el catálogo o pídele consejo a un farmacéutico."
+    },
     "errors": {
       "alreadyActive": "Ya tienes una reserva activa. Espera su resolución o contáctanos por WhatsApp.",
       "cartEmpty": "Tu carrito está vacío.",

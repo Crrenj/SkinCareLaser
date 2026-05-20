@@ -11,6 +11,10 @@ export interface CartItem {
     price: number
     currency: string
     stock: number
+    /** Volume product (ml/g) ou null si non saisi. */
+    volume?: string | null
+    /** Nom de marque dérivé de product_ranges → ranges → brands. */
+    brand?: string | null
     images: Array<{
       url: string
       alt: string

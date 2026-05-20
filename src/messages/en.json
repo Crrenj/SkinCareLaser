@@ -228,15 +228,15 @@
     "addToCart": "Add to cart"
   },
   "Cart": {
-    "emptyTitle": "Your cart is empty",
-    "emptyDescription": "Discover our products and start shopping!",
-    "continueShopping": "Continue shopping",
     "title": "Your cart",
+    "subtitle": "{products, plural, =1 {1 product} other {# products}} · {units, plural, =1 {1 unit} other {# units}}",
     "summary": "{count, plural, =0 {No products in your cart} =1 {1 product in your cart} other {# products in your cart}}",
     "productsHeading": "Products",
-    "summaryHeading": "Order summary",
+    "summaryHeading": "Summary",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
+    "shippingHint": "Calculated in the next step",
+    "subtotalCaps": "SUBTOTAL",
     "total": "Total",
     "decreaseQuantityAriaLabel": "Decrease quantity",
     "increaseQuantityAriaLabel": "Increase quantity",
@@ -244,8 +244,33 @@
     "removeTitle": "Remove from cart",
     "noImage": "No image",
     "reserveButton": "Reserve",
+    "reserveSubLabel": "We'll coordinate via WhatsApp",
     "reserving": "Reserving…",
     "reserveSubtext": "No online payment. We'll contact you via WhatsApp to schedule pickup.",
+    "continueShopping": "← Continue shopping",
+    "clearCart": "Clear cart",
+    "clearCartConfirm": "Clear the cart?",
+    "drawerClose": "Close cart",
+    "drawerTitle": "Cart",
+    "drawerProductsCount": "{count, plural, =0 {0 products} =1 {1 product} other {# products}}",
+    "trustNoPayment": {
+      "title": "No online payment",
+      "body": "Coordinate with us via WhatsApp after reserving."
+    },
+    "trustPharmacist": {
+      "title": "Pharmacist guidance",
+      "body": "Our team will reach out if anything needs clarifying."
+    },
+    "empty": {
+      "title": "Your cart is",
+      "titleEmphasis": "empty",
+      "lede": "Time to start your routine. Browse the catalog or ask a pharmacist for advice.",
+      "ctaCatalogue": "Browse the catalog",
+      "ctaPharmacist": "Talk to a pharmacist",
+      "bestsellersEyebrow": "Need an idea?",
+      "bestsellersTitle": "Our pharmacists' favorites",
+      "mobileLede": "Browse the catalog or ask a pharmacist for advice."
+    },
     "errors": {
       "alreadyActive": "You already have an active reservation. Wait for its resolution or contact us via WhatsApp.",
       "cartEmpty": "Your cart is empty.",
