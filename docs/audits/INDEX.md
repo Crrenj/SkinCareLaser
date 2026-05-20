@@ -1,12 +1,13 @@
 # Audit complet — FARMAU / Skincare Laser
 
 Date d'audit : 2026-05-19
-Date dernière mise à jour : 2026-05-20
+Date dernière mise à jour : 2026-05-20 (post sprint 2 design)
 Branche : `main`
 Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
 
 > **État** : voir `docs/HANDOFF.md` pour la punch list courante.
-> **142 findings au total** dont une grosse majorité **fermés** lors des sessions 2026-05-19 et 2026-05-20.
+> **142 findings au total** dont une grande majorité **fermés** lors des sessions 2026-05-19 et 2026-05-20.
+> Sprint 2 design (5 livrables) a en plus refondu visuellement ProductCard, NavBar, Fiche produit, Bannières, Home + Footer et ajouté le système Wishlist.
 
 ---
 
@@ -52,7 +53,7 @@ Livré en 8 commits (`5be92fa` → `5e51720`) :
 
 Plus :
 - ✅ `.limit(100)` → `.limit(500)` sur catalogue (commit `4f4db48`, 253 produits débloqués)
-- ❌ Footer 24 liens morts — **PENDING**
+- ✅ Footer 24 liens câblés (sprint 2 livrable 5/5 + commit `be73c77`) — restent les routes `/besoins/[slug]` et `/marques` à créer
 
 ### ~~3. Bug RPC `add_to_cart` — écrase la quantité~~ ✅ FIXÉ (commit `b8ea667`)
 - `quantity = public.cart_items.quantity + EXCLUDED.quantity` + bump `updated_at`
@@ -69,25 +70,52 @@ Plus :
 - `products.image_url` + table `product_images` cohabitent
 - Le fallback `image_url || product_images?.[0]?.url` est dispersé
 
+### 6. Sprint 2 design — ✅ LIVRÉ (commits `677622c` → `c37a915`)
+**Refonte visuelle complète sur 5 surfaces majeures** :
+- ProductCard (Instrument Serif sur prix, CTA outline ink, quick-add hover, ❤ heart top-right)
+- NavBar 3-row sticky + `⌘K` recherche dropdown + MobileDrawer + LocaleSwitcher
+- Fiche produit avec 5 accordéons natifs + galerie sticky + zoom + pharmacist conditionnel + sticky mobile
+- Bannières 6 → 3 (`editorial`/`hero`/`quote`) + admin form conditionnel
+- Home 7 sections (Hero éditorial → Bestsellers via v_bestsellers → ByNeed via tags.featured_on_home → Quote → Brands → Expertise → Routine) + Footer 5 col + newsletter
+
+**Système Wishlist complet** (nouvelles surfaces hors audit initial) :
+- Table `wishlists` (PK composite + RLS "users manage own")
+- API `/api/wishlist` GET liste + POST toggle
+- Hook `useWishlist` optimistic SWR
+- Heart sur ProductCard + Heart sur PDP
+- Page `/favoris` (force-dynamic, redirect /login si non auth, noindex)
+
+**Migration DB consolidée sprint 2** (commit `cf8f581`) :
+- 12 colonnes products : volume, pharmacist_advice, pharmacist_name, benefits[], usage, inci, technical_pdf_url, skin_type[], texture, old_price, is_new, is_featured
+- tags.featured_on_home boolean
+- 4 colonnes banners : direction (CHECK left|right), attribution_name, attribution_title, attribution_photo_url
+- table wishlists + RLS + 2 indexes
+- table newsletter_subscribers (RLS service-role only)
+- vue v_bestsellers (tri sold_30d + is_featured + created_at)
+- 7 indexes FK (product_ranges, product_tags, product_images, cart_items, order_items)
+
 ---
 
 ## 📊 Findings importants par dimension
 
 ### Sécurité (15)
 - ✅ Auth `/api/admin/*` (`requireAdmin`)
-- ✅ Rate limit `/api/contact` (5/min/IP, table + RPC `check_rate_limit`)
+- ✅ Rate limit `/api/contact` (5/min/IP) + `/api/newsletter` (3/min/IP)
 - ✅ Next.js 15.3.4 → 15.5.18 (CVE)
 - ✅ UUID admin hardcodé supprimé
-- ❌ Énumération emails via `create_contact_message` (réponse différentielle selon email existant) — rate limit ralentit mais ne ferme pas le trou — **PENDING (P2)**
+- ✅ Énumération emails `create_contact_message` (commit `4665575`) : RPC ouverte aux emails non inscrits
+- ✅ `npm audit fix` corrections non-breaking (commit `fb6dbbb`)
 - ❌ Fallback `localStorage` pour tokens Supabase (XSS exfiltration triviale)
 - ❌ RPC `SECURITY DEFINER` sans `SET search_path` (à auditer fonction par fonction ; `check_rate_limit`, `create_reservation`, `expire_stale_reservations`, `handle_new_user` sont OK)
 - ❌ Pas de validation des champs côté API (`...productData` propage tout)
 - ❌ Pas de protection CSRF
 
 ### Performance (12)
-- ✅ `revalidate = 60` sur `/`, `/catalogue`, `/product/[id]` (commit `bcefbbe`)
-- ✅ 4 indexes FK manquants créés (commit `0dd8721`) — sur les 8 proposés, 4 étaient déjà couverts par des PKs composites
-- ❌ 5 balises `<img>` au lieu de `next/image` — **PENDING (P2)**
+- ✅ `revalidate = 60` sur `/`, `/catalogue`, `/product/[slug]` (commit `bcefbbe`)
+- ✅ 4 indexes FK initiaux (commit `0dd8721`) + 7 indexes FK sprint 2 (`cf8f581`) → 11 indexes au total sur les FKs critiques
+- ✅ 2/5 `<img>` admin migrés (commit `b580342`)
+- ✅ Vue `v_bestsellers` cache home + nav-search fallback
+- ❌ 3 `<img>` restants → `next/image` : `CartDrawer`, `ProductClient×2` — **PENDING (P2)**
 - ❌ `splitChunks` custom → vendor chunk 864 KB
 - ❌ `framer-motion` listé mais jamais importé
 - ❌ `FiltersNew.tsx` jamais importé (mort)
@@ -100,15 +128,19 @@ Plus :
 - ❌ Types `Product`/`Brand`/`Tag`/`Banner` redéfinis 5-10 fois ad-hoc (mitigé par génération automatique des types Supabase mais usage non systématique)
 
 ### Base de données (20)
-- ✅ 4 indexes FK posés
+- ✅ 11 indexes FK posés (4 initiaux + 7 sprint 2)
 - ✅ `add_to_cart` fix
 - ✅ Migrations versionnées (`supabase/migrations/`)
 - ✅ Types TS générés (`src/lib/database.types.ts`)
-- ✅ Tables `reservations` + `reservation_items` + `rate_limit_buckets` ajoutées
+- ✅ Tables `reservations` + `reservation_items` + `rate_limit_buckets` + `wishlists` + `newsletter_subscribers` ajoutées
+- ✅ Vue `v_bestsellers` (sold_30d + is_featured + created_at)
+- ✅ 12 colonnes products sprint 2 (volume, pharmacist_*, benefits, usage, inci, etc.)
+- ✅ Bannières : 4 colonnes ajoutées (direction + attribution_*)
 - ❌ `auth.uid()` non wrappé dans `(SELECT auth.uid())` → évalué par ligne (perf RLS)
 - ❌ `is_user_admin` pas marquée STABLE
 - ❌ Stockage image dupliqué — **PENDING**
 - ❌ `tags_with_types` est une VUE non matérialisée
+- ❌ `banner_type_enum` strict pas encore créé (colonne reste `text` pour compat legacy)
 
 ### Accessibilité (18) — note 38/100 (à re-mesurer après refonte design)
 - ✅ `<html lang>`
@@ -117,14 +149,14 @@ Plus :
 - ❌ Modales sans rôle dialog — **PENDING**
 - ❌ Roadmap 5 sprints pour atteindre ~88 % conformité
 
-### SEO (15) — ✅ majoritairement FIXÉ (commit `3521c21`)
+### SEO (15) — ✅ majoritairement FIXÉ
 - ✅ `sitemap.ts` dynamique (routes × locales + produits avec hreflang)
 - ✅ `robots.ts`
 - ✅ `metadataBase` (`https://farmau.do`)
-- ✅ `generateMetadata` sur home, catalogue, contact, a-propos, product (dynamique), cart, profile
+- ✅ `generateMetadata` sur home, catalogue, contact, a-propos, product (dynamique), cart, profile, favoris
 - ✅ hreflang alternates + `x-default`
 - ✅ openGraph par page
-- ❌ URLs `/product/[uuid]` au lieu de `/product/[slug]` — **PENDING (P2)**
+- ✅ URLs `/product/[slug]` (refactor user pendant sprint 2)
 - ❌ Pas de JSON-LD structured data (Product schema)
 
 ### Developer Experience (15) — ✅ majoritairement FIXÉ
@@ -139,15 +171,21 @@ Plus :
 - ❌ Pas de validation runtime des env vars (Zod)
 - ❌ 35 `alert()` natifs dans l'admin
 
-### UX (14) — note 4/10 (à re-mesurer)
+### UX (14) — note à re-mesurer post sprint 2
 - ✅ Catalogue débloqué (limit 500)
 - ✅ Tunnel de réservation fonctionnel end-to-end
 - ✅ i18n FR/EN/ES complet avec LocaleSwitcher
-- ❌ Footer 100 % liens morts — **PENDING (P2)**
-- ❌ NavBar dropdown langue — ✅ FIXÉ via LocaleSwitcher
+- ✅ Footer 24 liens câblés (sprint 2 livrable 5/5) — restent routes `/marques` et `/besoins/[slug]` à créer
+- ✅ NavBar dropdown langue via LocaleSwitcher
+- ✅ Recherche permanente avec ⌘K + dropdown live + recents + bestsellers fallback
+- ✅ Wishlist fonctionnel : heart ProductCard + PDP + page `/favoris`
+- ✅ Hero éditorial home + 7 sections (plus de page vide après scroll)
+- ✅ ProductCard refondue × 353 (impact maximal)
+- ✅ PDP avec 5 accordéons + galerie sticky + sticky bar mobile + zoom
+- ✅ Banners 6 → 3 variantes éditoriales claires
 - ❌ Filtres catalogue 100 % client-side (perf sur tag changes)
 - ❌ 35 `alert()` natifs dans l'admin
-- ❌ `localeCompare` utilisé pour le tri "meilleures ventes" (faux)
+- ✅ `localeCompare` "meilleures ventes" → vue v_bestsellers avec vrai tri SQL
 
 ### Qualité de code (18)
 - ✅ -300 LOC duplication via factorisation `supabaseAdmin`
@@ -169,21 +207,21 @@ Plus :
 5. ⚠️ Anti-énumération `create_contact_message` — **PENDING**
 
 ### ✅ Phase 2 — Quick wins (FAIT)
-6. ✅ Indexes DB (4 sur les 8 proposés)
+6. ✅ Indexes DB (11 sur les 15 proposés ; les 4 manquants sont couverts par PKs composites)
 7. ✅ `sitemap.ts` + `robots.ts` + `metadataBase`
-8. ✅ `generateMetadata` pour `/product/[id]` (et toutes les autres pages publiques)
+8. ✅ `generateMetadata` pour `/product/[slug]` (et toutes les autres pages publiques)
 9. ✅ `revalidate` sur pages publiques
-10. ❌ Migrer 5 `<img>` vers `next/image` — **PENDING**
+10. ⚠️ 2/5 `<img>` migrés (admin) — reste CartDrawer + ProductClient×2 — **PENDING**
 11. ✅ `.env.local.example`
 12. ❌ Supprimer code mort (`FiltersNew`, `framer-motion`) — **PENDING**
 13. ✅ Factoriser `supabaseAdmin` en singleton
 
 ### Phase 3 — Accessibilité / UX (PARTIEL)
 14. ⚠️ Skip link OK, `focus-visible` global et modales `role="dialog"` — **PENDING**
-15. ❌ CartDrawer resize mobile — peut être OK avec refonte design
+15. ✅ CartDrawer mobile (refonte design sprint 2)
 16. ✅ Réservation branchée (équivalent du checkout WhatsApp suggéré)
 17. ✅ `.limit(100) → 500`
-18. ❌ Footer cleanup — **PENDING**
+18. ✅ Footer 24 liens câblés (sprint 2 livrable 5/5)
 
 ### Phase 4 — Hygiène long terme (PARTIEL)
 19. ✅ CI GitHub Actions
@@ -191,14 +229,37 @@ Plus :
 21. ❌ Tests d'intégration admin Playwright — **PENDING**
 22. ❌ Splitter pages admin > 500 LOC — **PENDING**
 23. ✅ Générer types Supabase
-24. ❌ URLs `/product/[slug]` — **PENDING (P2)**
-25. ❌ Bumper deps obsolètes (`npm audit` 19 vulns) — **PENDING**
+24. ✅ URLs `/product/[slug]`
+25. ✅ Bumper deps obsolètes (`npm audit fix` non-breaking, commit `fb6dbbb`)
 
 ### Phase 5 — Nouveau (post-audit) — FAIT
 26. ✅ Système de réservation complet (8 étapes)
 27. ✅ i18n FR/EN/ES (4 paliers : foundation, migration routes, traductions, LocaleSwitcher)
 28. ✅ Migrations versionnées (`supabase/migrations/`)
 29. ✅ Smoke tests Playwright golden path
+
+### Phase 6 — Sprint 2 design (post-audit) — FAIT
+30. ✅ ProductCard refondue (commit `677622c`)
+31. ✅ NavBar responsive + recherche ⌘K (commit `2e01376`)
+32. ✅ Fiche produit accordéons + galerie sticky + sticky mobile (commit `67cef04`)
+33. ✅ Bannières 6 → 3 fonctions éditoriales (commit `bab7eb7`)
+34. ✅ Home + Footer complets (commit `ac45f9f`)
+35. ✅ Migrations consolidées sprint 2 (commit `cf8f581`) : 12 cols products + tags.featured_on_home + 4 cols banners + table wishlists + vue v_bestsellers + 7 indexes FK
+36. ✅ Système Wishlist (table + API + heart ProductCard + page /favoris, commit `e35b307`)
+37. ✅ Admin annonce form refait pour 3 nouvelles variantes bannières (commit `c37a915`)
+38. ✅ NavSearch bestsellers fallback no-result (commit `dd0ebaa`)
+39. ✅ Footer colonne Produits rétablie + WhatsApp swap (commits `be73c77`, `75bb074`, `0b96938`)
+40. ✅ PDP gallery sticky lg:top-32 + pharmacist sans CTA (commits `e4cf800`, `21031b3`)
+
+### Phase 7 — Reste à faire (P2/P3 post sprint 2)
+- ❌ Page `/marques` (lien NavBar 404)
+- ❌ Routes `/besoins/[slug]` (14 liens Footer 404)
+- ❌ 3 `<img>` restants → `next/image` (CartDrawer, ProductClient×2)
+- ❌ JSON-LD Product schema
+- ❌ Migration `banner_type_enum` strict (legacy text actuellement)
+- ❌ Curation home : `is_featured=true` sur N produits + `featured_on_home=true` sur 3 tags
+- ❌ Saisie contenu PDP (pharmacist_advice, INCI, benefits, etc.) sur les 353 produits
+- ❌ Double opt-in newsletter (provider d'envoi)
 
 ---
 
@@ -217,6 +278,9 @@ Plus :
 - `globals.css` gère `prefers-reduced-motion`
 - **(Nouveau)** i18n complet avec next-intl, hreflang SEO clean
 - **(Nouveau)** CI verte sur chaque PR + push main
+- **(Sprint 2)** Design system cohérent : ProductCard / NavBar / PDP / Bannières / Home + Footer refondus en 15 commits, 0 régression bloquante
+- **(Sprint 2)** Wishlist système complet (table RLS + API + UI optimistic + page dédiée)
+- **(Sprint 2)** Couche données débloquée : 12 nouvelles colonnes products + tags.featured_on_home + 4 cols banners + vue v_bestsellers prêtes à recevoir le contenu
 
 ---
 

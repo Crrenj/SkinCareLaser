@@ -67,14 +67,15 @@ La table `admin_users` est la **source de vérité RLS** (évite la récursion s
 ### Route map
 
 **Pages publiques sous `[locale]/`** (FR/EN/ES) :
-- `src/app/[locale]/page.tsx` — accueil
+- `src/app/[locale]/page.tsx` — accueil (7 sections : Hero → Bestsellers → ByNeed → Quote → Brands → Expertise → Routine + CMS banners optionnelles)
 - `src/app/[locale]/catalogue/page.tsx` + `CatalogueClient` + `Filters`
-- `src/app/[locale]/product/[id]/page.tsx` + `ProductClient` (UUID, slug pas encore)
+- `src/app/[locale]/product/[slug]/page.tsx` + `ProductClient` (slug, plus UUID — `/product/[uuid]` redirige en 308 vers la canonical slug)
 - `src/app/[locale]/cart/page.tsx` + `CartClient`
 - `src/app/[locale]/contact/page.tsx` + `ContactForm`
 - `src/app/[locale]/a-propos/page.tsx`
 - `src/app/[locale]/(auth)/{login,signup}/page.tsx` — auth group
 - `src/app/[locale]/account/profile/page.tsx` + `ProfileEditForm`
+- `src/app/[locale]/favoris/page.tsx` — wishlist user (force-dynamic, redirect /login si non auth, robots noindex)
 
 **Admin (non localisé, FR)** :
 - `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `setup`, **`reservations`** (vue 8/8 du système de réservation). Pages démo (badge jaune) : `my-team`, `settings`.
@@ -83,6 +84,9 @@ La table `admin_users` est la **source de vérité RLS** (évite la récursion s
 - `src/app/api/admin/*` — 16 routes service-role + `/admin/reservations` (GET liste + PATCH status). Toutes commencent par `requireAdmin()`.
 - `src/app/api/cart/{,reserve}` — public (rate-limited pour reserve)
 - `src/app/api/contact` — public + rate limit (5 req/min/IP)
+- `src/app/api/search` — public ilike sur `products.name` + mode `?bestsellers=1` (lit `v_bestsellers`). Consommé par NavSearch.
+- `src/app/api/newsletter` — public POST email + lang. Rate limit 3/min/IP, idempotent (23505 → 200). Insert via service-role dans `newsletter_subscribers`.
+- `src/app/api/wishlist` — auth required. GET liste productIds, POST toggle. RLS bloque tout user non-auth.
 - `src/app/auth/callback` — OAuth Supabase, non localisé
 
 **SEO** :
@@ -105,13 +109,17 @@ Baseline `00000000000000_baseline.sql` + une migration par changement. Le remote
 
 Modèle (résumé) :
 - `brands` → `ranges` → `products` via `product_ranges` (n-n)
-- `tag_types` → `tags` → `product_tags` (tags polymorphes)
+- `tag_types` → `tags` → `product_tags` (tags polymorphes ; `tags.featured_on_home` curate les 3 cards "Besoins" sur la home)
 - `product_images` (multi-images ; **doublon avec `products.image_url`** — finding archi #3, non corrigé)
+- `products` enrichis sprint 2 : `volume`, `pharmacist_advice`, `pharmacist_name`, `benefits[]`, `usage`, `inci`, `technical_pdf_url`, `skin_type[]`, `texture`, `old_price`, `is_new`, `is_featured`
 - `carts` + `cart_items` (guest via `anonymous_id`, authenticated via `user_id`)
 - `reservations` + `reservation_items` (système de réservation, snapshot pattern, partial unique 1 active par user, pg_cron expire après 24h)
-- `rate_limit_buckets` (fixed-window pour /api/contact + autres)
+- `wishlists` (favoris user, PK composite `(user_id, product_id)`, RLS "users manage own")
+- `newsletter_subscribers` (email UNIQUE, lang CHECK, RLS service-role only)
+- `rate_limit_buckets` (fixed-window pour /api/contact + /api/newsletter)
 - `orders` + `order_items` (legacy, pas branché — peut-être à supprimer)
-- `banners`, `contact_messages` (CMS + admin)
+- `banners` (sprint 2 : 3 variantes `editorial`/`hero`/`quote` + colonnes `direction`, `attribution_name/title/photo_url` ; legacy 6 types tolérés dans la colonne `text`), `contact_messages`
+- Vue `v_bestsellers` : tri produits par `sold_30d desc` + `is_featured desc` + `created_at desc`, consommée par home + nav-search fallback
 
 État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à 100 DOP placeholder**, 299 product_images, 36 tags, 844 product_tags, 1 admin.
 
@@ -126,11 +134,12 @@ Modèle (résumé) :
 - **Helpers SEO** : `src/lib/seo.ts` (`localizedPath`, `buildLanguageAlternates` avec `x-default`)
 
 Namespaces principaux dans `src/messages/*.json` :
-- `Nav`, `Footer`, `LocaleSwitcher` — chrome
+- `Nav`, `Footer`, `LocaleSwitcher`, `Banner` — chrome
 - `Home`, `Catalogue`, `Filters`, `Product`, `Cart`, `Reservation`, `AddToCart`
-- `Login`, `Signup`, `Profile`, `Contact`, `ContactForm`, `About`
+- `Login`, `Signup`, `Profile`, `Contact`, `ContactForm`, `About`, `Favoris`
 - `PageMeta.{home,catalogue,...}` — title + description SEO par page
-- `NavSearch`, `ProductPage` (sous-namespaces ajoutés par le user lors du sprint design)
+- `NavSearch` — recherche dropdown (placeholder, recents, popular, no-results, keyboard hints)
+- `Home.{hero,bestsellers,byNeed,brands,expertise,routine}` — sections home sprint 2
 
 ### Système de réservation (catalogue + click & collect)
 
@@ -148,6 +157,20 @@ Fichiers clés :
 - **`src/hooks/useCart.ts`** — SWR sur `/api/cart`, optimistic updates.
 - **`src/hooks/useIsAdmin.ts`** — session + check admin factorisé (utilisé par admin/layout + NavBar).
 - **`src/hooks/useAuth.ts`** — onAuthStateChange + merge panier anonyme→authentifié.
+- **`src/hooks/useWishlist.ts`** — SWR sur `/api/wishlist` + `has(productId)` + `toggle()` optimistic. Retourne `needAuth: true` si non connecté (le bouton heart redirige vers `/login?redirectedFrom=/favoris`).
+
+### Architecture composants (post sprint 2 design)
+
+Découpage par scope/page :
+- **`src/components/home/*`** — `HomeHero`, `HomeBestsellers`, `HomeByNeed`, `HomeBrands`, `HomeExpertise`, `HomeRoutine`, `HomeSectionHeader` (header partagé)
+- **`src/components/banners/*`** — `BannerEditorial`, `BannerHero`, `BannerQuote`. `Banner.tsx` racine est un dispatcher sur `type` + normalize pour rétro-compat des 6 anciens `banner_type`.
+- **`src/components/pdp/*`** — `PdpGallery`, `PdpAccordions` (5 `<details>` natifs), `PdpPharmacist` (variantes A/B, conditionnel), `PdpStickyBar` (IntersectionObserver mobile), `PdpTrustSignals`, `PdpQuantity`, `PdpStockBadge`, `PdpWishlistButton`
+- **`src/components/footer/*`** — `FooterNewsletter` (form POST `/api/newsletter` optimistic). Le `Footer.tsx` racine est sur fond `ink-900` avec grid 5 colonnes (Brand+socials | Produits | Besoins | Service | FARMAU) + bottom bar legal/payments.
+- **`src/components/NavSearch.tsx`** — input + dropdown sticky avec recents (localStorage `farmau:search:recents`), popular categories, résultats live SWR `/api/search`, bestsellers fallback en no-result, navigation clavier ↑↓ ↵ Esc, `⌘K`/`Ctrl+K` global.
+- **`src/components/MobileDrawer.tsx`** — off-canvas fullscreen, nav serif italique actif, LocaleSwitcher block, footer login/admin/signout.
+- **`src/components/Logo.tsx`** — cercle sand-50 + glyph `F` Instrument Serif italic + wordmark FARMAU, taille paramétrique.
+- **`src/components/Breadcrumb.tsx`** — fil d'Ariane générique séparateur `›`.
+- **`src/components/ProductCardHeart.tsx`** — bouton heart top-right de l'image ProductCard, propagation arrêtée (la card est un `<Link>`).
 
 ## Conventions
 
@@ -189,22 +212,34 @@ i18n FR/EN/ES (4 paliers, commits `4ce4974` → `342096e`) :
 
 SEO post-i18n (commit `3521c21`) : sitemap.ts + robots.ts + helpers seo.ts + generateMetadata + hreflang sur toutes les pages publiques, noindex sur cart/profile
 
+Sprint 2 design (commits `677622c` → `c37a915`) :
+- ProductCard refondue (eyebrow marque, prix Instrument Serif 24px, CTA outline ink-900, quick-add au hover)
+- NavBar 3 rangées desktop sticky + drawer mobile + recherche `⌘K` avec dropdown (recents localStorage + popular + résultats live SWR + bestsellers fallback no-result)
+- Fiche produit avec 5 accordéons `<details>` natifs + galerie sticky desktop + zoom natif + pharmacist conditionnel + sticky bar mobile via IntersectionObserver
+- 6 anciennes bannières → 3 nouvelles (`editorial`/`hero`/`quote`) avec rétro-compat via `normalizeType`. Admin annonce form refait avec radio 3 types + champs conditionnels (direction + attribution_*)
+- Home + Footer complets : 7 sections home (Hero éditorial → Bestsellers v_bestsellers → ByNeed tags featured → Quote pharmacist → Brands → Expertise → Routine), Footer 5 colonnes câblé + newsletter form
+- Wishlist système complet (commits `e35b307` + `cd9ebd1`) : table `wishlists` RLS + `/api/wishlist` GET/POST toggle + `useWishlist` hook + `ProductCardHeart` + `PdpWishlistButton` fonctionnel + page `/favoris`
+- Migration consolidée sprint 2 (`cf8f581`) : 12 nouvelles colonnes products, tags.featured_on_home, 4 colonnes banners (direction + attribution_*), table wishlists + RLS, vue v_bestsellers, 7 indexes FK
+
 ### Reste à faire
 
 **P2 (impact moyen-élevé)** :
-- `/product/[id]` → `/product/[slug]` : slugs déjà en BDD, URL SEO-friendly
-- 5 `<img>` → `next/image` : `CartDrawer`, `ProductClient×2`, `DirectImageUpload`, `ImageUpload`
-- Anti-énumération `create_contact_message` : réponse différentielle selon email existant
-- Footer vrais liens : `<li>` Produits/Besoins non cliquables → vers `/catalogue?tag=...`
-- 19 vulnerabilities npm (1 critique, 11 high) : trier avec `npm audit fix`, attention breaking changes
+- Route `/marques` : lien ajouté dans NavBar mais page inexistante (404)
+- Routes `/besoins/[slug]` : 14 liens footer pointent vers ces slugs → soit créer la route, soit rediriger vers `/catalogue?need=`
+- 3 `<img>` restants → `next/image` : `CartDrawer`, `ProductClient×2` (2 admin déjà fait commit `b580342`)
+- Migration `banner_type_enum` : la colonne reste `text` pour compat legacy. Quand toutes les lignes auront été re-sauvegardées, créer l'enum strict.
+- Curation home : marquer `is_featured=true` sur N produits + `featured_on_home=true` sur 3 tags pour activer les sections data-driven (sinon fallback statique).
+- JSON-LD Product schema sur les fiches produit (SEO finding)
 
 **P3 (hygiène long terme)** :
 - `<html lang>` dynamique : nécessite un route group `(admin)` pour séparer l'arbre admin/public
 - Stockage image dédupliqué : `products.image_url` + `product_images` → choisir un seul
 - Tests d'intégration des routes admin Playwright
-- Split pages admin > 500 lignes (`tags` 753, `marques` 708, `product` 703, `annonce` 668)
+- Split pages admin > 500 lignes (`tags` 753, `marques` 708, `product` 703, `annonce` 668→887)
 - Fallback `localStorage` pour tokens Supabase (finding security #4)
 - Audit toutes les RPC SECURITY DEFINER pour vérifier `SET search_path = public`
+- Double opt-in newsletter (provider d'envoi)
+- Saisie INCI/benefits/pharmacist_advice sur les 353 produits (les colonnes sont prêtes, à remplir)
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
 
