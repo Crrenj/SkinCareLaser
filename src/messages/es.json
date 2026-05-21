@@ -862,6 +862,75 @@
     "intro": "Nuestra selección para {name}. {count, plural, =1 {1 producto recomendado} other {# productos recomendados}} por nuestros farmacéuticos.",
     "empty": "Ningún producto está asociado a esta necesidad por el momento."
   },
+  "Account": {
+    "sidebar": {
+      "heading": "Mi cuenta",
+      "items": {
+        "profile": "Perfil",
+        "reservations": "Reservas",
+        "favorites": "Favoritos",
+        "security": "Seguridad",
+        "preferences": "Preferencias"
+      },
+      "signOut": "Cerrar sesión"
+    },
+    "reservations": {
+      "pageTitle": "Mis reservas — FARMAU",
+      "pageDescription": "Historial de sus reservas FARMAU.",
+      "heading": "Mis reservas",
+      "subtitle": "{count, plural, =0 {Ninguna reserva por el momento} =1 {1 reserva} other {# reservas}}",
+      "emptyTitle": "Aún no ha reservado ningún producto.",
+      "emptyDescription": "Explore el catálogo, añada productos al carrito y pulse Reservar. Un farmacéutico le contactará por WhatsApp.",
+      "emptyCta": "Ver el catálogo",
+      "itemsMore": "+ {count, plural, =1 {1 artículo más} other {# artículos más}}",
+      "viewDetail": "Ver detalle",
+      "status": {
+        "pending": "Pendiente",
+        "confirmed": "Confirmada",
+        "collected": "Recogida",
+        "expired": "Expirada",
+        "cancelled": "Cancelada"
+      }
+    },
+    "security": {
+      "pageTitle": "Seguridad — FARMAU",
+      "pageDescription": "Contraseña, sesiones y eliminación de la cuenta.",
+      "heading": "Seguridad",
+      "subtitle": "Gestione su contraseña y los ajustes de seguridad de su cuenta FARMAU.",
+      "passwordHeading": "Contraseña",
+      "passwordDescription": "Para cambiar su contraseña, le enviamos un enlace seguro por correo. No se introduce ninguna contraseña en esta página.",
+      "changePasswordCta": "Recibir el enlace por correo",
+      "sending": "Enviando…",
+      "emailSent": "Acabamos de enviar un correo a {email}. El enlace expira en 1 hora.",
+      "emailError": "El envío ha fallado. Vuelva a intentarlo o contacte con soporte.",
+      "sessionHeading": "Sesión activa",
+      "sessionDescription": "Está conectado desde este navegador. Para cerrar sesión, utilice el botón de la barra lateral.",
+      "lastSignIn": "Último inicio de sesión:",
+      "dangerHeading": "Eliminar mi cuenta",
+      "dangerDescription": "Conforme a su derecho al olvido (Ley 172-13 RD), puede solicitar la eliminación definitiva de su cuenta. La solicitud se tratará en un plazo de 30 días.",
+      "dangerCta": "Solicitar la eliminación"
+    },
+    "preferences": {
+      "pageTitle": "Preferencias — FARMAU",
+      "pageDescription": "Newsletter, idioma por defecto.",
+      "heading": "Preferencias",
+      "subtitle": "Personalice sus comunicaciones y el idioma de la interfaz.",
+      "newsletterHeading": "Newsletter mensual",
+      "newsletterDescription": "Una vez al mes como máximo: novedades, consejos farmacéuticos, ofertas reservadas a suscriptores.",
+      "newsletterLoading": "Cargando su preferencia…",
+      "newsletterOn": "Suscrito·a a la newsletter",
+      "newsletterOff": "No suscrito·a",
+      "newsletterError": "Modificación imposible. Vuelva a intentarlo.",
+      "localeHeading": "Idioma preferido",
+      "localeDescription": "Si lo deja en Automático, usamos el idioma de la URL. De lo contrario, será redirigido·a a este idioma al iniciar sesión.",
+      "localeLabel": "Idioma por defecto",
+      "localeAuto": "Automático (URL)",
+      "localeError": "No se pudo guardar. Vuelva a intentarlo.",
+      "saveLocaleCta": "Guardar",
+      "saving": "…",
+      "saved": "Preferencia guardada."
+    }
+  },
   "Legal": {
     "shell": {
       "lastUpdated": "Última actualización el",

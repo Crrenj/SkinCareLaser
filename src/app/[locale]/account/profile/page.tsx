@@ -1,12 +1,8 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import NavBar from '@/components/NavBar'
-import Footer from '@/components/Footer'
 import ProfileEditForm from '@/components/ProfileEditForm'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
-// User-scoped page, never cacher
 export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
@@ -19,7 +15,6 @@ export async function generateMetadata({
   return {
     title: t('title'),
     description: t('description'),
-    // Profil = user-spécifique : pas d'indexation
     robots: { index: false, follow: false },
   }
 }
@@ -35,20 +30,16 @@ export default async function ProfilePage({
   setRequestLocale(locale)
   const t = await getTranslations('Profile')
   const supabase = await createSupabaseServerClient()
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
 
-  if (!session) {
-    redirect(
-      `/${locale}/login?redirectedFrom=${encodeURIComponent(`/${locale}/account/profile`)}`,
-    )
-  }
+  // La session est garantie par le layout /account ; on récupère juste l'user.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('id, first_name, last_name, display_name, phone, birth_date')
-    .eq('id', session.user.id)
+    .eq('id', user!.id)
     .maybeSingle()
 
   if (error) {
@@ -58,10 +49,8 @@ export default async function ProfilePage({
   const { required, from } = await searchParams
   const phoneRequired = required === 'phone'
 
-  // Fallback profile shape si la row n'existe pas (devrait pas arriver
-  // grâce au trigger handle_new_user mais défensif)
   const safeProfile = profile ?? {
-    id: session.user.id,
+    id: user!.id,
     first_name: null,
     last_name: null,
     display_name: null,
@@ -70,35 +59,29 @@ export default async function ProfilePage({
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-sand-200">
-      <NavBar />
-      <main id="main-content" className="flex-1 p-6">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-ink-900 mb-2">{t('pageTitle')}</h1>
-          <p className="text-ink-700 mb-8">{t('pageDescription')}</p>
+    <div className="max-w-2xl">
+      <header className="mb-8 pb-6 border-b border-sand-300">
+        <h1 className="font-serif text-[32px] lg:text-[40px] leading-[1.05] -tracking-[0.01em] text-ink-900 mb-2">
+          {t('pageTitle')}
+        </h1>
+        <p className="text-[14.5px] text-ink-700 leading-relaxed">{t('pageDescription')}</p>
+      </header>
 
-          {phoneRequired && (
-            <div
-              role="alert"
-              className="mb-6 bg-clay-50 border-l-4 border-clay-700 p-4 rounded"
-            >
-              <p className="font-medium text-ink-900">
-                {t('phoneRequiredTitle')}
-              </p>
-              <p className="text-sm text-ink-700 mt-1">
-                {t('phoneRequiredDescription')}
-              </p>
-            </div>
-          )}
-
-          <ProfileEditForm
-            profile={safeProfile}
-            userEmail={session.user.email ?? ''}
-            redirectTo={from}
-          />
+      {phoneRequired && (
+        <div
+          role="alert"
+          className="mb-6 bg-clay-50 border-l-4 border-clay-700 p-4 rounded"
+        >
+          <p className="font-medium text-ink-900">{t('phoneRequiredTitle')}</p>
+          <p className="text-sm text-ink-700 mt-1">{t('phoneRequiredDescription')}</p>
         </div>
-      </main>
-      <Footer />
+      )}
+
+      <ProfileEditForm
+        profile={safeProfile}
+        userEmail={user!.email ?? ''}
+        redirectTo={from}
+      />
     </div>
   )
 }

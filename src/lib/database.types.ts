@@ -547,6 +547,7 @@ export type Database = {
           is_admin: boolean | null
           last_name: string | null
           phone: string | null
+          preferred_locale: string | null
           role: string | null
           updated_at: string | null
         }
@@ -559,6 +560,7 @@ export type Database = {
           is_admin?: boolean | null
           last_name?: string | null
           phone?: string | null
+          preferred_locale?: string | null
           role?: string | null
           updated_at?: string | null
         }
@@ -571,6 +573,7 @@ export type Database = {
           is_admin?: boolean | null
           last_name?: string | null
           phone?: string | null
+          preferred_locale?: string | null
           role?: string | null
           updated_at?: string | null
         }

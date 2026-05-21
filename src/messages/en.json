@@ -862,6 +862,75 @@
     "intro": "Our selection for {name}. {count, plural, =1 {1 product recommended} other {# products recommended}} by our pharmacists.",
     "empty": "No products are associated with this concern yet."
   },
+  "Account": {
+    "sidebar": {
+      "heading": "My account",
+      "items": {
+        "profile": "Profile",
+        "reservations": "Reservations",
+        "favorites": "Favorites",
+        "security": "Security",
+        "preferences": "Preferences"
+      },
+      "signOut": "Sign out"
+    },
+    "reservations": {
+      "pageTitle": "My reservations — FARMAU",
+      "pageDescription": "History of your FARMAU reservations.",
+      "heading": "My reservations",
+      "subtitle": "{count, plural, =0 {No reservation yet} =1 {1 reservation} other {# reservations}}",
+      "emptyTitle": "You haven't reserved any product yet.",
+      "emptyDescription": "Browse the catalogue, add products to your cart and click Reserve. A pharmacist will contact you on WhatsApp.",
+      "emptyCta": "Browse catalogue",
+      "itemsMore": "+ {count, plural, =1 {1 more item} other {# more items}}",
+      "viewDetail": "View detail",
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "collected": "Collected",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      }
+    },
+    "security": {
+      "pageTitle": "Security — FARMAU",
+      "pageDescription": "Password, sessions and account deletion.",
+      "heading": "Security",
+      "subtitle": "Manage your password and security settings for your FARMAU account.",
+      "passwordHeading": "Password",
+      "passwordDescription": "To change your password, we'll send you a secure link by email. No password is entered on this page.",
+      "changePasswordCta": "Send reset link",
+      "sending": "Sending…",
+      "emailSent": "An email has just been sent to {email}. The link expires in 1 hour.",
+      "emailError": "Sending failed. Try again or contact support.",
+      "sessionHeading": "Active session",
+      "sessionDescription": "You're signed in from this browser. Use the sidebar button to sign out.",
+      "lastSignIn": "Last sign-in:",
+      "dangerHeading": "Delete my account",
+      "dangerDescription": "Under your right to be forgotten (Ley 172-13 DR), you can request a permanent deletion of your account. Request will be handled within 30 days.",
+      "dangerCta": "Request deletion"
+    },
+    "preferences": {
+      "pageTitle": "Preferences — FARMAU",
+      "pageDescription": "Newsletter, default language.",
+      "heading": "Preferences",
+      "subtitle": "Customize your communications and interface language.",
+      "newsletterHeading": "Monthly newsletter",
+      "newsletterDescription": "Once a month max: new arrivals, pharmacist tips, subscriber-only offers.",
+      "newsletterLoading": "Loading your preference…",
+      "newsletterOn": "Subscribed to the newsletter",
+      "newsletterOff": "Not subscribed",
+      "newsletterError": "Change failed. Try again.",
+      "localeHeading": "Preferred language",
+      "localeDescription": "If set to Automatic, we use the URL locale. Otherwise, you'll be redirected to this language on sign-in.",
+      "localeLabel": "Default language",
+      "localeAuto": "Automatic (URL)",
+      "localeError": "Saving failed. Try again.",
+      "saveLocaleCta": "Save",
+      "saving": "…",
+      "saved": "Preference saved."
+    }
+  },
   "Legal": {
     "shell": {
       "lastUpdated": "Last updated on",
