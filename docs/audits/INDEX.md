@@ -1,13 +1,13 @@
 # Audit complet — FARMAU / Skincare Laser
 
 Date d'audit : 2026-05-19
-Date dernière mise à jour : 2026-05-20 (post sprint 2 design)
+Date dernière mise à jour : 2026-05-21 (post P1 → P5 + curation home)
 Branche : `main`
 Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
 
 > **État** : voir `docs/HANDOFF.md` pour la punch list courante.
-> **142 findings au total** dont une grande majorité **fermés** lors des sessions 2026-05-19 et 2026-05-20.
-> Sprint 2 design (5 livrables) a en plus refondu visuellement ProductCard, NavBar, Fiche produit, Bannières, Home + Footer et ajouté le système Wishlist.
+> **142 findings au total** dont une grande majorité **fermés** lors des sessions 2026-05-19 → 2026-05-21.
+> Phase 7 (sessions 2026-05-21) : `/marques` + filtres URL + 404 design + pages légales + hub `/account` + 4 pages éditoriales + admin users/newsletter + curation home. Voir détails plus bas.
 
 ---
 
@@ -251,15 +251,28 @@ Plus :
 39. ✅ Footer colonne Produits rétablie + WhatsApp swap (commits `be73c77`, `75bb074`, `0b96938`)
 40. ✅ PDP gallery sticky lg:top-32 + pharmacist sans CTA (commits `e4cf800`, `21031b3`)
 
-### Phase 7 — Reste à faire (P2/P3 post sprint 2)
-- ❌ Page `/marques` (lien NavBar 404)
-- ❌ Routes `/besoins/[slug]` (14 liens Footer 404)
+### Phase 7 — Sessions 2026-05-21 (P1 → P5 + curation home) ✅
+- ✅ Page `/marques` data-driven (Server, lit `brands` + count produits + image) — commit `279f462`
+- ✅ Filtres URL catalogue (`?brand`, `?range`, `?need`, `?tag=type:slug`) — commit `279f462`
+- ✅ `not-found.tsx` design FARMAU (locale + fallback global) — commit `279f462`
+- ✅ Routes `/besoins/[slug]` existaient déjà ; Footer câblé proprement
+- ✅ Pages légales `/legal/{cgv,mentions-legales,confidentialite,cookies}` + composants shell + CookieBanner — commit `da37dfe`
+- ✅ Hub `/account` + 4 pages (`profile` refacto + `reservations` + `security` + `preferences`) + migration `profiles.preferred_locale` + APIs `/api/account/preferences` + `/api/newsletter` GET/DELETE — commit `ac1f9c3`
+- ✅ Pages éditoriales statiques `/livraison`, `/faq`, `/pharmacies`, `/manifeste` + traductions FR/EN/ES — commit `46ea917`
+- ✅ Admin `/admin/users` + `/admin/newsletter` + cleanup `/admin/my-team` + sidebar section "Clientes" — commit `ebad106`
+- ✅ Curation home en DB : 4 produits `is_featured` + 3 tags `featured_on_home` (hydratation, anti-age, protection-solaire)
+
+### Phase 8 — Restant après P5
+- ❌ JSON-LD Product schema sur PDP
 - ❌ 3 `<img>` restants → `next/image` (CartDrawer, ProductClient×2)
-- ❌ JSON-LD Product schema
-- ❌ Migration `banner_type_enum` strict (legacy text actuellement)
-- ❌ Curation home : `is_featured=true` sur N produits + `featured_on_home=true` sur 3 tags
-- ❌ Saisie contenu PDP (pharmacist_advice, INCI, benefits, etc.) sur les 353 produits
-- ❌ Double opt-in newsletter (provider d'envoi)
+- ❌ Migration `banner_type_enum` strict (legacy text)
+- ❌ Saisie contenu PDP (pharmacist_advice, INCI, benefits) sur 353 produits
+- ❌ Double opt-in newsletter (provider Resend/Postmark)
+- ❌ `focus-visible` global (~50 occurrences)
+- ❌ Blog (`posts` table + admin + `/blog` + `/blog/[slug]`)
+- ❌ Traductions ES/EN du contenu juridique `/legal/*`
+- ❌ Tests d'intégration admin + `/account/*` Playwright
+- ❌ Stockage image dédupliqué (`products.image_url` vs `product_images`)
 
 ---
 

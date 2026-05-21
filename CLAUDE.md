@@ -60,39 +60,59 @@ Types Supabase générés dans **`src/lib/database.types.ts`** (via MCP `generat
    - `/auth/callback` → passthrough (OAuth Supabase)
    - tout le reste → `next-intl` (routing locale `/(fr|es|en)/...`)
 2. **`src/app/admin/layout.tsx`** — re-check côté client via `useIsAdmin` hook.
-3. **`src/lib/requireAdmin.ts`** — helper pour les routes `/api/admin/*` (toutes les 16 routes admin sont maintenant gardées).
+3. **`src/lib/requireAdmin.ts`** — helper pour les routes `/api/admin/*` (toutes les 20 routes admin sont maintenant gardées).
 
 La table `admin_users` est la **source de vérité RLS** (évite la récursion sur `profiles`). Toujours utiliser `is_user_admin(auth.uid())` dans les policies.
 
 ### Route map
 
-**Pages publiques sous `[locale]/`** (FR/EN/ES) :
-- `src/app/[locale]/page.tsx` — accueil (7 sections : Hero → Bestsellers → ByNeed → Quote → Brands → Expertise → Routine + CMS banners optionnelles)
-- `src/app/[locale]/catalogue/page.tsx` + `CatalogueClient` + `Filters`
-- `src/app/[locale]/product/[slug]/page.tsx` + `ProductClient` (slug, plus UUID — `/product/[uuid]` redirige en 308 vers la canonical slug)
-- `src/app/[locale]/cart/page.tsx` + `CartClient`
-- `src/app/[locale]/contact/page.tsx` + `ContactForm`
-- `src/app/[locale]/a-propos/page.tsx`
-- `src/app/[locale]/(auth)/{login,signup}/page.tsx` — auth group
-- `src/app/[locale]/account/profile/page.tsx` + `ProfileEditForm`
-- `src/app/[locale]/favoris/page.tsx` — wishlist user (force-dynamic, redirect /login si non auth, robots noindex)
+**Pages publiques sous `[locale]/`** (FR/EN/ES) — `not-found.tsx` design FARMAU au niveau locale :
 
-**Admin (non localisé, FR)** :
-- `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `setup`, **`reservations`** (vue 8/8 du système de réservation). Pages démo (badge jaune) : `my-team`, `settings`.
+*Catalogue & produit*
+- `src/app/[locale]/page.tsx` — accueil (7 sections : Hero → Bestsellers → ByNeed → Quote → Brands → Expertise → Routine + CMS banners optionnelles)
+- `src/app/[locale]/catalogue/page.tsx` + `CatalogueClient` + `Filters` (filtres URL `?brand`, `?range`, `?need`, `?tag=type:slug` synchronisés au mount)
+- `src/app/[locale]/product/[slug]/page.tsx` + `ProductClient`
+- `src/app/[locale]/marques/page.tsx` — **index data-driven des marques** (Server, SSR Supabase) + `marques/[slug]/page.tsx`
+- `src/app/[locale]/besoins/[slug]/page.tsx` — landing par tag de besoin
+- `src/app/[locale]/favoris/page.tsx` — wishlist user
+
+*Tunnel réservation*
+- `src/app/[locale]/cart/page.tsx`, `/reservation/page.tsx`, `/reservation/confirmation/[id]/page.tsx`
+
+*Éditorial / Service*
+- `src/app/[locale]/a-propos/page.tsx`, `/contact/page.tsx`
+- `src/app/[locale]/livraison/page.tsx` — click & collect workflow
+- `src/app/[locale]/faq/page.tsx` — 5 sections, 19 Q&A, `<details>` natifs
+- `src/app/[locale]/pharmacies/page.tsx` — page pharmacie (1 lieu, sans table DB)
+- `src/app/[locale]/manifeste/page.tsx` — valeurs/positionnement
+
+*Legal (FR uniquement pour le contenu juridique, UI tri-langue)*
+- `src/app/[locale]/legal/{mentions-legales,cgv,confidentialite,cookies}/page.tsx`
+- `LegalShell` + `LegalSidebar` + `LegalSection` partagés (`src/components/legal/`)
+- `CookieBanner` monté dans `[locale]/layout.tsx`
+
+*Auth & compte (hub avec sidebar 5 onglets)*
+- `src/app/[locale]/(auth)/{login,signup,forgot-password,reset-password}/page.tsx`
+- `src/app/[locale]/account/layout.tsx` — check session SSR + `AccountSidebar` (Client, usePathname)
+- `src/app/[locale]/account/{profile,reservations,security,preferences}/page.tsx`
+
+**Admin (non localisé, ES/FR mélangé)** sidebar 5 sections (General/Catálogo/Operaciones/Clientes/Cuenta) :
+- `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, `setup` (diag), `settings` (démo)
 
 **API** :
-- `src/app/api/admin/*` — 16 routes service-role + `/admin/reservations` (GET liste + PATCH status). Toutes commencent par `requireAdmin()`.
+- `src/app/api/admin/*` — **20 routes** service-role (toutes `requireAdmin()`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export)
+- `src/app/api/account/preferences` — PATCH auth-only (preferred_locale)
 - `src/app/api/cart/{,reserve}` — public (rate-limited pour reserve)
-- `src/app/api/contact` — public + rate limit (5 req/min/IP)
-- `src/app/api/search` — public ilike sur `products.name` + mode `?bestsellers=1` (lit `v_bestsellers`). Consommé par NavSearch.
-- `src/app/api/newsletter` — public POST email + lang. Rate limit 3/min/IP, idempotent (23505 → 200). Insert via service-role dans `newsletter_subscribers`.
-- `src/app/api/wishlist` — auth required. GET liste productIds, POST toggle. RLS bloque tout user non-auth.
-- `src/app/auth/callback` — OAuth Supabase, non localisé
+- `src/app/api/contact` — public + rate limit (5/min/IP)
+- `src/app/api/search` — public ilike + mode `?bestsellers=1`
+- `src/app/api/newsletter` — POST publique (rate-limited) OU auth (re-sub depuis preferences) + GET/DELETE auth-only
+- `src/app/api/wishlist` — auth required
+- `src/app/auth/callback` — OAuth Supabase
 
 **SEO** :
-- `src/app/sitemap.ts` — sitemap dynamique (routes × locales + produits × locales avec hreflang)
-- `src/app/robots.ts` — règles + disallow admin/api/account/auth/cart
-- `generateMetadata` sur chaque page Server (home, catalogue, contact, a-propos, product, cart, profile)
+- `src/app/sitemap.ts` — dynamique : routes statiques (catalogue/marques/legal/livraison/faq/…) + produits + brands + needs × 3 locales avec hreflang
+- `src/app/robots.ts` — disallow admin/api/account/auth/cart
+- `generateMetadata` + hreflang `x-default` sur toutes les pages publiques
 
 ### Données
 
@@ -112,6 +132,7 @@ Modèle (résumé) :
 - `tag_types` → `tags` → `product_tags` (tags polymorphes ; `tags.featured_on_home` curate les 3 cards "Besoins" sur la home)
 - `product_images` (multi-images ; **doublon avec `products.image_url`** — finding archi #3, non corrigé)
 - `products` enrichis sprint 2 : `volume`, `pharmacist_advice`, `pharmacist_name`, `benefits[]`, `usage`, `inci`, `technical_pdf_url`, `skin_type[]`, `texture`, `old_price`, `is_new`, `is_featured`
+- `profiles.preferred_locale` (`fr|en|es|null`, ajouté sprint 4) — utilisé par `/account/preferences`
 - `carts` + `cart_items` (guest via `anonymous_id`, authenticated via `user_id`)
 - `reservations` + `reservation_items` (système de réservation, snapshot pattern, partial unique 1 active par user, pg_cron expire après 24h)
 - `wishlists` (favoris user, PK composite `(user_id, product_id)`, RLS "users manage own")
@@ -182,9 +203,20 @@ Découpage par scope/page :
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest sur PR et push main.
 
-## État du projet (2026-05-20)
+## État du projet (2026-05-21)
 
-### Fait ✅ (session 2026-05-19/20)
+### Fait ✅ (sessions 2026-05-21, post sprint 3)
+
+Surfaces publiques ajoutées (commits `279f462` → `46ea917`) :
+- `/marques` index data-driven (commit `279f462`) + filtres URL sur catalogue (`?brand`, `?range`, `?need`, `?tag=type:slug` matching name ou slug) + `not-found.tsx` design FARMAU (NavBar + Footer + serif italic 160px) global + locale-aware
+- 4 pages légales `/legal/{mentions-legales,cgv,confidentialite,cookies}` avec contenu FR pré-rédigé (Ley 172-13 + 358-05 + 126-02 RD), composants `LegalShell/Sidebar/Section` partagés, disclaimer "à valider par juriste" + `CookieBanner` (localStorage `farmau:cookies:consent`) (commit `da37dfe`)
+- Hub `/account` (Server layout + check session) avec sidebar 5 onglets : `profile` (refactor), `reservations` (SSR historique avec status badges + lien WhatsApp), `security` (CTA email reset → /reset-password + danger zone mailto RGPD), `preferences` (toggle newsletter + select langue préférée via `profiles.preferred_locale`). Migration `profiles.preferred_locale`, APIs `/api/newsletter` étendues (GET/DELETE auth) + `/api/account/preferences` PATCH (commit `ac1f9c3`)
+- 4 pages éditoriales statiques `/livraison`, `/faq` (5 sections 19 Q&A), `/pharmacies` (1 lieu), `/manifeste` (4 piliers + citation dark mode) + traductions exhaustives FR/EN/ES (commit `46ea917`)
+- Admin `/admin/users` (lecture via `auth.admin.listUsers` + jointure profiles + admin_users, toggle Promover/Admin avec garde-fou self-demote) + `/admin/newsletter` (stats + filtre lang + export CSV + delete par ligne). Sidebar admin nouvelle section "Clientes". Suppression `/admin/my-team` démo (commit `ebad106`)
+- Footer bottom-bar câblé vers /legal/* + cellule Productos /besoins/[slug] + cellule Marca câblée /marques /pharmacies /manifeste
+- Curation home active : 4 produits `is_featured=true` (Avène Hyaluron B3 Serum, Avène Hydrance Aqua Gel, Babe Aloe Vera, Babe Bicalm+) + 3 tags `featured_on_home=true` (hydratation, anti-age, protection-solaire)
+
+### Fait ✅ (sessions 2026-05-19/20)
 
 Sécurité + bugs P1 :
 - Auth sur les 16 routes `/api/admin/*` via `requireAdmin` + UUID admin dégagé (commit `8c6bf63`)
@@ -223,23 +255,30 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 
 ### Reste à faire
 
-**P2 (impact moyen-élevé)** :
-- Route `/marques` : lien ajouté dans NavBar mais page inexistante (404)
-- Routes `/besoins/[slug]` : 14 liens footer pointent vers ces slugs → soit créer la route, soit rediriger vers `/catalogue?need=`
-- 3 `<img>` restants → `next/image` : `CartDrawer`, `ProductClient×2` (2 admin déjà fait commit `b580342`)
-- Migration `banner_type_enum` : la colonne reste `text` pour compat legacy. Quand toutes les lignes auront été re-sauvegardées, créer l'enum strict.
-- Curation home : marquer `is_featured=true` sur N produits + `featured_on_home=true` sur 3 tags pour activer les sections data-driven (sinon fallback statique).
-- JSON-LD Product schema sur les fiches produit (SEO finding)
+**Quick wins SEO / perf** :
+- JSON-LD Product schema sur `/product/[slug]` (rich snippets Google)
+- 3 `<img>` restants → `next/image` : `CartDrawer`, `ProductClient×2` (impact LCP fiche produit)
+- Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
 
-**P3 (hygiène long terme)** :
-- `<html lang>` dynamique : nécessite un route group `(admin)` pour séparer l'arbre admin/public
+**Accessibilité (WCAG AA — note 38/100 avant refonte, à re-mesurer)** :
+- Remplacer ~50 `focus:outline-none` par `focus-visible:ring sand-700`
+- Modales sans `role="dialog"` + focus trap (CartDrawer, MobileDrawer le font déjà)
+- Audit contraste palette sand/clay (certains hover passent juste WCAG AA)
+
+**Contenu éditorial** :
+- Blog : table `posts` + admin CRUD + `/blog` + `/blog/[slug]` + sitemap (Footer "blog" pointe encore vers `/a-propos`)
+- Saisie INCI / benefits / pharmacist_advice sur les 353 produits (colonnes prêtes, contenu à fournir)
+- Traductions ES/EN du contenu juridique `/legal/*` (FR uniquement actuellement)
+
+**Hygiène long terme** :
+- `<html lang>` dynamique : route group `(admin)` pour séparer admin/public
 - Stockage image dédupliqué : `products.image_url` + `product_images` → choisir un seul
-- Tests d'intégration des routes admin Playwright
-- Split pages admin > 500 lignes (`tags` 753, `marques` 708, `product` 703, `annonce` 668→887)
-- Fallback `localStorage` pour tokens Supabase (finding security #4)
-- Audit toutes les RPC SECURITY DEFINER pour vérifier `SET search_path = public`
-- Double opt-in newsletter (provider d'envoi)
-- Saisie INCI/benefits/pharmacist_advice sur les 353 produits (les colonnes sont prêtes, à remplir)
+- Tests d'intégration admin Playwright + `/account/*` Playwright
+- Split pages admin > 500 lignes (`tags` 753, `annonce` ~890, `marques` 708, `product` 703)
+- Fallback `localStorage` pour tokens Supabase (finding security #4, XSS exfiltration)
+- Double opt-in newsletter (provider d'envoi : Resend/Postmark)
+- Vraie `/admin/settings` câblée à une table `shop_settings`
+- Audit RPC SECURITY DEFINER pour `SET search_path = public` manquants
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
 
