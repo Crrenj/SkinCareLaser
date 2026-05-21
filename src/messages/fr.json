@@ -842,6 +842,22 @@
     "need": {
       "titleTemplate": "{name} — Soins dermo-cosmétiques | FARMAU",
       "description": "Produits dermo-cosmétiques pour {name}. Sélection certifiée par nos pharmaciens-dermatologues, disponibles en réservation chez FARMAU."
+    },
+    "delivery": {
+      "title": "Livraison & retrait — FARMAU",
+      "description": "Comment fonctionne le click & collect chez FARMAU. Réservation en ligne, contact WhatsApp, retrait en pharmacie à Santiago."
+    },
+    "faq": {
+      "title": "Questions fréquentes — FARMAU",
+      "description": "Tout ce qu'il faut savoir sur la réservation, les produits, votre compte, le retrait et la confidentialité chez FARMAU."
+    },
+    "pharmacies": {
+      "title": "Notre pharmacie — FARMAU Santiago",
+      "description": "Adresse, horaires et accès de la pharmacie FARMAU à Cerros de Gurabo, Santiago, République Dominicaine."
+    },
+    "manifesto": {
+      "title": "Notre manifeste — FARMAU",
+      "description": "Pourquoi FARMAU existe : la pharmacie d'abord, la sélection avant le volume, le conseil avant la promo."
     }
   },
   "BrandsIndex": {
@@ -861,6 +877,213 @@
     "eyebrow": "Besoin",
     "intro": "Notre sélection pour {name}. {count, plural, =1 {1 produit recommandé} other {# produits recommandés}} par nos pharmaciens.",
     "empty": "Aucun produit n'est associé à ce besoin pour le moment."
+  },
+  "Delivery": {
+    "eyebrow": "Livraison & retrait",
+    "title": "Click & collect <em>sans pression.</em>",
+    "subtitle": "Vous réservez en ligne, nous vérifions la disponibilité, vous passez retirer en pharmacie. Pas de paiement à distance, pas d'envoi colis.",
+    "howItWorks": {
+      "eyebrow": "Comment ça marche",
+      "title": "Trois étapes, sans surprise.",
+      "step1Title": "Vous constituez votre panier",
+      "step1Body": "Parcourez le catalogue, ajoutez vos produits, validez la réservation depuis le panier en tant qu'utilisateur connecté.",
+      "step2Title": "Un pharmacien vous contacte",
+      "step2Body": "Vous recevez un message WhatsApp de notre équipe avec la confirmation de la disponibilité et le créneau de retrait proposé.",
+      "step3Title": "Vous passez retirer",
+      "step3Body": "Présentez votre référence de réservation à la pharmacie, payez sur place (espèces, carte) et repartez avec vos produits."
+    },
+    "practical": {
+      "eyebrow": "Infos pratiques",
+      "title": "Tout est à Santiago.",
+      "hoursTitle": "Horaires",
+      "hoursWeekday": "Lundi à vendredi : 9h – 19h",
+      "hoursSaturday": "Samedi : 9h – 14h",
+      "hoursSunday": "Dimanche : fermé",
+      "addressTitle": "Adresse",
+      "addressLine1": "Calle Jesús de Galíndez, esq. Calle 3",
+      "addressLine2": "Cerros de Gurabo, Santiago, RD",
+      "paymentTitle": "Paiement",
+      "paymentMethods": "Espèces (DOP), Visa, Mastercard",
+      "paymentNote": "Aucun paiement en ligne, tout se fait en pharmacie."
+    },
+    "ttl": {
+      "title": "Une réservation reste active 24 heures.",
+      "body": "Passé ce délai sans confirmation de notre part, la réservation est automatiquement annulée et les produits remis en disponibilité pour les autres clients.",
+      "cancel": "Vous pouvez annuler à tout moment en répondant au message WhatsApp ou en nous écrivant — sans frais, sans motif à justifier."
+    },
+    "cta": {
+      "title": "Prêt à réserver ?",
+      "body": "Plus de 350 produits dermo-cosmétiques certifiés, sélectionnés par nos pharmaciens.",
+      "primary": "Voir le catalogue",
+      "secondary": "Lire la FAQ"
+    }
+  },
+  "Faq": {
+    "eyebrow": "Questions fréquentes",
+    "title": "Vos questions, <em>nos réponses.</em>",
+    "subtitle": "Tout ce qu'il faut savoir avant de réserver. Si votre question ne figure pas ici, écrivez-nous.",
+    "sections": {
+      "reservation": {
+        "heading": "Réservation",
+        "q1": {
+          "q": "Comment réserver un produit ?",
+          "a": "Ajoutez le produit au panier, créez un compte si vous n'en avez pas, puis cliquez sur <strong>Réserver</strong> depuis le panier. Vous recevrez une référence au format <code>FAR-XXXXXXXX</code>."
+        },
+        "q2": {
+          "q": "Combien de temps ma réservation est-elle valable ?",
+          "a": "24 heures à compter de la création. Au-delà, et sans confirmation de notre part, elle expire automatiquement et les produits sont remis en disponibilité."
+        },
+        "q3": {
+          "q": "Puis-je avoir plusieurs réservations en cours ?",
+          "a": "Une seule réservation active à la fois. Pour réserver d'autres produits, attendez que la première soit confirmée, récupérée ou annulée."
+        },
+        "q4": {
+          "q": "Comment annuler une réservation ?",
+          "a": "Répondez au message WhatsApp de confirmation ou écrivez-nous à <a href='mailto:skin@skinlacercenter.net'>skin@skinlacercenter.net</a>. Sans frais, sans justification."
+        },
+        "q5": {
+          "q": "Y a-t-il un acompte ou un dépôt à verser ?",
+          "a": "Non. La réservation est gratuite et sans engagement. Le paiement n'a lieu qu'au moment du retrait en pharmacie."
+        }
+      },
+      "products": {
+        "heading": "Produits",
+        "q1": {
+          "q": "Les produits sont-ils authentiques ?",
+          "a": "Oui. Nous nous fournissons exclusivement auprès des distributeurs agréés des marques (ISDIN, La Roche-Posay, Avène, Filorga, etc.) en République Dominicaine."
+        },
+        "q2": {
+          "q": "Comment savoir quel produit choisir ?",
+          "a": "Filtrez le catalogue par <a href='/besoins/hydratation'>besoin</a> (acné, hydratation, anti-âge…) ou par type de peau. En cas de doute, un pharmacien peut vous conseiller via WhatsApp."
+        },
+        "q3": {
+          "q": "Les prix peuvent-ils changer entre la réservation et le retrait ?",
+          "a": "Les prix affichés sont indiqués en pesos dominicains (DOP), toutes taxes comprises. Ils peuvent être ajustés au moment du retrait pour refléter le prix en pharmacie le jour de la transaction."
+        },
+        "q4": {
+          "q": "Que faire si un produit ne me convient pas après usage ?",
+          "a": "Conformément aux usages sur les produits d'hygiène et de soin descellés, ils ne peuvent pas être repris. Demandez conseil à un pharmacien avant le retrait en cas de doute sur la tolérance."
+        }
+      },
+      "account": {
+        "heading": "Compte",
+        "q1": {
+          "q": "Pourquoi le téléphone est-il obligatoire ?",
+          "a": "Parce que toute la confirmation et le suivi se font par WhatsApp. Sans téléphone, impossible de finaliser une réservation."
+        },
+        "q2": {
+          "q": "Comment changer mon mot de passe ?",
+          "a": "Depuis votre compte → <a href='/account/security'>Sécurité</a>, ou directement via la page <a href='/forgot-password'>mot de passe oublié</a>. Un lien sécurisé vous sera envoyé par email."
+        },
+        "q3": {
+          "q": "Puis-je supprimer mon compte ?",
+          "a": "Oui, depuis <a href='/account/security'>Sécurité → Supprimer mon compte</a>. La demande est traitée sous 30 jours conformément à la Ley 172-13 RD."
+        }
+      },
+      "delivery": {
+        "heading": "Retrait en pharmacie",
+        "q1": {
+          "q": "Où se trouve la pharmacie ?",
+          "a": "Calle Jesús de Galíndez, esq. Calle 3, Cerros de Gurabo, Santiago. Voir <a href='/pharmacies'>la page pharmacie</a> pour la carte et l'accès."
+        },
+        "q2": {
+          "q": "Quels sont les horaires de retrait ?",
+          "a": "Lundi à vendredi : 9h – 19h. Samedi : 9h – 14h. Dimanche fermé."
+        },
+        "q3": {
+          "q": "Un tiers peut-il venir retirer ma commande ?",
+          "a": "Oui. Il suffit qu'il présente la référence de réservation et une pièce d'identité. Le paiement est dû à l'enlèvement."
+        },
+        "q4": {
+          "q": "Faites-vous de l'envoi à domicile ?",
+          "a": "Pas pour l'instant. FARMAU fonctionne en click & collect uniquement, pour garantir la chaîne du froid des produits sensibles et le conseil pharmaceutique."
+        }
+      },
+      "privacy": {
+        "heading": "Confidentialité",
+        "q1": {
+          "q": "Que faites-vous de mes données ?",
+          "a": "Détails complets dans la <a href='/legal/confidentialite'>politique de confidentialité</a>. En résumé : authentification, suivi de vos réservations, communication via WhatsApp. Aucune vente à des tiers."
+        },
+        "q2": {
+          "q": "Utilisez-vous des cookies de tracking ?",
+          "a": "Non. Seuls des cookies strictement essentiels (auth, panier, langue) sont déposés. Voir la <a href='/legal/cookies'>politique cookies</a> pour le détail."
+        },
+        "q3": {
+          "q": "Puis-je récupérer mes données personnelles ?",
+          "a": "Oui, conformément à la Ley 172-13 RD. Demande à <a href='mailto:skin@skinlacercenter.net'>skin@skinlacercenter.net</a>, réponse sous 30 jours."
+        }
+      }
+    },
+    "contact": {
+      "title": "Vous n'avez pas trouvé votre réponse ?",
+      "body": "Un pharmacien vous répond directement, dans la journée.",
+      "whatsapp": "Écrire sur WhatsApp",
+      "form": "Formulaire de contact"
+    }
+  },
+  "Pharmacies": {
+    "eyebrow": "Notre pharmacie",
+    "title": "Un seul lieu, <em>tout le soin.</em>",
+    "subtitle": "Toute la sélection FARMAU est disponible en click & collect à notre pharmacie de Cerros de Gurabo, Santiago.",
+    "locationLabel": "Adresse principale",
+    "locationName": "FARMAU — Santiago",
+    "addressLine1": "Calle Jesús de Galíndez, esq. Calle 3",
+    "addressLine2": "Cerros de Gurabo, Santiago, RD",
+    "hoursWeekday": "Lundi à vendredi : 9h – 19h",
+    "hoursSaturday": "Samedi : 9h – 14h",
+    "hoursSunday": "Dimanche : fermé",
+    "mapIframeTitle": "Localisation FARMAU sur Google Maps",
+    "ctaCatalogue": "Voir le catalogue",
+    "access": {
+      "eyebrow": "Accès",
+      "title": "Comment venir ?",
+      "body": "Le secteur Cerros de Gurabo est desservi par les principales avenues de Santiago. Parking gratuit devant la pharmacie. À 15 min en voiture du centre-ville et de l'aéroport Cibao."
+    },
+    "forWho": {
+      "eyebrow": "Pour qui",
+      "title": "Une pharmacie 100 % dermo.",
+      "body": "FARMAU est dédiée aux soins dermo-cosmétiques d'expertise pharmaceutique. Notre équipe est formée à la conseil personnalisé : peau réactive, acné, anti-âge, photoprotection."
+    }
+  },
+  "Manifesto": {
+    "eyebrow": "Notre manifeste",
+    "title": "La <em>pharmacie</em>, pas le commerce.",
+    "lede": "FARMAU n'est pas une parapharmacie. C'est une pharmacie qui a choisi de cultiver le soin dermo-cosmétique avec le sérieux qu'on réserve d'habitude aux médicaments.",
+    "intro1": "<strong>Nous avons commencé par retirer.</strong> Retirer les marques de complaisance, les promos artificielles, les routines à dix produits. Ce qui reste, c'est ce que nous oserions conseiller à notre propre famille.",
+    "intro2": "Sélectionner, c'est un travail quotidien. Lire les INCI ligne par ligne. Suivre les études cliniques publiées. Échanger avec les laboratoires sur les nouveautés et, parfois, refuser une référence parce que les indications nous semblent floues.",
+    "intro3": "Conseiller, c'est ralentir. C'est prendre cinq minutes pour comprendre votre type de peau avant de proposer un produit. C'est dire « ce dont vous avez besoin existe déjà chez vous », même si ça ne fait pas vendre.",
+    "pillars": {
+      "eyebrow": "Nos quatre piliers",
+      "title": "Ce qui guide chaque décision.",
+      "pharmacist": {
+        "title": "Le pharmacien d'abord",
+        "body": "Chaque référence du catalogue a été validée par un pharmacien. Aucun produit n'est listé sur la base d'un argumentaire commercial ou d'une tendance réseaux sociaux."
+      },
+      "curation": {
+        "title": "La sélection plutôt que le volume",
+        "body": "353 produits, pas 3 000. Treize marques choisies pour leur rigueur scientifique. Refuser fait partie du métier."
+      },
+      "human": {
+        "title": "Le contact humain",
+        "body": "Pas de chat-bot, pas de réponse automatique. Un pharmacien vous répond sur WhatsApp, prend le temps, oriente. Le click & collect est un prétexte pour se voir."
+      },
+      "care": {
+        "title": "Le soin de longue durée",
+        "body": "Une bonne routine dure. Nous préférons une fiche produit honnête qui dit « inutile chez vous » à une vente facile. Votre confiance compte plus que votre prochaine commande."
+      }
+    },
+    "quote": {
+      "eyebrow": "Signature pharmacien",
+      "text": "Le meilleur soin, c'est celui que vous comprenez. Pas celui qui coûte le plus cher.",
+      "attribution": "Équipe FARMAU"
+    },
+    "cta": {
+      "title": "On vous emmène en pharmacie ?",
+      "body": "Parcourez la sélection, posez vos questions sur WhatsApp, passez retirer. Pas de pression, pas d'envoi.",
+      "primary": "Voir le catalogue",
+      "secondary": "Notre histoire"
+    }
   },
   "Account": {
     "sidebar": {

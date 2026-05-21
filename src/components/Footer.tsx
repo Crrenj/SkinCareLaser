@@ -36,18 +36,18 @@ const NEED_SLUGS = [
 
 const SERVICE_LINKS = [
   { key: 'contact', href: '/contact' },
-  { key: 'delivery', href: '/contact' },
+  { key: 'delivery', href: '/livraison' },
   { key: 'pharmacists', href: '/a-propos' },
-  { key: 'faq', href: '/contact' },
+  { key: 'faq', href: '/faq' },
   { key: 'help', href: '/contact' },
 ] as const
 
 const BRAND_LINKS = [
   { key: 'about', href: '/a-propos' },
-  { key: 'manifesto', href: '/a-propos' },
+  { key: 'manifesto', href: '/manifeste' },
   { key: 'brands', href: '/marques' },
   { key: 'blog', href: '/a-propos' },
-  { key: 'stores', href: '/contact' },
+  { key: 'stores', href: '/pharmacies' },
 ] as const
 
 export default function Footer() {
