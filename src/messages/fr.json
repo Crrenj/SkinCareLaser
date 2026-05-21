@@ -835,10 +835,22 @@
       "titleTemplate": "{name} — Produits dermo-cosmétiques | FARMAU",
       "description": "Découvrez la sélection {name} chez FARMAU, pharmacie dermo-cosmétique en République Dominicaine. Réservation WhatsApp pour collecte en pharmacie."
     },
+    "brandsIndex": {
+      "title": "Nos marques — Pharmacie dermo-cosmétique | FARMAU",
+      "description": "Toutes les marques dermo-cosmétiques distribuées par FARMAU : ISDIN, La Roche-Posay, Avène, Filorga, ACM, Uriage et plus. Réservation WhatsApp pour collecte à Santiago."
+    },
     "need": {
       "titleTemplate": "{name} — Soins dermo-cosmétiques | FARMAU",
       "description": "Produits dermo-cosmétiques pour {name}. Sélection certifiée par nos pharmaciens-dermatologues, disponibles en réservation chez FARMAU."
     }
+  },
+  "BrandsIndex": {
+    "eyebrow": "Nos marques",
+    "title": "Toutes nos <em>marques</em>",
+    "intro": "{brands, plural, =1 {1 marque} other {# marques}} dermo-cosmétiques sélectionnées par nos pharmaciens. {products, plural, =1 {1 produit} other {# produits}} disponibles à la réservation.",
+    "cardCta": "Voir la marque",
+    "productSuffix": "produits",
+    "empty": "Aucune marque disponible pour le moment."
   },
   "BrandPage": {
     "eyebrow": "Marque",
@@ -849,5 +861,19 @@
     "eyebrow": "Besoin",
     "intro": "Notre sélection pour {name}. {count, plural, =1 {1 produit recommandé} other {# produits recommandés}} par nos pharmaciens.",
     "empty": "Aucun produit n'est associé à ce besoin pour le moment."
+  },
+  "NotFound": {
+    "eyebrow": "Erreur 404",
+    "title": "Cette page <em>n'existe plus</em>.",
+    "description": "Le lien est peut-être obsolète, le produit a été retiré du catalogue, ou l'adresse contient une faute. Vous pouvez repartir du catalogue ou nous écrire si vous cherchiez quelque chose de précis.",
+    "primaryCta": "Voir le catalogue",
+    "ghostCta": "Retour à l'accueil",
+    "quickLinksHeading": "Pages utiles",
+    "quickLinks": {
+      "brands": "Nos marques",
+      "favorites": "Mes favoris",
+      "contact": "Contact",
+      "about": "À propos"
+    }
   }
 }

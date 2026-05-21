@@ -4,13 +4,17 @@ import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { FooterNewsletter } from './footer/FooterNewsletter'
 
+// `categories` tag_type est vide en DB (taxonomie à créer) ; en attendant on
+// pointe les liens qui ont un besoin équivalent vers /besoins/[slug] et
+// retombe sur /catalogue pour les autres (au lieu de filtres ?category=
+// silencieusement ignorés).
 const PRODUCT_LINKS = [
-  { key: 'cleansers', href: '/catalogue?category=cleansers' },
-  { key: 'serums', href: '/catalogue?category=serums' },
-  { key: 'creams', href: '/catalogue?category=creams' },
-  { key: 'masks', href: '/catalogue?category=masks' },
-  { key: 'sunCare', href: '/catalogue?category=sunCare' },
-  { key: 'bodyCare', href: '/catalogue?category=bodyCare' },
+  { key: 'cleansers', href: '/besoins/nettoyage' },
+  { key: 'serums', href: '/catalogue' },
+  { key: 'creams', href: '/catalogue' },
+  { key: 'masks', href: '/catalogue' },
+  { key: 'sunCare', href: '/besoins/protection-solaire' },
+  { key: 'bodyCare', href: '/catalogue' },
 ] as const
 
 const NEED_SLUGS = [
@@ -41,7 +45,7 @@ const SERVICE_LINKS = [
 const BRAND_LINKS = [
   { key: 'about', href: '/a-propos' },
   { key: 'manifesto', href: '/a-propos' },
-  { key: 'brands', href: '/catalogue' },
+  { key: 'brands', href: '/marques' },
   { key: 'blog', href: '/a-propos' },
   { key: 'stores', href: '/contact' },
 ] as const

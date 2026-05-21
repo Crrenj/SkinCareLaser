@@ -835,10 +835,22 @@
       "titleTemplate": "{name} — Productos dermocosméticos | FARMAU",
       "description": "Descubra la selección {name} en FARMAU, farmacia dermocosmética en República Dominicana. Reserva por WhatsApp para retirada en tienda."
     },
+    "brandsIndex": {
+      "title": "Nuestras marcas — Farmacia dermocosmética | FARMAU",
+      "description": "Todas las marcas dermocosméticas distribuidas por FARMAU: ISDIN, La Roche-Posay, Avène, Filorga, ACM, Uriage y más. Reserva por WhatsApp para recogida en Santiago."
+    },
     "need": {
       "titleTemplate": "{name} — Cuidados dermocosméticos | FARMAU",
       "description": "Productos dermocosméticos para {name}. Selección certificada por nuestros farmacéuticos-dermatólogos, disponibles en reserva en FARMAU."
     }
+  },
+  "BrandsIndex": {
+    "eyebrow": "Nuestras marcas",
+    "title": "Todas nuestras <em>marcas</em>",
+    "intro": "{brands, plural, =1 {1 marca} other {# marcas}} dermocosméticas seleccionadas por nuestros farmacéuticos. {products, plural, =1 {1 producto} other {# productos}} disponibles en reserva.",
+    "cardCta": "Ver la marca",
+    "productSuffix": "productos",
+    "empty": "Ninguna marca disponible por el momento."
   },
   "BrandPage": {
     "eyebrow": "Marca",
@@ -849,5 +861,19 @@
     "eyebrow": "Necesidad",
     "intro": "Nuestra selección para {name}. {count, plural, =1 {1 producto recomendado} other {# productos recomendados}} por nuestros farmacéuticos.",
     "empty": "Ningún producto está asociado a esta necesidad por el momento."
+  },
+  "NotFound": {
+    "eyebrow": "Error 404",
+    "title": "Esta página <em>ya no existe</em>.",
+    "description": "Es posible que el enlace esté obsoleto, que el producto haya sido retirado del catálogo o que la dirección contenga un error. Puedes volver al catálogo o escribirnos si buscas algo específico.",
+    "primaryCta": "Ver el catálogo",
+    "ghostCta": "Volver al inicio",
+    "quickLinksHeading": "Páginas útiles",
+    "quickLinks": {
+      "brands": "Nuestras marcas",
+      "favorites": "Mis favoritos",
+      "contact": "Contacto",
+      "about": "Acerca de"
+    }
   }
 }

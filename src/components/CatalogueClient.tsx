@@ -7,6 +7,26 @@ import Filters from '@/components/Filters'
 import { FiltersMobileSheet } from '@/components/catalogue/FiltersMobileSheet'
 import { FiltersPill, type ActiveFilterPill } from '@/components/catalogue/FiltersPill'
 
+/**
+ * Convertit un name de tag/marque en slug kebab-case sans accents, pour
+ * matcher les params URL comme `?need=protection-solaire` ou `?brand=avene`.
+ */
+function nameToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+/** Split tolérant : accepte `?brand=A,B` ou `?brand=A&brand=B`. */
+function readMultiParam(params: URLSearchParams, key: string): string[] {
+  const all = params.getAll(key)
+  if (all.length === 0) return []
+  return all.flatMap((v) => v.split(',')).map((v) => v.trim()).filter(Boolean)
+}
+
 interface TagItem { label: string; category: string }
 interface Product {
   id: string
@@ -87,6 +107,70 @@ export default function CatalogueClient({
         Object.keys(itemsByType).map(key => [key, new Set<string>()])
       )
   )
+
+  // Sync filtres ↔ URL : lis ?brand, ?range, ?need, ?tag au mount (et à chaque
+  // navigation). Permet aux liens "Voir SPF" / "Hydratation" / brand badge PDP
+  // d'arriver pré-filtrés.
+  useEffect(() => {
+    // brand/range = matching par nom exact (case-insensitive ou via slug)
+    const brandsParam = readMultiParam(searchParams, 'brand')
+    const matchedBrands = new Set<string>()
+    brandsParam.forEach((value) => {
+      const lower = value.toLowerCase()
+      const slug = nameToSlug(value)
+      const match = brands.find(
+        (b) => b.toLowerCase() === lower || nameToSlug(b) === slug,
+      )
+      if (match) matchedBrands.add(match)
+    })
+
+    const rangesParam = readMultiParam(searchParams, 'range')
+    const allRanges = Object.values(rangesByBrand).flat()
+    const matchedRanges = new Set<string>()
+    rangesParam.forEach((value) => {
+      const lower = value.toLowerCase()
+      const slug = nameToSlug(value)
+      const match = allRanges.find(
+        (r) => r.toLowerCase() === lower || nameToSlug(r) === slug,
+      )
+      if (match) matchedRanges.add(match)
+    })
+
+    // need/tag = matching par slug contre les noms de tags de chaque tag_type
+    const nextTags: Record<string, Set<string>> = Object.fromEntries(
+      Object.keys(itemsByType).map((k) => [k, new Set<string>()]),
+    )
+
+    // ?need=slug → tag_type 'besoins'
+    const needParam = readMultiParam(searchParams, 'need')
+    if (needParam.length > 0 && itemsByType['besoins']) {
+      needParam.forEach((slug) => {
+        const wanted = slug.toLowerCase()
+        const match = itemsByType['besoins'].find(
+          (name) => nameToSlug(name) === wanted || name.toLowerCase() === wanted,
+        )
+        if (match) nextTags['besoins'].add(match)
+      })
+    }
+
+    // ?tag=type:slug → générique, supporte tous les tag_types
+    // Ex: ?tag=ingredients:vitamine-c ou ?tag=types-peau:sensible
+    const tagParam = readMultiParam(searchParams, 'tag')
+    tagParam.forEach((entry) => {
+      const [type, value] = entry.split(':')
+      if (!type || !value || !itemsByType[type]) return
+      const wanted = value.toLowerCase()
+      const match = itemsByType[type].find(
+        (name) => nameToSlug(name) === wanted || name.toLowerCase() === wanted,
+      )
+      if (match) nextTags[type].add(match)
+    })
+
+    setSelectedBrands(matchedBrands)
+    setSelectedRanges(matchedRanges)
+    setSelectedTags(nextTags)
+    setCurrentPage(1)
+  }, [searchParams, brands, rangesByBrand, itemsByType])
 
   const handleTagToggle = useCallback((tagType: string, tagName: string) => {
     setSelectedTags(prev => {

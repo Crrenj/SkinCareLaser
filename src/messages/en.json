@@ -835,10 +835,22 @@
       "titleTemplate": "{name} — Dermocosmetic products | FARMAU",
       "description": "Discover the {name} selection at FARMAU, dermocosmetic pharmacy in the Dominican Republic. WhatsApp reservation for in-store pickup."
     },
+    "brandsIndex": {
+      "title": "Our brands — Dermocosmetic pharmacy | FARMAU",
+      "description": "All dermocosmetic brands distributed by FARMAU: ISDIN, La Roche-Posay, Avène, Filorga, ACM, Uriage and more. WhatsApp reservation for pickup in Santiago."
+    },
     "need": {
       "titleTemplate": "{name} — Dermocosmetic care | FARMAU",
       "description": "Dermocosmetic products for {name}. Selection certified by our pharmacist-dermatologists, available for reservation at FARMAU."
     }
+  },
+  "BrandsIndex": {
+    "eyebrow": "Our brands",
+    "title": "All our <em>brands</em>",
+    "intro": "{brands, plural, =1 {1 brand} other {# brands}} of dermocosmetic care selected by our pharmacists. {products, plural, =1 {1 product} other {# products}} available for reservation.",
+    "cardCta": "View brand",
+    "productSuffix": "products",
+    "empty": "No brand available at the moment."
   },
   "BrandPage": {
     "eyebrow": "Brand",
@@ -849,5 +861,19 @@
     "eyebrow": "Concern",
     "intro": "Our selection for {name}. {count, plural, =1 {1 product recommended} other {# products recommended}} by our pharmacists.",
     "empty": "No products are associated with this concern yet."
+  },
+  "NotFound": {
+    "eyebrow": "Error 404",
+    "title": "This page <em>no longer exists</em>.",
+    "description": "The link may be outdated, the product withdrawn from the catalogue, or the URL contains a typo. You can start over from the catalogue or write to us if you were looking for something specific.",
+    "primaryCta": "See the catalogue",
+    "ghostCta": "Back to home",
+    "quickLinksHeading": "Useful pages",
+    "quickLinks": {
+      "brands": "Our brands",
+      "favorites": "My favorites",
+      "contact": "Contact",
+      "about": "About"
+    }
   }
 }
