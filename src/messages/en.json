@@ -862,6 +862,47 @@
     "intro": "Our selection for {name}. {count, plural, =1 {1 product recommended} other {# products recommended}} by our pharmacists.",
     "empty": "No products are associated with this concern yet."
   },
+  "Legal": {
+    "shell": {
+      "lastUpdated": "Last updated on",
+      "disclaimerTitle": "Reference document.",
+      "disclaimerBody": "This text is a generic template to be reviewed and completed by legal counsel before final publication in the Dominican Republic. French version below."
+    },
+    "sidebar": {
+      "heading": "Legal pages",
+      "items": {
+        "mentions": "Legal notice",
+        "cgv": "Terms of use",
+        "privacy": "Privacy policy",
+        "cookies": "Cookie policy"
+      }
+    },
+    "cookieBanner": {
+      "title": "Cookies",
+      "body": "We only use essential cookies (session, cart, language). No tracking tools are active. See the cookie policy.",
+      "linkLabel": "Learn more",
+      "acceptLabel": "Got it",
+      "rejectLabel": "Reject non-essential"
+    },
+    "pageMeta": {
+      "mentions": {
+        "title": "Legal notice — FARMAU",
+        "description": "Editor identity, hosting provider, contact and credits for the FARMAU website."
+      },
+      "cgv": {
+        "title": "Terms of use — FARMAU",
+        "description": "Terms of use of the FARMAU website and click & collect reservation rules in pharmacy."
+      },
+      "privacy": {
+        "title": "Privacy policy — FARMAU",
+        "description": "Data collected, purposes, retention and user rights (Ley 172-13 DR)."
+      },
+      "cookies": {
+        "title": "Cookie policy — FARMAU",
+        "description": "List of cookies used by FARMAU and how to manage them."
+      }
+    }
+  },
   "NotFound": {
     "eyebrow": "Error 404",
     "title": "This page <em>no longer exists</em>.",

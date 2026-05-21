@@ -22,6 +22,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/marques', priority: 0.7, changeFrequency: 'weekly' },
     { path: '/a-propos', priority: 0.5, changeFrequency: 'monthly' },
     { path: '/contact', priority: 0.5, changeFrequency: 'monthly' },
+    { path: '/legal/mentions-legales', priority: 0.3, changeFrequency: 'yearly' },
+    { path: '/legal/cgv', priority: 0.3, changeFrequency: 'yearly' },
+    { path: '/legal/confidentialite', priority: 0.3, changeFrequency: 'yearly' },
+    { path: '/legal/cookies', priority: 0.3, changeFrequency: 'yearly' },
   ]
 
   // Produits actifs (slugs — le routage utilise /product/[slug])

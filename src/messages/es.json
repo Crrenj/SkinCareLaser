@@ -862,6 +862,47 @@
     "intro": "Nuestra selección para {name}. {count, plural, =1 {1 producto recomendado} other {# productos recomendados}} por nuestros farmacéuticos.",
     "empty": "Ningún producto está asociado a esta necesidad por el momento."
   },
+  "Legal": {
+    "shell": {
+      "lastUpdated": "Última actualización el",
+      "disclaimerTitle": "Documento orientativo.",
+      "disclaimerBody": "Este texto es una plantilla genérica que debe ser revisada y completada por un asesor jurídico antes de su publicación definitiva en República Dominicana. Versión en francés a continuación."
+    },
+    "sidebar": {
+      "heading": "Páginas legales",
+      "items": {
+        "mentions": "Aviso legal",
+        "cgv": "Condiciones de uso",
+        "privacy": "Política de privacidad",
+        "cookies": "Política de cookies"
+      }
+    },
+    "cookieBanner": {
+      "title": "Cookies",
+      "body": "Solo usamos cookies esenciales (sesión, carrito, idioma). Ninguna herramienta de seguimiento está activa. Ver la política de cookies.",
+      "linkLabel": "Más información",
+      "acceptLabel": "Entendido",
+      "rejectLabel": "Rechazar no esenciales"
+    },
+    "pageMeta": {
+      "mentions": {
+        "title": "Aviso legal — FARMAU",
+        "description": "Identidad del editor, hospedaje, contacto y créditos del sitio FARMAU."
+      },
+      "cgv": {
+        "title": "Condiciones de uso — FARMAU",
+        "description": "Condiciones de uso del sitio FARMAU y modalidades de reserva click & collect en farmacia."
+      },
+      "privacy": {
+        "title": "Política de privacidad — FARMAU",
+        "description": "Datos recopilados, finalidades, duración de conservación y derechos de los usuarios (Ley 172-13 RD)."
+      },
+      "cookies": {
+        "title": "Política de cookies — FARMAU",
+        "description": "Lista de cookies utilizadas por FARMAU y cómo gestionarlas."
+      }
+    }
+  },
   "NotFound": {
     "eyebrow": "Error 404",
     "title": "Esta página <em>ya no existe</em>.",

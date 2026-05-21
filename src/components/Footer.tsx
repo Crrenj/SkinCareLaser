@@ -120,10 +120,10 @@ export default function Footer() {
       <div className="py-6 border-t border-ink-800 flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11.5px] text-ink-500">
         <div>{t('bottom.copyright')}</div>
         <div className="flex flex-wrap gap-5">
-          <FooterLegalLink href="/contact" label={t('bottom.terms')} />
-          <FooterLegalLink href="/contact" label={t('bottom.privacy')} />
-          <FooterLegalLink href="/contact" label={t('bottom.cookies')} />
-          <FooterLegalLink href="/contact" label={t('bottom.legal')} />
+          <FooterLegalLink href="/legal/cgv" label={t('bottom.terms')} />
+          <FooterLegalLink href="/legal/confidentialite" label={t('bottom.privacy')} />
+          <FooterLegalLink href="/legal/cookies" label={t('bottom.cookies')} />
+          <FooterLegalLink href="/legal/mentions-legales" label={t('bottom.legal')} />
         </div>
         <div className="flex gap-2">
           {['Visa', 'Mastercard', 'PayPal', 'Azul'].map((label) => (

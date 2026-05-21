@@ -862,6 +862,47 @@
     "intro": "Notre sélection pour {name}. {count, plural, =1 {1 produit recommandé} other {# produits recommandés}} par nos pharmaciens.",
     "empty": "Aucun produit n'est associé à ce besoin pour le moment."
   },
+  "Legal": {
+    "shell": {
+      "lastUpdated": "Dernière mise à jour le",
+      "disclaimerTitle": "Document indicatif.",
+      "disclaimerBody": "Ce texte est un modèle générique destiné à être validé et complété par un conseil juridique avant publication définitive en République Dominicaine."
+    },
+    "sidebar": {
+      "heading": "Pages légales",
+      "items": {
+        "mentions": "Mentions légales",
+        "cgv": "Conditions générales",
+        "privacy": "Politique de confidentialité",
+        "cookies": "Politique cookies"
+      }
+    },
+    "cookieBanner": {
+      "title": "Cookies",
+      "body": "Nous utilisons uniquement des cookies essentiels (session, panier, langue). Aucun outil de tracking n'est actif. Voir la politique cookies.",
+      "linkLabel": "En savoir plus",
+      "acceptLabel": "J'ai compris",
+      "rejectLabel": "Refuser non-essentiels"
+    },
+    "pageMeta": {
+      "mentions": {
+        "title": "Mentions légales — FARMAU",
+        "description": "Identité de l'éditeur, hébergeur, contact et crédits du site FARMAU."
+      },
+      "cgv": {
+        "title": "Conditions générales — FARMAU",
+        "description": "Conditions d'utilisation du site FARMAU et modalités de réservation click & collect en pharmacie."
+      },
+      "privacy": {
+        "title": "Politique de confidentialité — FARMAU",
+        "description": "Données collectées, finalités, durées de conservation et droits des utilisateurs (Ley 172-13 RD)."
+      },
+      "cookies": {
+        "title": "Politique cookies — FARMAU",
+        "description": "Liste des cookies utilisés par FARMAU et façons de les gérer."
+      }
+    }
+  },
   "NotFound": {
     "eyebrow": "Erreur 404",
     "title": "Cette page <em>n'existe plus</em>.",
