@@ -203,16 +203,17 @@ Découpage par scope/page :
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest sur PR et push main.
 
-## État du projet (2026-05-21)
+## État du projet (2026-05-22)
 
-### Fait ✅ (sessions 2026-05-21, post sprint 3)
+### Fait ✅ (sessions 2026-05-21 → 2026-05-22, post sprint 3)
 
-Surfaces publiques ajoutées (commits `279f462` → `46ea917`) :
+Surfaces publiques ajoutées (commits `279f462` → `8d8ec14`) :
 - `/marques` index data-driven (commit `279f462`) + filtres URL sur catalogue (`?brand`, `?range`, `?need`, `?tag=type:slug` matching name ou slug) + `not-found.tsx` design FARMAU (NavBar + Footer + serif italic 160px) global + locale-aware
 - 4 pages légales `/legal/{mentions-legales,cgv,confidentialite,cookies}` avec contenu FR pré-rédigé (Ley 172-13 + 358-05 + 126-02 RD), composants `LegalShell/Sidebar/Section` partagés, disclaimer "à valider par juriste" + `CookieBanner` (localStorage `farmau:cookies:consent`) (commit `da37dfe`)
 - Hub `/account` (Server layout + check session) avec sidebar 5 onglets : `profile` (refactor), `reservations` (SSR historique avec status badges + lien WhatsApp), `security` (CTA email reset → /reset-password + danger zone mailto RGPD), `preferences` (toggle newsletter + select langue préférée via `profiles.preferred_locale`). Migration `profiles.preferred_locale`, APIs `/api/newsletter` étendues (GET/DELETE auth) + `/api/account/preferences` PATCH (commit `ac1f9c3`)
 - 4 pages éditoriales statiques `/livraison`, `/faq` (5 sections 19 Q&A), `/pharmacies` (1 lieu), `/manifeste` (4 piliers + citation dark mode) + traductions exhaustives FR/EN/ES (commit `46ea917`)
 - Admin `/admin/users` (lecture via `auth.admin.listUsers` + jointure profiles + admin_users, toggle Promover/Admin avec garde-fou self-demote) + `/admin/newsletter` (stats + filtre lang + export CSV + delete par ligne). Sidebar admin nouvelle section "Clientes". Suppression `/admin/my-team` démo (commit `ebad106`)
+- JSON-LD Product schema sur PDP (`src/components/pdp/ProductJsonLd.tsx` Server, rich snippets Google avec offers/price/availability calculée depuis stock) + 2 derniers `<img>` migrés vers `next/image` (`CartEmpty` bestsellers fallback + `ConfirmationRecap` items recap) — commit `8d8ec14`
 - Footer bottom-bar câblé vers /legal/* + cellule Productos /besoins/[slug] + cellule Marca câblée /marques /pharmacies /manifeste
 - Curation home active : 4 produits `is_featured=true` (Avène Hyaluron B3 Serum, Avène Hydrance Aqua Gel, Babe Aloe Vera, Babe Bicalm+) + 3 tags `featured_on_home=true` (hydratation, anti-age, protection-solaire)
 
@@ -256,8 +257,8 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 ### Reste à faire
 
 **Quick wins SEO / perf** :
-- JSON-LD Product schema sur `/product/[slug]` (rich snippets Google)
-- 3 `<img>` restants → `next/image` : `CartDrawer`, `ProductClient×2` (impact LCP fiche produit)
+- ~~JSON-LD Product schema~~ ✅ commit `8d8ec14` (`ProductJsonLd` Server)
+- ~~3 `<img>` → `next/image`~~ ✅ commit `8d8ec14` (CartEmpty + ConfirmationRecap ; les autres déjà refacto)
 - Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
 
 **Accessibilité (WCAG AA — note 38/100 avant refonte, à re-mesurer)** :

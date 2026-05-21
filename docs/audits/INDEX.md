@@ -1,7 +1,7 @@
 # Audit complet — FARMAU / Skincare Laser
 
 Date d'audit : 2026-05-19
-Date dernière mise à jour : 2026-05-21 (post P1 → P5 + curation home)
+Date dernière mise à jour : 2026-05-22 (post quick wins SEO/perf, session 6)
 Branche : `main`
 Méthode : 9 audits parallèles spécialisés, ~5 500 lignes de rapports
 
@@ -262,9 +262,11 @@ Plus :
 - ✅ Admin `/admin/users` + `/admin/newsletter` + cleanup `/admin/my-team` + sidebar section "Clientes" — commit `ebad106`
 - ✅ Curation home en DB : 4 produits `is_featured` + 3 tags `featured_on_home` (hydratation, anti-age, protection-solaire)
 
-### Phase 8 — Restant après P5
-- ❌ JSON-LD Product schema sur PDP
-- ❌ 3 `<img>` restants → `next/image` (CartDrawer, ProductClient×2)
+### Phase 8 — Session 2026-05-22 (Quick wins SEO/perf) ✅
+- ✅ JSON-LD Product schema sur PDP (composant `ProductJsonLd` Server) — commit `8d8ec14`
+- ✅ 2 derniers `<img>` → `next/image` : CartEmpty + ConfirmationRecap — commit `8d8ec14` (les autres déjà refacto au sprint 3)
+
+### Phase 9 — Restant
 - ❌ Migration `banner_type_enum` strict (legacy text)
 - ❌ Saisie contenu PDP (pharmacist_advice, INCI, benefits) sur 353 produits
 - ❌ Double opt-in newsletter (provider Resend/Postmark)
@@ -273,6 +275,11 @@ Plus :
 - ❌ Traductions ES/EN du contenu juridique `/legal/*`
 - ❌ Tests d'intégration admin + `/account/*` Playwright
 - ❌ Stockage image dédupliqué (`products.image_url` vs `product_images`)
+- ❌ Split pages admin > 500 LOC
+- ❌ Vraie `/admin/settings` câblée DB
+- ❌ `<html lang={locale}>` dynamique (route group `(admin)`)
+- ❌ Fallback `localStorage` tokens Supabase (security #4)
+- ❌ Audit RPC `SECURITY DEFINER` `SET search_path`
 
 ---
 
