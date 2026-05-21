@@ -28,7 +28,7 @@ export type MappedProduct = {
   tagsByCategory: Record<string, string[]>
   // Champs optionnels — backés par DB plus tard (spec §07 schéma)
   volume?: string
-  stock?: number
+  stock?: number | null
   benefits?: string[]
   usage?: string
   inci?: string
@@ -141,13 +141,13 @@ export default function ProductClient({
               <span className="text-[13px] text-ink-500">· {product.volume}</span>
             )}
           </div>
-          <PdpStockBadge stock={product.stock} />
+          <PdpStockBadge stock={product.stock ?? undefined} />
 
           <div
             ref={buyRowRef}
             className="grid grid-cols-[120px_1fr_52px] gap-3 mt-7 mb-4"
           >
-            <PdpQuantity value={quantity} onChange={setQuantity} max={product.stock} />
+            <PdpQuantity value={quantity} onChange={setQuantity} max={product.stock ?? undefined} />
             <button
               type="button"
               onClick={handleAddToCart}

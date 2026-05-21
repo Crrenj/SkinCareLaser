@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import useSWR from 'swr'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
@@ -81,10 +82,15 @@ export function CartEmpty() {
                 href={`/product/${hit.slug}`}
                 className="group bg-sand-50 border border-sand-300 rounded-xl p-4 flex flex-col gap-1.5 hover:border-ink-700 transition-colors"
               >
-                <div className="aspect-square bg-sand-200 rounded-md mb-1.5 flex items-center justify-center text-ink-400 text-[10px] tracking-[0.1em] uppercase overflow-hidden">
+                <div className="relative aspect-square bg-sand-200 rounded-md mb-1.5 flex items-center justify-center text-ink-400 text-[10px] tracking-[0.1em] uppercase overflow-hidden">
                   {hit.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={hit.image} alt={hit.name} className="w-full h-full object-cover" />
+                    <Image
+                      src={hit.image}
+                      alt={hit.name}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 240px"
+                      className="object-cover"
+                    />
                   ) : (
                     'Pack'
                   )}

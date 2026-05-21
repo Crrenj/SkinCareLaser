@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductClient from '@/components/ProductClient'
+import { ProductJsonLd } from '@/components/pdp/ProductJsonLd'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { JSX } from 'react'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
@@ -97,6 +98,7 @@ type RawProduct = {
   price: string | number
   currency: string
   slug: string
+  stock: number | null
   product_images: { url: string; alt: string | null }[] | null
   product_ranges: RangeJoin[] | null
   product_tags: TagJoin[] | null
@@ -109,6 +111,7 @@ type MappedProduct = {
   price: number
   currency: string
   slug: string
+  stock: number | null
   images: { url: string; alt: string | null }[]
   brand: string
   range: string
@@ -122,6 +125,7 @@ const PRODUCT_SELECT = `
   price,
   currency,
   slug,
+  stock,
   product_images ( url, alt ),
   product_ranges (
     range:ranges (
@@ -153,6 +157,7 @@ function mapProduct(raw: RawProduct): MappedProduct {
     price: Number(raw.price),
     currency: raw.currency,
     slug: raw.slug,
+    stock: raw.stock,
     images: raw.product_images ?? [],
     brand: firstRange?.brand?.name ?? '',
     range: firstRange?.name ?? '',
@@ -223,6 +228,17 @@ export default async function ProductPage({
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
+      <ProductJsonLd
+        locale={locale}
+        slug={mainProduct.slug}
+        name={mainProduct.name}
+        description={mainProduct.description}
+        brand={mainProduct.brand}
+        price={mainProduct.price}
+        currency={mainProduct.currency}
+        images={mainProduct.images}
+        stock={mainProduct.stock}
+      />
       <NavBar />
       <main id="main-content" className="flex-grow">
         <ProductClient
