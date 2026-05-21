@@ -11,8 +11,10 @@ import {
   Home,
   LogOut,
   Mail,
+  Mailbox,
   Megaphone,
   Tag,
+  Users,
   X,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
@@ -58,6 +60,13 @@ const SECTIONS: Section[] = [
       },
       { href: '/admin/messages', label: 'Mensajes', icon: Mail, badgeKey: 'messages', badgeVariant: 'alert' },
       { href: '/admin/annonce', label: 'Anuncios', icon: Megaphone },
+    ],
+  },
+  {
+    title: 'Clientes',
+    items: [
+      { href: '/admin/users', label: 'Usuarios', icon: Users },
+      { href: '/admin/newsletter', label: 'Newsletter', icon: Mailbox },
     ],
   },
   {
