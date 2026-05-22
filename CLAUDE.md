@@ -205,6 +205,16 @@ Découpage par scope/page :
 
 ## État du projet (2026-05-22)
 
+### Fait ✅ (session 2026-05-22, hygiène technique autonome)
+
+- Code mort retiré : `FiltersNew.tsx` (393 LOC), `admin/ImageUpload.tsx`, `admin/DirectImageUpload.tsx` — 0 import dans `src/`, totalisant ~700 LOC supprimées
+- `src/lib/constants.ts` + `src/lib/formatPrice.ts` créés : centralisation `DEFAULT_CURRENCY`, `DEFAULT_LOCALE_TAG`, `LOCALE_TAG_MAP`/`toLocaleTag`, `LOW_STOCK_THRESHOLD`, `MAX_CART_QUANTITY`, `ADMIN_HOME_PATH` + helper `formatPrice(value, { locale?, fractionDigits? })`. Migration des 5 défauts `'DOP'` hardcodés + 13 `Intl.NumberFormat` (7 `localeMap` dupliqués supprimés). Seul `account/reservations/page.tsx` conserve son `Intl.NumberFormat` direct (comportement par défaut 0-3 chiffres, différent de `formatPrice`)
+- **`focus-visible` global** : 64 occurrences de `focus:outline-none` migrées vers `focus-visible:` (incluant `focus:ring-*`, `focus:border-*` renommés en pair sur la même ligne). 13 cas isolés enrichis avec `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700`. Bloqueur WCAG 2.4.7 fermé
+- **Toaster sonner** : `npm install sonner`, `<Toaster richColors position="top-right" closeButton />` monté dans `src/app/admin/layout.tsx`. 27 `alert()` admin migrés vers `toast.error()` / `toast.info()` (les 2 `window.alert("próximamente")` de reservations)
+- Migration DB `20260522092810_set_search_path_security_definer.sql` : `ALTER FUNCTION ... SET search_path = public, pg_temp` sur les 9 fonctions sans config (`add_to_cart`, `cleanup_banner_positions`, `get_messages_stats`, `get_or_create_cart`, `is_user_admin`, `mark_message_as_read`, `remove_from_cart`, `reorder_banners`, `update_updated_at_column`). Advisor `function_search_path_mutable` désormais à 0
+
+NB : `npm uninstall framer-motion @supabase/auth-helpers-nextjs` était au plan mais refusé en permission — les 2 deps restent dans `package.json` (à retirer manuellement quand souhaité, 0 import dans `src/`).
+
 ### Fait ✅ (sessions 2026-05-21 → 2026-05-22, post sprint 3)
 
 Surfaces publiques ajoutées (commits `279f462` → `8d8ec14`) :
@@ -262,9 +272,10 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 - Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
 
 **Accessibilité (WCAG AA — note 38/100 avant refonte, à re-mesurer)** :
-- Remplacer ~50 `focus:outline-none` par `focus-visible:ring sand-700`
+- ~~Remplacer ~50 `focus:outline-none` par `focus-visible:ring sand-700`~~ ✅ session 2026-05-22 (64 occ migrées)
 - Modales sans `role="dialog"` + focus trap (CartDrawer, MobileDrawer le font déjà)
 - Audit contraste palette sand/clay (certains hover passent juste WCAG AA)
+- 35 `alert()` admin migrés vers `sonner` (session 2026-05-22) — il reste à factoriser certains `confirm()` natifs si on veut un design system d'alerts cohérent
 
 **Contenu éditorial** :
 - Blog : table `posts` + admin CRUD + `/blog` + `/blog/[slug]` + sitemap (Footer "blog" pointe encore vers `/a-propos`)
@@ -274,12 +285,13 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 **Hygiène long terme** :
 - `<html lang>` dynamique : route group `(admin)` pour séparer admin/public
 - Stockage image dédupliqué : `products.image_url` + `product_images` → choisir un seul
-- Tests d'intégration admin Playwright + `/account/*` Playwright
+- Tests d'intégration admin Playwright + `/account/*` Playwright (npx playwright install requis localement, le binaire chromium n'est pas dans `~/Library/Caches/ms-playwright`)
 - Split pages admin > 500 lignes (`tags` 753, `annonce` ~890, `marques` 708, `product` 703)
 - Fallback `localStorage` pour tokens Supabase (finding security #4, XSS exfiltration)
 - Double opt-in newsletter (provider d'envoi : Resend/Postmark)
 - Vraie `/admin/settings` câblée à une table `shop_settings`
-- Audit RPC SECURITY DEFINER pour `SET search_path = public` manquants
+- ~~Audit RPC SECURITY DEFINER pour `SET search_path = public` manquants~~ ✅ session 2026-05-22 (9 fonctions corrigées via migration `20260522092810_set_search_path_security_definer.sql`)
+- `npm uninstall framer-motion @supabase/auth-helpers-nextjs` (deps non importées dans `src/`, retrait refusé en session — à faire manuellement)
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
 
