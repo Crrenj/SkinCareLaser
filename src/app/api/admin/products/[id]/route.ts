@@ -29,14 +29,13 @@ export async function PATCH(
         brandName = (range?.brands as { name?: string } | null)?.name?.toLowerCase() || ''
       }
 
-      const { data: product } = await supabaseAdmin
-        .from('products')
-        .select('image_url, slug')
-        .eq('id', id)
-        .single()
+      const { data: existingImages } = await supabaseAdmin
+        .from('product_images')
+        .select('url')
+        .eq('product_id', id)
 
-      if (product?.image_url) {
-        const oldPath = product.image_url.split('/storage/v1/object/public/product-image/')[1]
+      for (const existing of existingImages ?? []) {
+        const oldPath = existing.url.split('/storage/v1/object/public/product-image/')[1]
         if (oldPath) {
           await supabaseAdmin.storage.from('product-image').remove([oldPath])
         }
@@ -117,14 +116,14 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    const { data: product } = await supabaseAdmin
-      .from('products')
-      .select('image_url')
-      .eq('id', id)
-      .single()
+    const { data: existingImages } = await supabaseAdmin
+      .from('product_images')
+      .select('url')
+      .eq('product_id', id)
 
-    if (product?.image_url) {
-      const imagePath = product.image_url.split('/').pop()
+    for (const existing of existingImages ?? []) {
+      const imagePath = existing.url
+        .split('/storage/v1/object/public/product-image/')[1]
       if (imagePath) {
         await supabaseAdmin.storage.from('product-image').remove([imagePath])
       }

@@ -34,6 +34,8 @@ export interface Product {
   price: number
   currency: string
   stock: number
+  /** Calculé serveur-side depuis `product_images[0].url` (la colonne legacy
+   * `products.image_url` a été supprimée). */
   image_url: string | null
   is_active: boolean
   brand?: Brand

@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       ...product,
       brand: product.product_ranges?.[0]?.ranges?.brands || null,
       range: product.product_ranges?.[0]?.ranges || null,
-      image_url: product.product_images?.[0]?.url || product.image_url,
+      image_url: product.product_images?.[0]?.url ?? null,
     }))
 
     return NextResponse.json({

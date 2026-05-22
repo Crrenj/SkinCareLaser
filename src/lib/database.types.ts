@@ -466,7 +466,6 @@ export type Database = {
           currency: string | null
           description: string | null
           id: string
-          image_url: string | null
           inci: string | null
           is_active: boolean | null
           is_featured: boolean | null
@@ -491,7 +490,6 @@ export type Database = {
           currency?: string | null
           description?: string | null
           id?: string
-          image_url?: string | null
           inci?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
@@ -516,7 +514,6 @@ export type Database = {
           currency?: string | null
           description?: string | null
           id?: string
-          image_url?: string | null
           inci?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
@@ -857,7 +854,6 @@ export type Database = {
           currency: string | null
           description: string | null
           id: string | null
-          image_url: string | null
           inci: string | null
           is_active: boolean | null
           is_featured: boolean | null

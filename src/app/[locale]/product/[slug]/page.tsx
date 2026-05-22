@@ -40,7 +40,7 @@ export async function generateMetadata({
 
   const { data: prod } = await supabase
     .from('products')
-    .select('name, description, image_url, product_images(url), product_ranges(range:ranges(name, brand:brands(name)))')
+    .select('name, description, product_images(url), product_ranges(range:ranges(name, brand:brands(name)))')
     .eq('slug', slug)
     .maybeSingle()
 
@@ -63,9 +63,7 @@ export async function generateMetadata({
     : t('descriptionFallback', { name: productName, brand: brandName })
 
   const imageUrl =
-    prod.image_url ??
-    (Array.isArray(prod.product_images) && prod.product_images[0]?.url) ??
-    undefined
+    (Array.isArray(prod.product_images) && prod.product_images[0]?.url) ?? undefined
 
   return {
     title,
