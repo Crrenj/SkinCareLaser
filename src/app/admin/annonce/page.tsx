@@ -15,6 +15,7 @@ import {
   ArrowDownIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
+import { toast } from 'sonner'
 
 type BannerType =
   | 'editorial'
@@ -179,11 +180,11 @@ export default function AnnoncePage() {
         setEditingBanner(null)
       } else {
         console.error('Erreur lors de la sauvegarde:', data.error)
-        alert('Erreur lors de la sauvegarde: ' + data.error)
+        toast.error('Erreur lors de la sauvegarde: ' + data.error)
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
     }
@@ -201,11 +202,11 @@ export default function AnnoncePage() {
       } else {
         const data = await response.json()
         console.error('Erreur lors de la suppression:', data.error)
-        alert('Erreur lors de la suppression: ' + data.error)
+        toast.error('Erreur lors de la suppression: ' + data.error)
       }
     } catch (error) {
       console.error('Erreur lors de la suppression:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression')
     }
   }
 

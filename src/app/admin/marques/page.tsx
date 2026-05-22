@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  PlusIcon, 
-  PencilIcon, 
-  TrashIcon, 
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
   TagIcon,
@@ -12,6 +12,7 @@ import {
   ChevronRightIcon,
   Squares2X2Icon
 } from '@heroicons/react/24/outline'
+import { toast } from 'sonner'
 
 interface Brand {
   id: string
@@ -69,7 +70,7 @@ export default function MarquesPage() {
         setBrands([])
         
         if (data.message?.includes('SUPABASE_SERVICE')) {
-          alert('Configuration manquante: La clé de service Supabase n\'est pas configurée.')
+          toast.error('Configuration manquante: La clé de service Supabase n\'est pas configurée.')
         }
       }
     } catch (error) {
@@ -185,11 +186,11 @@ export default function MarquesPage() {
         setShowModal(false)
       } else {
         const error = await res.json()
-        alert('Erreur: ' + error.error)
+        toast.error('Erreur: ' + error.error)
       }
     } catch (error) {
       console.error('Erreur sauvegarde:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -216,11 +217,11 @@ export default function MarquesPage() {
         setShowRangeModal(false)
       } else {
         const error = await res.json()
-        alert('Erreur: ' + error.error)
+        toast.error('Erreur: ' + error.error)
       }
     } catch (error) {
       console.error('Erreur sauvegarde gamme:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -236,11 +237,11 @@ export default function MarquesPage() {
         setShowDeleteConfirm(null)
       } else {
         const error = await res.json()
-        alert('Erreur: ' + error.error)
+        toast.error('Erreur: ' + error.error)
       }
     } catch (error) {
       console.error('Erreur suppression:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression')
     }
   }
 
@@ -257,11 +258,11 @@ export default function MarquesPage() {
         setShowRangeDeleteConfirm(null)
       } else {
         const error = await res.json()
-        alert('Erreur: ' + error.error)
+        toast.error('Erreur: ' + error.error)
       }
     } catch (error) {
       console.error('Erreur suppression gamme:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression')
     }
   }
 
@@ -338,7 +339,7 @@ export default function MarquesPage() {
           <input
             type="text"
             placeholder="Rechercher une marque..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -511,7 +512,7 @@ export default function MarquesPage() {
                       slug: editingBrand ? prev.slug : generateSlug(e.target.value)
                     }))
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   placeholder="Ex: Avène"
                 />
               </div>
@@ -525,7 +526,7 @@ export default function MarquesPage() {
                   required
                   value={formData.slug}
                   onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   placeholder="Ex: avene"
                 />
               </div>
@@ -534,13 +535,13 @@ export default function MarquesPage() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                   {editingBrand ? 'Modifier' : 'Créer'}
                 </button>
@@ -575,7 +576,7 @@ export default function MarquesPage() {
                   required
                   value={rangeFormData.brand_id}
                   onChange={(e) => setRangeFormData(prev => ({ ...prev, brand_id: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   disabled={!!selectedBrandForRange}
                 >
                   <option value="">Sélectionner une marque</option>
@@ -600,7 +601,7 @@ export default function MarquesPage() {
                       slug: editingRange ? prev.slug : generateSlug(e.target.value)
                     }))
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   placeholder="Ex: Hydrance"
                 />
               </div>
@@ -614,7 +615,7 @@ export default function MarquesPage() {
                   required
                   value={rangeFormData.slug}
                   onChange={(e) => setRangeFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   placeholder="Ex: hydrance"
                 />
               </div>
@@ -623,13 +624,13 @@ export default function MarquesPage() {
                 <button
                   type="button"
                   onClick={() => setShowRangeModal(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                 >
                   {editingRange ? 'Modifier' : 'Créer'}
                 </button>

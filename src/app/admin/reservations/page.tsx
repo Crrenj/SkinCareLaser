@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Download, Plus, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { FilterBar, type SortOption } from '@/components/admin/reservations/FilterBar'
 import { BulkActionBar } from '@/components/admin/reservations/BulkActionBar'
@@ -182,7 +184,7 @@ export default function ReservationsAdminPage() {
       '',
       ...r.items.map((it) => `• ${it.quantity}× ${it.product_name}`),
       '',
-      `Total a coordinar: ${fmtDOP(r.total_price)} ${r.currency || 'DOP'}.`,
+      `Total a coordinar: ${fmtDOP(r.total_price)} ${r.currency || DEFAULT_CURRENCY}.`,
       '',
       '¿Coordinamos el pago y la entrega?',
     ]
@@ -265,7 +267,7 @@ export default function ReservationsAdminPage() {
               className="h-9 px-3.5 rounded-md text-[13px] border border-sand-300 bg-transparent text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors inline-flex items-center gap-1.5"
               onClick={() => {
                 if (typeof window === 'undefined') return
-                window.alert('Exportación CSV próximamente.')
+                toast.info('Exportación CSV próximamente.')
               }}
             >
               <Download className="w-3.5 h-3.5" />
@@ -276,7 +278,7 @@ export default function ReservationsAdminPage() {
               className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-clay-800 text-sand-50 inline-flex items-center gap-1.5 transition-colors"
               onClick={() => {
                 if (typeof window === 'undefined') return
-                window.alert('Crear reserva manual próximamente.')
+                toast.info('Crear reserva manual próximamente.')
               }}
             >
               <Plus className="w-3.5 h-3.5" />

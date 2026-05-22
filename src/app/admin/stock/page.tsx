@@ -10,6 +10,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline'
+import { toast } from 'sonner'
 
 interface StockItem {
   id: string
@@ -171,7 +172,7 @@ export default function StockPage() {
       setShowModal(false)
     } catch (error) {
       console.error('Erreur sauvegarde stock:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -242,7 +243,7 @@ export default function StockPage() {
             <input
               type="text"
               placeholder="Rechercher un produit..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -250,7 +251,7 @@ export default function StockPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
           >
             <option value="all">Tous les statuts</option>
             <option value="ok">Stock normal</option>

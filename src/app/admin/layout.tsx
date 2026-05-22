@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
+import { Toaster } from 'sonner'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { Sidebar } from '@/components/admin/dashboard/Sidebar'
 
@@ -69,6 +70,8 @@ export default function AdminLayout({
 
         <main className="flex-1 min-w-0">{children}</main>
       </div>
+
+      <Toaster richColors position="top-right" closeButton />
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { PlusIcon, PencilIcon, TrashIcon, PhotoIcon, MagnifyingGlassIcon, TagIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import { toast } from 'sonner'
 
 interface Brand {
   id: string
@@ -90,7 +91,7 @@ export default function ProductPage() {
         setTotalPages(1)
         
         if (data.message?.includes('SUPABASE_SERVICE')) {
-          alert('Configuration manquante: La clé de service Supabase n\'est pas configurée.')
+          toast.error('Configuration manquante: La clé de service Supabase n\'est pas configurée.')
         }
       }
     } catch (error) {
@@ -241,11 +242,11 @@ export default function ProductPage() {
         setShowModal(false)
       } else {
         const error = await res.json()
-        alert('Erreur: ' + error.error)
+        toast.error('Erreur: ' + error.error)
       }
     } catch (error) {
       console.error('Erreur sauvegarde:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -261,11 +262,11 @@ export default function ProductPage() {
         setShowDeleteConfirm(null)
       } else {
         const error = await res.json()
-        alert('Erreur: ' + error.error)
+        toast.error('Erreur: ' + error.error)
       }
     } catch (error) {
       console.error('Erreur suppression:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression')
     }
   }
 
@@ -307,7 +308,7 @@ export default function ProductPage() {
           <input
             type="text"
             placeholder="Rechercher un produit..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

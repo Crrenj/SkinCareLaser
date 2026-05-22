@@ -33,6 +33,7 @@ import {
   FaceSmileIcon,
   AcademicCapIcon
 } from '@heroicons/react/24/outline'
+import { toast } from 'sonner'
 
 interface Tag {
   id: string
@@ -251,11 +252,11 @@ export default function TagsPage() {
         fetchData()
         setShowTagModal(false)
       } else {
-        alert(data.error || 'Erreur lors de la sauvegarde')
+        toast.error(data.error || 'Erreur lors de la sauvegarde')
       }
     } catch (error) {
       console.error('Erreur sauvegarde:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -320,11 +321,11 @@ export default function TagsPage() {
         fetchData()
         setShowTypeModal(false)
       } else {
-        alert(data.error || 'Erreur lors de la sauvegarde')
+        toast.error(data.error || 'Erreur lors de la sauvegarde')
       }
     } catch (error) {
       console.error('Erreur sauvegarde:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -345,11 +346,11 @@ export default function TagsPage() {
         setShowDeleteConfirm(null)
       } else {
         const error = await res.json()
-        alert(error.error || 'Erreur lors de la suppression')
+        toast.error(error.error || 'Erreur lors de la suppression')
       }
     } catch (error) {
       console.error('Erreur suppression:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression')
     }
   }
 
@@ -539,7 +540,7 @@ export default function TagsPage() {
                       slug: editingType ? prev.slug : generateSlug(e.target.value)
                     }))
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:border-transparent"
                   placeholder="Ex: Texture"
                 />
               </div>
@@ -553,7 +554,7 @@ export default function TagsPage() {
                   required
                   value={typeForm.slug}
                   onChange={(e) => setTypeForm(prev => ({ ...prev, slug: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:border-transparent"
                   placeholder="Ex: texture"
                 />
               </div>
@@ -611,7 +612,7 @@ export default function TagsPage() {
                     type="text"
                     value={typeForm.initialTag}
                     onChange={(e) => setTypeForm(prev => ({ ...prev, initialTag: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:border-transparent"
                     placeholder="Ex: Crémeuse"
                   />
                   <p className="mt-1 text-xs text-gray-500">
@@ -681,7 +682,7 @@ export default function TagsPage() {
                       slug: editingTag ? prev.slug : generateSlug(e.target.value)
                     }))
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   placeholder="Ex: Hydratant"
                 />
               </div>
@@ -695,7 +696,7 @@ export default function TagsPage() {
                   required
                   value={tagForm.slug}
                   onChange={(e) => setTagForm(prev => ({ ...prev, slug: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
                   placeholder="Ex: hydratant"
                 />
                 <p className="mt-1 text-xs text-gray-500">
