@@ -45,7 +45,7 @@ export default function Logo({ size = 64, onClick, className = '' }: LogoProps) 
         type="button"
         onClick={onClick}
         aria-label="FARMAU"
-        className="focus:outline-none"
+        className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
       >
         {inner}
       </button>
@@ -53,7 +53,7 @@ export default function Logo({ size = 64, onClick, className = '' }: LogoProps) 
   }
 
   return (
-    <Link href="/" aria-label="FARMAU" className="focus:outline-none">
+    <Link href="/" aria-label="FARMAU" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700">
       {inner}
     </Link>
   )

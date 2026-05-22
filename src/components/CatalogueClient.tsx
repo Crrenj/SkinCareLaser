@@ -437,7 +437,7 @@ export default function CatalogueClient({
             placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full px-4 py-3 border border-sand-300 rounded-lg focus:outline-none focus:border-clay-600 transition-colors"
+            className="w-full px-4 py-3 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:border-clay-600 transition-colors"
             aria-label={t('searchAriaLabel')}
           />
           <svg
@@ -493,7 +493,7 @@ export default function CatalogueClient({
               <p>{t('noResults')}</p>
               <button
                 onClick={clearAllFilters}
-                className="mt-4 px-4 py-2 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus:outline-none"
+                className="mt-4 px-4 py-2 bg-clay-700 text-white rounded-lg hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
               >
                 {t('resetFilters')}
               </button>
@@ -508,7 +508,7 @@ export default function CatalogueClient({
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus:outline-none"
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
             aria-label={t('previousPageAriaLabel')}
           >
             {t('previousPage')}
@@ -518,7 +518,7 @@ export default function CatalogueClient({
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-4 py-2 border rounded-lg transition-colors focus:outline-none ${
+              className={`px-4 py-2 border rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 ${
                 currentPage === page
                   ? 'bg-clay-700 text-white border-clay-600'
                   : 'hover:bg-sand-50'
@@ -533,7 +533,7 @@ export default function CatalogueClient({
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus:outline-none"
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-sand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
             aria-label={t('nextPageAriaLabel')}
           >
             {t('nextPage')}

@@ -58,7 +58,7 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       defaultValue="Skincare Laser"
                     />
                   </div>
@@ -69,7 +69,7 @@ export default function SettingsPage() {
                     </label>
                     <input
                       type="email"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       defaultValue="contact@skincarelaser.com"
                     />
                   </div>
@@ -78,7 +78,7 @@ export default function SettingsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Fuseau horaire
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
                       <option>Europe/Paris (UTC+1)</option>
                       <option>Europe/London (UTC+0)</option>
                       <option>America/New_York (UTC-5)</option>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Langue par défaut
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
                       <option>Français</option>
                       <option>English</option>
                       <option>Español</option>
@@ -148,17 +148,17 @@ export default function SettingsPage() {
                       <input
                         type="password"
                         placeholder="Mot de passe actuel"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       />
                       <input
                         type="password"
                         placeholder="Nouveau mot de passe"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       />
                       <input
                         type="password"
                         placeholder="Confirmer le nouveau mot de passe"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       />
                     </div>
                   </div>
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Thème
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
                       <option>Clair</option>
                       <option>Sombre</option>
                       <option>Automatique (système)</option>

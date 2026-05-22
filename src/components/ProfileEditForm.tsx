@@ -139,7 +139,7 @@ export default function ProfileEditForm({
             type="text"
             value={form.first_name}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
+            className="w-full px-3 py-2 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand-400 text-ink-900"
             placeholder={t('firstNamePlaceholder')}
           />
         </div>
@@ -156,7 +156,7 @@ export default function ProfileEditForm({
             type="text"
             value={form.last_name}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
+            className="w-full px-3 py-2 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand-400 text-ink-900"
             placeholder={t('lastNamePlaceholder')}
           />
         </div>
@@ -178,7 +178,7 @@ export default function ProfileEditForm({
             type="text"
             value={form.display_name}
             onChange={handleChange}
-            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
+            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand-400 text-ink-900"
             placeholder={t('displayNamePlaceholder')}
           />
         </div>
@@ -202,7 +202,7 @@ export default function ProfileEditForm({
             autoComplete="tel"
             value={form.phone}
             onChange={handleChange}
-            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
+            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand-400 text-ink-900"
             placeholder={t('phonePlaceholder')}
           />
         </div>
@@ -227,7 +227,7 @@ export default function ProfileEditForm({
             type="date"
             value={form.birth_date}
             onChange={handleChange}
-            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sand-400 text-ink-900"
+            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand-400 text-ink-900"
           />
         </div>
       </div>

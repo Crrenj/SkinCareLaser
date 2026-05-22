@@ -101,7 +101,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-clay-600 focus:border-transparent"
+              className="w-full pl-10 pr-3 py-3 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-600 focus-visible:border-transparent"
               placeholder={t('emailPlaceholder')}
               disabled={loading}
             />
@@ -122,7 +122,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
             required
             value={formData.subject}
             onChange={handleChange}
-            className="w-full px-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-clay-600 focus:border-transparent"
+            className="w-full px-3 py-3 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-600 focus-visible:border-transparent"
             placeholder={t('subjectPlaceholder')}
             disabled={loading}
           />
@@ -139,7 +139,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
             rows={6}
             value={formData.message}
             onChange={handleChange}
-            className="w-full px-3 py-3 border border-sand-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-clay-600 focus:border-transparent resize-vertical"
+            className="w-full px-3 py-3 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-600 focus-visible:border-transparent resize-vertical"
             placeholder={t('messagePlaceholder')}
             disabled={loading}
           />
@@ -148,7 +148,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-clay-700 text-white font-medium rounded-lg hover:bg-clay-800 focus:outline-none focus:ring-2 focus:ring-clay-600 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-clay-700 text-white font-medium rounded-lg hover:bg-clay-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-600 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? (
             <>

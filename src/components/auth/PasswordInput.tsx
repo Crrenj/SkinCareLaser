@@ -40,7 +40,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             className={
               'w-full h-11 px-3 pr-10 rounded-lg border border-sand-300 ' +
               'bg-sand-50 text-[14.5px] text-ink-900 placeholder:text-ink-500 ' +
-              'focus:outline-none focus:border-clay-700 ' +
+              'focus-visible:outline-none focus-visible:border-clay-700 ' +
               'focus:ring-[3px] focus:ring-clay-700/20 transition-colors ' +
               (className ?? '')
             }

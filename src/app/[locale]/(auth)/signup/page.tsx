@@ -172,7 +172,7 @@ export default function SignupPage() {
               placeholder={t('firstNamePlaceholder')}
               className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                          text-[14.5px] text-ink-900 placeholder:text-ink-500
-                         focus:outline-none focus:border-clay-700
+                         focus-visible:outline-none focus-visible:border-clay-700
                          focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
             />
           </div>
@@ -190,7 +190,7 @@ export default function SignupPage() {
               placeholder={t('lastNamePlaceholder')}
               className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                          text-[14.5px] text-ink-900 placeholder:text-ink-500
-                         focus:outline-none focus:border-clay-700
+                         focus-visible:outline-none focus-visible:border-clay-700
                          focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
             />
           </div>
@@ -211,7 +211,7 @@ export default function SignupPage() {
             placeholder={t('emailPlaceholder')}
             className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                        text-[14.5px] text-ink-900 placeholder:text-ink-500
-                       focus:outline-none focus:border-clay-700
+                       focus-visible:outline-none focus-visible:border-clay-700
                        focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
           />
         </div>
@@ -231,7 +231,7 @@ export default function SignupPage() {
             placeholder={t('phonePlaceholder')}
             className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                        text-[14.5px] text-ink-900 placeholder:text-ink-500
-                       focus:outline-none focus:border-clay-700
+                       focus-visible:outline-none focus-visible:border-clay-700
                        focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
           />
           <p className="text-[12px] text-ink-500">{t('phoneHint')}</p>
@@ -249,7 +249,7 @@ export default function SignupPage() {
             onChange={handleChange}
             className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                        text-[14.5px] text-ink-900 placeholder:text-ink-500
-                       focus:outline-none focus:border-clay-700
+                       focus-visible:outline-none focus-visible:border-clay-700
                        focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
           />
         </div>

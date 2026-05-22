@@ -97,13 +97,13 @@ export function NewsletterClient() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar email…"
-            className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus:outline-none focus:border-clay-700 focus:ring-[3px] focus:ring-clay-700/15 transition-colors"
+            className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
           />
         </div>
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as typeof lang)}
-          className="h-10 px-3 rounded-md border border-sand-300 bg-white text-[14px] focus:outline-none focus:border-clay-700 focus:ring-[3px] focus:ring-clay-700/15 transition-colors"
+          className="h-10 px-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
         >
           <option value="all">Todos los idiomas</option>
           <option value="fr">Français</option>

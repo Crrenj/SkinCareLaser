@@ -68,7 +68,7 @@ export default async function AProposPage({
         <section className="mt-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">{t('popularProductsHeading')}</h2>
-            <button className="text-clay-700 font-semibold hover:underline focus:outline-none rounded">
+            <button className="text-clay-700 font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 rounded">
               {t('seeTrend')}
             </button>
           </div>
@@ -111,7 +111,7 @@ export default async function AProposPage({
         <section className="mt-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">{t('reviewsHeading')}</h2>
-            <button className="text-clay-700 font-semibold hover:underline focus:outline-none rounded">
+            <button className="text-clay-700 font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 rounded">
               {t('seeMore')}
             </button>
           </div>

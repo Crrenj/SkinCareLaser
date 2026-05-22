@@ -108,7 +108,7 @@ export function UsersClient() {
             setSearch(e.target.value)
           }}
           placeholder="Buscar email, nombre, teléfono…"
-          className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus:outline-none focus:border-clay-700 focus:ring-[3px] focus:ring-clay-700/15 transition-colors"
+          className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
         />
       </div>
 

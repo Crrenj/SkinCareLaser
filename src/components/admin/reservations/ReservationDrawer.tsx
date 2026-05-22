@@ -208,7 +208,7 @@ export function ReservationDrawer({
               value={note}
               onChange={handleNoteChange}
               placeholder="Ej. Stock confirmado en farmacia. Cliente prefiere efectivo."
-              className="w-full min-h-[80px] px-3 py-2.5 rounded-md border border-sand-300 bg-sand-50 text-[13px] text-ink-900 leading-[1.5] resize-y focus:outline-none focus:border-clay-700 focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+              className="w-full min-h-[80px] px-3 py-2.5 rounded-md border border-sand-300 bg-sand-50 text-[13px] text-ink-900 leading-[1.5] resize-y focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors"
             />
             <span className="text-[11px] text-ink-500 mt-1 inline-flex items-center gap-1">
               {saveState === 'saving' && (

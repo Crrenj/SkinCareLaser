@@ -167,7 +167,7 @@ export function PreferencesForm({ initialPreferredLocale }: PreferencesFormProps
               id="preferred-locale"
               value={locale}
               onChange={(e) => setLocale(e.target.value as LocaleValue)}
-              className="w-full h-11 px-3 rounded-lg border border-sand-300 bg-sand-50 text-[14.5px] text-ink-900 focus:outline-none focus:border-clay-700 focus:ring-[3px] focus:ring-clay-700/20 transition-colors"
+              className="w-full h-11 px-3 rounded-lg border border-sand-300 bg-sand-50 text-[14.5px] text-ink-900 focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors"
             >
               <option value="auto">{t('localeAuto')}</option>
               <option value="fr">Français</option>

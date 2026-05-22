@@ -84,7 +84,7 @@ const Filters: FC<FiltersProps> = ({
       <div className="mb-6">
         <button
           onClick={() => toggleSection('sort')}
-          className="w-full flex items-center justify-between py-4 border-b border-sand-300 text-left focus:outline-none"
+          className="w-full flex items-center justify-between py-4 border-b border-sand-300 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
         >
           <span className="text-base font-semibold tracking-wide">{t('sortHeading')}</span>
           {expandedSections.has('sort') ? (
@@ -130,7 +130,7 @@ const Filters: FC<FiltersProps> = ({
           <span className="text-base font-semibold tracking-wide">{t('filterHeading')}</span>
           <button
             onClick={onClearFilters}
-            className="text-sm font-medium underline hover:no-underline focus:outline-none"
+            className="text-sm font-medium underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
           >
             {t('reset')}
           </button>
@@ -141,7 +141,7 @@ const Filters: FC<FiltersProps> = ({
           <div className="border-t border-sand-300">
             <button
               onClick={() => toggleSection('brands')}
-              className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
+              className="w-full flex items-center justify-between py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
             >
               <span className="text-sm font-medium tracking-wide">{t('brands')}</span>
               {expandedSections.has('brands') ? (
@@ -256,7 +256,7 @@ const Filters: FC<FiltersProps> = ({
             <div key={tagType} className="border-t border-sand-300">
               <button
                 onClick={() => toggleSection(sectionKey)}
-                className="w-full flex items-center justify-between py-4 text-left focus:outline-none"
+                className="w-full flex items-center justify-between py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
               >
                 <span className="text-sm font-medium tracking-wide">{displayLabel}</span>
                 {expandedSections.has(sectionKey) ? (

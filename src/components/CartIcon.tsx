@@ -15,7 +15,7 @@ export function CartIcon({ className = '', onClick }: CartIconProps) {
     <div className={`relative inline-block ${className}`}>
       <button
         onClick={onClick}
-        className="relative p-2 text-ink-800 hover:text-ink-900 transition-colors focus:outline-none"
+        className="relative p-2 text-ink-800 hover:text-ink-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
         disabled={isLoading}
         data-testid="cart-icon"
         aria-label="Ouvrir le panier"
