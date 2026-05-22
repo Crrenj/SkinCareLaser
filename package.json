@@ -9,6 +9,7 @@
     "lint": "next lint",
     "test": "playwright test",
     "test:smoke": "playwright test golden-path --project=chromium --workers=1 --reporter=line",
+    "test:auth": "playwright test admin-auth account-auth --project=chromium --workers=1 --reporter=line",
     "test:unit": "vitest",
     "test:unit:watch": "vitest watch",
     "check-products": "node scripts/check-products.js",
