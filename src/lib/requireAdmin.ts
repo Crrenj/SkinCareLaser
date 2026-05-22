@@ -21,31 +21,30 @@ export type AdminGuardResult =
  *   - 500 si configuration Supabase manquante côté serveur
  */
 export async function requireAdmin(): Promise<AdminGuardResult> {
-  // Utilise le client serveur cookie-based (lit la session du browser)
   const supabase = await createSupabaseServerClient()
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession()
 
-  if (sessionError) {
-    console.error('requireAdmin session error:', sessionError)
-    return {
-      ok: false,
-      response: NextResponse.json({ error: 'Erreur de session' }, { status: 500 }),
-    }
+  // getUser() valide le JWT côté serveur Supabase (vs getSession() qui se
+  // contente du cookie local). Coût ~50-200ms, OK pour les routes admin.
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError && userError.name !== 'AuthSessionMissingError') {
+    console.error('requireAdmin getUser error:', userError.message)
   }
 
-  if (!session) {
+  if (!user) {
     return {
       ok: false,
       response: NextResponse.json({ error: 'Non authentifié' }, { status: 401 }),
     }
   }
 
-  // Check admin via la table admin_users (source de vérité, évite la récursion RLS)
-  // On utilise le client service-role parce que admin_users a RLS désactivée
-  // mais n'est pas accessible en lecture par défaut au rôle anon/authenticated.
+  // Source de vérité admin : table admin_users via le service-role (bypass
+  // RLS, pas de policy SELECT publique). Le middleware utilise plutôt la RPC
+  // is_user_admin qui est SECURITY DEFINER — ici on a déjà supabaseAdmin
+  // sous la main donc on l'utilise directement.
   if (!supabaseAdmin) {
     return {
       ok: false,
@@ -59,7 +58,7 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
   const { data: admin, error: adminError } = await supabaseAdmin
     .from('admin_users')
     .select('user_id')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .maybeSingle()
 
   if (adminError) {
@@ -77,5 +76,5 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
     }
   }
 
-  return { ok: true, userId: session.user.id }
+  return { ok: true, userId: user.id }
 }

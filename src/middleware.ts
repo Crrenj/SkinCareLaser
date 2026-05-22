@@ -78,25 +78,35 @@ async function adminAuthMiddleware(request: NextRequest) {
   )
 
   try {
+    // getUser() fait un appel API à Supabase pour valider le JWT cryptographi-
+    // quement, contrairement à getSession() qui se contente de lire le cookie.
+    // Coût : ~50-200ms supplémentaires par nav admin (acceptable — l'admin est
+    // interne) en échange d'une vraie validation côté serveur d'auth (cf. audit
+    // security #11).
     const {
-      data: { session },
+      data: { user },
       error,
-    } = await supabase.auth.getSession()
-    if (error) console.error('Middleware session error:', error)
+    } = await supabase.auth.getUser()
+    if (error && error.name !== 'AuthSessionMissingError') {
+      console.error('Middleware getUser error:', error.message)
+    }
 
-    if (!session) {
+    if (!user) {
       const redirectUrl = new URL('/login', request.url)
       redirectUrl.searchParams.set('redirectedFrom', pathname)
       return NextResponse.redirect(redirectUrl)
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('id', session.user.id)
-      .single()
+    // Source de vérité admin : RPC is_user_admin (SECURITY DEFINER, lit
+    // admin_users qui n'est pas exposée en SELECT direct au rôle anon). C'est
+    // la même fonction utilisée par les policies RLS, donc on aligne le
+    // middleware avec le reste du système (cf. audit security #8 — la
+    // divergence historique middleware vs requireAdmin/RPC est fermée).
+    const { data: isAdmin } = await supabase.rpc('is_user_admin', {
+      check_user_id: user.id,
+    })
 
-    if (!profile?.is_admin) {
+    if (!isAdmin) {
       const redirectUrl = new URL('/login', request.url)
       redirectUrl.searchParams.set('error', 'unauthorized')
       return NextResponse.redirect(redirectUrl)
