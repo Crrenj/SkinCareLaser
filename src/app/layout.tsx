@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Be_Vietnam_Pro } from "next/font/google";
+import { getLocale } from 'next-intl/server'
 import "./globals.css";
 import { SWRProvider } from '@/components/SWRProvider'
 import { AuthProvider } from '@/components/AuthProvider'
@@ -30,9 +31,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Lit la locale next-intl du request (cf. middleware + [locale] segment).
+  // Les routes non-localisées (/admin/*, /api/*) reçoivent la locale par
+  // défaut ('fr') — l'admin est mono-langue FR/ES mélangé donc fr est OK.
+  const locale = await getLocale()
   return (
-    <html lang="fr" className={`${serif.variable} ${sans.variable}`}>
+    <html lang={locale} className={`${serif.variable} ${sans.variable}`}>
       <body className="antialiased">
         <a
           href="#main-content"
