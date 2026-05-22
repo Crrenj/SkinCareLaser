@@ -75,8 +75,30 @@ export async function GET() {
       )
     }
 
-    // Formater la réponse avec typage correct
-    const items = (cartItems as any[])?.map(item => {
+    // Formater la réponse avec typage correct.
+    // Le shape retourné par Supabase avec les joins imbriqués n'est pas
+    // facilement exprimable via les types générés (relations 1-n profondes),
+    // donc on définit le shape attendu localement plutôt qu'utiliser `any`.
+    type CartItemRow = {
+      id: string
+      cart_id: string
+      product_id: string
+      quantity: number
+      products: {
+        id: string
+        name: string
+        price: number
+        currency: string
+        stock: number | null
+        volume: string | null
+        product_images: { url: string; alt: string | null }[]
+        product_ranges:
+          | { ranges: { brands: { name: string } | null } | null }[]
+          | null
+      } | null
+    }
+
+    const items = ((cartItems ?? []) as unknown as CartItemRow[]).map((item) => {
       // Le brand vient via product_ranges → ranges → brands (m:m). On prend
       // le premier dispo pour l'eyebrow d'affichage.
       const brandName =
@@ -86,18 +108,23 @@ export async function GET() {
         cart_id: item.cart_id,
         product_id: item.product_id,
         quantity: item.quantity,
-        product: item.products ? {
-          id: item.products.id,
-          name: item.products.name,
-          price: item.products.price,
-          currency: item.products.currency,
-          stock: item.products.stock,
-          volume: item.products.volume ?? null,
-          brand: brandName,
-          images: item.products.product_images || []
-        } : undefined,
+        product: item.products
+          ? {
+              id: item.products.id,
+              name: item.products.name,
+              price: item.products.price,
+              currency: item.products.currency,
+              stock: item.products.stock ?? 0,
+              volume: item.products.volume ?? null,
+              brand: brandName,
+              images: (item.products.product_images ?? []).map((img) => ({
+                url: img.url,
+                alt: img.alt ?? '',
+              })),
+            }
+          : undefined,
       }
-    }) || []
+    })
     
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = items.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0)

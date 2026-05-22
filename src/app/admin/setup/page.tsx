@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 
 interface ConfigStatus {
@@ -46,7 +46,7 @@ export default function AdminSetupPage() {
           message: 'Erreur de configuration générale'
         })
       }
-    } catch (error) {
+    } catch {
       setConfigStatus({
         supabaseUrl: false,
         supabaseAnonKey: false,
@@ -159,7 +159,7 @@ npm run dev
               </div>
               
               <p className="text-green-800 mb-4">
-                Toutes les variables d'environnement sont correctement configurées.
+                Toutes les variables d&apos;environnement sont correctement configurées.
               </p>
               
               <div className="flex gap-3">

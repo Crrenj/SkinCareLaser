@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   Mail, 
   MailOpen, 
@@ -12,7 +12,6 @@ import {
   User,
   Filter,
   Search,
-  Eye,
   EyeOff
 } from 'lucide-react'
 import { useModalA11y } from '@/hooks/useModalA11y'
@@ -53,16 +52,15 @@ export default function MessagesAdminPage() {
 
   const messageDialogRef = useModalA11y(showMessageModal, () => setShowMessageModal(false))
 
-  // Charger les messages
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams()
       if (statusFilter !== 'all') params.set('status', statusFilter)
-      
+
       const response = await fetch(`/api/admin/messages?${params}`)
       const data = await response.json()
-      
+
       if (response.ok) {
         setMessages(data.messages || [])
         setStats(data.stats)
@@ -74,11 +72,11 @@ export default function MessagesAdminPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter])
 
   useEffect(() => {
     loadMessages()
-  }, [statusFilter])
+  }, [loadMessages])
 
   // Marquer comme lu
   const markAsRead = async (messageId: string) => {
@@ -202,7 +200,7 @@ export default function MessagesAdminPage() {
             </div>
             <div className="bg-white p-4 rounded-lg shadow">
               <div className="text-2xl font-bold text-purple-600">{stats.today}</div>
-              <div className="text-sm text-gray-600">Aujourd'hui</div>
+              <div className="text-sm text-gray-600">Aujourd&apos;hui</div>
             </div>
             <div className="bg-white p-4 rounded-lg shadow">
               <div className="text-2xl font-bold text-indigo-600">{stats.this_week}</div>

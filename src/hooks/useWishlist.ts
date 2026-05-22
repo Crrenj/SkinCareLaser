@@ -1,10 +1,9 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import useSWR from 'swr'
 
 type WishlistResponse = { productIds: string[] }
-type ToggleResponse = { added: boolean; error?: string }
 
 const fetcher = (url: string) =>
   fetch(url, { credentials: 'same-origin' }).then((r) => {
@@ -27,7 +26,7 @@ export function useWishlist() {
     { revalidateOnFocus: false },
   )
 
-  const productIds = data?.productIds ?? []
+  const productIds = useMemo(() => data?.productIds ?? [], [data?.productIds])
 
   const has = useCallback(
     (productId: string) => productIds.includes(productId),
@@ -58,7 +57,7 @@ export function useWishlist() {
           return { ok: false, needAuth: true }
         }
 
-        const json = (await res.json()) as ToggleResponse
+        await res.json()
         if (!res.ok) {
           mutate(data, { revalidate: false })
           return { ok: false }

@@ -54,14 +54,14 @@ export default async function ConfidentialitePage({
         <p>Selon votre interaction avec le site, nous pouvons collecter :</p>
         <ul>
           <li>
-            <strong>Données d'identification :</strong> prénom, nom, date de
+            <strong>Données d&apos;identification :</strong> prénom, nom, date de
             naissance (facultative), email, mot de passe (haché), numéro de
             téléphone, langue préférée.
           </li>
           <li>
             <strong>Données de navigation :</strong> identifiant de session,
             panier en cours, favoris, historique de réservations, préférences
-            d'affichage.
+            d&apos;affichage.
           </li>
           <li>
             <strong>Données techniques :</strong> adresse IP (pour la sécurité et
@@ -147,7 +147,7 @@ export default async function ConfidentialitePage({
 
       <LegalSection id="transferts" num="05." title="Transferts internationaux">
         <p>
-          L'hébergement chez Vercel et Supabase peut entraîner un transfert de
+          L&apos;hébergement chez Vercel et Supabase peut entraîner un transfert de
           données hors de la République Dominicaine, principalement vers les
           États-Unis et Singapour. Ces sous-traitants présentent des garanties
           contractuelles de sécurité conformes à leurs propres standards (SOC 2,
@@ -182,7 +182,7 @@ export default async function ConfidentialitePage({
             </tr>
             <tr>
               <td>Inscription newsletter</td>
-              <td>Jusqu'au désabonnement</td>
+              <td>Jusqu&apos;au désabonnement</td>
             </tr>
             <tr>
               <td>Logs techniques et IP</td>
@@ -198,40 +198,40 @@ export default async function ConfidentialitePage({
           données :
         </p>
         <ul>
-          <li><strong>Droit d'accès</strong> aux données vous concernant ;</li>
+          <li><strong>Droit d&apos;accès</strong> aux données vous concernant ;</li>
           <li><strong>Droit de rectification</strong> des données inexactes ou incomplètes ;</li>
-          <li><strong>Droit de suppression</strong> (« droit à l'oubli »), sous réserve des obligations légales de conservation ;</li>
-          <li><strong>Droit d'opposition</strong> au traitement de vos données pour des motifs légitimes ;</li>
+          <li><strong>Droit de suppression</strong> (« droit à l&apos;oubli »), sous réserve des obligations légales de conservation ;</li>
+          <li><strong>Droit d&apos;opposition</strong> au traitement de vos données pour des motifs légitimes ;</li>
           <li><strong>Droit à la portabilité</strong> : récupérer vos données dans un format structuré, couramment utilisé ;</li>
           <li><strong>Droit de retirer votre consentement</strong> à tout moment (notamment pour la newsletter).</li>
         </ul>
         <p>
           Pour exercer ces droits, écrivez-nous à{' '}
           <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>{' '}
-          en précisant votre demande et une preuve d'identité. Une réponse vous
+          en précisant votre demande et une preuve d&apos;identité. Une réponse vous
           sera apportée dans un délai maximum de 30 jours.
         </p>
         <p>
           En cas de désaccord persistant, vous pouvez introduire une réclamation
-          auprès de l'autorité dominicaine compétente.
+          auprès de l&apos;autorité dominicaine compétente.
         </p>
       </LegalSection>
 
       <LegalSection id="securite" num="08." title="Sécurité des données">
         <p>
           FARMAU met en œuvre des mesures techniques et organisationnelles
-          appropriées pour protéger vos données contre la perte, l'accès non
-          autorisé, la divulgation, l'altération ou la destruction :
+          appropriées pour protéger vos données contre la perte, l&apos;accès non
+          autorisé, la divulgation, l&apos;altération ou la destruction :
         </p>
         <ul>
-          <li>chiffrement TLS sur l'ensemble des échanges ;</li>
+          <li>chiffrement TLS sur l&apos;ensemble des échanges ;</li>
           <li>hachage des mots de passe (Argon2 / bcrypt) ;</li>
-          <li>contrôle d'accès par rôle (RLS PostgreSQL au niveau de la base) ;</li>
+          <li>contrôle d&apos;accès par rôle (RLS PostgreSQL au niveau de la base) ;</li>
           <li>limitation de débit sur les routes sensibles ;</li>
           <li>audits de sécurité périodiques.</li>
         </ul>
         <p>
-          Aucune méthode de transmission ou de stockage n'est totalement
+          Aucune méthode de transmission ou de stockage n&apos;est totalement
           inviolable. En cas de violation de données affectant vos droits, nous
           vous en informerons dans un délai de 72 heures.
         </p>
@@ -239,9 +239,9 @@ export default async function ConfidentialitePage({
 
       <LegalSection id="enfants" num="09." title="Protection des mineurs">
         <p>
-          Le site et le service de réservation ne s'adressent pas aux personnes
+          Le site et le service de réservation ne s&apos;adressent pas aux personnes
           de moins de 18 ans. Nous ne collectons pas sciemment de données
-          relatives à des mineurs. Si vous constatez qu'un mineur a créé un
+          relatives à des mineurs. Si vous constatez qu&apos;un mineur a créé un
           compte, contactez-nous pour suppression.
         </p>
       </LegalSection>

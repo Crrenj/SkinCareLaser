@@ -52,7 +52,7 @@ export default async function CookiesPage({
         <p>
           Le terme « cookie » désigne ici, par extension, toute technologie
           équivalente : <em>localStorage</em>, <em>sessionStorage</em>, balises
-          web invisibles. À l'exception de la session, FARMAU n'utilise pas de
+          web invisibles. À l&apos;exception de la session, FARMAU n&apos;utilise pas de
           balises tierces.
         </p>
       </LegalSection>
@@ -61,7 +61,7 @@ export default async function CookiesPage({
         <p>
           Les cookies en service sur farmau.do sont tous{' '}
           <strong>strictement nécessaires</strong> au fonctionnement du site et
-          n'exigent pas de consentement préalable au titre de la Ley 172-13 RD.
+          n&apos;exigent pas de consentement préalable au titre de la Ley 172-13 RD.
           Ils sont les suivants :
         </p>
         <table>
@@ -77,7 +77,7 @@ export default async function CookiesPage({
             <tr>
               <td><code>sb-*-auth-token</code></td>
               <td>Supabase (sous-traitant)</td>
-              <td>Authentification de l'utilisateur connecté</td>
+              <td>Authentification de l&apos;utilisateur connecté</td>
               <td>Session + 7 jours (refresh token)</td>
             </tr>
             <tr>
@@ -101,14 +101,14 @@ export default async function CookiesPage({
             <tr>
               <td><code>farmau:cookies:consent</code> (localStorage)</td>
               <td>FARMAU</td>
-              <td>Mémoriser que vous avez vu le bandeau d'information</td>
+              <td>Mémoriser que vous avez vu le bandeau d&apos;information</td>
               <td>12 mois</td>
             </tr>
           </tbody>
         </table>
         <p>
-          <strong>Aucun cookie de mesure d'audience</strong> (Google Analytics,
-          Plausible, Matomo, etc.) n'est utilisé. Si cela venait à changer, cette
+          <strong>Aucun cookie de mesure d&apos;audience</strong> (Google Analytics,
+          Plausible, Matomo, etc.) n&apos;est utilisé. Si cela venait à changer, cette
           politique serait mise à jour et un consentement vous serait demandé.
         </p>
       </LegalSection>
@@ -128,7 +128,7 @@ export default async function CookiesPage({
           </li>
           <li>
             <strong>Liens WhatsApp / réseaux sociaux</strong> : aucune
-            interaction n'est tracée tant que vous ne cliquez pas dessus.
+            interaction n&apos;est tracée tant que vous ne cliquez pas dessus.
           </li>
         </ul>
       </LegalSection>
@@ -165,17 +165,17 @@ export default async function CookiesPage({
 
       <LegalSection id="dnt" num="05." title="Signal « Do Not Track »">
         <p>
-          Le signal <em>Do Not Track</em> n'a aujourd'hui aucun standard
-          d'application reconnu. Puisque FARMAU n'opère aucun suivi
-          publicitaire ni mesure d'audience tierce, l'envoi de ce signal n'a pas
-          d'effet sur votre navigation.
+          Le signal <em>Do Not Track</em> n&apos;a aujourd&apos;hui aucun standard
+          d&apos;application reconnu. Puisque FARMAU n&apos;opère aucun suivi
+          publicitaire ni mesure d&apos;audience tierce, l&apos;envoi de ce signal n&apos;a pas
+          d&apos;effet sur votre navigation.
         </p>
       </LegalSection>
 
       <LegalSection id="modifications" num="06." title="Mise à jour de la politique cookies">
         <p>
           La présente politique peut être mise à jour si nous ajoutons de
-          nouveaux outils (mesure d'audience, A/B testing). Dans ce cas, un
+          nouveaux outils (mesure d&apos;audience, A/B testing). Dans ce cas, un
           bandeau de consentement explicite serait affiché avant tout dépôt
           non strictement nécessaire.
         </p>

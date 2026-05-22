@@ -15,7 +15,15 @@ const eslintConfig = [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
+      // Permet `_unused` ou `_req` pour les paramètres intentionnellement
+      // ignorés (convention TypeScript). Sans cette config, `_` n'a pas
+      // de traitement spécial et déclenche le warning quand même.
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        destructuredArrayIgnorePattern: "^_",
+      }],
       "react/no-unescaped-entities": "warn",
       "react-hooks/exhaustive-deps": "warn",
     },

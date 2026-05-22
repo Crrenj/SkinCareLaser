@@ -122,7 +122,7 @@ export default function SettingsPage() {
                   <label className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-900">Nouveaux clients</p>
-                      <p className="text-sm text-gray-500">Notification lors de l'inscription d'un nouveau client</p>
+                      <p className="text-sm text-gray-500">Notification lors de l&apos;inscription d&apos;un nouveau client</p>
                     </div>
                     <input type="checkbox" className="h-4 w-4 text-blue-600 rounded" />
                   </label>

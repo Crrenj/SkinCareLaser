@@ -57,25 +57,6 @@ const nextConfig: NextConfig = {
   
   // Optimisations de cache
   generateEtags: false,
-  
-  // Optimisations de bundle
-  webpack: (config, { dev, isServer }) => {
-    // Optimisations pour la production
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-        },
-      }
-    }
-    
-    return config
-  },
 }
 
 export default withNextIntl(nextConfig)

@@ -47,27 +47,27 @@ export default async function CGVPage({
           Le site <strong>farmau.do</strong> est un service de réservation et de
           présentation de produits dermo-cosmétiques distribués par FARMAU. Il ne
           constitue pas une plateforme de vente en ligne au sens de la Ley No.
-          126-02 sur le Commerce Électronique : aucune transaction financière n'est
+          126-02 sur le Commerce Électronique : aucune transaction financière n&apos;est
           opérée à distance.
         </p>
         <p>
-          L'utilisation du site est gratuite et ouverte à toute personne âgée d'au
-          moins <strong>18 ans</strong>, à l'exclusion de toute pratique
+          L&apos;utilisation du site est gratuite et ouverte à toute personne âgée d&apos;au
+          moins <strong>18 ans</strong>, à l&apos;exclusion de toute pratique
           professionnelle de revente.
         </p>
       </LegalSection>
 
       <LegalSection id="compte" num="02." title="Création de compte">
         <p>
-          La réservation nécessite la création d'un compte utilisateur. Lors de
-          l'inscription, vous devez fournir des informations exactes, complètes et
+          La réservation nécessite la création d&apos;un compte utilisateur. Lors de
+          l&apos;inscription, vous devez fournir des informations exactes, complètes et
           à jour, dont obligatoirement un numéro de téléphone valide en République
           Dominicaine ou international permettant le contact WhatsApp.
         </p>
         <p>
           Vous êtes responsable de la confidentialité de vos identifiants. Toute
           activité réalisée depuis votre compte est présumée effectuée par vous.
-          En cas de soupçon d'usage non autorisé, contactez-nous immédiatement à{' '}
+          En cas de soupçon d&apos;usage non autorisé, contactez-nous immédiatement à{' '}
           <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
         </p>
       </LegalSection>
@@ -107,9 +107,9 @@ export default async function CGVPage({
           automatiquement annulée et les produits remis en disponibilité.
         </p>
         <p>
-          Un utilisateur ne peut avoir qu'<strong>une seule réservation active</strong>{' '}
-          à la fois. Pour réserver d'autres produits, vous devez attendre la
-          finalisation ou l'expiration de la réservation en cours.
+          Un utilisateur ne peut avoir qu&apos;<strong>une seule réservation active</strong>{' '}
+          à la fois. Pour réserver d&apos;autres produits, vous devez attendre la
+          finalisation ou l&apos;expiration de la réservation en cours.
         </p>
       </LegalSection>
 
@@ -122,7 +122,7 @@ export default async function CGVPage({
           transaction.
         </p>
         <p>
-          Le paiement s'effectue <strong>exclusivement en pharmacie</strong>, au
+          Le paiement s&apos;effectue <strong>exclusivement en pharmacie</strong>, au
           moment du retrait des produits. Sont acceptés : espèces (DOP), cartes de
           débit et de crédit Visa/Mastercard, et tout autre moyen de paiement
           précisé en pharmacie.
@@ -131,14 +131,14 @@ export default async function CGVPage({
 
       <LegalSection id="retrait" num="06." title="Retrait en pharmacie">
         <p>
-          Le retrait s'effectue à l'adresse indiquée : Calle Jesús de Galíndez,
+          Le retrait s&apos;effectue à l&apos;adresse indiquée : Calle Jesús de Galíndez,
           esq. Calle 3, Cerros de Gurabo, Santiago, République Dominicaine, durant
-          les horaires d'ouverture communiqués lors de la confirmation.
+          les horaires d&apos;ouverture communiqués lors de la confirmation.
         </p>
         <p>
-          Présentez votre référence de réservation et une pièce d'identité au
+          Présentez votre référence de réservation et une pièce d&apos;identité au
           moment du retrait. Un tiers peut retirer la commande à votre place en
-          présentant la référence de réservation et une pièce d'identité.
+          présentant la référence de réservation et une pièce d&apos;identité.
         </p>
       </LegalSection>
 
@@ -151,8 +151,8 @@ export default async function CGVPage({
         </p>
         <p>
           Aucun produit cosmétique déjà retiré et payé en pharmacie ne peut faire
-          l'objet d'une rétractation, conformément aux usages applicables aux
-          produits d'hygiène et de soin descellés.
+          l&apos;objet d&apos;une rétractation, conformément aux usages applicables aux
+          produits d&apos;hygiène et de soin descellés.
         </p>
       </LegalSection>
 
@@ -160,12 +160,12 @@ export default async function CGVPage({
         <p>
           Tous les produits référencés sont importés par les distributeurs agréés
           en République Dominicaine. Ils respectent les normes applicables dans
-          leur pays d'origine (FDA, EMA, ANMAT, ANVISA selon les marques) ainsi
+          leur pays d&apos;origine (FDA, EMA, ANMAT, ANVISA selon les marques) ainsi
           que la réglementation dominicaine en matière de produits cosmétiques.
         </p>
         <p>
           Les fiches produits affichent à titre indicatif : composition (INCI),
-          mode d'usage, contre-indications connues. Ces informations ne se
+          mode d&apos;usage, contre-indications connues. Ces informations ne se
           substituent pas à un avis pharmaceutique. En cas de doute, demandez
           conseil à votre pharmacien.
         </p>
@@ -173,14 +173,14 @@ export default async function CGVPage({
 
       <LegalSection id="responsabilite" num="09." title="Responsabilité de FARMAU">
         <p>
-          FARMAU s'engage à fournir un service de qualité et à donner les
+          FARMAU s&apos;engage à fournir un service de qualité et à donner les
           informations les plus exactes possibles. Sa responsabilité ne peut
           toutefois être engagée :
         </p>
         <ul>
-          <li>en cas d'indisponibilité technique du site (maintenance, force majeure) ;</li>
+          <li>en cas d&apos;indisponibilité technique du site (maintenance, force majeure) ;</li>
           <li>en cas de rupture de stock entre la réservation et la confirmation ;</li>
-          <li>en cas de mauvais usage d'un produit en dehors de ses indications ;</li>
+          <li>en cas de mauvais usage d&apos;un produit en dehors de ses indications ;</li>
           <li>en cas de réaction individuelle imprévisible à un composant cosmétique.</li>
         </ul>
         <p>
@@ -194,14 +194,14 @@ export default async function CGVPage({
           Vous pouvez demander la suppression de votre compte à tout moment en
           nous écrivant à{' '}
           <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
-          La suppression est effective sous 30 jours et entraîne l'effacement des
+          La suppression est effective sous 30 jours et entraîne l&apos;effacement des
           données personnelles, sous réserve des obligations légales de
           conservation (voir la{' '}
           <Link href="/legal/confidentialite">politique de confidentialité</Link>).
         </p>
         <p>
           FARMAU se réserve le droit de suspendre ou supprimer tout compte en cas
-          d'usage abusif, frauduleux ou contraire aux présentes conditions.
+          d&apos;usage abusif, frauduleux ou contraire aux présentes conditions.
         </p>
       </LegalSection>
 
@@ -209,7 +209,7 @@ export default async function CGVPage({
         <p>
           Le traitement de vos données personnelles est détaillé dans notre{' '}
           <Link href="/legal/confidentialite">politique de confidentialité</Link>.
-          L'utilisation des cookies est décrite dans la{' '}
+          L&apos;utilisation des cookies est décrite dans la{' '}
           <Link href="/legal/cookies">politique cookies</Link>.
         </p>
       </LegalSection>

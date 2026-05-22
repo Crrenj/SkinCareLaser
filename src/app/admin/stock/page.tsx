@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { 
   PencilIcon, 
   MagnifyingGlassIcon,
@@ -54,22 +54,26 @@ export default function StockPage() {
 
   const dialogRef = useModalA11y(showModal, () => setShowModal(false))
 
-  // Fonction pour récupérer les données de stock
-  const fetchStockData = async () => {
+  const fetchStockData = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
         search: searchTerm,
-        sortBy: sortColumn === 'product_name' ? 'name' : sortColumn === 'current_stock' ? 'stock' : sortColumn,
+        sortBy:
+          sortColumn === 'product_name'
+            ? 'name'
+            : sortColumn === 'current_stock'
+              ? 'stock'
+              : sortColumn,
         sortOrder,
-        status: filterStatus
+        status: filterStatus,
       })
-      
+
       const response = await fetch(`/api/admin/stock?${params}`)
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération des données')
       }
-      
+
       const data = await response.json()
       setStockItems(data.items || [])
       setStats(data.stats || { total: 0, ok: 0, low: 0, out: 0 })
@@ -78,12 +82,11 @@ export default function StockPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchTerm, filterStatus, sortColumn, sortOrder])
 
-  // Charger les données au montage et quand les filtres changent
   useEffect(() => {
     fetchStockData()
-  }, [searchTerm, filterStatus, sortColumn, sortOrder])
+  }, [fetchStockData])
 
   // Fonction pour gérer le tri par colonnes
   const handleSort = (column: SortColumn) => {

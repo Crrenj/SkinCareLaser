@@ -10,7 +10,7 @@ import {
   useImperativeHandle,
 } from 'react'
 import useSWR from 'swr'
-import { Search, Clock, X } from 'lucide-react'
+import { Search, Clock } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 
@@ -84,7 +84,7 @@ export const NavSearch = forwardRef<NavSearchHandle, NavSearchProps>(
       fetcher,
       { revalidateOnFocus: false, keepPreviousData: true },
     )
-    const hits = data?.hits ?? []
+    const hits = useMemo(() => data?.hits ?? [], [data?.hits])
     const hasResults = hits.length > 0
     const showNoResults = shouldFetch && !isLoading && !hasResults
 

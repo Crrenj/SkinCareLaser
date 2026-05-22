@@ -8,63 +8,51 @@ export function useAuth() {
   const { refreshCart } = useCart()
 
   useEffect(() => {
-    // Écouter les changements d'état d'authentification
+    // Handlers définis dans useEffect pour ne pas les inclure dans les deps
+    // tout en respectant react-hooks/exhaustive-deps.
+    const handleUserLogin = async (userId: string) => {
+      try {
+        const cartId = getCookie('cart_id')
+        if (cartId) {
+          // Fusionner le panier anonyme avec l'utilisateur connecté
+          const { error } = await supabase
+            .from('carts')
+            .update({ user_id: userId, anonymous_id: null })
+            .eq('anonymous_id', cartId)
+
+          if (error) {
+            console.error('Erreur fusion panier:', error)
+          } else {
+            deleteCookie('cart_id')
+            await refreshCart()
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la fusion du panier:', error)
+      }
+    }
+
+    const handleUserLogout = async () => {
+      try {
+        deleteCookie('cart_id')
+        await refreshCart()
+      } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error)
+      }
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          // Utilisateur vient de se connecter
           await handleUserLogin(session.user.id)
         } else if (event === 'SIGNED_OUT') {
-          // Utilisateur s'est déconnecté
           await handleUserLogout()
         }
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [])
-
-  const handleUserLogin = async (userId: string) => {
-    try {
-      // Récupérer l'ID anonyme du cookie
-      const cartId = getCookie('cart_id')
-      
-      if (cartId) {
-        // Fusionner le panier anonyme avec l'utilisateur connecté
-        const { error } = await supabase
-          .from('carts')
-          .update({ 
-            user_id: userId, 
-            anonymous_id: null 
-          })
-          .eq('anonymous_id', cartId)
-
-        if (error) {
-          console.error('Erreur fusion panier:', error)
-        } else {
-          // Supprimer le cookie
-          deleteCookie('cart_id')
-          
-          // Recharger le panier
-          await refreshCart()
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la fusion du panier:', error)
-    }
-  }
-
-  const handleUserLogout = async () => {
-    try {
-      // Supprimer le cookie du panier
-      deleteCookie('cart_id')
-      
-      // Recharger le panier (sera vide pour l'utilisateur déconnecté)
-      await refreshCart()
-    } catch (error) {
-      console.error('Erreur lors de la déconnexion:', error)
-    }
-  }
+  }, [refreshCart])
 
   /**
    * Connecte un utilisateur avec email et mot de passe
