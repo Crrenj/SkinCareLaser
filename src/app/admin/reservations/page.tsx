@@ -5,6 +5,7 @@ import { Download, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
+import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
 import { FilterBar, type SortOption } from '@/components/admin/reservations/FilterBar'
 import { BulkActionBar } from '@/components/admin/reservations/BulkActionBar'
 import { ReservationsTable } from '@/components/admin/reservations/ReservationsTable'
@@ -34,6 +35,8 @@ export default function ReservationsAdminPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
+
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -210,12 +213,15 @@ export default function ReservationsAdminPage() {
 
   const cancelReservation = useCallback(
     async (r: Reservation) => {
-      if (typeof window === 'undefined') return
-      if (!window.confirm('¿Cancelar esta reserva ? Esta acción es irreversible.')) return
+      const ok = await confirm(
+        '¿Cancelar esta reserva? Esta acción es irreversible.',
+        { title: 'Cancelar reserva', confirmLabel: 'Cancelar la reserva' },
+      )
+      if (!ok) return
       await updateStatus(r.id, 'cancelled')
       setExpandedId(null)
     },
-    [updateStatus],
+    [updateStatus, confirm],
   )
 
   const bulkAdvance = useCallback(async () => {
@@ -229,19 +235,16 @@ export default function ReservationsAdminPage() {
   }, [selectedRows, sharedStatus, updateStatus])
 
   const bulkCancel = useCallback(async () => {
-    if (typeof window === 'undefined') return
-    if (
-      !window.confirm(
-        `Cancelar ${selectedRows.length} reservas ? Esta acción es irreversible.`,
-      )
-    ) {
-      return
-    }
+    const ok = await confirm(
+      `¿Cancelar ${selectedRows.length} reservas? Esta acción es irreversible.`,
+      { title: 'Cancelar reservas', confirmLabel: 'Cancelar las reservas' },
+    )
+    if (!ok) return
     for (const r of selectedRows) {
       await updateStatus(r.id, 'cancelled')
     }
     setSelectedIds(new Set())
-  }, [selectedRows, updateStatus])
+  }, [selectedRows, updateStatus, confirm])
 
   const bulkWhatsapp = useCallback(() => {
     // Ouvre un onglet WhatsApp pour chaque sélection
@@ -370,6 +373,7 @@ export default function ReservationsAdminPage() {
           busy={busyId === expandedReservation.id}
         />
       )}
+      {confirmDialog}
     </>
   )
 }

@@ -15,6 +15,7 @@ import {
   EyeOff
 } from 'lucide-react'
 import { useModalA11y } from '@/hooks/useModalA11y'
+import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
 
 interface ContactMessage {
   id: string
@@ -51,6 +52,7 @@ export default function MessagesAdminPage() {
   const [showMessageModal, setShowMessageModal] = useState(false)
 
   const messageDialogRef = useModalA11y(showMessageModal, () => setShowMessageModal(false))
+  const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
   const loadMessages = useCallback(async () => {
     try {
@@ -119,7 +121,11 @@ export default function MessagesAdminPage() {
 
   // Supprimer un message
   const deleteMessage = async (messageId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) return
+    const ok = await confirm('Êtes-vous sûr de vouloir supprimer ce message ?', {
+      title: 'Supprimer le message',
+      confirmLabel: 'Supprimer',
+    })
+    if (!ok) return
 
     try {
       const response = await fetch(`/api/admin/messages?id=${messageId}`, {
@@ -396,6 +402,7 @@ export default function MessagesAdminPage() {
           </div>
         )}
       </div>
+      {confirmDialog}
     </div>
   )
 } 
