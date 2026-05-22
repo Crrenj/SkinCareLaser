@@ -27,88 +27,103 @@ type Product = {
 
 type Props = { product: Product }
 
+/**
+ * Carte produit du catalogue.
+ *
+ * Le lien vers la PDP est implémenté en "stretched link" (un `<Link>`
+ * absolu qui couvre toute la carte avec z-index inférieur aux contrôles
+ * interactifs). Ça évite d'imbriquer `<button>` et `<a>` (HTML invalide)
+ * tout en gardant la totalité de la carte cliquable, et préserve le
+ * right-click "Open in new tab" du navigateur sur l'image, le nom et
+ * le prix sans bloquer les interactions du heart et des deux boutons
+ * "Ajouter au panier".
+ */
 export default function ProductCard({ product }: Props) {
   const inStock = product.inStock ?? true
   const isPromo = product.oldPrice !== undefined && product.oldPrice > product.price
+  const href = `/product/${product.slug ?? product.id}`
 
   return (
-    <Link
-      href={`/product/${product.slug ?? product.id}`}
-      prefetch={false}
-      className="group block h-full"
+    <article
+      data-testid="product-card"
+      className="group relative flex flex-col h-full p-3.5 bg-white rounded-md border border-sand-300 transition-all duration-[240ms] ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_32px_-12px_rgba(31,27,22,0.16),0_2px_4px_rgba(31,27,22,0.04)]"
     >
-      <article
-        data-testid="product-card"
-        className="relative flex flex-col h-full p-3.5 bg-white rounded-md border border-sand-300 transition-all duration-[240ms] ease-out group-hover:-translate-y-0.5 group-hover:shadow-[0_12px_32px_-12px_rgba(31,27,22,0.16),0_2px_4px_rgba(31,27,22,0.04)]"
-      >
-        {/* IMAGE */}
-        <div className="relative aspect-square mb-4 overflow-hidden rounded bg-sand-50">
-          {product.badge && (
-            <ProductBadge
-              kind={product.badge}
-              oldPrice={product.oldPrice}
-              price={product.price}
-            />
-          )}
-          <ProductCardHeart
-            productId={product.id}
-            className="absolute top-2.5 right-2.5 z-10"
+      {/* Lien étendu qui couvre toute la carte sans englober les boutons. */}
+      <Link
+        href={href}
+        prefetch={false}
+        aria-label={product.name}
+        className="absolute inset-0 z-10 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+      />
+
+      {/* IMAGE */}
+      <div className="relative aspect-square mb-4 overflow-hidden rounded bg-sand-50">
+        {product.badge && (
+          <ProductBadge
+            kind={product.badge}
+            oldPrice={product.oldPrice}
+            price={product.price}
           />
-          <div
-            className={`flex items-center justify-center w-full h-full p-[18%] ${
-              !inStock ? 'opacity-35' : ''
-            }`}
-          >
-            <Image
-              src={product.images?.[0]?.url ?? '/placeholder.png'}
-              alt={product.images?.[0]?.alt ?? product.name}
-              width={400}
-              height={400}
-              className="w-full h-full object-contain"
-            />
-          </div>
-          {inStock && (
-            <AddToCartButton
-              productId={product.id}
-              variant="icon"
-              className="absolute bottom-2.5 right-2.5 w-9 h-9 opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
-            />
-          )}
-        </div>
-
-        {/* BRAND eyebrow */}
-        {product.brand && (
-          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-clay-700 mb-1.5 truncate">
-            {product.brand}
-          </div>
         )}
-
-        {/* NAME */}
-        <h3 className="text-[15.5px] font-medium text-ink-900 leading-[1.3] line-clamp-2 mb-3.5 text-balance min-h-[2.6em]">
-          {product.name}
-        </h3>
-
-        {/* PRICE + CTA */}
-        <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-sand-200">
-          <div className="font-serif text-2xl text-ink-900 leading-none tracking-[-0.01em]">
-            {isPromo && (
-              <span className="font-sans text-[13px] text-ink-400 line-through mr-2 align-[4px]">
-                {product.oldPrice!.toFixed(0)}
-              </span>
-            )}
-            {product.price.toFixed(0)}
-            <span className="font-sans text-[14px] text-ink-500 tracking-wide ml-1">
-              {product.currency.toUpperCase()}
-            </span>
-          </div>
+        <ProductCardHeart
+          productId={product.id}
+          className="absolute top-2.5 right-2.5 z-20"
+        />
+        <div
+          className={`flex items-center justify-center w-full h-full p-[18%] ${
+            !inStock ? 'opacity-35' : ''
+          }`}
+        >
+          <Image
+            src={product.images?.[0]?.url ?? '/placeholder.png'}
+            alt={product.images?.[0]?.alt ?? product.name}
+            width={400}
+            height={400}
+            className="w-full h-full object-contain"
+          />
+        </div>
+        {inStock && (
           <AddToCartButton
             productId={product.id}
-            variant="card-cta"
-            disabled={!inStock}
+            variant="icon"
+            className="absolute bottom-2.5 right-2.5 z-20 w-9 h-9 opacity-0 translate-y-1.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
           />
+        )}
+      </div>
+
+      {/* BRAND eyebrow */}
+      {product.brand && (
+        <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-clay-700 mb-1.5 truncate">
+          {product.brand}
         </div>
-      </article>
-    </Link>
+      )}
+
+      {/* NAME */}
+      <h3 className="text-[15.5px] font-medium text-ink-900 leading-[1.3] line-clamp-2 mb-3.5 text-balance min-h-[2.6em]">
+        {product.name}
+      </h3>
+
+      {/* PRICE + CTA */}
+      <div className="mt-auto flex items-center justify-between gap-3 pt-3 border-t border-sand-200">
+        <div className="font-serif text-2xl text-ink-900 leading-none tracking-[-0.01em]">
+          {isPromo && (
+            <span className="font-sans text-[13px] text-ink-400 line-through mr-2 align-[4px]">
+              {product.oldPrice!.toFixed(0)}
+            </span>
+          )}
+          {product.price.toFixed(0)}
+          <span className="font-sans text-[14px] text-ink-500 tracking-wide ml-1">
+            {product.currency.toUpperCase()}
+          </span>
+        </div>
+        <AddToCartButton
+          productId={product.id}
+          variant="card-cta"
+          disabled={!inStock}
+          className="relative z-20"
+        />
+      </div>
+    </article>
   )
 }
 
@@ -139,7 +154,7 @@ function ProductBadge({
 
   return (
     <span
-      className={`absolute top-2.5 left-2.5 z-10 text-[10px] font-mono font-medium uppercase tracking-[0.08em] px-2 py-1 rounded-sm ${styles[kind]}`}
+      className={`absolute top-2.5 left-2.5 z-20 text-[10px] font-mono font-medium uppercase tracking-[0.08em] px-2 py-1 rounded-sm ${styles[kind]}`}
     >
       {label}
     </span>
