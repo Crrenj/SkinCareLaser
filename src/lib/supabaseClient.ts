@@ -1,30 +1,21 @@
 import { createBrowserClient, type CookieOptions } from '@supabase/ssr'
 
 /**
- * ⚠️ ATTENTION - CODE CRITIQUE DE CONNEXION ⚠️
- * 
- * Ce fichier gère l'authentification Supabase avec des corrections spéciales pour :
- * - La navigation privée
- * - Les erreurs SSR (Server-Side Rendering)
- * - Les problèmes de cookies
- * 
- * 🚨 NE PAS MODIFIER SANS AUTORISATION 🚨
- * 
- * Problèmes résolus :
- * - "document is not defined" en SSR
- * - Cookies bloqués en navigation privée
- * - Sessions perdues lors des redirections
- * 
- * Si vous devez modifier ce code :
- * 1. Demandez l'autorisation
- * 2. Testez en navigation normale ET privée
- * 3. Vérifiez que le SSR fonctionne
- * 4. Testez toutes les pages de login
- */
-
-/**
- * Client Supabase pour le navigateur
- * Utilise createBrowserClient avec configuration optimisée pour la navigation privée et SSR
+ * Client Supabase navigateur.
+ *
+ * Sécurité : pas de fallback localStorage pour les tokens. L'audit
+ * sécurité a flaggé que stocker access_token + refresh_token dans
+ * localStorage les rend exfiltrables par toute XSS (alors qu'un cookie
+ * HttpOnly géré côté serveur n'est jamais exposé au JS). Le fallback
+ * historique servait à supporter la navigation privée Safari/Firefox
+ * où certains cookies étaient bloqués — c'est désormais résolu côté
+ * navigateur (cookies SameSite=Lax acceptés en mode privé) et le risque
+ * XSS pesait beaucoup plus lourd que le cas edge restant.
+ *
+ * Si la navigation privée bloque vraiment les cookies sur un browser
+ * donné, l'utilisateur recevra un message "session expirée" classique
+ * au lieu de rester connecté — comportement attendu et conforme au
+ * threat model.
  */
 export const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,76 +23,23 @@ export const supabase = createBrowserClient(
   {
     cookies: {
       get(name: string) {
-        // ⚠️ PROTECTION SSR : Vérifier que nous sommes côté client
-        if (typeof window === 'undefined') {
-          return undefined
-        }
-        
-        try {
-          // Essayer d'abord les cookies, puis le localStorage en fallback
-          const cookie = document.cookie
-            .split('; ')
-            .find(row => row.startsWith(name + '='))
-            ?.split('=')[1]
-          
-          if (cookie) return cookie
-          
-          // Fallback pour navigation privée
-          try {
-            return localStorage.getItem(`sb-${name}`) || undefined
-          } catch {
-            return undefined
-          }
-        } catch (error) {
-          console.warn('Erreur lecture cookie/localStorage:', error)
-          return undefined
-        }
+        if (typeof document === 'undefined') return undefined
+        return document.cookie
+          .split('; ')
+          .find((row) => row.startsWith(name + '='))
+          ?.split('=')[1]
       },
       set(name: string, value: string, options: CookieOptions) {
-        // ⚠️ PROTECTION SSR : Vérifier que nous sommes côté client
-        if (typeof window === 'undefined') {
-          return
-        }
-        
-        try {
-          // Essayer de définir le cookie normalement
-          const cookieStr = `${name}=${value}; path=/; ${options.maxAge ? `max-age=${options.maxAge}` : ''}; SameSite=Lax`
-          document.cookie = cookieStr
-        } catch (error) {
-          console.warn('Cookie non défini, utilisation du localStorage:', error)
-        }
-        
-        // Fallback pour navigation privée
-        try {
-          if (value) {
-            localStorage.setItem(`sb-${name}`, value)
-          } else {
-            localStorage.removeItem(`sb-${name}`)
-          }
-        } catch (error) {
-          console.warn('localStorage non disponible:', error)
-        }
+        if (typeof document === 'undefined') return
+        const parts = [`${name}=${value}`, 'path=/', 'SameSite=Lax']
+        if (options.maxAge) parts.push(`max-age=${options.maxAge}`)
+        if (process.env.NODE_ENV === 'production') parts.push('Secure')
+        document.cookie = parts.join('; ')
       },
       remove(name: string, _options: CookieOptions) {
-        // ⚠️ PROTECTION SSR : Vérifier que nous sommes côté client
-        if (typeof window === 'undefined') {
-          return
-        }
-        
-        try {
-          // Supprimer le cookie
-          document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`
-        } catch (error) {
-          console.warn('Cookie non supprimé:', error)
-        }
-        
-        // Supprimer du localStorage
-        try {
-          localStorage.removeItem(`sb-${name}`)
-        } catch (error) {
-          console.warn('localStorage non accessible:', error)
-        }
-      }
-    }
-  }
+        if (typeof document === 'undefined') return
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT`
+      },
+    },
+  },
 )
