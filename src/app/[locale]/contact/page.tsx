@@ -5,6 +5,12 @@ import Footer from '@/components/Footer'
 import ContactForm from '@/components/ContactForm'
 import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import {
+  getShopSettings,
+  telHref,
+  whatsappHref,
+  mailtoHref,
+} from '@/lib/getShopSettings'
 
 export async function generateMetadata({
   params,
@@ -37,6 +43,10 @@ export default async function ContactPage({
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('Contact')
+  const settings = await getShopSettings()
+  const phoneHref = telHref(settings.contact_phone)
+  const waHref = whatsappHref(settings.whatsapp_number)
+  const emailHref = mailtoHref(settings.contact_email)
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-200">
@@ -69,29 +79,33 @@ export default async function ContactPage({
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <PhoneIcon className="h-6 w-6 text-clay-700 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-ink-900">{t('phoneHeading')}</h3>
-                    <p className="text-ink-700">
-                      <a href="tel:+18097243940" className="hover:text-clay-700 transition-colors">
-                        +1 809 724 3940
-                      </a>
-                    </p>
+                {phoneHref && settings.contact_phone && (
+                  <div className="flex items-start space-x-4">
+                    <PhoneIcon className="h-6 w-6 text-clay-700 mt-1 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-semibold text-ink-900">{t('phoneHeading')}</h3>
+                      <p className="text-ink-700">
+                        <a href={phoneHref} className="hover:text-clay-700 transition-colors">
+                          {settings.contact_phone}
+                        </a>
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="flex items-start space-x-4">
-                  <EnvelopeIcon className="h-6 w-6 text-clay-700 mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-ink-900">{t('emailHeading')}</h3>
-                    <p className="text-ink-700">
-                      <a href="mailto:skin@skinlacercenter.net" className="hover:text-clay-700 transition-colors">
-                        skin@skinlacercenter.net
-                      </a>
-                    </p>
+                {emailHref && settings.contact_email && (
+                  <div className="flex items-start space-x-4">
+                    <EnvelopeIcon className="h-6 w-6 text-clay-700 mt-1 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-semibold text-ink-900">{t('emailHeading')}</h3>
+                      <p className="text-ink-700">
+                        <a href={emailHref} className="hover:text-clay-700 transition-colors">
+                          {settings.contact_email}
+                        </a>
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="flex items-start space-x-4">
                   <ClockIcon className="h-6 w-6 text-clay-700 mt-1 flex-shrink-0" />
@@ -107,13 +121,14 @@ export default async function ContactPage({
               </div>
             </div>
 
+            {waHref && (
             <div className="bg-sand-50 rounded-lg p-6 border-l-4 border-olive-600">
               <h3 className="text-lg font-semibold text-olive-600 mb-3">{t('whatsappHeading')}</h3>
               <p className="text-ink-800 mb-4">
                 {t('whatsappDescription')}
               </p>
               <a
-                href="https://wa.me/18094122468"
+                href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-4 py-2 bg-olive-600 text-white rounded-md hover:bg-clay-700 transition-colors font-semibold"
@@ -124,6 +139,7 @@ export default async function ContactPage({
                 {t('whatsappButton')}
               </a>
             </div>
+            )}
           </div>
         </div>
 

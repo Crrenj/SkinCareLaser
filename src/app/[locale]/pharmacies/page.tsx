@@ -6,6 +6,12 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import {
+  getShopSettings,
+  telHref,
+  whatsappHref,
+  mailtoHref,
+} from '@/lib/getShopSettings'
 
 export const revalidate = 86400
 
@@ -40,6 +46,10 @@ export default async function PharmaciesPage({
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('Pharmacies')
+  const settings = await getShopSettings()
+  const phoneHref = telHref(settings.contact_phone)
+  const waHref = whatsappHref(settings.whatsapp_number)
+  const emailHref = mailtoHref(settings.contact_email)
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
@@ -104,34 +114,40 @@ export default async function PharmaciesPage({
                   </p>
                 </InfoLine>
 
-                <InfoLine icon={<Phone size={16} strokeWidth={1.7} />}>
-                  <a
-                    href="tel:+18097243940"
-                    className="text-[14px] text-clay-700 hover:text-clay-800 transition-colors"
-                  >
-                    +1 809 724 3940
-                  </a>
-                </InfoLine>
+                {phoneHref && settings.contact_phone && (
+                  <InfoLine icon={<Phone size={16} strokeWidth={1.7} />}>
+                    <a
+                      href={phoneHref}
+                      className="text-[14px] text-clay-700 hover:text-clay-800 transition-colors"
+                    >
+                      {settings.contact_phone}
+                    </a>
+                  </InfoLine>
+                )}
 
-                <InfoLine icon={<SiWhatsapp size={16} />}>
-                  <a
-                    href="https://wa.me/18094122468"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[14px] text-clay-700 hover:text-clay-800 transition-colors"
-                  >
-                    +1 809 412 2468
-                  </a>
-                </InfoLine>
+                {waHref && settings.whatsapp_number && (
+                  <InfoLine icon={<SiWhatsapp size={16} />}>
+                    <a
+                      href={waHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[14px] text-clay-700 hover:text-clay-800 transition-colors"
+                    >
+                      {settings.whatsapp_number}
+                    </a>
+                  </InfoLine>
+                )}
 
-                <InfoLine icon={<Mail size={16} strokeWidth={1.7} />}>
-                  <a
-                    href="mailto:skin@skinlacercenter.net"
-                    className="text-[14px] text-clay-700 hover:text-clay-800 break-all transition-colors"
-                  >
-                    skin@skinlacercenter.net
-                  </a>
-                </InfoLine>
+                {emailHref && settings.contact_email && (
+                  <InfoLine icon={<Mail size={16} strokeWidth={1.7} />}>
+                    <a
+                      href={emailHref}
+                      className="text-[14px] text-clay-700 hover:text-clay-800 break-all transition-colors"
+                    >
+                      {settings.contact_email}
+                    </a>
+                  </InfoLine>
+                )}
               </div>
 
               <Link
