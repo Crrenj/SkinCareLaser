@@ -1,278 +1,395 @@
 'use client'
 
-import { useState } from 'react'
-import { BellIcon, ShieldCheckIcon, CurrencyEuroIcon, PaintBrushIcon } from '@heroicons/react/24/outline'
+import { useEffect, useState } from 'react'
+import useSWR from 'swr'
+import { Store, Truck, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import type { Database } from '@/lib/database.types'
+
+type ShopSettings = Database['public']['Tables']['shop_settings']['Row']
+
+type Tab = 'shop' | 'shipping'
+
+const fetcher = async (url: string): Promise<ShopSettings> => {
+  const res = await fetch(url, { credentials: 'same-origin' })
+  if (!res.ok) throw new Error('settings_fetch_failed')
+  return res.json()
+}
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general')
-  
-  const tabs = [
-    { id: 'general', name: 'Général', icon: null },
-    { id: 'notifications', name: 'Notifications', icon: BellIcon },
-    { id: 'security', name: 'Sécurité', icon: ShieldCheckIcon },
-    { id: 'billing', name: 'Facturation', icon: CurrencyEuroIcon },
-    { id: 'appearance', name: 'Apparence', icon: PaintBrushIcon },
-  ]
-  
-  return (
-    <div className="p-8">
-      <div className="mb-6 bg-amber-50 border-l-4 border-amber-400 p-4 rounded">
-        <p className="text-sm text-amber-800">
-          <strong>Mode démo</strong> — Les modifications ne sont pas persistées. Cette page sera câblée quand la config boutique sera stockée en BDD.
+  const { data, mutate, isLoading, error } = useSWR<ShopSettings>(
+    '/api/admin/settings',
+    fetcher,
+    { revalidateOnFocus: false },
+  )
+
+  const [tab, setTab] = useState<Tab>('shop')
+  const [form, setForm] = useState<ShopSettings | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (data) setForm(data)
+  }, [data])
+
+  const update = <K extends keyof ShopSettings>(field: K, value: ShopSettings[K]) => {
+    setForm((prev) => (prev ? { ...prev, [field]: value } : prev))
+  }
+
+  const isDirty = !!data && !!form && JSON.stringify(data) !== JSON.stringify(form)
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form || !isDirty) return
+    setSaving(true)
+    try {
+      // On envoie tous les champs éditables (l'API filtre via allowlist)
+      const payload = {
+        shop_name: form.shop_name,
+        shop_tagline: form.shop_tagline,
+        contact_email: form.contact_email,
+        contact_phone: form.contact_phone,
+        whatsapp_number: form.whatsapp_number,
+        pickup_name: form.pickup_name,
+        pickup_address: form.pickup_address,
+        pickup_hours: form.pickup_hours,
+        pickup_phone: form.pickup_phone,
+        shipping_santo_domingo: form.shipping_santo_domingo,
+        shipping_interior: form.shipping_interior,
+      }
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'same-origin',
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error || 'Erreur de sauvegarde')
+        return
+      }
+      toast.success('Paramètres sauvegardés')
+      mutate(json, { revalidate: false })
+    } catch (err) {
+      console.error('PATCH /api/admin/settings:', err)
+      toast.error('Erreur réseau')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleReset = () => {
+    if (data) setForm(data)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-6 h-6 animate-spin text-clay-700" />
+      </div>
+    )
+  }
+
+  if (error || !form) {
+    return (
+      <div className="p-8">
+        <p className="text-red-700 bg-red-50 border border-red-200 rounded-md p-4 text-sm">
+          Impossible de charger les paramètres boutique.
         </p>
       </div>
+    )
+  }
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Paramètres</h1>
-      
+  return (
+    <form onSubmit={handleSave} className="p-8 max-w-4xl">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Paramètres boutique</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Mis à jour {new Date(form.updated_at).toLocaleString('fr-FR')}
+          </p>
+        </div>
+      </div>
+
       <div className="flex gap-8">
-        {/* Sidebar de navigation */}
-        <div className="w-64">
+        {/* Sidebar */}
+        <div className="w-56 shrink-0">
           <nav className="space-y-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeTab === tab.id
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                {tab.icon && <tab.icon className="h-5 w-5 mr-3" />}
-                {tab.name}
-              </button>
-            ))}
+            <TabButton
+              active={tab === 'shop'}
+              onClick={() => setTab('shop')}
+              icon={Store}
+              label="Boutique"
+            />
+            <TabButton
+              active={tab === 'shipping'}
+              onClick={() => setTab('shipping')}
+              icon={Truck}
+              label="Livraison & retrait"
+            />
           </nav>
         </div>
-        
-        {/* Contenu principal */}
+
+        {/* Contenu */}
         <div className="flex-1">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            {activeTab === 'general' && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Paramètres généraux</h2>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nom de la boutique
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      defaultValue="Skincare Laser"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email de contact
-                    </label>
-                    <input
-                      type="email"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      defaultValue="contact@skincarelaser.com"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fuseau horaire
-                    </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                      <option>Europe/Paris (UTC+1)</option>
-                      <option>Europe/London (UTC+0)</option>
-                      <option>America/New_York (UTC-5)</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Langue par défaut
-                    </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                      <option>Français</option>
-                      <option>English</option>
-                      <option>Español</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            {tab === 'shop' && (
+              <ShopTab form={form} update={update} />
             )}
-            
-            {activeTab === 'notifications' && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Notifications</h2>
-                <div className="space-y-4">
-                  <label className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Nouvelles commandes</p>
-                      <p className="text-sm text-gray-500">Recevoir une notification pour chaque nouvelle commande</p>
-                    </div>
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 rounded" defaultChecked />
-                  </label>
-                  
-                  <label className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Stock faible</p>
-                      <p className="text-sm text-gray-500">Alertes quand un produit est en rupture de stock</p>
-                    </div>
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 rounded" defaultChecked />
-                  </label>
-                  
-                  <label className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Nouveaux clients</p>
-                      <p className="text-sm text-gray-500">Notification lors de l&apos;inscription d&apos;un nouveau client</p>
-                    </div>
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 rounded" />
-                  </label>
-                  
-                  <label className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Résumé hebdomadaire</p>
-                      <p className="text-sm text-gray-500">Recevoir un résumé des performances chaque semaine</p>
-                    </div>
-                    <input type="checkbox" className="h-4 w-4 text-blue-600 rounded" defaultChecked />
-                  </label>
-                </div>
-              </div>
+            {tab === 'shipping' && (
+              <ShippingTab form={form} update={update} />
             )}
-            
-            {activeTab === 'security' && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Sécurité</h2>
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Changer le mot de passe</h3>
-                    <div className="space-y-4">
-                      <input
-                        type="password"
-                        placeholder="Mot de passe actuel"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      />
-                      <input
-                        type="password"
-                        placeholder="Nouveau mot de passe"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      />
-                      <input
-                        type="password"
-                        placeholder="Confirmer le nouveau mot de passe"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Authentification à deux facteurs</h3>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Ajoutez une couche de sécurité supplémentaire à votre compte
-                    </p>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                      Activer la 2FA
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {activeTab === 'billing' && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Facturation</h2>
-                <div className="space-y-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-gray-900 mb-2">Plan actuel</h3>
-                    <p className="text-2xl font-bold text-gray-900">Plan Premium</p>
-                    <p className="text-sm text-gray-500">99€ / mois</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Méthode de paiement</h3>
-                    <div className="flex items-center justify-between p-4 border border-gray-300 rounded-md">
-                      <div className="flex items-center">
-                        <div className="w-12 h-8 bg-blue-600 rounded mr-4"></div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">•••• •••• •••• 4242</p>
-                          <p className="text-sm text-gray-500">Expire 12/2024</p>
-                        </div>
-                      </div>
-                      <button className="text-sm text-blue-600 hover:text-blue-800">Modifier</button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Historique des factures</h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-sm text-gray-600">Décembre 2023</span>
-                        <span className="text-sm font-medium text-gray-900">99€</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-sm text-gray-600">Novembre 2023</span>
-                        <span className="text-sm font-medium text-gray-900">99€</span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="text-sm text-gray-600">Octobre 2023</span>
-                        <span className="text-sm font-medium text-gray-900">99€</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {activeTab === 'appearance' && (
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Apparence</h2>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Thème
-                    </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
-                      <option>Clair</option>
-                      <option>Sombre</option>
-                      <option>Automatique (système)</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Couleur principale
-                    </label>
-                    <div className="flex gap-2">
-                      <button className="w-10 h-10 bg-blue-600 rounded"></button>
-                      <button className="w-10 h-10 bg-green-600 rounded"></button>
-                      <button className="w-10 h-10 bg-purple-600 rounded"></button>
-                      <button className="w-10 h-10 bg-red-600 rounded"></button>
-                      <button className="w-10 h-10 bg-yellow-600 rounded"></button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Logo de la boutique
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <p className="text-sm text-gray-500">Glisser-déposer ou cliquer pour télécharger</p>
-                      <button className="mt-2 text-sm text-blue-600 hover:text-blue-800">
-                        Choisir un fichier
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Bouton de sauvegarde */}
-            <div className="mt-8 flex justify-end">
-              <button className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Enregistrer les modifications
-              </button>
-            </div>
           </div>
+
+          {/* Sticky save bar */}
+          {isDirty && (
+            <div className="sticky bottom-4 mt-4 bg-ink-900 text-white rounded-lg shadow-lg p-4 flex items-center justify-between">
+              <span className="text-sm">Modifications non enregistrées</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={saving}
+                  className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 rounded-md disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-4 py-2 text-sm font-medium bg-clay-700 hover:bg-clay-800 rounded-md disabled:opacity-50 inline-flex items-center gap-2"
+                >
+                  {saving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Enregistrer
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+      </div>
+    </form>
+  )
+}
+
+function TabButton({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? 'page' : undefined}
+      className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+        active
+          ? 'bg-clay-50 text-clay-900'
+          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+      }`}
+    >
+      <Icon className="h-5 w-5 mr-3" />
+      {label}
+    </button>
+  )
+}
+
+function Field({
+  id,
+  label,
+  hint,
+  children,
+}: {
+  id: string
+  label: string
+  hint?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      {children}
+      {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
+    </div>
+  )
+}
+
+type TabProps = {
+  form: ShopSettings
+  update: <K extends keyof ShopSettings>(field: K, value: ShopSettings[K]) => void
+}
+
+function ShopTab({ form, update }: TabProps) {
+  return (
+    <div>
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">Identité & contacts</h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Affiché dans le footer, les pages /contact, /pharmacies, et les liens WhatsApp.
+      </p>
+
+      <div className="space-y-5">
+        <Field id="shop_name" label="Nom de la boutique">
+          <input
+            id="shop_name"
+            type="text"
+            required
+            value={form.shop_name}
+            onChange={(e) => update('shop_name', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+          />
+        </Field>
+
+        <Field id="shop_tagline" label="Tagline" hint="Phrase courte sous le logo, OG description par défaut.">
+          <input
+            id="shop_tagline"
+            type="text"
+            value={form.shop_tagline ?? ''}
+            onChange={(e) => update('shop_tagline', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+          />
+        </Field>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field id="contact_email" label="Email de contact">
+            <input
+              id="contact_email"
+              type="email"
+              value={form.contact_email ?? ''}
+              onChange={(e) => update('contact_email', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            />
+          </Field>
+          <Field id="contact_phone" label="Téléphone">
+            <input
+              id="contact_phone"
+              type="tel"
+              value={form.contact_phone ?? ''}
+              onChange={(e) => update('contact_phone', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            />
+          </Field>
+        </div>
+
+        <Field
+          id="whatsapp_number"
+          label="Numéro WhatsApp"
+          hint="Format international sans espaces (ex: +18094122468). Utilisé pour les liens wa.me/* des réservations."
+        >
+          <input
+            id="whatsapp_number"
+            type="tel"
+            value={form.whatsapp_number ?? ''}
+            onChange={(e) => update('whatsapp_number', e.target.value)}
+            placeholder="+18094122468"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+          />
+        </Field>
       </div>
     </div>
   )
-} 
+}
+
+function ShippingTab({ form, update }: TabProps) {
+  return (
+    <div className="space-y-8">
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Tarifs de livraison</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Affichés dans le tunnel de réservation à l&apos;étape « livraison » et sur la page /livraison.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field
+            id="shipping_santo_domingo"
+            label="Santo Domingo (DOP)"
+            hint="DN + Gran Santo Domingo · livraison 24-48h."
+          >
+            <input
+              id="shipping_santo_domingo"
+              type="number"
+              min={0}
+              step={1}
+              required
+              value={form.shipping_santo_domingo}
+              onChange={(e) =>
+                update('shipping_santo_domingo', Number(e.target.value) || 0)
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            />
+          </Field>
+          <Field
+            id="shipping_interior"
+            label="Interior del país (DOP)"
+            hint="Tout le reste du pays · livraison 3-5 jours."
+          >
+            <input
+              id="shipping_interior"
+              type="number"
+              min={0}
+              step={1}
+              required
+              value={form.shipping_interior}
+              onChange={(e) =>
+                update('shipping_interior', Number(e.target.value) || 0)
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            />
+          </Field>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Point de retrait</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Affiché dans le tunnel et sur la page /pharmacies. Le retrait sur place est gratuit.
+        </p>
+        <div className="space-y-5">
+          <Field id="pickup_name" label="Nom du point de retrait">
+            <input
+              id="pickup_name"
+              type="text"
+              value={form.pickup_name ?? ''}
+              onChange={(e) => update('pickup_name', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            />
+          </Field>
+          <Field id="pickup_address" label="Adresse complète">
+            <textarea
+              id="pickup_address"
+              rows={2}
+              value={form.pickup_address ?? ''}
+              onChange={(e) => update('pickup_address', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            />
+          </Field>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field id="pickup_hours" label="Horaires d'ouverture">
+              <input
+                id="pickup_hours"
+                type="text"
+                value={form.pickup_hours ?? ''}
+                onChange={(e) => update('pickup_hours', e.target.value)}
+                placeholder="Lun-Vie 6h30-17h · Sáb 8h-16h"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              />
+            </Field>
+            <Field id="pickup_phone" label="Téléphone pharmacie">
+              <input
+                id="pickup_phone"
+                type="tel"
+                value={form.pickup_phone ?? ''}
+                onChange={(e) => update('pickup_phone', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              />
+            </Field>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}

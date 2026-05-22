@@ -729,6 +729,57 @@ export type Database = {
         }
         Relationships: []
       }
+      shop_settings: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          id: number
+          pickup_address: string | null
+          pickup_hours: string | null
+          pickup_name: string | null
+          pickup_phone: string | null
+          shipping_interior: number
+          shipping_santo_domingo: number
+          shop_name: string
+          shop_tagline: string | null
+          updated_at: string
+          updated_by: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          id?: number
+          pickup_address?: string | null
+          pickup_hours?: string | null
+          pickup_name?: string | null
+          pickup_phone?: string | null
+          shipping_interior?: number
+          shipping_santo_domingo?: number
+          shop_name?: string
+          shop_tagline?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          id?: number
+          pickup_address?: string | null
+          pickup_hours?: string | null
+          pickup_name?: string | null
+          pickup_phone?: string | null
+          shipping_interior?: number
+          shipping_santo_domingo?: number
+          shop_name?: string
+          shop_tagline?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       tag_types: {
         Row: {
           color: string | null
