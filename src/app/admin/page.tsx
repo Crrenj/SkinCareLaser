@@ -99,9 +99,7 @@ async function fetchLowStock(): Promise<LowStockItem[]> {
     .from('products')
     .select(
       `id, name, stock, volume,
-       product_ranges (
-         ranges ( brands (name) )
-       )`,
+       range:ranges ( brand:brands (name) )`,
     )
     .eq('is_active', true)
     .lt('stock', 5)
@@ -114,13 +112,11 @@ async function fetchLowStock(): Promise<LowStockItem[]> {
     name: string
     stock: number | null
     volume: string | null
-    product_ranges?: Array<{
-      ranges?: { brands?: { name?: string | null } | null } | null
-    }>
+    range?: { brand?: { name?: string | null } | null } | null
   }>).map((p) => ({
     id: p.id,
     name: p.name,
-    brand: p.product_ranges?.[0]?.ranges?.brands?.name ?? null,
+    brand: p.range?.brand?.name ?? null,
     volume: p.volume ?? null,
     stock: p.stock ?? 0,
   }))
@@ -137,9 +133,7 @@ async function fetchTopProducts(): Promise<TopProductRow[]> {
     .select(
       `product_id, product_name, quantity, unit_price,
        reservations!inner (status, created_at),
-       products (
-         product_ranges ( ranges ( brands (name) ) )
-       )`,
+       products ( range:ranges ( brand:brands (name) ) )`,
     )
     .gte('reservations.created_at', thirtyDaysAgo)
     .neq('reservations.status', 'cancelled')
@@ -152,7 +146,7 @@ async function fetchTopProducts(): Promise<TopProductRow[]> {
     quantity: number
     unit_price: number | string
     products?: {
-      product_ranges?: Array<{ ranges?: { brands?: { name?: string | null } | null } | null }>
+      range?: { brand?: { name?: string | null } | null } | null
     } | null
   }
 
@@ -165,7 +159,7 @@ async function fetchTopProducts(): Promise<TopProductRow[]> {
     const cur = agg.get(key) ?? {
       productId: row.product_id,
       name: row.product_name,
-      brand: row.products?.product_ranges?.[0]?.ranges?.brands?.name ?? null,
+      brand: row.products?.range?.brand?.name ?? null,
       units: 0,
       total: 0,
     }

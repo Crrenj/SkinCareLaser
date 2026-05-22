@@ -93,11 +93,25 @@ export async function DELETE(
       )
     }
 
-    const { data: products, error: productsError } = await supabaseAdmin
-      .from('product_ranges')
-      .select('product_id, ranges!inner(brand_id)')
-      .eq('ranges.brand_id', id)
-      .limit(1)
+    // Vérifie qu'aucun produit n'utilise une range de cette marque.
+    // (Depuis la migration `products.range_id`, on remonte par les ranges
+    // de la marque et on cherche un produit qui pointe sur l'une d'elles.)
+    const { data: brandRanges, error: brandRangesError } = await supabaseAdmin
+      .from('ranges')
+      .select('id')
+      .eq('brand_id', id)
+
+    if (brandRangesError) throw brandRangesError
+
+    const rangeIds = (brandRanges ?? []).map((r) => r.id)
+    const { data: products, error: productsError } =
+      rangeIds.length > 0
+        ? await supabaseAdmin
+            .from('products')
+            .select('id')
+            .in('range_id', rangeIds)
+            .limit(1)
+        : { data: [], error: null }
 
     if (productsError) throw productsError
 

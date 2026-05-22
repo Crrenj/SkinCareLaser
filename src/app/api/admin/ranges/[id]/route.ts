@@ -92,8 +92,8 @@ export async function DELETE(
     }
 
     const { data: products, error: productsError } = await supabaseAdmin
-      .from('product_ranges')
-      .select('product_id')
+      .from('products')
+      .select('id')
       .eq('range_id', id)
       .limit(1)
 

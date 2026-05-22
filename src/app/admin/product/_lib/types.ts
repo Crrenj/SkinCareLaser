@@ -38,8 +38,10 @@ export interface Product {
    * `products.image_url` a été supprimée). */
   image_url: string | null
   is_active: boolean
-  brand?: Brand
-  product_ranges?: { range_id: string }[]
+  brand?: Brand | null
+  /** Mapping côté API : products.range_id direct, ou null. */
+  range_id?: string | null
+  range?: Range | null
   product_tags?: { tag: Tag }[]
   tags?: Tag[]
 }

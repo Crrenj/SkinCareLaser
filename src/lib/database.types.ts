@@ -378,43 +378,6 @@ export type Database = {
           },
         ]
       }
-      product_ranges: {
-        Row: {
-          product_id: string
-          range_id: string
-        }
-        Insert: {
-          product_id: string
-          range_id: string
-        }
-        Update: {
-          product_id?: string
-          range_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_ranges_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_ranges_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "v_bestsellers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_ranges_range_id_fkey"
-            columns: ["range_id"]
-            isOneToOne: false
-            referencedRelation: "ranges"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       product_tags: {
         Row: {
           product_id: string
@@ -475,6 +438,7 @@ export type Database = {
           pharmacist_advice: string | null
           pharmacist_name: string | null
           price: number
+          range_id: string | null
           skin_type: string[] | null
           slug: string | null
           stock: number | null
@@ -499,6 +463,7 @@ export type Database = {
           pharmacist_advice?: string | null
           pharmacist_name?: string | null
           price: number
+          range_id?: string | null
           skin_type?: string[] | null
           slug?: string | null
           stock?: number | null
@@ -523,6 +488,7 @@ export type Database = {
           pharmacist_advice?: string | null
           pharmacist_name?: string | null
           price?: number
+          range_id?: string | null
           skin_type?: string[] | null
           slug?: string | null
           stock?: number | null
@@ -532,7 +498,15 @@ export type Database = {
           usage?: string | null
           volume?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_range_id_fkey"
+            columns: ["range_id"]
+            isOneToOne: false
+            referencedRelation: "ranges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

@@ -60,11 +60,7 @@ export default async function ConfirmationPage({
       quantity,
       products (
         product_images (url, alt),
-        product_ranges (
-          ranges (
-            brands (name)
-          )
-        )
+        range:ranges ( brand:brands (name) )
       )
     `,
     )
@@ -80,13 +76,10 @@ export default async function ConfirmationPage({
       quantity: number
       products?: {
         product_images?: Array<{ url: string; alt: string | null }>
-        product_ranges?: Array<{
-          ranges?: { brands?: { name?: string | null } | null } | null
-        }>
+        range?: { brand?: { name?: string | null } | null } | null
       } | null
     }
-    const brandName =
-      item.products?.product_ranges?.[0]?.ranges?.brands?.name ?? null
+    const brandName = item.products?.range?.brand?.name ?? null
     const image = item.products?.product_images?.[0]?.url ?? null
     return {
       id: item.id,

@@ -29,9 +29,7 @@ interface RawHit {
   price: string | number
   currency: string
   product_images: { url: string; alt: string | null }[] | null
-  product_ranges:
-    | { range: { brand: { name: string } | null } | null }[]
-    | null
+  range: { brand: { name: string } | null } | null
 }
 
 interface RawBestseller {
@@ -93,11 +91,7 @@ export async function GET(request: NextRequest) {
       price,
       currency,
       product_images ( url, alt ),
-      product_ranges (
-        range:ranges (
-          brand:brands ( name )
-        )
-      )
+      range:ranges ( brand:brands ( name ) )
     `)
     .ilike('name', `%${q}%`)
     .limit(limit)
@@ -109,7 +103,7 @@ export async function GET(request: NextRequest) {
   }
 
   const hits: SearchHit[] = (data ?? []).map((p) => {
-    const brand = p.product_ranges?.[0]?.range?.brand?.name ?? ''
+    const brand = p.range?.brand?.name ?? ''
     const image = p.product_images?.[0] ?? null
     return {
       id: p.id,

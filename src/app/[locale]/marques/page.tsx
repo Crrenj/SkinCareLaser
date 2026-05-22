@@ -74,14 +74,13 @@ async function fetchBrandCards(
         }
       }
 
-      // 2. Produits actifs liés à ces ranges
+      // 2. Produits actifs liés à ces ranges (via products.range_id direct
+      //    depuis la migration product_ranges → 1-n).
       const { data: productLinks } = await supabase
-        .from('product_ranges')
-        .select('product_id')
+        .from('products')
+        .select('id')
         .in('range_id', rangeIds)
-      const productIds = Array.from(
-        new Set((productLinks ?? []).map((l) => l.product_id)),
-      )
+      const productIds = (productLinks ?? []).map((l) => l.id)
 
       if (productIds.length === 0) {
         return {

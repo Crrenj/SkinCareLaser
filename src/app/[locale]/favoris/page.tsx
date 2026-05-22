@@ -37,9 +37,7 @@ interface RawProduct {
   price: string | number
   currency: string | null
   product_images: { url: string; alt: string | null }[] | null
-  product_ranges:
-    | { range: { name: string; brand: { name: string } | null } | null }[]
-    | null
+  range: { name: string; brand: { name: string } | null } | null
 }
 
 export default async function FavorisPage({
@@ -82,9 +80,7 @@ export default async function FavorisPage({
         price,
         currency,
         product_images ( url, alt ),
-        product_ranges (
-          range:ranges ( name, brand:brands ( name ) )
-        )
+        range:ranges ( name, brand:brands ( name ) )
       `)
       .in('id', productIds)
       .returns<RawProduct[]>()
@@ -117,7 +113,7 @@ export default async function FavorisPage({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {ordered.map((p) => {
-              const firstRange = p.product_ranges?.[0]?.range ?? null
+              const firstRange = p.range
               return (
                 <ProductCard
                   key={p.id}

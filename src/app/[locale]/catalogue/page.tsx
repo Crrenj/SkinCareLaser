@@ -33,7 +33,9 @@ export async function generateMetadata({
 
 type TagItem = { name: string; tag_type: string }
 type RangeJoin = {
-  range: { id: string; name: string; brand: { id: string; name: string } | null } | null
+  id: string
+  name: string
+  brand: { id: string; name: string } | null
 }
 type RawProduct = {
   id: string
@@ -43,7 +45,7 @@ type RawProduct = {
   price: string | number
   currency: string
   product_images: { url: string; alt: string | null }[] | null
-  product_ranges: RangeJoin[] | null
+  range: RangeJoin | null
   product_tags: { tag: TagItem | null }[] | null
 }
 
@@ -68,12 +70,10 @@ export default async function Catalogue({
       price,
       currency,
       product_images ( url, alt ),
-      product_ranges (
-        range:ranges (
-          id,
-          name,
-          brand:brands ( id, name )
-        )
+      range:ranges (
+        id,
+        name,
+        brand:brands ( id, name )
       ),
       product_tags (
         tag:tags_with_types ( name, tag_type )
@@ -104,23 +104,20 @@ export default async function Catalogue({
   })
 
   // 4. Mapper les produits pour le front
-  const mappedProducts = (products ?? []).map(p => {
-    const firstRange = p.product_ranges?.[0]?.range ?? null
-    return {
-      id: p.id,
-      slug: p.slug,
-      name: p.name,
-      description: p.description ?? '',
-      price: Number(p.price),
-      currency: p.currency,
-      images: p.product_images ?? [],
-      brand: firstRange?.brand?.name ?? '',
-      range: firstRange?.name ?? '',
-      tags: (p.product_tags ?? []).flatMap(pt =>
-        pt.tag ? [{ label: pt.tag.name, category: pt.tag.tag_type }] : []
-      ),
-    }
-  })
+  const mappedProducts = (products ?? []).map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    name: p.name,
+    description: p.description ?? '',
+    price: Number(p.price),
+    currency: p.currency,
+    images: p.product_images ?? [],
+    brand: p.range?.brand?.name ?? '',
+    range: p.range?.name ?? '',
+    tags: (p.product_tags ?? []).flatMap((pt) =>
+      pt.tag ? [{ label: pt.tag.name, category: pt.tag.tag_type }] : [],
+    ),
+  }))
 
   return (
     <div className="flex flex-col min-h-screen bg-[color:var(--background)]">

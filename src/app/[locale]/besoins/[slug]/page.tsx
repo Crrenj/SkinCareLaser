@@ -18,9 +18,7 @@ type RawProduct = {
   price: string | number
   currency: string
   product_images: { url: string; alt: string | null }[] | null
-  product_ranges:
-    | { range: { brand: { name: string } | null } | null }[]
-    | null
+  range: { brand: { name: string } | null } | null
 }
 
 async function fetchNeedTag(
@@ -56,9 +54,7 @@ async function fetchProductsByTag(
       price,
       currency,
       product_images ( url, alt ),
-      product_ranges (
-        range:ranges ( brand:brands ( name ) )
-      )
+      range:ranges ( brand:brands ( name ) )
     `)
     .in('id', productIds)
     .eq('is_active', true)
@@ -134,7 +130,7 @@ export default async function NeedPage({
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {rawProducts.map((p) => {
-              const brand = p.product_ranges?.[0]?.range?.brand?.name ?? undefined
+              const brand = p.range?.brand?.name ?? undefined
               return (
                 <ProductCard
                   key={p.id}

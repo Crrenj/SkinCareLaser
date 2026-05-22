@@ -44,19 +44,12 @@ async function fetchBrandProducts(
   const rangeIds = (ranges ?? []).map((r) => r.id)
   if (rangeIds.length === 0) return []
 
-  // 2. Produits liés à ces ranges via product_ranges
-  const { data: links } = await supabase
-    .from('product_ranges')
-    .select('product_id')
-    .in('range_id', rangeIds)
-  const productIds = Array.from(new Set((links ?? []).map((l) => l.product_id)))
-  if (productIds.length === 0) return []
-
-  // 3. Produits actifs
+  // 2. Produits actifs liés à ces ranges (via products.range_id direct
+  //    depuis la migration product_ranges → 1-n).
   const { data: products } = await supabase
     .from('products')
     .select('id, slug, name, price, currency, product_images ( url, alt )')
-    .in('id', productIds)
+    .in('range_id', rangeIds)
     .eq('is_active', true)
     .order('name', { ascending: true })
     .returns<RawProduct[]>()

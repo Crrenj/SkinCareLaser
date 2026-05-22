@@ -23,14 +23,11 @@ export async function GET(req: NextRequest) {
       .from('products')
       .select(`
         *,
-        product_ranges(
-          range_id,
-          ranges(
-            id,
-            name,
-            brand_id,
-            brands(id, name)
-          )
+        range:ranges(
+          id,
+          name,
+          brand_id,
+          brand:brands(id, name)
         ),
         product_images(url, alt)
       `, { count: 'exact' })
@@ -45,12 +42,17 @@ export async function GET(req: NextRequest) {
 
     if (error) throw error
 
-    const products = data?.map(product => ({
-      ...product,
-      brand: product.product_ranges?.[0]?.ranges?.brands || null,
-      range: product.product_ranges?.[0]?.ranges || null,
-      image_url: product.product_images?.[0]?.url ?? null,
-    }))
+    const products = data?.map((product) => {
+      const range = product.range as
+        | { id: string; name: string; brand_id: string; brand: { id: string; name: string } | null }
+        | null
+      return {
+        ...product,
+        brand: range?.brand ?? null,
+        range,
+        image_url: product.product_images?.[0]?.url ?? null,
+      }
+    })
 
     return NextResponse.json({
       products,
@@ -110,34 +112,28 @@ export async function POST(req: NextRequest) {
       imageUrl = publicUrl
     }
 
-    const { data: product, error } = await supabaseAdmin
-      .from('products')
-      .insert({
-        ...productData,
-        currency: productData.currency || DEFAULT_CURRENCY,
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-
-    if (product && range_id) {
-      await supabaseAdmin
-        .from('product_ranges')
-        .insert({ product_id: product.id, range_id })
-    } else if (product && brand_id && !range_id) {
+    // Si pas de range_id explicite mais une marque, on prend la 1ère gamme de la marque.
+    let effectiveRangeId: string | null = range_id ?? null
+    if (!effectiveRangeId && brand_id) {
       const { data: availableRanges } = await supabaseAdmin
         .from('ranges')
         .select('id')
         .eq('brand_id', brand_id)
         .limit(1)
-
-      if (availableRanges && availableRanges.length > 0) {
-        await supabaseAdmin
-          .from('product_ranges')
-          .insert({ product_id: product.id, range_id: availableRanges[0].id })
-      }
+      effectiveRangeId = availableRanges?.[0]?.id ?? null
     }
+
+    const { data: product, error } = await supabaseAdmin
+      .from('products')
+      .insert({
+        ...productData,
+        currency: productData.currency || DEFAULT_CURRENCY,
+        range_id: effectiveRangeId,
+      })
+      .select()
+      .single()
+
+    if (error) throw error
 
     if (product && imageUrl) {
       await supabaseAdmin

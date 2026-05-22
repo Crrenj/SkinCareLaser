@@ -58,11 +58,7 @@ export async function GET() {
           stock,
           volume,
           product_images (url, alt),
-          product_ranges (
-            ranges (
-              brands (name)
-            )
-          )
+          range:ranges ( brand:brands (name) )
         )
       `)
       .eq('cart_id', cartId)
@@ -77,8 +73,8 @@ export async function GET() {
 
     // Formater la réponse avec typage correct.
     // Le shape retourné par Supabase avec les joins imbriqués n'est pas
-    // facilement exprimable via les types générés (relations 1-n profondes),
-    // donc on définit le shape attendu localement plutôt qu'utiliser `any`.
+    // facilement exprimable via les types générés, on définit le shape
+    // attendu localement plutôt qu'utiliser `any`.
     type CartItemRow = {
       id: string
       cart_id: string
@@ -92,17 +88,12 @@ export async function GET() {
         stock: number | null
         volume: string | null
         product_images: { url: string; alt: string | null }[]
-        product_ranges:
-          | { ranges: { brands: { name: string } | null } | null }[]
-          | null
+        range: { brand: { name: string } | null } | null
       } | null
     }
 
     const items = ((cartItems ?? []) as unknown as CartItemRow[]).map((item) => {
-      // Le brand vient via product_ranges → ranges → brands (m:m). On prend
-      // le premier dispo pour l'eyebrow d'affichage.
-      const brandName =
-        item.products?.product_ranges?.[0]?.ranges?.brands?.name ?? null
+      const brandName = item.products?.range?.brand?.name ?? null
       return {
         id: item.id,
         cart_id: item.cart_id,

@@ -31,14 +31,11 @@ export async function GET(req: NextRequest) {
         price,
         currency,
         updated_at,
-        product_ranges(
-          range_id,
-          ranges(
-            id,
-            name,
-            brand_id,
-            brands(id, name)
-          )
+        range:ranges(
+          id,
+          name,
+          brand_id,
+          brand:brands(id, name)
         )
       `)
 
@@ -53,8 +50,10 @@ export async function GET(req: NextRequest) {
     if (error) throw error
 
     const stockItems = (products || []).map((product) => {
-      const range = product.product_ranges?.[0]?.ranges as { id?: string; name?: string; brands?: { id?: string; name?: string } | null } | null | undefined
-      const brand = range?.brands || null
+      const range = product.range as
+        | { id: string; name: string; brand_id: string; brand: { id: string; name: string } | null }
+        | null
+      const brand = range?.brand || null
       const itemStatus = getStockStatus(product.stock ?? 0)
 
       return {

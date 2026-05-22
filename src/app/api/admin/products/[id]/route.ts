@@ -72,8 +72,10 @@ export async function PATCH(
     if (error) throw error
 
     if (range_id) {
-      await supabaseAdmin.from('product_ranges').delete().eq('product_id', id)
-      await supabaseAdmin.from('product_ranges').insert({ product_id: id, range_id })
+      await supabaseAdmin
+        .from('products')
+        .update({ range_id })
+        .eq('id', id)
     }
 
     if (image_url) {

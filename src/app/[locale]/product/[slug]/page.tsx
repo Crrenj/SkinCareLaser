@@ -40,7 +40,7 @@ export async function generateMetadata({
 
   const { data: prod } = await supabase
     .from('products')
-    .select('name, description, product_images(url), product_ranges(range:ranges(name, brand:brands(name)))')
+    .select('name, description, product_images(url), range:ranges(name, brand:brands(name))')
     .eq('slug', slug)
     .maybeSingle()
 
@@ -50,10 +50,8 @@ export async function generateMetadata({
     return { title: t('titleTemplate', { name: '', brand: '' }) }
   }
 
-  const ranges = (prod.product_ranges ?? []) as unknown as Array<{
-    range: { name: string; brand: { name: string } | null } | null
-  }>
-  const brandName = ranges[0]?.range?.brand?.name ?? ''
+  const range = prod.range as unknown as { name: string; brand: { name: string } | null } | null
+  const brandName = range?.brand?.name ?? ''
   const productName = prod.name
   const description = (prod.description ?? '').trim()
 
@@ -85,7 +83,9 @@ export async function generateMetadata({
 type TagItem = { name: string; tag_type: string }
 
 type RangeJoin = {
-  range: { id: string; name: string; brand: { id: string; name: string } | null } | null
+  id: string
+  name: string
+  brand: { id: string; name: string } | null
 }
 type TagJoin = { tag: TagItem | null }
 
@@ -98,7 +98,7 @@ type RawProduct = {
   slug: string
   stock: number | null
   product_images: { url: string; alt: string | null }[] | null
-  product_ranges: RangeJoin[] | null
+  range: RangeJoin | null
   product_tags: TagJoin[] | null
 }
 
@@ -125,12 +125,10 @@ const PRODUCT_SELECT = `
   slug,
   stock,
   product_images ( url, alt ),
-  product_ranges (
-    range:ranges (
-      id,
-      name,
-      brand:brands ( id, name )
-    )
+  range:ranges (
+    id,
+    name,
+    brand:brands ( id, name )
   ),
   product_tags (
     tag:tags_with_types ( name, tag_type )
@@ -147,7 +145,6 @@ function buildTagMap(rawTags: TagJoin[] | null): Record<string, string[]> {
 }
 
 function mapProduct(raw: RawProduct): MappedProduct {
-  const firstRange = raw.product_ranges?.[0]?.range ?? null
   return {
     id: raw.id,
     name: raw.name,
@@ -157,8 +154,8 @@ function mapProduct(raw: RawProduct): MappedProduct {
     slug: raw.slug,
     stock: raw.stock,
     images: raw.product_images ?? [],
-    brand: firstRange?.brand?.name ?? '',
-    range: firstRange?.name ?? '',
+    brand: raw.range?.brand?.name ?? '',
+    range: raw.range?.name ?? '',
     tagsByCategory: buildTagMap(raw.product_tags),
   }
 }
@@ -186,14 +183,14 @@ export default async function ProductPage({
   }
 
   const mainProduct = mapProduct(prodRaw)
-  const rangeId = prodRaw.product_ranges?.[0]?.range?.id
+  const rangeId = prodRaw.range?.id
 
   // 2. Produits similaires — étape A (même gamme)
   const { data: sameRange } = rangeId
     ? await supabase
         .from('products')
         .select(PRODUCT_SELECT)
-        .eq('product_ranges.range_id', rangeId)
+        .eq('range_id', rangeId)
         .neq('id', prodRaw.id)
         .limit(3)
         .returns<RawProduct[]>()

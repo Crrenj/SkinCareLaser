@@ -21,14 +21,11 @@ export async function GET(req: NextRequest) {
       .from('products')
       .select(`
         *,
-        product_ranges(
-          range_id,
-          ranges(
-            id,
-            name,
-            brand_id,
-            brands(id, name)
-          )
+        range:ranges(
+          id,
+          name,
+          brand_id,
+          brand:brands(id, name)
         ),
         product_images(url, alt)
       `, { count: 'exact' })
@@ -65,13 +62,18 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const productsWithTags = products?.map((product) => ({
-      ...product,
-      brand: product.product_ranges?.[0]?.ranges?.brands || null,
-      range: product.product_ranges?.[0]?.ranges || null,
-      image_url: product.product_images?.[0]?.url ?? null,
-      product_tags: productTags.filter((pt) => pt.product_id === product.id),
-    }))
+    const productsWithTags = products?.map((product) => {
+      const range = product.range as
+        | { id: string; name: string; brand_id: string; brand: { id: string; name: string } | null }
+        | null
+      return {
+        ...product,
+        brand: range?.brand ?? null,
+        range,
+        image_url: product.product_images?.[0]?.url ?? null,
+        product_tags: productTags.filter((pt) => pt.product_id === product.id),
+      }
+    })
 
     return NextResponse.json({
       products: productsWithTags,

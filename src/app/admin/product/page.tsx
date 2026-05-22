@@ -27,7 +27,6 @@ export default function ProductPage() {
   const openModal = (product?: Product) => {
     if (product) {
       setEditingProduct(product)
-      const range = product.product_ranges?.[0]
       const selectedTags =
         product.product_tags?.map((pt) => pt.tag.id) ||
         product.tags?.map((t) => t.id) ||
@@ -39,7 +38,7 @@ export default function ProductPage() {
         price: product.price,
         stock: product.stock,
         brand_id: product.brand?.id || '',
-        range_id: range?.range_id || '',
+        range_id: product.range_id || '',
         imageFile: null,
         selectedTags,
       })

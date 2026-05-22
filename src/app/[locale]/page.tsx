@@ -70,9 +70,7 @@ interface RawBestseller {
   price: string | number
   currency: string
   product_images: { url: string; alt: string | null }[] | null
-  product_ranges:
-    | { range: { name: string; brand: { name: string } | null } | null }[]
-    | null
+  range: { name: string; brand: { name: string } | null } | null
 }
 
 interface MappedBestseller {
@@ -182,7 +180,6 @@ export default async function LocaleHome({
 }
 
 function mapBestseller(p: RawBestseller): MappedBestseller {
-  const firstRange = p.product_ranges?.[0]?.range ?? null
   return {
     id: p.id,
     slug: p.slug ?? undefined,
@@ -191,8 +188,8 @@ function mapBestseller(p: RawBestseller): MappedBestseller {
     price: Number(p.price),
     currency: p.currency,
     images: p.product_images ?? [],
-    brand: firstRange?.brand?.name ?? undefined,
-    range: firstRange?.name ?? undefined,
+    brand: p.range?.brand?.name ?? undefined,
+    range: p.range?.name ?? undefined,
   }
 }
 
@@ -216,7 +213,7 @@ async function fetchBestsellers(
       .select(`
         id, slug, name, description, price, currency,
         product_images ( url, alt ),
-        product_ranges ( range:ranges ( name, brand:brands ( name ) ) )
+        range:ranges ( name, brand:brands ( name ) )
       `)
       .limit(4)
       .returns<RawBestseller[]>()
@@ -231,7 +228,7 @@ async function fetchBestsellers(
     .select(`
       id, slug, name, description, price, currency,
       product_images ( url, alt ),
-      product_ranges ( range:ranges ( name, brand:brands ( name ) ) )
+      range:ranges ( name, brand:brands ( name ) )
     `)
     .in('id', ids)
     .returns<RawBestseller[]>()
