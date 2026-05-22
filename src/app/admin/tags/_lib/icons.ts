@@ -102,12 +102,4 @@ export const colorOptions: string[] = [
   '#6366F1', // Indigo
 ]
 
-/** Convertit un nom en slug URL-safe (NFD, accents retirés, kebab-case). */
-export function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '')
-}
+export { generateSlug } from '@/lib/slug'
