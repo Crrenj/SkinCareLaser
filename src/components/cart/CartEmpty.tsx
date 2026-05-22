@@ -4,8 +4,8 @@ import Image from 'next/image'
 import useSWR from 'swr'
 import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
+import { formatPrice } from '@/lib/formatPrice'
 
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
 type SearchHit = {
@@ -21,11 +21,7 @@ type SearchHit = {
 export function CartEmpty() {
   const t = useTranslations('Cart.empty')
   const locale = useLocale()
-  const fmt = (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n, { locale })
 
   const { data } = useSWR<{ hits: SearchHit[] }>('/api/search?bestsellers=1&limit=3', fetcher)
   const hits = data?.hits ?? []

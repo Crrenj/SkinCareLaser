@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { ArrowRight } from 'lucide-react'
 import { PICKUP_LOCATIONS, SHIPPING_COSTS, type ShippingZone } from '@/lib/shipping'
+import { formatPrice } from '@/lib/formatPrice'
 import { ReservationDisclaimer } from './ReservationDisclaimer'
 
 export type ShippingSelection =
@@ -16,16 +17,10 @@ type Props = {
   onBack: () => void
 }
 
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
-
 export function ShippingStep({ initial, onSubmit, onBack }: Props) {
   const t = useTranslations('Reservation.shipping')
   const locale = useLocale()
-  const fmt = (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n, { locale })
 
   const [zone, setZone] = useState<ShippingZone>(initial.zone)
   const [pickupId, setPickupId] = useState<string>(

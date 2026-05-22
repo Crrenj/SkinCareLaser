@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import { useLocale, useTranslations } from 'next-intl'
 import { PICKUP_LOCATIONS, SHIPPING_COSTS } from '@/lib/shipping'
-
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
+import { formatPrice } from '@/lib/formatPrice'
+import { toLocaleTag } from '@/lib/constants'
 
 export type ConfirmationItem = {
   id: string
@@ -55,11 +55,7 @@ export function ConfirmationRecap({
   const t = useTranslations('Reservation.confirmation')
   const tDeliv = useTranslations('Reservation.deliveryLabels')
   const locale = useLocale()
-  const fmt = (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n, { locale })
 
   const shippingCost =
     !shipping || shipping.kind === 'pickup' ? 0 : SHIPPING_COSTS[shipping.zone]
@@ -76,7 +72,7 @@ export function ConfirmationRecap({
       : tDeliv(shipping.zone)
 
   const formattedDate = savedAt
-    ? new Intl.DateTimeFormat(localeMap[locale] ?? 'es-DO', {
+    ? new Intl.DateTimeFormat(toLocaleTag(locale), {
         day: 'numeric',
         month: 'long',
         hour: '2-digit',

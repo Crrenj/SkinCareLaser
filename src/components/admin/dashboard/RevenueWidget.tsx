@@ -1,5 +1,6 @@
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
 import Link from 'next/link'
+import { formatPrice } from '@/lib/formatPrice'
 
 export type DailyPoint = {
   /** ISO date (YYYY-MM-DD) */
@@ -17,11 +18,7 @@ type RevenueWidgetProps = {
   previous: DailyPoint[]
 }
 
-const fmtDOP = (n: number) =>
-  new Intl.NumberFormat('es-DO', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.round(n))
+const fmtDOP = (n: number) => formatPrice(Math.round(n), { fractionDigits: 0 })
 
 const sum = (rows: DailyPoint[], key: 'reserved' | 'confirmed') =>
   rows.reduce((acc, r) => acc + (r[key] ?? 0), 0)

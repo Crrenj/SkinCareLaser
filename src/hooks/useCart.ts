@@ -1,5 +1,6 @@
 import useSWR, { mutate } from 'swr'
 import { CartResponse, AddToCartRequest } from '@/types/cart'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
 
 // Fetcher pour SWR avec gestion d'erreur améliorée
 const fetcher = async (url: string): Promise<CartResponse> => {
@@ -81,7 +82,7 @@ export function useCart() {
           id: productId,
           name: 'Chargement...',
           price: 0,
-          currency: 'DOP',
+          currency: DEFAULT_CURRENCY,
           stock: 0,
           images: []
         }

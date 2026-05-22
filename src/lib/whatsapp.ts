@@ -4,6 +4,7 @@ import {
   type PickupLocation,
   type ShippingZone,
 } from '@/lib/shipping'
+import { formatPrice } from '@/lib/formatPrice'
 
 export type ReservationContact = {
   firstName: string
@@ -52,11 +53,7 @@ export function buildReservationMessage(p: ReservationPayload): string {
   const shippingCost =
     p.shipping.kind === 'pickup' ? 0 : SHIPPING_COSTS[p.shipping.zone]
   const total = p.subtotal + shippingCost
-  const fmt = (n: number) =>
-    new Intl.NumberFormat('es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n)
 
   const lines: string[] = []
   lines.push(`Hola FARMAU 👋, quiero confirmar mi reserva *#${p.reference}*.`)

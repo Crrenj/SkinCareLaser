@@ -1,3 +1,5 @@
+import { formatPrice } from '@/lib/formatPrice'
+
 /**
  * Status DB existants (5 valeurs enum) + label ES par défaut.
  * Le design théorique mentionne "Contactada" en plus mais la valeur
@@ -107,8 +109,5 @@ export function relativeAndAbsolute(iso: string | null | undefined): {
 }
 
 export function fmtDOP(n: number, fractional = 2): string {
-  return new Intl.NumberFormat('es-DO', {
-    minimumFractionDigits: fractional,
-    maximumFractionDigits: fractional,
-  }).format(n)
+  return formatPrice(n, { fractionDigits: fractional })
 }

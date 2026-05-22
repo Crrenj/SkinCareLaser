@@ -7,6 +7,7 @@ import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import { Link } from '@/i18n/navigation'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
 
 export const dynamic = 'force-dynamic' // favoris dépend de l'user connecté
 
@@ -126,7 +127,7 @@ export default async function FavorisPage({
                     name: p.name,
                     description: p.description ?? undefined,
                     price: Number(p.price),
-                    currency: p.currency ?? 'DOP',
+                    currency: p.currency ?? DEFAULT_CURRENCY,
                     images: (p.product_images ?? []).map((img) => ({
                       url: img.url,
                       alt: img.alt,

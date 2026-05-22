@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { formatPrice } from '@/lib/formatPrice'
 
 export type TopProductRow = {
   productId: string | null
@@ -8,11 +9,7 @@ export type TopProductRow = {
   totalDop: number
 }
 
-const fmtDOP = (n: number) =>
-  new Intl.NumberFormat('es-DO', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.round(n))
+const fmtDOP = (n: number) => formatPrice(Math.round(n), { fractionDigits: 0 })
 
 export function TopProductsWidget({ rows }: { rows: TopProductRow[] }) {
   return (

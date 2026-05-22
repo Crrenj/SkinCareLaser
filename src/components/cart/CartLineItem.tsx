@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Trash2 } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { CartItem } from '@/types/cart'
+import { formatPrice } from '@/lib/formatPrice'
 
 type CartLineItemProps = {
   item: CartItem
@@ -15,15 +16,9 @@ type CartLineItemProps = {
   busy?: boolean
 }
 
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
-
 function useFormatNumber() {
   const locale = useLocale()
-  return (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  return (n: number) => formatPrice(n, { locale })
 }
 
 export function CartLineItem({

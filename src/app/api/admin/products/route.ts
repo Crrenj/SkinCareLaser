@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
 
 // GET /api/admin/products -> liste des produits avec pagination
 export async function GET(req: NextRequest) {
@@ -113,7 +114,7 @@ export async function POST(req: NextRequest) {
       .from('products')
       .insert({
         ...productData,
-        currency: productData.currency || 'DOP',
+        currency: productData.currency || DEFAULT_CURRENCY,
       })
       .select()
       .single()

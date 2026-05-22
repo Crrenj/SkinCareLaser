@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
 
 /**
  * GET /api/search?q=<query>&limit=<n>
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
         name: p.name!,
         brand: '',
         price: Number(p.price ?? 0),
-        currency: p.currency ?? 'DOP',
+        currency: p.currency ?? DEFAULT_CURRENCY,
         image: null,
       }))
 

@@ -2,6 +2,7 @@
 
 import { Loader2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { formatPrice } from '@/lib/formatPrice'
 
 type CartSummaryProps = {
   /** Sous-total panier (sans livraison — la livraison est calculée à l'étape suivante) */
@@ -16,7 +17,6 @@ type CartSummaryProps = {
   hideTrustSignals?: boolean
 }
 
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
 
 export function CartSummary({
   subtotal,
@@ -28,11 +28,7 @@ export function CartSummary({
 }: CartSummaryProps) {
   const t = useTranslations('Cart')
   const locale = useLocale()
-  const fmt = (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n, { locale })
 
   const isPage = variant === 'page'
 

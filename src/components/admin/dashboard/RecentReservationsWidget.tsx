@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { StatusBadge, type ReservationStatus } from './StatusBadge'
+import { formatPrice } from '@/lib/formatPrice'
 
 export type ReservationRow = {
   id: string
@@ -10,11 +11,7 @@ export type ReservationRow = {
   whatsappOpened: boolean
 }
 
-const fmtDOP = (n: number) =>
-  new Intl.NumberFormat('es-DO', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(n)
+const fmtDOP = (n: number) => formatPrice(n)
 
 export function RecentReservationsWidget({ rows }: { rows: ReservationRow[] }) {
   return (

@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl'
 import type { ShippingZone } from '@/lib/shipping'
 import type { CartItem } from '@/types/cart'
+import { formatPrice } from '@/lib/formatPrice'
 import { ReservationDisclaimer } from './ReservationDisclaimer'
 
 type Props = {
@@ -17,8 +18,6 @@ type Props = {
   ctaSlot?: React.ReactNode
 }
 
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
-
 export function ReservationSummary({
   items,
   subtotal,
@@ -30,11 +29,7 @@ export function ReservationSummary({
   const t = useTranslations('Reservation')
   const tCart = useTranslations('Cart')
   const locale = useLocale()
-  const fmt = (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n, { locale })
 
   const total = subtotal + shippingCost
   const showFullTotal = variant !== 'subtotal-only'

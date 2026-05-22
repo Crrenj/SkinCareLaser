@@ -5,10 +5,9 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import type { CartItem } from '@/types/cart'
 import { PICKUP_LOCATIONS, SHIPPING_COSTS } from '@/lib/shipping'
+import { formatPrice } from '@/lib/formatPrice'
 import type { AddressData } from './AddressStep'
 import type { ShippingSelection } from './ShippingStep'
-
-const localeMap: Record<string, string> = { fr: 'fr-FR', es: 'es-DO', en: 'en-US' }
 
 type Props = {
   items: CartItem[]
@@ -41,11 +40,7 @@ export function ReviewStep({
   const tShipping = useTranslations('Reservation.shipping')
   const tIndic = useTranslations('Reservation.stepIndicator')
   const locale = useLocale()
-  const fmt = (n: number) =>
-    new Intl.NumberFormat(localeMap[locale] ?? 'es-DO', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(n)
+  const fmt = (n: number) => formatPrice(n, { locale })
 
   const [note, setNote] = useState(initialNote)
 
@@ -208,7 +203,7 @@ export function ReviewStep({
           onChange={(e) => setNote(e.target.value)}
           placeholder={t('notePlaceholder')}
           maxLength={500}
-          className="w-full min-h-[80px] px-3 py-3 rounded-lg border border-sand-300 bg-sand-50 text-[14px] text-ink-900 leading-[1.5] placeholder:text-ink-500 focus:outline-none focus:border-clay-700 focus:ring-[3px] focus:ring-clay-700/20 transition-colors resize-y"
+          className="w-full min-h-[80px] px-3 py-3 rounded-lg border border-sand-300 bg-sand-50 text-[14px] text-ink-900 leading-[1.5] placeholder:text-ink-500 focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors resize-y"
         />
       </section>
 
