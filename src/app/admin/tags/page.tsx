@@ -34,6 +34,7 @@ import {
   AcademicCapIcon
 } from '@heroicons/react/24/outline'
 import { toast } from 'sonner'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 interface Tag {
   id: string
@@ -73,6 +74,10 @@ export default function TagsPage() {
   const [editingType, setEditingType] = useState<TagType | null>(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ type: 'tag' | 'type', id: string } | null>(null)
+
+  const tagDialogRef = useModalA11y(showTagModal, () => setShowTagModal(false))
+  const typeDialogRef = useModalA11y(showTypeModal, () => setShowTypeModal(false))
+  const deleteDialogRef = useModalA11y(!!showDeleteConfirm, () => setShowDeleteConfirm(null))
   
   const [tagForm, setTagForm] = useState({
     name: '',
@@ -510,14 +515,27 @@ export default function TagsPage() {
 
       {/* Modal de type de tag */}
       {showTypeModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+          onClick={() => setShowTypeModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={typeDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tag-type-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 id="tag-type-modal-title" className="text-lg font-bold text-gray-900">
                 {editingType ? 'Modifier le type de tag' : 'Nouveau type de tag'}
               </h3>
               <button
                 onClick={() => setShowTypeModal(false)}
+                aria-label="Fermer"
                 className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <XMarkIcon className="h-5 w-5 text-gray-400" />
@@ -643,14 +661,27 @@ export default function TagsPage() {
 
       {/* Modal de tag */}
       {showTagModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+          onClick={() => setShowTagModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={tagDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tag-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 id="tag-modal-title" className="text-lg font-bold text-gray-900">
                 {editingTag ? 'Modifier le tag' : 'Nouveau tag'}
               </h3>
               <button
                 onClick={() => setShowTagModal(false)}
+                aria-label="Fermer"
                 className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <XMarkIcon className="h-5 w-5 text-gray-400" />
@@ -726,9 +757,21 @@ export default function TagsPage() {
 
       {/* Modal de confirmation de suppression */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-          <div className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Confirmer la suppression</h3>
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+          onClick={() => setShowDeleteConfirm(null)}
+          aria-hidden="true"
+        >
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tag-delete-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white"
+          >
+            <h3 id="tag-delete-modal-title" className="text-lg font-bold text-gray-900 mb-4">Confirmer la suppression</h3>
             <p className="text-sm text-gray-600 mb-6">
               Êtes-vous sûr de vouloir supprimer {showDeleteConfirm.type === 'type' ? 'ce type de tag' : 'ce tag'} ? 
               Cette action est irréversible.

@@ -15,6 +15,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 interface ContactMessage {
   id: string
@@ -49,6 +50,8 @@ export default function MessagesAdminPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [showMessageModal, setShowMessageModal] = useState(false)
+
+  const messageDialogRef = useModalA11y(showMessageModal, () => setShowMessageModal(false))
 
   // Charger les messages
   const loadMessages = async () => {
@@ -304,13 +307,25 @@ export default function MessagesAdminPage() {
 
         {/* Modal de détail du message */}
         {showMessageModal && selectedMessage && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={() => setShowMessageModal(false)}
+            aria-hidden="true"
+          >
+            <div
+              ref={messageDialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="messages-modal-title"
+              tabIndex={-1}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            >
               <div className="p-6">
                 {/* En-tête du modal */}
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">
+                    <h3 id="messages-modal-title" className="text-lg font-medium text-gray-900 mb-1">
                       {selectedMessage.subject}
                     </h3>
                     <div className="flex items-center gap-2 text-sm text-gray-600">

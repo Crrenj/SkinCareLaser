@@ -16,6 +16,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline'
 import { toast } from 'sonner'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 type BannerType =
   | 'editorial'
@@ -56,6 +57,9 @@ export default function AnnoncePage() {
   const [showModal, setShowModal] = useState(false)
   const [editingBanner, setEditingBanner] = useState<BannerData | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+
+  const formDialogRef = useModalA11y(showModal, () => setShowModal(false))
+  const deleteDialogRef = useModalA11y(!!showDeleteConfirm, () => setShowDeleteConfirm(null))
   const [previewMode, setPreviewMode] = useState(false)
   const [saving, setSaving] = useState(false)
   
@@ -504,14 +508,27 @@ export default function AnnoncePage() {
 
       {/* Modal d'ajout/édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={formDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="annonce-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white"
+          >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 id="annonce-modal-title" className="text-lg font-bold text-gray-900">
                 {editingBanner ? 'Modifier la bannière' : 'Créer une bannière'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
+                aria-label="Fermer"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -767,13 +784,25 @@ export default function AnnoncePage() {
 
       {/* Modal de confirmation de suppression */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowDeleteConfirm(null)}
+          aria-hidden="true"
+        >
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="annonce-delete-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+          >
             <div className="mt-3 text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                 <TrashIcon className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mt-2">Supprimer la bannière</h3>
+              <h3 id="annonce-delete-modal-title" className="text-lg font-medium text-gray-900 mt-2">Supprimer la bannière</h3>
               <p className="text-sm text-gray-500 mt-2">
                 Êtes-vous sûr de vouloir supprimer cette bannière ? Cette action ne peut pas être annulée.
               </p>

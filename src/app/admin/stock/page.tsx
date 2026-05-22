@@ -11,6 +11,7 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline'
 import { toast } from 'sonner'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 interface StockItem {
   id: string
@@ -50,6 +51,8 @@ export default function StockPage() {
     product_id: '',
     current_stock: 0
   })
+
+  const dialogRef = useModalA11y(showModal, () => setShowModal(false))
 
   // Fonction pour récupérer les données de stock
   const fetchStockData = async () => {
@@ -360,9 +363,21 @@ export default function StockPage() {
 
       {/* Modal d'édition */}
       {showModal && editingItem && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="stock-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+          >
+            <h3 id="stock-modal-title" className="text-lg font-bold text-gray-900 mb-4">
               Modifier le stock - {editingItem.product_name}
             </h3>
             

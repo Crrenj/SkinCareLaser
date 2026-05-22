@@ -13,6 +13,7 @@ import {
   Squares2X2Icon
 } from '@heroicons/react/24/outline'
 import { toast } from 'sonner'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 interface Brand {
   id: string
@@ -42,6 +43,11 @@ export default function MarquesPage() {
   const [selectedBrandForRange, setSelectedBrandForRange] = useState<string | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
   const [showRangeDeleteConfirm, setShowRangeDeleteConfirm] = useState<string | null>(null)
+
+  const brandDialogRef = useModalA11y(showModal, () => setShowModal(false))
+  const rangeDialogRef = useModalA11y(showRangeModal, () => setShowRangeModal(false))
+  const brandDeleteDialogRef = useModalA11y(!!showDeleteConfirm, () => setShowDeleteConfirm(null))
+  const rangeDeleteDialogRef = useModalA11y(!!showRangeDeleteConfirm, () => setShowRangeDeleteConfirm(null))
   const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set())
   
   // Formulaires
@@ -482,14 +488,27 @@ export default function MarquesPage() {
 
       {/* Modal d'ajout/édition marque */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={brandDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="brand-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 id="brand-modal-title" className="text-lg font-bold text-gray-900">
                 {editingBrand ? 'Modifier la marque' : 'Nouvelle marque'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
+                aria-label="Fermer"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -553,14 +572,27 @@ export default function MarquesPage() {
 
       {/* Modal d'ajout/édition gamme */}
       {showRangeModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowRangeModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={rangeDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="range-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+          >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 id="range-modal-title" className="text-lg font-bold text-gray-900">
                 {editingRange ? 'Modifier la gamme' : 'Nouvelle gamme'}
               </h3>
               <button
                 onClick={() => setShowRangeModal(false)}
+                aria-label="Fermer"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -642,13 +674,25 @@ export default function MarquesPage() {
 
       {/* Modal de confirmation de suppression marque */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowDeleteConfirm(null)}
+          aria-hidden="true"
+        >
+          <div
+            ref={brandDeleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="brand-delete-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+          >
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                 <TrashIcon className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="mt-2 text-lg font-medium text-gray-900">
+              <h3 id="brand-delete-modal-title" className="mt-2 text-lg font-medium text-gray-900">
                 Supprimer la marque
               </h3>
               <p className="mt-2 text-sm text-gray-500">
@@ -675,13 +719,25 @@ export default function MarquesPage() {
 
       {/* Modal de confirmation de suppression gamme */}
       {showRangeDeleteConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowRangeDeleteConfirm(null)}
+          aria-hidden="true"
+        >
+          <div
+            ref={rangeDeleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="range-delete-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+          >
             <div className="text-center">
               <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                 <TrashIcon className="h-6 w-6 text-red-600" />
               </div>
-              <h3 className="mt-2 text-lg font-medium text-gray-900">
+              <h3 id="range-delete-modal-title" className="mt-2 text-lg font-medium text-gray-900">
                 Supprimer la gamme
               </h3>
               <p className="mt-2 text-sm text-gray-500">

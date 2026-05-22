@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { PlusIcon, PencilIcon, TrashIcon, PhotoIcon, MagnifyingGlassIcon, TagIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { toast } from 'sonner'
+import { useModalA11y } from '@/hooks/useModalA11y'
 
 interface Brand {
   id: string
@@ -61,6 +62,9 @@ export default function ProductPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+
+  const formDialogRef = useModalA11y(showModal, () => setShowModal(false))
+  const deleteDialogRef = useModalA11y(!!showDeleteConfirm, () => setShowDeleteConfirm(null))
   
   // Formulaire
   const [formData, setFormData] = useState({
@@ -476,14 +480,27 @@ export default function ProductPage() {
 
       {/* Modal d'ajout/édition */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowModal(false)}
+          aria-hidden="true"
+        >
+          <div
+            ref={formDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white"
+          >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-gray-900">
+              <h3 id="product-modal-title" className="text-lg font-bold text-gray-900">
                 {editingProduct ? 'Modifier le produit' : 'Ajouter un produit'}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
+                aria-label="Fermer"
                 className="text-gray-400 hover:text-gray-600"
               >
                 <XMarkIcon className="h-6 w-6" />
@@ -674,11 +691,23 @@ export default function ProductPage() {
 
       {/* Modal de confirmation de suppression */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+          onClick={() => setShowDeleteConfirm(null)}
+          aria-hidden="true"
+        >
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-delete-modal-title"
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+            className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white"
+          >
             <div className="mt-3 text-center">
               <TrashIcon className="mx-auto h-12 w-12 text-red-500" />
-              <h3 className="text-lg font-medium text-gray-900 mt-2">Confirmer la suppression</h3>
+              <h3 id="product-delete-modal-title" className="text-lg font-medium text-gray-900 mt-2">Confirmer la suppression</h3>
               <p className="text-sm text-gray-500 mt-2">
                 Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.
               </p>
