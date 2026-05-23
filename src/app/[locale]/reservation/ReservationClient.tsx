@@ -36,7 +36,7 @@ export default function ReservationClient({ initialProfile }: ReservationClientP
   const t = useTranslations('Reservation')
   const tReview = useTranslations('Reservation.review')
   const router = useRouter()
-  const { items, totalItems, totalPrice } = useCart()
+  const { items, totalItems, totalPrice, isLoading: cartLoading } = useCart()
 
   // Persistance brouillon dans sessionStorage pour survivre F5
   const [draft, setDraft] = useState<Draft>({})
@@ -163,10 +163,13 @@ export default function ReservationClient({ initialProfile }: ReservationClientP
     [draft, initialProfile.email, router, t, totalPrice],
   )
 
-  // Si le panier vide arrive en cours (race condition refresh), retour cart
+  // Si le panier vide arrive en cours (race condition refresh), retour cart.
+  // Important : attendre que SWR ait fini son fetch initial — sinon
+  // totalItems vaut 0 par défaut et on redirige systématiquement à l'arrivée
+  // sur /reservation, même avec un cart non vide.
   useEffect(() => {
-    if (totalItems === 0) router.replace('/cart')
-  }, [totalItems, router])
+    if (!cartLoading && totalItems === 0) router.replace('/cart')
+  }, [cartLoading, totalItems, router])
 
   const handleEdit = (s: ReservationStep) => setStep(s)
 
