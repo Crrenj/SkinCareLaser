@@ -82,16 +82,7 @@ test.describe('Réservation E2E', () => {
       .toBeGreaterThan(0)
   }
 
-  // FIXME bug RLS sur carts UPDATE policy :
-  //   `(auth.uid() = user_id) OR (anonymous_id = auth.jwt()->>'anonymous_id')`
-  // Le merge useAuth.handleUserLogin (UPDATE carts SET user_id WHERE anonymous_id=X)
-  // est silently bloqué car user_id IS NULL et le JWT n'a pas de claim
-  // anonymous_id → 0 rows updated, sans erreur. Conséquence : le cart anon
-  // reste orphelin, totalItems après login = 0, /api/cart/reserve renvoie
-  // cart_empty. À fixer côté policy (autoriser UPDATE quand user_id IS NULL
-  // et l'update set user_id = auth.uid()) ou côté code (utiliser service role
-  // pour le merge via une RPC dédiée).
-  test.fixme('Happy path : addToCart anon → login (merge) → reserve → 200 + /account/reservations', async ({
+  test('Happy path : addToCart anon → login (merge) → reserve → 200 + /account/reservations', async ({
     page,
   }) => {
     await addFeaturedToCart(page)
@@ -104,13 +95,13 @@ test.describe('Réservation E2E', () => {
     expect(body.reservationId).toMatch(/^[0-9a-f-]{36}$/)
 
     await page.goto('/fr/account/reservations', { waitUntil: 'domcontentloaded' })
-    const refShort = body.reservationId.slice(0, 8).toUpperCase()
-    // La page affiche `#XXXXXXXX` (8 premiers hex maj). On regarde dans le DOM.
-    await expect(page.locator(`text=#${refShort}`).first()).toBeVisible({ timeout: 30_000 })
+    // La page affiche la référence = id sans tirets, 8 premiers hex en maj
+    // (cf src/app/[locale]/account/reservations/page.tsx buildReference).
+    const refShort = body.reservationId.replace(/-/g, '').slice(0, 8).toUpperCase()
+    await expect(page.locator(`text=${refShort}`).first()).toBeVisible({ timeout: 30_000 })
   })
 
-  // FIXME même cause que le test précédent (merge cart anon→user bloqué par RLS).
-  test.fixme('409 si réservation active déjà en cours', async ({ page }) => {
+  test('409 si réservation active déjà en cours', async ({ page }) => {
     await addFeaturedToCart(page)
     await loginAs(page, user)
 

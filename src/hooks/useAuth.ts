@@ -10,22 +10,22 @@ export function useAuth() {
   useEffect(() => {
     // Handlers définis dans useEffect pour ne pas les inclure dans les deps
     // tout en respectant react-hooks/exhaustive-deps.
-    const handleUserLogin = async (userId: string) => {
+    const handleUserLogin = async () => {
       try {
         const cartId = getCookie('cart_id')
-        if (cartId) {
-          // Fusionner le panier anonyme avec l'utilisateur connecté
-          const { error } = await supabase
-            .from('carts')
-            .update({ user_id: userId, anonymous_id: null })
-            .eq('anonymous_id', cartId)
-
-          if (error) {
-            console.error('Erreur fusion panier:', error)
-          } else {
-            deleteCookie('cart_id')
-            await refreshCart()
-          }
+        if (!cartId) return
+        // Via RPC SECURITY DEFINER : la policy RLS UPDATE de carts exige
+        // auth.uid() = user_id, ce qui empêche le merge en mode direct
+        // (le cart cible a user_id IS NULL). La RPC valide auth.uid() puis
+        // bypass RLS pour reclaim ou fusionner le cart anonyme.
+        const { error } = await supabase.rpc('merge_anon_cart_to_user', {
+          p_anon_id: cartId,
+        })
+        if (error) {
+          console.error('Erreur fusion panier:', error)
+        } else {
+          deleteCookie('cart_id')
+          await refreshCart()
         }
       } catch (error) {
         console.error('Erreur lors de la fusion du panier:', error)
@@ -44,7 +44,7 @@ export function useAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          await handleUserLogin(session.user.id)
+          await handleUserLogin()
         } else if (event === 'SIGNED_OUT') {
           await handleUserLogout()
         }

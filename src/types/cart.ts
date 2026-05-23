@@ -25,7 +25,7 @@ export interface CartItem {
 export interface Cart {
   id: string
   user_id: string | null
-  anonymous_id: string
+  anonymous_id: string | null
   created_at: string
   items: CartItem[]
 }

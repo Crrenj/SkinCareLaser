@@ -1,38 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { CartResponse, AddToCartRequest } from '@/types/cart'
 
-// Client Supabase normal
-function createSupabaseClient() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-  
-  return supabase
+/**
+ * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
+ * on travaille avec son cart user_id (et on n'écrit pas le cookie anon).
+ * Sinon on retombe sur le cookie `cart_id` UUID (créé à la volée si absent).
+ *
+ * Retourne aussi le user_id pour les RPC qui en ont besoin.
+ */
+async function resolveCartContext(supabase: SupabaseClient): Promise<{
+  userId: string | null
+  anonId: string | null
+}> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    return { userId: user.id, anonId: null }
+  }
+
+  const cookieStore = await cookies()
+  let anonId = cookieStore.get('cart_id')?.value ?? null
+  if (!anonId) {
+    anonId = crypto.randomUUID()
+    cookieStore.set('cart_id', anonId, {
+      maxAge: 60 * 60 * 24 * 30, // 30 jours
+      sameSite: 'lax',
+      httpOnly: false, // accès client (legacy)
+    })
+  }
+  return { userId: null, anonId }
 }
 
 // GET : Récupérer l'état du panier
 export async function GET() {
   try {
-    const cookieStore = await cookies()
-    let anonId = cookieStore.get('cart_id')?.value
-    
-    if (!anonId) {
-      anonId = crypto.randomUUID()
-      cookieStore.set('cart_id', anonId, {
-        maxAge: 60 * 60 * 24 * 30, // 30 jours
-        sameSite: 'lax',
-        httpOnly: false // Permettre l'accès côté client
-      })
-    }
-    
-    const supabase = createSupabaseClient()
-    
-    // Récupérer ou créer le panier
-    const { data: cartId, error: cartError } = await supabase
-      .rpc('get_or_create_cart', { p_anonymous_id: anonId })
+    const supabase = await createSupabaseServerClient()
+    const { userId, anonId } = await resolveCartContext(supabase)
+
+    const { data: cartId, error: cartError } = await supabase.rpc('get_or_create_cart', {
+      p_user_id: userId,
+      p_anonymous_id: anonId,
+    })
 
     if (cartError) {
       console.error('Erreur création panier:', cartError)
@@ -42,7 +52,6 @@ export async function GET() {
       )
     }
 
-    // Récupérer les items du panier avec les détails produits
     const { data: cartItems, error: itemsError } = await supabase
       .from('cart_items')
       .select(`
@@ -71,10 +80,8 @@ export async function GET() {
       )
     }
 
-    // Formater la réponse avec typage correct.
-    // Le shape retourné par Supabase avec les joins imbriqués n'est pas
-    // facilement exprimable via les types générés, on définit le shape
-    // attendu localement plutôt qu'utiliser `any`.
+    // Shape retourné par Supabase avec les joins imbriqués — typé localement
+    // (les types générés ne capturent pas bien les joins multi-niveau).
     type CartItemRow = {
       id: string
       cart_id: string
@@ -116,24 +123,23 @@ export async function GET() {
           : undefined,
       }
     })
-    
+
     const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
     const totalPrice = items.reduce((sum, item) => sum + (item.product?.price || 0) * item.quantity, 0)
-    
+
     const response: CartResponse = {
       cart: {
         id: cartId,
-        user_id: null, // Sera mis à jour lors de la connexion
+        user_id: userId,
         anonymous_id: anonId,
         created_at: new Date().toISOString(),
-        items
+        items,
       },
       totalItems,
-      totalPrice
+      totalPrice,
     }
-    
+
     return NextResponse.json(response)
-    
   } catch (error) {
     console.error('Erreur API panier:', error)
     return NextResponse.json(
@@ -146,54 +152,43 @@ export async function GET() {
 // POST : Ajouter/modifier un item dans le panier
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies()
-    let anonId = cookieStore.get('cart_id')?.value
-    
-    if (!anonId) {
-      anonId = crypto.randomUUID()
-      cookieStore.set('cart_id', anonId, {
-        maxAge: 60 * 60 * 24 * 30,
-        sameSite: 'lax',
-        httpOnly: false
-      })
-    }
-    
     const body: AddToCartRequest = await request.json()
     const { productId, quantity } = body
-    
+
     if (!productId || quantity <= 0) {
       return NextResponse.json(
         { error: 'Paramètres invalides' },
         { status: 400 }
       )
     }
-    
-    const supabase = createSupabaseClient()
-    
-    // Vérifier le stock disponible
+
+    const supabase = await createSupabaseServerClient()
+    const { userId, anonId } = await resolveCartContext(supabase)
+
     const { data: product, error: productError } = await supabase
       .from('products')
       .select('stock, price')
       .eq('id', productId)
       .single()
-    
+
     if (productError || !product) {
       return NextResponse.json(
         { error: 'Produit non trouvé' },
         { status: 404 }
       )
     }
-    
-    if (product.stock < quantity) {
+
+    if ((product.stock ?? 0) < quantity) {
       return NextResponse.json(
         { error: 'Stock insuffisant' },
         { status: 400 }
       )
     }
-    
-    // Récupérer ou créer le panier
-    const { data: cartId, error: cartError } = await supabase
-      .rpc('get_or_create_cart', { p_anonymous_id: anonId })
+
+    const { data: cartId, error: cartError } = await supabase.rpc('get_or_create_cart', {
+      p_user_id: userId,
+      p_anonymous_id: anonId,
+    })
 
     if (cartError) {
       return NextResponse.json(
@@ -202,25 +197,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Utiliser directement la fonction RPC avec la signature correcte
-    const { error: rpcError } = await supabase
-      .rpc('add_to_cart', {
-        p_cart_id: cartId,
-        p_product_id: productId,
-        p_quantity: quantity,
-        p_anon_id: anonId
-      })
-    
+    const { error: rpcError } = await supabase.rpc('add_to_cart', {
+      p_cart_id: cartId,
+      p_product_id: productId,
+      p_quantity: quantity,
+      // anon_id seulement en mode anon (la RPC le valide contre le cart) ;
+      // en mode user on passe null et le check est skippé.
+      p_anon_id: anonId,
+    })
+
     if (rpcError) {
-      console.error('Erreur RPC:', rpcError)
+      console.error('Erreur RPC add_to_cart:', rpcError)
       return NextResponse.json(
         { error: 'Erreur lors de l\'ajout au panier' },
         { status: 500 }
       )
     }
-    
+
     return NextResponse.json({ success: true })
-    
   } catch (error) {
     console.error('Erreur POST panier:', error)
     return NextResponse.json(
@@ -235,43 +229,39 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const productId = searchParams.get('productId')
-    
+
     if (!productId) {
       return NextResponse.json(
         { error: 'ID produit requis' },
         { status: 400 }
       )
     }
-    
-    const cookieStore = await cookies()
-    const anonId = cookieStore.get('cart_id')?.value
-    
-    if (!anonId) {
+
+    const supabase = await createSupabaseServerClient()
+    const { userId, anonId } = await resolveCartContext(supabase)
+
+    if (!userId && !anonId) {
       return NextResponse.json(
         { error: 'Panier non trouvé' },
         { status: 404 }
       )
     }
-    
-    const supabase = createSupabaseClient()
-    
-    // Utiliser directement la fonction RPC pour la suppression
-    const { error: rpcError } = await supabase
-      .rpc('remove_from_cart', {
-        p_product_id: productId,
-        p_anon_id: anonId
-      })
-    
+
+    // remove_from_cart hardened : utilise auth.uid() OU p_anon_id.
+    const { error: rpcError } = await supabase.rpc('remove_from_cart', {
+      p_product_id: productId,
+      p_anon_id: anonId,
+    })
+
     if (rpcError) {
-      console.error('Erreur RPC suppression:', rpcError)
+      console.error('Erreur RPC remove_from_cart:', rpcError)
       return NextResponse.json(
         { error: 'Erreur lors de la suppression' },
         { status: 500 }
       )
     }
-    
+
     return NextResponse.json({ success: true })
-    
   } catch (error) {
     console.error('Erreur DELETE panier:', error)
     return NextResponse.json(
@@ -279,4 +269,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     )
   }
-} 
+}

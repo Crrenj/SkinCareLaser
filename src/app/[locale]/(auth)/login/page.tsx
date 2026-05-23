@@ -81,12 +81,10 @@ function LoginForm() {
         let isAdmin = isAdminFromMeta
 
         if (!isAdminFromMeta) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', data.session.user.id)
-            .single()
-          isAdmin = profile?.is_admin === true
+          const { data: isAdminRpc } = await supabase.rpc('is_user_admin', {
+            check_user_id: data.session.user.id,
+          })
+          isAdmin = isAdminRpc === true
         }
 
         setRedirecting(true)

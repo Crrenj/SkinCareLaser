@@ -40,9 +40,11 @@ test.describe('Panier invité', () => {
     await expect(page.locator('[data-testid="cart-badge"]')).toHaveText('1', { timeout: 10_000 })
   })
 
-  // FIXME: après reload, le badge ne réapparaît pas dans la fenêtre 10s.
-  // Le POST /api/cart répond 200 mais la persistance via cookie cart_id
-  // semble incompatible avec le timing SWR au remount. À investiguer.
+  // FIXME flaky : badge=1 après add (optimistic SWR ✓), mais après reload
+  // le GET /api/cart retourne occasionnellement un cart vide. Probablement
+  // un race entre la persistance Postgres et le SWR refetch immédiat post-
+  // reload. Pas reproductible manuellement. Garder fixme tant qu'on n'a pas
+  // de retry/poll côté useCart.
   test.fixme('Persistance du panier après refresh', async ({ page }) => {
     await gotoCatalogueReady(page)
     await page.locator('[data-testid="add-to-cart-button"]').first().click()

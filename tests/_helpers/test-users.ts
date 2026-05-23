@@ -59,19 +59,11 @@ export async function createTestUser(opts?: {
   }
 
   if (isAdmin) {
-    // admin_users = source de vérité RLS (utilisée par middleware via RPC
-    // is_user_admin). profiles.is_admin = vestige legacy lu par /login pour
-    // décider du redirect post-login vers /admin/product vs /. Les deux
-    // doivent être set pour que le flow complet (login + middleware) marche.
+    // admin_users = SoV unifiée RLS + middleware + login (post-refacto).
     const { error: adminError } = await admin
       .from('admin_users')
       .insert({ user_id: data.user.id })
     if (adminError) throw adminError
-    const { error: legacyError } = await admin
-      .from('profiles')
-      .update({ is_admin: true })
-      .eq('id', data.user.id)
-    if (legacyError) throw legacyError
   }
 
   return { id: data.user.id, email, password }

@@ -62,15 +62,13 @@ function AuthCallbackInner() {
 
         setStatus('Session trouvée, vérification des permissions…')
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', session.user.id)
-          .single()
-        if (profileError) console.warn('Callback profile error:', profileError)
+        const { data: isAdminRpc, error: rpcError } = await supabase.rpc('is_user_admin', {
+          check_user_id: session.user.id,
+        })
+        if (rpcError) console.warn('Callback is_user_admin error:', rpcError)
 
         const isAdmin =
-          profile?.is_admin === true ||
+          isAdminRpc === true ||
           session.user.app_metadata?.role === 'admin'
 
         let destination: string

@@ -9,7 +9,8 @@ import type { User } from '@supabase/supabase-js'
  *
  * Source de vérité :
  *   1. session.user.app_metadata.role === 'admin'  (rapide, depuis JWT)
- *   2. sinon, table profiles.is_admin
+ *   2. sinon, RPC is_user_admin (lit admin_users — SoV unifiée avec
+ *      middleware/requireAdmin).
  *
  * Réagit à SIGNED_IN / SIGNED_OUT pour rester à jour.
  *
@@ -45,14 +46,12 @@ export function useIsAdmin() {
         return
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', session.user.id)
-        .single()
+      const { data: isAdminRpc } = await supabase.rpc('is_user_admin', {
+        check_user_id: session.user.id,
+      })
       if (cancelled) return
 
-      setIsAdmin(profile?.is_admin === true)
+      setIsAdmin(isAdminRpc === true)
       setLoading(false)
     }
 
