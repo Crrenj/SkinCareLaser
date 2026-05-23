@@ -512,6 +512,34 @@ export default function CatalogueClient({
 
         {/* Colonne des produits — pleine largeur sous lg */}
         <div className="lg:col-span-3 pb-24 lg:pb-0">
+          {/* Chips de filtres actifs (desktop only — mobile a la FiltersPill) */}
+          {activeFilters.length > 0 && (
+            <div className="hidden lg:flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink-500 mr-1">
+                {t('activeFiltersLabel')}
+              </span>
+              {activeFilters.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={f.onRemove}
+                  className="inline-flex items-center gap-1.5 h-8 pl-3 pr-2 rounded-full bg-ink-900 text-sand-50 text-[12.5px] font-medium hover:bg-ink-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+                  aria-label={t('removeFilterAriaLabel', { label: f.label })}
+                >
+                  {f.label}
+                  <span aria-hidden="true" className="text-sand-300 text-[14px] leading-none">×</span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="ml-1 text-[12px] text-ink-500 hover:text-clay-700 underline decoration-dotted underline-offset-2 transition-colors"
+              >
+                {t('resetFilters')}
+              </button>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
             {currentProducts.map(p => (
               <ProductCard key={p.id} product={p} />

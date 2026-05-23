@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { buildReservationReference } from '@/lib/reservation'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,10 +47,7 @@ export async function generateMetadata({
   }
 }
 
-function buildReference(id: string): string {
-  const idPart = id.replace(/-/g, '').slice(0, 8).toUpperCase()
-  return `FAR-${idPart}`
-}
+// Référence FAR-YYYYMMDD-XXXX — factorisée dans @/lib/reservation.
 
 export default async function AccountReservationsPage({
   params,
@@ -127,7 +125,7 @@ async function EmptyState() {
 async function ReservationCard({ reservation }: { reservation: ReservationRow }) {
   const t = await getTranslations('Account.reservations')
   const tStatus = await getTranslations('Account.reservations.status')
-  const reference = buildReference(reservation.id)
+  const reference = buildReservationReference(reservation.id, reservation.created_at)
   const itemsPreview = (reservation.reservation_items ?? []).slice(0, 3)
   const remainingItems = Math.max(
     (reservation.reservation_items?.length ?? 0) - itemsPreview.length,

@@ -207,6 +207,15 @@ Découpage par scope/page :
 
 ## État du projet (2026-05-23)
 
+### Fait ✅ (session 2026-05-23 — suite, audit design "Modernisation - pages importantes")
+
+Audit des 9 pages clés contre les maquettes Sprint 2/3 du bundle Claude Design (`farmau/project/Modernisation - pages importantes.html` + 9 maquettes individuelles). **7 pages déjà conformes** (Home, NavBar, PDP, Cart empty, Auth, Admin Dashboard, et — découverte de l'audit — le tunnel Réservation 3-étapes existait déjà : `AddressStep` + `ShippingStep` + `ReviewStep` + `StepIndicator` + `ReservationDisclaimer` + `lib/shipping.ts`). 3 deltas comblés :
+
+- **Pagination catalogue** : ellipsis `‹ 1 [2] 3 … 19 ›` via helper `buildPageRange(current, total, siblings)` — fini les 20 boutons en ligne (commit `5f69077`)
+- **Race condition `/reservation`** : ReservationClient redirigeait vers `/cart` au mount avant que SWR ait hydraté (`totalItems` initial = 0). Fix : gate sur `!cartLoading` (commit `33e626e`)
+- **Référence réservation** `FAR-YYYYMMDD-XXXX` : factorisée dans `src/lib/reservation.ts` (helpers `buildReservationReference` + `buildReservationReferenceCompact`). ConfirmationClient + `account/reservations` utilisent la version complète ; admin RecentReservationsWidget reste compact `FAR-…XXXX` ; tests Playwright reservation adaptés
+- **Chips de filtres actifs catalogue** : pilule ink-900 desktop au-dessus de la grille avec × removable + label "Filtres actifs" + lien "Réinitialiser les filtres". Mobile garde sa `FiltersPill`. Trad FR/ES/EN
+
 ### Fait ✅ (session 2026-05-23, expansion tests Playwright + chasse aux bugs)
 
 **Bugs critiques fermés** :

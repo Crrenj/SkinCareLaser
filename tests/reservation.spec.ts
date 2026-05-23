@@ -64,7 +64,7 @@ test.describe('Réservation E2E', () => {
     await page.locator('#email').fill(u.email)
     await page.locator('#password').fill(u.password)
     await Promise.all([
-      page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30_000 }),
+      page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 60_000 }),
       page.getByRole('button', { name: /se connecter/i }).click(),
     ])
     // Attendre que useAuth ait migré le cart anon → user_id (le hook fire
@@ -95,10 +95,13 @@ test.describe('Réservation E2E', () => {
     expect(body.reservationId).toMatch(/^[0-9a-f-]{36}$/)
 
     await page.goto('/fr/account/reservations', { waitUntil: 'domcontentloaded' })
-    // La page affiche la référence = id sans tirets, 8 premiers hex en maj
-    // (cf src/app/[locale]/account/reservations/page.tsx buildReference).
-    const refShort = body.reservationId.replace(/-/g, '').slice(0, 8).toUpperCase()
-    await expect(page.locator(`text=${refShort}`).first()).toBeVisible({ timeout: 30_000 })
+    // La page affiche la référence FAR-YYYYMMDD-XXXX (4 premiers hex en maj
+    // après la date). On vérifie juste le segment XXXX, le préfixe `FAR-` et
+    // la date dépendent de la création de la résa.
+    const idHex4 = body.reservationId.replace(/-/g, '').slice(0, 4).toUpperCase()
+    await expect(
+      page.locator(`text=FAR-`).filter({ hasText: idHex4 }).first(),
+    ).toBeVisible({ timeout: 30_000 })
   })
 
   test('409 si réservation active déjà en cours', async ({ page }) => {

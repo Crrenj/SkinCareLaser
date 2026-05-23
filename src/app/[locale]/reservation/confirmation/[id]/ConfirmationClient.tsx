@@ -10,6 +10,7 @@ import {
   type ReservationPayload,
 } from '@/lib/whatsapp'
 import { PICKUP_LOCATIONS } from '@/lib/shipping'
+import { buildReservationReference } from '@/lib/reservation'
 import { ConfirmationHeader } from '@/components/confirmation/ConfirmationHeader'
 import { WhatsappHero } from '@/components/confirmation/WhatsappHero'
 import { ReservationTimeline } from '@/components/confirmation/ReservationTimeline'
@@ -39,18 +40,7 @@ type DraftSnapshot = {
   subtotal?: number
 }
 
-/** Construit FAR-YYYYMMDD-XXXX à partir de l'id + created_at. */
-function buildReference(id: string, createdAt: string | null): string {
-  const datePart = (() => {
-    const d = createdAt ? new Date(createdAt) : new Date()
-    const y = d.getUTCFullYear()
-    const m = String(d.getUTCMonth() + 1).padStart(2, '0')
-    const day = String(d.getUTCDate()).padStart(2, '0')
-    return `${y}${m}${day}`
-  })()
-  const idPart = id.replace(/-/g, '').slice(0, 4).toUpperCase()
-  return `FAR-${datePart}-${idPart}`
-}
+// Référence FAR-YYYYMMDD-XXXX — factorisée dans @/lib/reservation.
 
 export default function ConfirmationClient({
   reservationId,
@@ -62,7 +52,7 @@ export default function ConfirmationClient({
 }: Props) {
   const t = useTranslations('Reservation.confirmation')
   const reference = useMemo(
-    () => buildReference(reservationId, createdAt),
+    () => buildReservationReference(reservationId, createdAt),
     [reservationId, createdAt],
   )
 

@@ -677,6 +677,8 @@
     "searchAriaLabel": "Rechercher un produit",
     "noResults": "Aucun produit trouvé avec les critères sélectionnés.",
     "resetFilters": "Réinitialiser les filtres",
+    "activeFiltersLabel": "Filtres actifs",
+    "removeFilterAriaLabel": "Retirer le filtre {label}",
     "paginationAriaLabel": "Pagination",
     "previousPage": "Précédent",
     "nextPage": "Suivant",

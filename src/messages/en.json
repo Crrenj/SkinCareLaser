@@ -677,6 +677,8 @@
     "searchAriaLabel": "Search for a product",
     "noResults": "No products found with the selected criteria.",
     "resetFilters": "Reset filters",
+    "activeFiltersLabel": "Active filters",
+    "removeFilterAriaLabel": "Remove {label} filter",
     "paginationAriaLabel": "Pagination",
     "previousPage": "Previous",
     "nextPage": "Next",

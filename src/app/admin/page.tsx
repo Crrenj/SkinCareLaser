@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Plus, Search } from 'lucide-react'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { buildReservationReferenceCompact } from '@/lib/reservation'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { RevenueWidget, type DailyPoint } from '@/components/admin/dashboard/RevenueWidget'
 import {
@@ -40,12 +41,8 @@ function dateKey(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
-function buildReference(id: string): string {
-  const idPart = id.replace(/-/g, '').slice(0, 4).toUpperCase()
-  // Le widget affiche la version compacte ; la référence complète
-  // (FAR-YYYYMMDD-XXXX) est calculée côté détail réservation.
-  return `FAR-…${idPart}`
-}
+// Version compacte FAR-…XXXX pour les widgets denses — factorisée dans
+// @/lib/reservation (la full FAR-YYYYMMDD-XXXX est sur la confirmation).
 
 async function fetchRevenue(): Promise<{ current: DailyPoint[]; previous: DailyPoint[] }> {
   if (!supabaseAdmin) return { current: [], previous: [] }
@@ -195,7 +192,7 @@ async function fetchRecentReservations(): Promise<ReservationRow[]> {
     created_at: string
   }>).map((r) => ({
     id: r.id,
-    reference: buildReference(r.id),
+    reference: buildReservationReferenceCompact(r.id),
     contactName: r.contact_name ?? '',
     status: (r.status as ReservationStatus) ?? 'pending',
     totalPrice: Number(r.total_price ?? 0),
