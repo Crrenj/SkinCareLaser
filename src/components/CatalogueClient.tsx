@@ -8,6 +8,36 @@ import { FiltersMobileSheet } from '@/components/catalogue/FiltersMobileSheet'
 import { FiltersPill, type ActiveFilterPill } from '@/components/catalogue/FiltersPill'
 
 /**
+ * Génère la séquence de pages à afficher pour une pagination ellipsis :
+ *   `‹ 1 [2] 3 … 19 ›` au lieu des 20 boutons à plat.
+ * `siblings` = combien de pages on garde autour de la page active (par défaut 1).
+ * Compact : on n'insère jamais 2 ellipses consécutives ni une ellipse qui
+ * cache une seule page (on affiche cette page à la place).
+ */
+function buildPageRange(
+  current: number,
+  total: number,
+  siblings = 1,
+): Array<number | 'ellipsis'> {
+  // Petit total : tout afficher
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+
+  const first = 1
+  const last = total
+  const start = Math.max(first + 1, current - siblings)
+  const end = Math.min(last - 1, current + siblings)
+
+  const out: Array<number | 'ellipsis'> = [first]
+  if (start > first + 1) out.push('ellipsis')
+  else if (start === first + 1) out.push(first + 1)
+  for (let i = Math.max(start, first + 2); i <= end; i++) out.push(i)
+  if (end < last - 1) out.push('ellipsis')
+  else if (end === last - 1) out.push(last - 1)
+  out.push(last)
+  return out
+}
+
+/**
  * Convertit un name de tag/marque en slug kebab-case sans accents, pour
  * matcher les params URL comme `?need=protection-solaire` ou `?brand=avene`.
  */
@@ -514,21 +544,31 @@ export default function CatalogueClient({
             {t('previousPage')}
           </button>
 
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-4 py-2 border rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 ${
-                currentPage === page
-                  ? 'bg-clay-700 text-white border-clay-600'
-                  : 'hover:bg-sand-50'
-              }`}
-              aria-label={t('pageAriaLabel', { page })}
-              aria-current={currentPage === page ? 'page' : undefined}
-            >
-              {page}
-            </button>
-          ))}
+          {buildPageRange(currentPage, totalPages, 1).map((entry, idx) =>
+            entry === 'ellipsis' ? (
+              <span
+                key={`e-${idx}`}
+                aria-hidden="true"
+                className="px-2 text-ink-400 select-none"
+              >
+                …
+              </span>
+            ) : (
+              <button
+                key={entry}
+                onClick={() => handlePageChange(entry)}
+                className={`px-4 py-2 border rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 ${
+                  currentPage === entry
+                    ? 'bg-clay-700 text-white border-clay-600'
+                    : 'hover:bg-sand-50'
+                }`}
+                aria-label={t('pageAriaLabel', { page: entry })}
+                aria-current={currentPage === entry ? 'page' : undefined}
+              >
+                {entry}
+              </button>
+            ),
+          )}
 
           <button
             onClick={handleNextPage}
