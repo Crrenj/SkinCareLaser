@@ -128,21 +128,22 @@ Baseline `00000000000000_baseline.sql` + une migration par changement. Le remote
 4. Si types touchés : regénérer `src/lib/database.types.ts` via MCP `generate_typescript_types`.
 
 Modèle (résumé) :
-- `brands` → `ranges` → `products` via `product_ranges` (n-n)
+- `brands` → `ranges` → `products` via `products.range_id` (FK directe 1-n depuis migration `20260522205544`, plus de table n-n)
 - `tag_types` → `tags` → `product_tags` (tags polymorphes ; `tags.featured_on_home` curate les 3 cards "Besoins" sur la home)
-- `product_images` (multi-images ; **doublon avec `products.image_url`** — finding archi #3, non corrigé)
-- `products` enrichis sprint 2 : `volume`, `pharmacist_advice`, `pharmacist_name`, `benefits[]`, `usage`, `inci`, `technical_pdf_url`, `skin_type[]`, `texture`, `old_price`, `is_new`, `is_featured`
+- `product_images` (multi-images ; source unique pour l'image produit — la colonne `products.image_url` a été supprimée le 2026-05-22)
+- `products` enrichis sprint 2 : `volume`, `pharmacist_advice`, `pharmacist_name`, `benefits[]`, `usage`, `inci`, `technical_pdf_url`, `skin_type[]`, `texture`, `old_price`, `is_new`, `is_featured`, `range_id`
 - `profiles.preferred_locale` (`fr|en|es|null`, ajouté sprint 4) — utilisé par `/account/preferences`
 - `carts` + `cart_items` (guest via `anonymous_id`, authenticated via `user_id`)
 - `reservations` + `reservation_items` (système de réservation, snapshot pattern, partial unique 1 active par user, pg_cron expire après 24h)
 - `wishlists` (favoris user, PK composite `(user_id, product_id)`, RLS "users manage own")
 - `newsletter_subscribers` (email UNIQUE, lang CHECK, RLS service-role only)
 - `rate_limit_buckets` (fixed-window pour /api/contact + /api/newsletter)
+- `shop_settings` (single-row `id = 1 CHECK`, RLS public SELECT + admin UPDATE via `is_user_admin`) — nom, contact, pickup, tarifs livraison, édité via `/admin/settings`
 - `orders` + `order_items` (legacy, pas branché — peut-être à supprimer)
 - `banners` (sprint 2 : 3 variantes `editorial`/`hero`/`quote` + colonnes `direction`, `attribution_name/title/photo_url` ; legacy 6 types tolérés dans la colonne `text`), `contact_messages`
 - Vue `v_bestsellers` : tri produits par `sold_30d desc` + `is_featured desc` + `created_at desc`, consommée par home + nav-search fallback
 
-État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à 100 DOP placeholder**, 299 product_images, 36 tags, 844 product_tags, 1 admin.
+État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à 100 DOP placeholder** (tous ont un `range_id`), 299 product_images, 36 tags, 844 product_tags, 1 admin, 1 row dans shop_settings.
 
 ### i18n (next-intl)
 
@@ -197,13 +198,43 @@ Découpage par scope/page :
 
 - **i18n** : tout texte UI passe par `useTranslations`/`getTranslations`. Pas de string FR dur dans le code. Le contenu BDD (noms produits, marques) reste tel quel.
 - Path alias `@/*` → `src/*`.
-- TypeScript `strict: true`, **0 erreur tsc**. Lint : ~38 warnings (mostly `any` dans admin pages, non bloquants).
+- TypeScript `strict: true`, **0 erreur tsc**. Lint : **0 warning** depuis 2026-05-22 (eslint config honore `^_` pattern).
 - ESLint warnings non bloquants au build (cf `eslint.config.mjs`). Le fichier `database.types.ts` est ignoré (généré).
 - **Ne jamais commit sans demande explicite** (règle Cursor `alwaysApply`).
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest sur PR et push main.
 
-## État du projet (2026-05-22)
+## État du projet (2026-05-23)
+
+### Fait ✅ (sessions 2026-05-22 → 2026-05-23, architecture + sécurité)
+
+**A11y** :
+- `role="dialog"` + focus trap + Escape + scroll lock sur 13 modales admin via hook `src/hooks/useModalA11y.ts` (commit `688859c`)
+- ProductCard refondue en "stretched link" — plus de `<button>` dans `<a>` (HTML invalide), audit archi #5 + UX #18 fermés (commit `c4b851b`)
+- `useConfirmDialog` hook + 3 `confirm()` natifs admin migrés (messages delete, reservations cancel single + bulk) — design system d'alerts unifié avec `sonner` (commit `423cd62`)
+
+**Sécurité** :
+- Fallback `localStorage` pour tokens Supabase retiré (audit security #4, XSS exfiltration triviale) + cookie `Secure` en prod (commit `a037202`)
+- Middleware + requireAdmin passent à `getUser()` (validation JWT serveur vs `getSession()` cookie-only) + RPC `is_user_admin` (source de vérité unifiée vs `profiles.is_admin` historique) — audit security #8 + #11 fermés (commit `57a92cc`)
+
+**SEO / a11y** :
+- `<html lang={locale}>` dynamique via `getLocale()` next-intl (avant : `lang="fr"` hardcodé partout, even pour /es/* et /en/*) — commit `bb95ef6`
+
+**Refactors structurels** :
+- 4 pages admin obèses splittées en `_lib/` + `_hooks/` + `_components/` (commits `d914f26`, `e522a1f`, `34612d0`, `00b6606`) : `tags` 797→211, `product` 733→157, `marques` 765→229, `annonce` 828→162 LOC. `generateSlug` centralisé dans `src/lib/slug.ts`
+- `products.image_url` dropped + view `v_bestsellers` recréée + 6 sites code mis à jour (commit `4567e19`) — audit DB #6 + archi #3 fermés
+- `product_ranges` (n-n) supprimée, `products.range_id` direct (1-n) — migration `20260522205544`, 22 fichiers refactorés, jointures simplifiées (commit `b7ad240`) — audit DB #1 fermé
+
+**Configuration boutique** :
+- Table `shop_settings` (single-row pattern) + RLS public SELECT + admin UPDATE + API `GET/PATCH /api/admin/settings` + page admin rewrite (2 tabs Boutique/Livraison) — fin du "Mode démo" (commit `be5f318`)
+- Helper `src/lib/getShopSettings.ts` (React `cache()`) + `/pharmacies` + `/contact` lisent contact/whatsapp/email depuis DB (commit `5b0e7fe`)
+
+**Tests** :
+- 13 tests Playwright auth-guard (`tests/admin-auth.spec.ts` + `tests/account-auth.spec.ts`, `npm run test:auth`) — vérifient les redirects sans credentials (commit `325660b`)
+- 2 tests deps uninstall : `framer-motion` + `@supabase/auth-helpers-nextjs` retirés du package.json (commit `c1f1a04`)
+
+**Qualité** :
+- 0 warning lint (commit `186058b`) : 73 unescaped entities + 14 ESLint warnings + custom `splitChunks` retirés. `eslint.config.mjs` honore `argsIgnorePattern: '^_'`
 
 ### Fait ✅ (session 2026-05-22, hygiène technique autonome)
 
@@ -213,7 +244,7 @@ Découpage par scope/page :
 - **Toaster sonner** : `npm install sonner`, `<Toaster richColors position="top-right" closeButton />` monté dans `src/app/admin/layout.tsx`. 27 `alert()` admin migrés vers `toast.error()` / `toast.info()` (les 2 `window.alert("próximamente")` de reservations)
 - Migration DB `20260522092810_set_search_path_security_definer.sql` : `ALTER FUNCTION ... SET search_path = public, pg_temp` sur les 9 fonctions sans config (`add_to_cart`, `cleanup_banner_positions`, `get_messages_stats`, `get_or_create_cart`, `is_user_admin`, `mark_message_as_read`, `remove_from_cart`, `reorder_banners`, `update_updated_at_column`). Advisor `function_search_path_mutable` désormais à 0
 
-NB : `npm uninstall framer-motion @supabase/auth-helpers-nextjs` était au plan mais refusé en permission — les 2 deps restent dans `package.json` (à retirer manuellement quand souhaité, 0 import dans `src/`).
+NB : `npm uninstall framer-motion @supabase/auth-helpers-nextjs` a été fait manuellement par l'utilisateur + commit `c1f1a04` (cf. session 2026-05-23 plus haut).
 
 ### Fait ✅ (sessions 2026-05-21 → 2026-05-22, post sprint 3)
 
@@ -266,32 +297,29 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 
 ### Reste à faire
 
-**Quick wins SEO / perf** :
-- ~~JSON-LD Product schema~~ ✅ commit `8d8ec14` (`ProductJsonLd` Server)
-- ~~3 `<img>` → `next/image`~~ ✅ commit `8d8ec14` (CartEmpty + ConfirmationRecap ; les autres déjà refacto)
+**Quick wins** :
 - Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
+- AggregateRating sur `ProductJsonLd` si système de reviews un jour
+- Tests Playwright admin avec login interactif (`/admin/product` CRUD) — nécessite seed test admin
 
-**Accessibilité (WCAG AA — note 38/100 avant refonte, à re-mesurer)** :
-- ~~Remplacer ~50 `focus:outline-none` par `focus-visible:ring sand-700`~~ ✅ session 2026-05-22 (64 occ migrées)
-- Modales sans `role="dialog"` + focus trap (CartDrawer, MobileDrawer le font déjà)
+**Accessibilité** :
 - Audit contraste palette sand/clay (certains hover passent juste WCAG AA)
-- 35 `alert()` admin migrés vers `sonner` (session 2026-05-22) — il reste à factoriser certains `confirm()` natifs si on veut un design system d'alerts cohérent
+- Standardisation CTAs `bg-blue-*` → palette sand/clay (audit UX #13 — visuel à valider)
 
 **Contenu éditorial** :
 - Blog : table `posts` + admin CRUD + `/blog` + `/blog/[slug]` + sitemap (Footer "blog" pointe encore vers `/a-propos`)
 - Saisie INCI / benefits / pharmacist_advice sur les 353 produits (colonnes prêtes, contenu à fournir)
 - Traductions ES/EN du contenu juridique `/legal/*` (FR uniquement actuellement)
 
+**Consommation `shop_settings` à finir** :
+- Tunnel réservation lit encore `SHIPPING_COSTS` / `PICKUP_LOCATIONS` (`lib/shipping.ts` constants) + `NEXT_PUBLIC_WHATSAPP_NUMBER` env var. Le swap nécessite de passer PICKUP_LOCATIONS de 3-array à single-pickup (changement UX — séparé)
+- Footer + CartEmpty utilisent encore `NEXT_PUBLIC_WHATSAPP_NUMBER`
+- `metadata.openGraph.siteName` pourrait lire `shop_name` depuis settings
+
 **Hygiène long terme** :
-- `<html lang>` dynamique : route group `(admin)` pour séparer admin/public
-- Stockage image dédupliqué : `products.image_url` + `product_images` → choisir un seul
-- Tests d'intégration admin Playwright + `/account/*` Playwright (npx playwright install requis localement, le binaire chromium n'est pas dans `~/Library/Caches/ms-playwright`)
-- Split pages admin > 500 lignes (`tags` 753, `annonce` ~890, `marques` 708, `product` 703)
-- Fallback `localStorage` pour tokens Supabase (finding security #4, XSS exfiltration)
 - Double opt-in newsletter (provider d'envoi : Resend/Postmark)
-- Vraie `/admin/settings` câblée à une table `shop_settings`
-- ~~Audit RPC SECURITY DEFINER pour `SET search_path = public` manquants~~ ✅ session 2026-05-22 (9 fonctions corrigées via migration `20260522092810_set_search_path_security_definer.sql`)
-- `npm uninstall framer-motion @supabase/auth-helpers-nextjs` (deps non importées dans `src/`, retrait refusé en session — à faire manuellement)
+- Audit Storage policies (2 buckets publics avec policy `select` large — flag Supabase advisor)
+- Refactor `auth.uid()` non wrappé dans `(SELECT auth.uid())` dans les policies RLS (perf, audit DB #3)
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
 
