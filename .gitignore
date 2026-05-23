@@ -59,3 +59,6 @@ next-env.d.ts
 
 # Données de prix (générées par scripts/prices-export.cjs, ne pas versionner)
 /data/prices.csv
+
+# Scripts de probe Playwright ad-hoc à la racine (sessions de debug)
+/_probe-*.mjs

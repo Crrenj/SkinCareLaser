@@ -98,6 +98,7 @@ export function CartLineItem({
           disabled={busy}
           className="w-7 h-7 flex items-center justify-center text-ink-500 hover:text-brick-600 rounded transition-colors disabled:opacity-50"
           aria-label={t('removeAriaLabel', { name: p.name })}
+          data-testid="remove-item"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -161,6 +162,7 @@ export function CartLineItem({
           disabled={busy}
           className="lg:hidden w-7 h-7 flex items-center justify-center text-ink-500 hover:text-brick-600 rounded transition-colors disabled:opacity-50"
           aria-label={t('removeAriaLabel', { name: p.name })}
+          data-testid="remove-item"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -190,6 +192,7 @@ export function CartLineItem({
           disabled={busy}
           className="hidden lg:flex w-9 h-9 items-center justify-center text-ink-500 hover:text-brick-600 hover:bg-sand-100 rounded-md transition-colors disabled:opacity-50"
           aria-label={t('removeAriaLabel', { name: p.name })}
+          data-testid="remove-item"
         >
           <Trash2 className="w-[18px] h-[18px]" />
         </button>

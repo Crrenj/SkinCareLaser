@@ -219,7 +219,10 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
   return (
     <>
       {/* Desktop static */}
-      <aside className="hidden lg:flex w-[240px] shrink-0 bg-sand-100 border-r border-sand-300 px-3 py-5">
+      <aside
+        data-testid="admin-sidebar"
+        className="hidden lg:flex w-[240px] shrink-0 bg-sand-100 border-r border-sand-300 px-3 py-5"
+      >
         {content}
       </aside>
 

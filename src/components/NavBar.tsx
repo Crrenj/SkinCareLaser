@@ -128,10 +128,14 @@ export default function NavBar() {
             onClick={() => setCartOpen(true)}
             aria-label={t('cartAriaLabel')}
             className="relative h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+            data-testid="cart-icon"
           >
             <ShoppingBag size={22} strokeWidth={1.6} />
             {totalItems > 0 && (
-              <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-clay-700 text-sand-50 text-[10px] font-semibold flex items-center justify-center">
+              <span
+                className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-clay-700 text-sand-50 text-[10px] font-semibold flex items-center justify-center"
+                data-testid="cart-badge"
+              >
                 {totalItems > 99 ? '99+' : totalItems}
               </span>
             )}

@@ -43,9 +43,10 @@ test.describe('Admin auth guard', () => {
     await expect(page).toHaveURL(/\/login/, { timeout: 30_000 })
     // La sidebar admin ne doit pas être présente sur /login
     await expect(page.locator('[data-testid="admin-sidebar"]')).toHaveCount(0)
-    // Le formulaire de login doit être présent (h1 "Se connecter" en FR)
-    await expect(page.getByRole('heading', { name: /se connecter/i })).toBeVisible({
-      timeout: 30_000,
-    })
+    // Le heading du form de login (locale-dépendant) : "Se connecter" (fr) /
+    // "Sign in" (en) / "Iniciar sesión" (es).
+    await expect(
+      page.getByRole('heading', { name: /se connecter|sign in|iniciar sesi[oó]n/i }),
+    ).toBeVisible({ timeout: 30_000 })
   })
 })

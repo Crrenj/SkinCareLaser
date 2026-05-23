@@ -16,16 +16,18 @@ test.describe('Golden path', () => {
   })
 
   test('1. Page d\'accueil charge', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'domcontentloaded' })
+    // /fr/ explicite — le middleware redirige / vers la locale du navigateur
+    // (Playwright Chromium par défaut = en), ce qui invaliderait l'assert lang=fr.
+    await page.goto('/fr/', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveTitle(/FARMAU/i)
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
     await expect(
-      page.getByRole('heading', { name: /nos services/i }),
+      page.getByRole('heading', { name: /best-sellers/i }),
     ).toBeVisible({ timeout: 30_000 })
   })
 
   test('2. Catalogue affiche des produits', async ({ page }) => {
-    await page.goto('/catalogue', { waitUntil: 'domcontentloaded' })
+    await page.goto('/fr/catalogue', { waitUntil: 'domcontentloaded' })
     await page.waitForSelector('[data-testid="product-card"]', {
       timeout: 60_000,
     })
@@ -34,19 +36,21 @@ test.describe('Golden path', () => {
   })
 
   test('3. Clic sur un produit ouvre sa fiche', async ({ page }) => {
-    await page.goto('/catalogue', { waitUntil: 'domcontentloaded' })
+    await page.goto('/fr/catalogue', { waitUntil: 'domcontentloaded' })
     await page.waitForSelector('[data-testid="product-card"]', {
       timeout: 60_000,
     })
 
-    const firstHeading = page.locator('[data-testid="product-card"] h3').first()
-    const productName = (await firstHeading.innerText()).trim()
+    const firstCard = page.locator('[data-testid="product-card"]').first()
+    const productName = (await firstCard.locator('h3').innerText()).trim()
+    // ProductCard est en "stretched link" : un <a> absolute inset-0 z-10
+    // recouvre toute la carte. Cliquer sur ce lien (par aria-label) est plus
+    // fiable que viser un descendant qui peut être sous d'autres z-index.
+    const stretchedLink = firstCard.getByRole('link', { name: productName }).first()
 
-    // Click + attente navigation en une seule étape (Next.js Link compile
-    // /product/[slug] à froid au premier hit -> bump 60s).
     await Promise.all([
       page.waitForURL(/\/product\/[a-z0-9][a-z0-9-]*/i, { timeout: 60_000 }),
-      firstHeading.click(),
+      stretchedLink.click(),
     ])
 
     await expect(
@@ -68,7 +72,7 @@ test.describe('Golden path', () => {
       }),
     )
 
-    await page.goto('/contact', { waitUntil: 'domcontentloaded' })
+    await page.goto('/fr/contact', { waitUntil: 'domcontentloaded' })
     await page.getByLabel(/adresse email/i).fill('test+golden@example.com')
     await page.getByLabel(/sujet/i).fill('Smoke test')
     await page
