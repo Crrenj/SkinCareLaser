@@ -29,7 +29,7 @@ async function fetchNeedTag(
     .from('tags_with_types')
     .select('id, name, slug')
     .eq('slug', slug)
-    .eq('tag_type', 'Besoins')
+    .eq('tag_type', 'besoins')
     .maybeSingle()
   return data ?? null
 }

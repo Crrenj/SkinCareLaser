@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: needs } = await supabase
     .from('tags_with_types')
     .select('slug')
-    .eq('tag_type', 'Besoins')
+    .eq('tag_type', 'besoins')
 
   const needEntries: MetadataRoute.Sitemap = (needs ?? [])
     .filter((n) => n.slug)
