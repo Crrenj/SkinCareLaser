@@ -10,6 +10,7 @@ const mockGet = vi.fn()
 const mockSignInWithPassword = vi.fn()
 const mockSignUp = vi.fn()
 const mockFrom = vi.fn()
+const mockRpc = vi.fn()
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -85,6 +86,7 @@ vi.mock('@/lib/supabaseClient', () => ({
       signUp: (...args: unknown[]) => mockSignUp(...args),
     },
     from: (...args: unknown[]) => mockFrom(...args),
+    rpc: (...args: unknown[]) => mockRpc(...args),
   },
 }))
 
@@ -162,10 +164,7 @@ describe('Authentication Tests', () => {
         error: null,
       })
 
-      const mockSingle = vi.fn().mockResolvedValueOnce({ data: { is_admin: true }, error: null })
-      mockFrom.mockReturnValueOnce({
-        select: () => ({ eq: () => ({ single: mockSingle }) }),
-      })
+      mockRpc.mockResolvedValueOnce({ data: true, error: null })
 
       render(<LoginPage />)
 
@@ -192,10 +191,7 @@ describe('Authentication Tests', () => {
         error: null,
       })
 
-      const mockSingle = vi.fn().mockResolvedValueOnce({ data: { is_admin: false }, error: null })
-      mockFrom.mockReturnValueOnce({
-        select: () => ({ eq: () => ({ single: mockSingle }) }),
-      })
+      mockRpc.mockResolvedValueOnce({ data: false, error: null })
 
       render(<LoginPage />)
 

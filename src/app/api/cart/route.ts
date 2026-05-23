@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { CartResponse, AddToCartRequest } from '@/types/cart'
 
 /**
  * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
  * on travaille avec son cart user_id (et on n'écrit pas le cookie anon).
  * Sinon on retombe sur le cookie `cart_id` UUID (créé à la volée si absent).
- *
- * Retourne aussi le user_id pour les RPC qui en ont besoin.
  */
-async function resolveCartContext(supabase: SupabaseClient): Promise<{
+async function resolveCartContext(): Promise<{
   userId: string | null
   anonId: string | null
 }> {
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabaseSsr = await createSupabaseServerClient()
+  const { data: { user } } = await supabaseSsr.auth.getUser()
   if (user) {
     return { userId: user.id, anonId: null }
   }
@@ -33,15 +32,29 @@ async function resolveCartContext(supabase: SupabaseClient): Promise<{
   return { userId: null, anonId }
 }
 
+/**
+ * Les RLS de carts/cart_items reposent sur un claim JWT `anonymous_id` qui
+ * n'est jamais émis par Supabase Auth pour les visiteurs anonymes. Conséquence :
+ * tout SELECT/UPDATE direct retourne 0 rows en mode anon. On bypasse via
+ * service role, la sécurité étant assurée côté route (chaque opération valide
+ * que l'anon_id du cookie pointe bien sur le cart cible avant d'agir).
+ */
+function getDb() {
+  if (!supabaseAdmin) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY missing')
+  }
+  return supabaseAdmin
+}
+
 // GET : Récupérer l'état du panier
 export async function GET() {
   try {
-    const supabase = await createSupabaseServerClient()
-    const { userId, anonId } = await resolveCartContext(supabase)
+    const { userId, anonId } = await resolveCartContext()
+    const supabase = getDb()
 
     const { data: cartId, error: cartError } = await supabase.rpc('get_or_create_cart', {
-      p_user_id: userId,
-      p_anonymous_id: anonId,
+      p_user_id: userId ?? undefined,
+      p_anonymous_id: anonId ?? undefined,
     })
 
     if (cartError) {
@@ -162,8 +175,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createSupabaseServerClient()
-    const { userId, anonId } = await resolveCartContext(supabase)
+    const { userId, anonId } = await resolveCartContext()
+    const supabase = getDb()
 
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -186,8 +199,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { data: cartId, error: cartError } = await supabase.rpc('get_or_create_cart', {
-      p_user_id: userId,
-      p_anonymous_id: anonId,
+      p_user_id: userId ?? undefined,
+      p_anonymous_id: anonId ?? undefined,
     })
 
     if (cartError) {
@@ -202,8 +215,8 @@ export async function POST(request: NextRequest) {
       p_product_id: productId,
       p_quantity: quantity,
       // anon_id seulement en mode anon (la RPC le valide contre le cart) ;
-      // en mode user on passe null et le check est skippé.
-      p_anon_id: anonId,
+      // en mode user on passe undefined et le check est skippé.
+      p_anon_id: anonId ?? undefined,
     })
 
     if (rpcError) {
@@ -237,8 +250,8 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = await createSupabaseServerClient()
-    const { userId, anonId } = await resolveCartContext(supabase)
+    const { userId, anonId } = await resolveCartContext()
+    const supabase = getDb()
 
     if (!userId && !anonId) {
       return NextResponse.json(
@@ -247,10 +260,12 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // remove_from_cart hardened : utilise auth.uid() OU p_anon_id.
+    // En mode service-role, auth.uid() = NULL côté RPC. On passe donc le
+    // user_id explicitement quand on est authentifié.
     const { error: rpcError } = await supabase.rpc('remove_from_cart', {
       p_product_id: productId,
-      p_anon_id: anonId,
+      p_anon_id: anonId ?? undefined,
+      p_user_id: userId ?? undefined,
     })
 
     if (rpcError) {

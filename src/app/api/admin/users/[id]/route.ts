@@ -57,11 +57,5 @@ export async function PATCH(
     }
   }
 
-  // Synchronise la colonne profiles.is_admin par cohérence (legacy)
-  await supabaseAdmin
-    .from('profiles')
-    .update({ is_admin: body.isAdmin })
-    .eq('id', id)
-
   return NextResponse.json({ ok: true, isAdmin: body.isAdmin })
 }

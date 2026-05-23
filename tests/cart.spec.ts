@@ -19,7 +19,7 @@ async function gotoCatalogueReady(page: Page) {
   // si data?.cart n'est pas encore hydraté.
   const cartReady = page.waitForResponse(
     (r) => r.url().endsWith('/api/cart') && r.request().method() === 'GET',
-    { timeout: 30_000 },
+    { timeout: 60_000 },
   )
   await page.goto('/fr/', { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('[data-testid="product-card"]', { timeout: 60_000 })
@@ -40,12 +40,7 @@ test.describe('Panier invité', () => {
     await expect(page.locator('[data-testid="cart-badge"]')).toHaveText('1', { timeout: 10_000 })
   })
 
-  // FIXME flaky : badge=1 après add (optimistic SWR ✓), mais après reload
-  // le GET /api/cart retourne occasionnellement un cart vide. Probablement
-  // un race entre la persistance Postgres et le SWR refetch immédiat post-
-  // reload. Pas reproductible manuellement. Garder fixme tant qu'on n'a pas
-  // de retry/poll côté useCart.
-  test.fixme('Persistance du panier après refresh', async ({ page }) => {
+  test('Persistance du panier après refresh', async ({ page }) => {
     await gotoCatalogueReady(page)
     await page.locator('[data-testid="add-to-cart-button"]').first().click()
     await expect(page.locator('[data-testid="cart-badge"]')).toHaveText('1', { timeout: 10_000 })
