@@ -1,6 +1,7 @@
 'use client'
 
 import { Plus, Pencil, Trash2, Tag as TagIcon, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { Tag, TagCategory } from '../_lib/types'
 
 type TagCategoryGridProps = {
@@ -22,21 +23,24 @@ export function TagCategoryGrid({
   onEditTag,
   onDeleteTag,
 }: TagCategoryGridProps) {
+  const t = useTranslations('Admin.tags')
+  const tCommon = useTranslations('Admin.common')
+
   if (loading) {
     return (
       <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">
         <Loader2 className="w-5 h-5 mx-auto mb-3 animate-spin text-clay-700" />
-        Cargando…
+        {tCommon('loading')}
       </div>
     )
   }
 
   if (categories.length === 0) {
     return (
-      <div className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]">
-        No hay tipos de etiqueta. Pulsa{' '}
-        <b className="text-ink-900 font-medium">Nuevo tipo de etiqueta</b> para crear el primero.
-      </div>
+      <div
+        className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]"
+        dangerouslySetInnerHTML={{ __html: t.raw('emptyState') as string }}
+      />
     )
   }
 
@@ -59,22 +63,21 @@ export function TagCategoryGrid({
                   {category.name}
                 </h3>
                 <span className="font-mono text-[11px] tracking-[0.06em] text-ink-500">
-                  {category.tags.length}{' '}
-                  {category.tags.length === 1 ? 'etiqueta' : 'etiquetas'} · {category.type}
+                  {t('categoryCount', { count: category.tags.length })} · {category.type}
                 </span>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               <HeaderAction
-                label={`Editar tipo ${category.name}`}
-                title="Editar tipo"
+                label={t('editTypeAria', { name: category.name })}
+                title={t('editTypeTitle')}
                 onClick={() => onEditType(category.id)}
               >
                 <Pencil className="w-3.5 h-3.5" />
               </HeaderAction>
               <HeaderAction
-                label={`Eliminar tipo ${category.name}`}
-                title="Eliminar tipo"
+                label={t('deleteTypeAria', { name: category.name })}
+                title={t('deleteTypeTitle')}
                 onClick={() => onDeleteType(category.id)}
                 disabled={category.tags.length > 0}
                 danger
@@ -87,7 +90,7 @@ export function TagCategoryGrid({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium bg-clay-700 text-sand-50 rounded-md hover:bg-clay-800 transition-colors"
               >
                 <Plus className="w-3 h-3" strokeWidth={2.4} />
-                Etiqueta
+                {t('addTagButton')}
               </button>
             </div>
           </header>
@@ -95,13 +98,13 @@ export function TagCategoryGrid({
           {category.tags.length === 0 ? (
             <div className="px-5 py-10 text-center text-ink-500">
               <TagIcon className="w-6 h-6 mx-auto mb-2 opacity-50" />
-              <p className="text-[13px] mb-2">No hay etiquetas en este tipo.</p>
+              <p className="text-[13px] mb-2">{t('emptyCategoryTitle')}</p>
               <button
                 type="button"
                 onClick={() => onCreateTag(category.id)}
                 className="text-[13px] font-medium text-clay-700 hover:text-clay-800 underline underline-offset-4 bg-transparent transition-colors"
               >
-                Añadir la primera
+                {t('emptyCategoryCta')}
               </button>
             </div>
           ) : (
@@ -126,15 +129,15 @@ export function TagCategoryGrid({
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <RowAction
-                      label={`Editar ${tag.name}`}
-                      title="Editar etiqueta"
+                      label={t('editTagAria', { name: tag.name })}
+                      title={t('editTagTitle')}
                       onClick={() => onEditTag(category.id, tag)}
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </RowAction>
                     <RowAction
-                      label={`Eliminar ${tag.name}`}
-                      title="Eliminar etiqueta"
+                      label={t('deleteTagAria', { name: tag.name })}
+                      title={t('deleteTagTitle')}
                       onClick={() => onDeleteTag(tag.id)}
                       danger
                     >

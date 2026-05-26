@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useProductsData } from './_hooks/useProductsData'
 import {
@@ -15,6 +16,9 @@ import { ProductFormModal } from './_components/ProductFormModal'
 import { ProductDeleteModal } from './_components/ProductDeleteModal'
 
 export default function ProductPage() {
+  const t = useTranslations('Admin.product')
+  const tCrumbs = useTranslations('Admin.crumbs')
+  const tCommon = useTranslations('Admin.common')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const { products, brands, tags, tagTypes, loading, totalPages, refreshProducts } =
@@ -67,11 +71,11 @@ export default function ProductPage() {
         setShowModal(false)
       } else {
         const error = await res.json()
-        toast.error('Erreur: ' + error.error)
+        toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur sauvegarde:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(tCommon('saveError'))
     }
   }
 
@@ -83,11 +87,11 @@ export default function ProductPage() {
         setDeleteProductId(null)
       } else {
         const error = await res.json()
-        toast.error('Erreur: ' + error.error)
+        toast.error(`${tCommon('deleteError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur suppression:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error(tCommon('deleteError'))
     }
   }
 
@@ -95,11 +99,11 @@ export default function ProductPage() {
     <>
       <PageHeader
         crumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Catálogo' },
-          { label: 'Productos' },
+          { label: tCrumbs('admin'), href: '/admin' },
+          { label: tCrumbs('catalog') },
+          { label: tCrumbs('products') },
         ]}
-        title="Productos"
+        title={t('title')}
         actions={
           <button
             type="button"
@@ -107,7 +111,7 @@ export default function ProductPage() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-sand-50 text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
           >
             <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
-            Añadir producto
+            {t('addButton')}
           </button>
         }
       />
@@ -115,10 +119,10 @@ export default function ProductPage() {
       <div className="bg-sand-100 border-b border-sand-300 px-5 lg:px-8 py-3.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 sticky top-[88px] z-[4]">
         <label className="flex items-center gap-2 bg-sand-50 border border-sand-300 rounded-md px-3 py-1.5 text-ink-700 min-w-0 flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 shrink-0" aria-hidden />
-          <span className="sr-only">Buscar un producto</span>
+          <span className="sr-only">{tCommon('search')}</span>
           <input
             type="search"
-            placeholder="Buscar por nombre, SKU…"
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value)

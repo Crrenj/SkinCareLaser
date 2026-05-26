@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import type { Brand } from '../_lib/types'
 
 type BrandStatsCardsProps = {
@@ -7,14 +8,15 @@ type BrandStatsCardsProps = {
 }
 
 export function BrandStatsCards({ brands }: BrandStatsCardsProps) {
+  const t = useTranslations('Admin.marques')
   const totalRanges = brands.reduce((sum, brand) => sum + (brand.ranges?.length || 0), 0)
   const avgRanges = brands.length > 0 ? Math.round((totalRanges / brands.length) * 10) / 10 : 0
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <Kpi label="Marcas" value={brands.length} />
-      <Kpi label="Gamas" value={totalRanges} accent="olive" />
-      <Kpi label="Gamas / marca" value={avgRanges} suffix="prom." />
+      <Kpi label={t('kpiBrands')} value={brands.length} />
+      <Kpi label={t('kpiRanges')} value={totalRanges} accent="olive" />
+      <Kpi label={t('kpiAvgRanges')} value={avgRanges} suffix={t('kpiAvgSuffix')} />
     </div>
   )
 }

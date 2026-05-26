@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Plus, Search } from 'lucide-react'
 import Link from 'next/link'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { toLocaleTag } from '@/lib/constants'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { buildReservationReferenceCompact } from '@/lib/reservation'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
@@ -225,8 +227,8 @@ async function fetchRecentMessages(): Promise<MessageRow[]> {
   }))
 }
 
-function todayLabel(): string {
-  return new Intl.DateTimeFormat('es-DO', {
+function todayLabel(locale: string): string {
+  return new Intl.DateTimeFormat(toLocaleTag(locale), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -234,23 +236,29 @@ function todayLabel(): string {
 }
 
 export default async function AdminDashboardPage() {
-  const [revenue, lowStock, topProducts, recentReservations, recentMessages] =
+  const [revenue, lowStock, topProducts, recentReservations, recentMessages, locale, tCrumbs, tDashboard, tCommon, tProduct] =
     await Promise.all([
       fetchRevenue(),
       fetchLowStock(),
       fetchTopProducts(),
       fetchRecentReservations(),
       fetchRecentMessages(),
+      getLocale(),
+      getTranslations('Admin.crumbs'),
+      getTranslations('Admin.crumbs'),
+      getTranslations('Admin.common'),
+      getTranslations('Admin.product'),
     ])
+  void tDashboard
 
   return (
     <>
       <PageHeader
         crumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Vista general' },
+          { label: tCrumbs('admin'), href: '/admin' },
+          { label: tCrumbs('dashboard') },
         ]}
-        title={`Vista general · ${todayLabel()}`}
+        title={`${tCrumbs('dashboard')} · ${todayLabel(locale)}`}
         actions={
           <>
             <Link
@@ -258,14 +266,14 @@ export default async function AdminDashboardPage() {
               className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md text-[13px] border border-sand-300 bg-transparent text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors no-underline"
             >
               <Plus className="w-3.5 h-3.5" />
-              Añadir producto
+              {tProduct('addButton')}
             </Link>
             <Link
               href="/admin/product"
               className="inline-flex items-center gap-1.5 h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 text-sand-50 hover:bg-clay-800 transition-colors no-underline"
             >
               <Search className="w-3.5 h-3.5" />
-              Buscar
+              {tCommon('search')}
             </Link>
           </>
         }

@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   Boxes,
   Building2,
@@ -18,9 +18,10 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
 
-const PUBLIC_LOCALES = [
+const ADMIN_LOCALES = [
   { code: 'fr', label: 'FR' },
   { code: 'es', label: 'ES' },
   { code: 'en', label: 'EN' },
@@ -28,57 +29,73 @@ const PUBLIC_LOCALES = [
 
 type NavItem = {
   href: string
-  label: string
+  /** Clé i18n dans Admin.sidebar.nav* */
+  labelKey:
+    | 'navOverview'
+    | 'navProducts'
+    | 'navBrands'
+    | 'navStock'
+    | 'navTags'
+    | 'navReservations'
+    | 'navMessages'
+    | 'navAnnounce'
+    | 'navUsers'
+    | 'navNewsletter'
+    | 'navSettings'
   icon: React.ComponentType<{ className?: string }>
-  /** clé du badge dans /api/admin/sidebar-stats (optionnel). */
   badgeKey?: 'products' | 'low_stock' | 'reservations' | 'messages'
-  /** Style du badge : `count` = neutre ink-500, `alert` = clay-700. */
   badgeVariant?: 'count' | 'alert'
 }
 
 type Section = {
-  title: string
+  /** Clé i18n dans Admin.sidebar.section* */
+  titleKey:
+    | 'sectionGeneral'
+    | 'sectionCatalog'
+    | 'sectionOps'
+    | 'sectionCustomers'
+    | 'sectionAccount'
   items: NavItem[]
 }
 
 const SECTIONS: Section[] = [
   {
-    title: 'General',
-    items: [{ href: '/admin', label: 'Vista general', icon: Home }],
+    titleKey: 'sectionGeneral',
+    items: [{ href: '/admin', labelKey: 'navOverview', icon: Home }],
   },
   {
-    title: 'Catálogo',
+    titleKey: 'sectionCatalog',
     items: [
-      { href: '/admin/product', label: 'Productos', icon: Boxes, badgeKey: 'products', badgeVariant: 'count' },
-      { href: '/admin/marques', label: 'Marcas', icon: Building2 },
-      { href: '/admin/stock', label: 'Stock', icon: Boxes, badgeKey: 'low_stock', badgeVariant: 'alert' },
-      { href: '/admin/tags', label: 'Etiquetas', icon: Tag },
+      { href: '/admin/product', labelKey: 'navProducts', icon: Boxes, badgeKey: 'products', badgeVariant: 'count' },
+      { href: '/admin/marques', labelKey: 'navBrands', icon: Building2 },
+      { href: '/admin/stock', labelKey: 'navStock', icon: Boxes, badgeKey: 'low_stock', badgeVariant: 'alert' },
+      { href: '/admin/tags', labelKey: 'navTags', icon: Tag },
     ],
   },
   {
-    title: 'Operaciones',
+    titleKey: 'sectionOps',
     items: [
       {
         href: '/admin/reservations',
-        label: 'Reservas',
+        labelKey: 'navReservations',
         icon: ClipboardList,
         badgeKey: 'reservations',
         badgeVariant: 'alert',
       },
-      { href: '/admin/messages', label: 'Mensajes', icon: Mail, badgeKey: 'messages', badgeVariant: 'alert' },
-      { href: '/admin/annonce', label: 'Anuncios', icon: Megaphone },
+      { href: '/admin/messages', labelKey: 'navMessages', icon: Mail, badgeKey: 'messages', badgeVariant: 'alert' },
+      { href: '/admin/annonce', labelKey: 'navAnnounce', icon: Megaphone },
     ],
   },
   {
-    title: 'Clientes',
+    titleKey: 'sectionCustomers',
     items: [
-      { href: '/admin/users', label: 'Usuarios', icon: Users },
-      { href: '/admin/newsletter', label: 'Newsletter', icon: Mailbox },
+      { href: '/admin/users', labelKey: 'navUsers', icon: Users },
+      { href: '/admin/newsletter', labelKey: 'navNewsletter', icon: Mailbox },
     ],
   },
   {
-    title: 'Cuenta',
-    items: [{ href: '/admin/settings', label: 'Configuración', icon: Cog }],
+    titleKey: 'sectionAccount',
+    items: [{ href: '/admin/settings', labelKey: 'navSettings', icon: Cog }],
   },
 ]
 
@@ -97,10 +114,14 @@ type SidebarProps = {
 
 export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const dialogId = useId()
   const [stats, setStats] = useState<Stats>({})
+  const [localeSwitching, setLocaleSwitching] = useState(false)
+  const currentLocale = useLocale()
+  const tNav = useTranslations('Admin.sidebar')
+  const tChrome = useTranslations('Admin.chrome')
 
-  // Charge les compteurs sidebar via une route service-role
   useEffect(() => {
     let cancelled = false
     fetch('/api/admin/sidebar-stats')
@@ -109,7 +130,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
         if (!cancelled && d) setStats(d)
       })
       .catch(() => {
-        // fail-quiet : badges juste absents
+        // fail-quiet
       })
     return () => {
       cancelled = true
@@ -119,6 +140,23 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     window.location.href = '/login'
+  }
+
+  const switchLocale = async (locale: string) => {
+    if (locale === currentLocale || localeSwitching) return
+    setLocaleSwitching(true)
+    try {
+      const res = await fetch('/api/admin/set-locale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ locale }),
+      })
+      if (res.ok) {
+        router.refresh()
+      }
+    } finally {
+      setLocaleSwitching(false)
+    }
   }
 
   // Esc ferme le drawer mobile
@@ -149,7 +187,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
           type="button"
           onClick={onCloseMobile}
           className="lg:hidden w-8 h-8 rounded-md text-ink-700 hover:bg-sand-200 flex items-center justify-center"
-          aria-label="Cerrar menú"
+          aria-label={tChrome('openMenu')}
         >
           <X className="w-5 h-5" />
         </button>
@@ -157,9 +195,9 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
 
       <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
         {SECTIONS.map((section) => (
-          <div key={section.title}>
+          <div key={section.titleKey}>
             <p className="px-3 pt-3.5 pb-1.5 text-[10.5px] tracking-[0.18em] uppercase text-ink-500 font-semibold">
-              {section.title}
+              {tNav(section.titleKey)}
             </p>
             <div className="flex flex-col gap-0.5">
               {section.items.map((item) => {
@@ -185,7 +223,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
                         isActive ? 'text-clay-700' : 'text-ink-500'
                       }`}
                     />
-                    <span className="flex-1">{item.label}</span>
+                    <span className="flex-1">{tNav(item.labelKey)}</span>
                     {badgeValue !== undefined && badgeValue > 0 && (
                       <span
                         className={`text-[10px] font-semibold leading-[1.4] rounded-full px-1.5 py-px ${
@@ -208,19 +246,34 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
       <div className="border-t border-sand-300 pt-3 mt-2 flex flex-col gap-1.5 shrink-0">
         <div className="px-3 flex items-center gap-2 text-[11px] text-ink-500">
           <Globe className="w-3 h-3 shrink-0" aria-hidden />
-          <span className="tracking-[0.14em] uppercase font-semibold">Sitio público</span>
+          <span className="tracking-[0.14em] uppercase font-semibold">
+            {tChrome('localeGroupLabel')}
+          </span>
         </div>
-        <div className="px-3 flex gap-1.5" role="group" aria-label="Ver sitio público en otro idioma">
-          {PUBLIC_LOCALES.map((loc) => (
-            <Link
-              key={loc.code}
-              href={`/${loc.code}`}
-              onClick={onCloseMobile}
-              className="flex-1 inline-flex items-center justify-center px-2 py-1.5 text-[12px] font-mono font-medium border border-sand-300 bg-sand-50 text-ink-700 rounded-md hover:border-ink-900 hover:text-ink-900 hover:bg-sand-200 transition-colors"
-            >
-              {loc.label}
-            </Link>
-          ))}
+        <div
+          className="px-3 flex gap-1.5"
+          role="group"
+          aria-label={tChrome('localeSwitcherAria')}
+        >
+          {ADMIN_LOCALES.map((loc) => {
+            const isCurrent = loc.code === currentLocale
+            return (
+              <button
+                key={loc.code}
+                type="button"
+                onClick={() => switchLocale(loc.code)}
+                disabled={localeSwitching || isCurrent}
+                aria-pressed={isCurrent}
+                className={`flex-1 inline-flex items-center justify-center px-2 py-1.5 text-[12px] font-mono font-medium border rounded-md transition-colors disabled:cursor-default ${
+                  isCurrent
+                    ? 'bg-ink-900 text-sand-50 border-ink-900'
+                    : 'bg-sand-50 text-ink-700 border-sand-300 hover:border-ink-900 hover:text-ink-900 hover:bg-sand-200'
+                } ${localeSwitching && !isCurrent ? 'opacity-50' : ''}`}
+              >
+                {loc.label}
+              </button>
+            )
+          })}
         </div>
         {email && (
           <p className="px-3 pt-1.5 text-[11px] text-ink-500 truncate" title={email}>
@@ -233,7 +286,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
           className="flex items-center gap-3 px-3 py-2 rounded-md text-[13.5px] text-brick-600 hover:bg-brick-600/10 transition-colors text-left"
         >
           <LogOut className="w-4 h-4 shrink-0" />
-          Cerrar sesión
+          {tChrome('logout')}
         </button>
       </div>
     </nav>

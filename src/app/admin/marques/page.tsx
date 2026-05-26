@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useBrandsData } from './_hooks/useBrandsData'
 import {
@@ -20,6 +21,9 @@ import { RangeFormModal } from './_components/RangeFormModal'
 import { DeleteConfirmModal } from './_components/DeleteConfirmModal'
 
 export default function MarquesPage() {
+  const t = useTranslations('Admin.marques')
+  const tCrumbs = useTranslations('Admin.crumbs')
+  const tCommon = useTranslations('Admin.common')
   const { brands, loading, refresh } = useBrandsData()
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -75,11 +79,11 @@ export default function MarquesPage() {
         setShowBrandModal(false)
       } else {
         const error = await res.json()
-        toast.error('Erreur: ' + error.error)
+        toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur sauvegarde brand:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(tCommon('saveError'))
     }
   }
 
@@ -100,11 +104,11 @@ export default function MarquesPage() {
         setShowRangeModal(false)
       } else {
         const error = await res.json()
-        toast.error('Erreur: ' + error.error)
+        toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur sauvegarde range:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(tCommon('saveError'))
     }
   }
 
@@ -116,11 +120,11 @@ export default function MarquesPage() {
         setDeleteBrandId(null)
       } else {
         const error = await res.json()
-        toast.error('Erreur: ' + error.error)
+        toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur suppression brand:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error(tCommon('deleteError'))
     }
   }
 
@@ -132,11 +136,11 @@ export default function MarquesPage() {
         setDeleteRangeId(null)
       } else {
         const error = await res.json()
-        toast.error('Erreur: ' + error.error)
+        toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur suppression range:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error(tCommon('deleteError'))
     }
   }
 
@@ -150,11 +154,11 @@ export default function MarquesPage() {
     <>
       <PageHeader
         crumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Catálogo' },
-          { label: 'Marcas' },
+          { label: tCrumbs('admin'), href: '/admin' },
+          { label: tCrumbs('catalog') },
+          { label: tCrumbs('brands') },
         ]}
-        title="Marcas"
+        title={t('title')}
         actions={
           <button
             type="button"
@@ -162,7 +166,7 @@ export default function MarquesPage() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-sand-50 text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
           >
             <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
-            Añadir marca
+            {t('addButton')}
           </button>
         }
       />
@@ -170,10 +174,10 @@ export default function MarquesPage() {
       <div className="bg-sand-100 border-b border-sand-300 px-5 lg:px-8 py-3.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 sticky top-[88px] z-[4]">
         <label className="flex items-center gap-2 bg-sand-50 border border-sand-300 rounded-md px-3 py-1.5 text-ink-700 min-w-0 flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 shrink-0" aria-hidden />
-          <span className="sr-only">Buscar una marca</span>
+          <span className="sr-only">{tCommon('search')}</span>
           <input
             type="search"
-            placeholder="Buscar por nombre o slug…"
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1 min-w-0 bg-transparent border-0 outline-none text-[13.5px] text-ink-900 placeholder:text-ink-500"
@@ -216,8 +220,8 @@ export default function MarquesPage() {
 
       <DeleteConfirmModal
         id={deleteBrandId}
-        title="Eliminar marca"
-        description="¿Seguro que quieres eliminar esta marca? Esta acción es irreversible."
+        title={t('deleteBrandConfirmTitle')}
+        description={t('deleteBrandConfirmBody')}
         labelId="brand-delete-modal-title"
         onCancel={() => setDeleteBrandId(null)}
         onConfirm={handleBrandDelete}
@@ -225,8 +229,8 @@ export default function MarquesPage() {
 
       <DeleteConfirmModal
         id={deleteRangeId}
-        title="Eliminar gama"
-        description="¿Seguro que quieres eliminar esta gama? Esta acción es irreversible."
+        title={t('deleteRangeConfirmTitle')}
+        description={t('deleteRangeConfirmBody')}
         labelId="range-delete-modal-title"
         onCancel={() => setDeleteRangeId(null)}
         onConfirm={handleRangeDelete}

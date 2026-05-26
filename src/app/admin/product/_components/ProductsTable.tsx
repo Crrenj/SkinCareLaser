@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { Pencil, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { Product, Tag, TagType } from '../_lib/types'
 
 type ProductsTableProps = {
@@ -25,14 +26,17 @@ export function ProductsTable({
   totalPages,
   onPageChange,
 }: ProductsTableProps) {
+  const t = useTranslations('Admin.product')
+  const tCommon = useTranslations('Admin.common')
+  const tStock = useTranslations('Admin.stockState')
   const colorOf = (tag: Tag) =>
-    tagTypes.find((t) => t.id === tag.tag_type_id)?.color || 'var(--color-ink-500)'
+    tagTypes.find((tt) => tt.id === tag.tag_type_id)?.color || 'var(--color-ink-500)'
 
   if (loading) {
     return (
       <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">
         <Loader2 className="w-5 h-5 mx-auto mb-3 animate-spin text-clay-700" />
-        Cargando…
+        {tCommon('loading')}
       </div>
     )
   }
@@ -40,7 +44,7 @@ export function ProductsTable({
   if (products.length === 0) {
     return (
       <div className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]">
-        No hay productos.
+        {t('emptyState')}
       </div>
     )
   }
@@ -51,12 +55,12 @@ export function ProductsTable({
         <table className="w-full border-collapse text-[13.5px]">
           <thead className="bg-sand-100 border-b border-sand-300">
             <tr>
-              <Th>Producto</Th>
-              <Th>Marca</Th>
-              <Th>Etiquetas</Th>
-              <Th align="right">Precio</Th>
-              <Th align="right">Stock</Th>
-              <Th align="right">Estado</Th>
+              <Th>{t('columnProduct')}</Th>
+              <Th>{t('columnBrand')}</Th>
+              <Th>{t('columnTags')}</Th>
+              <Th align="right">{t('columnPrice')}</Th>
+              <Th align="right">{t('columnStock')}</Th>
+              <Th align="right">{t('columnStatus')}</Th>
               <Th className="w-[88px]"></Th>
             </tr>
           </thead>
@@ -153,25 +157,25 @@ export function ProductsTable({
                     >
                       {product.stock}
                       <small className="text-ink-500 font-sans text-[10.5px] font-normal ml-1">
-                        uds
+                        {tStock('units')}
                       </small>
                     </span>
                   </td>
                   <td className="px-4 py-3 align-middle text-right">
-                    <StockPill state={stockState} />
+                    <StockPill state={stockState} tStock={tStock} />
                   </td>
                   <td className="px-4 py-3 align-middle">
                     <div className="flex gap-1 justify-end opacity-60 group-hover:opacity-100 transition-opacity">
                       <RowAction
-                        label={`Editar ${product.name}`}
-                        title="Editar"
+                        label={t('editAria', { name: product.name })}
+                        title={t('editTitle')}
                         onClick={() => onEdit(product)}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </RowAction>
                       <RowAction
-                        label={`Eliminar ${product.name}`}
-                        title="Eliminar"
+                        label={t('deleteAria', { name: product.name })}
+                        title={t('deleteTitle')}
                         onClick={() => onDelete(product.id)}
                         danger
                       >
@@ -189,10 +193,12 @@ export function ProductsTable({
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-5 py-3.5 bg-sand-50 border-t border-sand-200 text-[12.5px] text-ink-700">
           <span>
-            Página <b className="text-ink-900 font-medium">{page}</b> de{' '}
-            <b className="text-ink-900 font-medium">{totalPages}</b>
+            {tCommon.rich('pageOf', {
+              page,
+              total: totalPages,
+            })}
           </span>
-          <nav aria-label="Paginación" className="flex flex-wrap gap-1">
+          <nav aria-label={tCommon('pagination')} className="flex flex-wrap gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p}
@@ -233,11 +239,17 @@ function Th({
   )
 }
 
-function StockPill({ state }: { state: 'ok' | 'low' | 'out' }) {
+function StockPill({
+  state,
+  tStock,
+}: {
+  state: 'ok' | 'low' | 'out'
+  tStock: (key: 'ok' | 'low' | 'out') => string
+}) {
   const map = {
-    ok: { label: 'Activo', bg: 'bg-olive-600/15', text: 'text-olive-600', dot: 'bg-olive-600' },
-    low: { label: 'Stock bajo', bg: 'bg-[rgba(181,133,43,0.15)]', text: 'text-[#7A5A1C]', dot: 'bg-[#B5852B]' },
-    out: { label: 'Sin stock', bg: 'bg-brick-600/12', text: 'text-brick-600', dot: 'bg-brick-600' },
+    ok: { bg: 'bg-olive-600/15', text: 'text-olive-600', dot: 'bg-olive-600' },
+    low: { bg: 'bg-[rgba(181,133,43,0.15)]', text: 'text-[#7A5A1C]', dot: 'bg-[#B5852B]' },
+    out: { bg: 'bg-brick-600/12', text: 'text-brick-600', dot: 'bg-brick-600' },
   } as const
   const s = map[state]
   return (
@@ -245,7 +257,7 @@ function StockPill({ state }: { state: 'ok' | 'low' | 'out' }) {
       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap ${s.bg} ${s.text}`}
     >
       <span aria-hidden className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-      {s.label}
+      {tStock(state)}
     </span>
   )
 }

@@ -10,6 +10,7 @@ import {
   Layers,
   Loader2,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { Brand, Range } from '../_lib/types'
 
 type BrandsTableProps = {
@@ -31,6 +32,8 @@ export function BrandsTable({
   onEditRange,
   onDeleteRange,
 }: BrandsTableProps) {
+  const t = useTranslations('Admin.marques')
+  const tCommon = useTranslations('Admin.common')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
 
   const toggle = (brandId: string) => {
@@ -44,16 +47,17 @@ export function BrandsTable({
     return (
       <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">
         <Loader2 className="w-5 h-5 mx-auto mb-3 animate-spin text-clay-700" />
-        Cargando…
+        {tCommon('loading')}
       </div>
     )
   }
 
   if (brands.length === 0) {
     return (
-      <div className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]">
-        No hay marcas. Pulsa <b className="text-ink-900 font-medium">Añadir marca</b> para crear la primera.
-      </div>
+      <div
+        className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]"
+        dangerouslySetInnerHTML={{ __html: t.raw('emptyState') as string }}
+      />
     )
   }
 
@@ -63,9 +67,9 @@ export function BrandsTable({
         <table className="w-full border-collapse text-[13.5px]">
           <thead className="bg-sand-100 border-b border-sand-300">
             <tr>
-              <Th>Marca</Th>
-              <Th>Slug</Th>
-              <Th>Gamas</Th>
+              <Th>{t('columnBrand')}</Th>
+              <Th>{t('columnSlug')}</Th>
+              <Th>{t('columnRanges')}</Th>
               <Th className="w-[120px]"></Th>
             </tr>
           </thead>
@@ -81,7 +85,11 @@ export function BrandsTable({
                         <button
                           type="button"
                           onClick={() => toggle(brand.id)}
-                          aria-label={isOpen ? `Plegar ${brand.name}` : `Desplegar ${brand.name}`}
+                          aria-label={
+                            isOpen
+                              ? t('collapseAria', { name: brand.name })
+                              : t('expandAria', { name: brand.name })
+                          }
                           aria-expanded={isOpen}
                           className="w-6 h-6 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-sand-200 hover:text-ink-900 transition-colors"
                         >
@@ -107,8 +115,8 @@ export function BrandsTable({
                         <button
                           type="button"
                           onClick={() => onCreateRange(brand.id)}
-                          aria-label={`Añadir gama a ${brand.name}`}
-                          title="Añadir gama"
+                          aria-label={t('addRangeAria', { name: brand.name })}
+                          title={t('addRange')}
                           className="w-7 h-7 inline-flex items-center justify-center rounded-md text-olive-600 hover:bg-olive-600/10 transition-colors"
                         >
                           <Plus className="w-3.5 h-3.5" strokeWidth={2.2} />
@@ -118,15 +126,15 @@ export function BrandsTable({
                     <td className="px-4 py-3 align-middle">
                       <div className="flex gap-1 justify-end">
                         <RowAction
-                          label={`Editar ${brand.name}`}
-                          title="Editar marca"
+                          label={t('editAria', { name: brand.name })}
+                          title={t('editTitle')}
                           onClick={() => onEditBrand(brand)}
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </RowAction>
                         <RowAction
-                          label={`Eliminar ${brand.name}`}
-                          title="Eliminar marca"
+                          label={t('deleteAria', { name: brand.name })}
+                          title={t('deleteTitle')}
                           onClick={() => onDeleteBrand(brand.id)}
                           danger
                         >
@@ -154,21 +162,21 @@ export function BrandsTable({
                         </td>
                         <td className="px-4 py-2.5 align-middle">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10.5px] font-medium bg-clay-200 text-clay-800">
-                            Gama
+                            {t('rangeLabel')}
                           </span>
                         </td>
                         <td className="px-4 py-2.5 align-middle">
                           <div className="flex gap-1 justify-end">
                             <RowAction
-                              label={`Editar gama ${range.name}`}
-                              title="Editar gama"
+                              label={t('editRangeAria', { name: range.name })}
+                              title={t('editRangeTitle')}
                               onClick={() => onEditRange(range)}
                             >
                               <Pencil className="w-3 h-3" />
                             </RowAction>
                             <RowAction
-                              label={`Eliminar gama ${range.name}`}
-                              title="Eliminar gama"
+                              label={t('deleteRangeAria', { name: range.name })}
+                              title={t('deleteRangeTitle')}
                               onClick={() => onDeleteRange(range.id)}
                               danger
                             >

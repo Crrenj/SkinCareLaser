@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useTagsData } from './_hooks/useTagsData'
 import { generateSlug } from './_lib/icons'
@@ -29,6 +30,9 @@ const INITIAL_TYPE_FORM: TypeFormState = {
 }
 
 export default function TagsPage() {
+  const t = useTranslations('Admin.tags')
+  const tCrumbs = useTranslations('Admin.crumbs')
+  const tCommon = useTranslations('Admin.common')
   const { tagCategories, tagTypes, loading, refresh } = useTagsData()
 
   const [showTagModal, setShowTagModal] = useState(false)
@@ -89,11 +93,11 @@ export default function TagsPage() {
         refresh()
         setShowTagModal(false)
       } else {
-        toast.error(data.error || 'Erreur lors de la sauvegarde')
+        toast.error(data.error || tCommon('saveError'))
       }
     } catch (error) {
       console.error('Erreur sauvegarde tag:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(tCommon('saveError'))
     }
   }
 
@@ -126,11 +130,11 @@ export default function TagsPage() {
         refresh()
         setShowTypeModal(false)
       } else {
-        toast.error(data.error || 'Erreur lors de la sauvegarde')
+        toast.error(data.error || tCommon('saveError'))
       }
     } catch (error) {
       console.error('Erreur sauvegarde type:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(tCommon('saveError'))
     }
   }
 
@@ -147,11 +151,11 @@ export default function TagsPage() {
         setDeleteTarget(null)
       } else {
         const error = await res.json()
-        toast.error(error.error || 'Erreur lors de la suppression')
+        toast.error(error.error || tCommon('deleteError'))
       }
     } catch (error) {
       console.error('Erreur suppression:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error(tCommon('deleteError'))
     }
   }
 
@@ -159,11 +163,11 @@ export default function TagsPage() {
     <>
       <PageHeader
         crumbs={[
-          { label: 'Admin', href: '/admin' },
-          { label: 'Catálogo' },
-          { label: 'Etiquetas' },
+          { label: tCrumbs('admin'), href: '/admin' },
+          { label: tCrumbs('catalog') },
+          { label: tCrumbs('tags') },
         ]}
-        title="Etiquetas"
+        title={t('title')}
         actions={
           <button
             type="button"
@@ -171,7 +175,7 @@ export default function TagsPage() {
             className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-sand-50 text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
           >
             <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
-            Nuevo tipo de etiqueta
+            {t('addTypeButton')}
           </button>
         }
       />
