@@ -38,9 +38,13 @@ export async function POST(request: NextRequest) {
 
     const newCount = (banner[column] || 0) + 1
 
+    const updatePayload = column === 'view_count'
+      ? { view_count: newCount }
+      : { click_count: newCount }
+
     const { error: updateError } = await supabaseAdmin
       .from('banners')
-      .update({ [column]: newCount })
+      .update(updatePayload)
       .eq('id', bannerId)
 
     if (updateError) {

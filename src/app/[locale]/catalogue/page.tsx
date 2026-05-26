@@ -5,8 +5,16 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import CatalogueClient from '@/components/CatalogueClient'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import {
+  parseFilters,
+  filterProducts,
+  computeFacetedCounts,
+  type CatalogueProduct,
+} from '@/lib/catalogueFilters'
 
 export const revalidate = 60
+
+const PRODUCTS_PER_PAGE = 24
 
 export async function generateMetadata({
   params,
@@ -41,7 +49,6 @@ type RawProduct = {
   id: string
   slug: string
   name: string
-  description: string | null
   price: string | number
   old_price: string | number | null
   currency: string
@@ -56,22 +63,23 @@ type RawProduct = {
 
 export default async function Catalogue({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { locale } = await params
+  const sp = await searchParams
   setRequestLocale(locale)
   const t = await getTranslations('Catalogue')
   const supabase = await createSupabaseServerClient()
 
-  // 1. Produits + marques/gammes + tags
   const { data: products, error: pErr } = await supabase
     .from('products')
     .select(`
       id,
       slug,
       name,
-      description,
       price,
       old_price,
       currency,
@@ -93,7 +101,6 @@ export default async function Catalogue({
     .limit(500)
     .returns<RawProduct[]>()
 
-  // 2. Tous les tags disponibles
   const { data: tags, error: tErr } = await supabase
     .from('tags_with_types')
     .select('name, tag_type')
@@ -104,22 +111,19 @@ export default async function Catalogue({
     return <p className="p-6">{t('loadError')}</p>
   }
 
-  // 3. Regrouper les tags par type
   const itemsByType: Record<string, string[]> = {}
-  tags?.forEach(t => {
-    itemsByType[t.tag_type] ??= []
-    itemsByType[t.tag_type].push(t.name)
+  tags?.forEach(tg => {
+    itemsByType[tg.tag_type] ??= []
+    itemsByType[tg.tag_type].push(tg.name)
   })
   Object.keys(itemsByType).forEach(tagType => {
     itemsByType[tagType].sort()
   })
 
-  // 4. Mapper les produits pour le front
-  const mappedProducts = (products ?? []).map((p) => ({
+  const allProducts: CatalogueProduct[] = (products ?? []).map((p) => ({
     id: p.id,
     slug: p.slug,
     name: p.name,
-    description: p.description ?? '',
     price: Number(p.price),
     oldPrice: p.old_price !== null && p.old_price !== undefined ? Number(p.old_price) : undefined,
     currency: p.currency,
@@ -135,13 +139,49 @@ export default async function Catalogue({
     ),
   }))
 
+  const allBrands = Array.from(
+    new Set(allProducts.map((p) => p.brand).filter(Boolean)),
+  ).sort()
+
+  const rangesByBrand: Record<string, string[]> = {}
+  allProducts.forEach((p) => {
+    if (p.brand && p.range) {
+      rangesByBrand[p.brand] ??= []
+      if (!rangesByBrand[p.brand].includes(p.range)) rangesByBrand[p.brand].push(p.range)
+    }
+  })
+  Object.keys(rangesByBrand).forEach((b) => rangesByBrand[b].sort())
+
+  const allRanges = Object.values(rangesByBrand).flat()
+  const filters = parseFilters(sp, allBrands, allRanges, itemsByType)
+
+  const filtered = filterProducts(allProducts, filters)
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE))
+  const page = Math.min(filters.page, totalPages)
+  const startIndex = (page - 1) * PRODUCTS_PER_PAGE
+  const pageProducts = filtered.slice(startIndex, startIndex + PRODUCTS_PER_PAGE)
+
+  const counts = computeFacetedCounts(allProducts, filters, allBrands, rangesByBrand, itemsByType)
+
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
       <NavBar />
       <main id="main-content" className="flex-grow">
         <CatalogueClient
-          products={mappedProducts}
+          products={pageProducts}
+          visibleCount={filtered.length}
+          totalCount={allProducts.length}
+          currentPage={page}
+          totalPages={totalPages}
+          sortBy={filters.sort}
+          availableBrands={allBrands}
+          rangesByBrand={rangesByBrand}
           itemsByType={itemsByType}
+          selectedBrands={filters.brands}
+          selectedRanges={filters.ranges}
+          selectedTags={filters.tags}
+          searchTerm={filters.q}
+          productCounts={counts}
         />
       </main>
       <Footer />

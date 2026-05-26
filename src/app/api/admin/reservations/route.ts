@@ -101,10 +101,16 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'status invalide' }, { status: 400 })
   }
 
-  const updateData: Record<string, unknown> = {}
+  type ReservationStatusEnum = 'pending' | 'confirmed' | 'collected' | 'expired' | 'cancelled'
+  const updateData: {
+    status?: ReservationStatusEnum
+    confirmed_at?: string
+    collected_at?: string
+    admin_notes?: string
+  } = {}
 
   if (status) {
-    updateData.status = status
+    updateData.status = status as ReservationStatusEnum
     if (status === 'confirmed') updateData.confirmed_at = new Date().toISOString()
     if (status === 'collected') updateData.collected_at = new Date().toISOString()
   }

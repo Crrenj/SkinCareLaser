@@ -62,7 +62,14 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json()
     const { id, status, priority, admin_notes, replied_at } = body
 
-    const updateData: Record<string, unknown> = {
+    const updateData: {
+      updated_at: string
+      status?: string
+      priority?: string
+      admin_notes?: string
+      replied_at?: string
+      replied_by?: string
+    } = {
       updated_at: new Date().toISOString(),
     }
 
@@ -71,7 +78,6 @@ export async function PATCH(request: NextRequest) {
     if (admin_notes !== undefined) updateData.admin_notes = admin_notes
     if (replied_at) {
       updateData.replied_at = replied_at
-      // Trace l'admin qui a répondu (utilisateur authentifié, plus de UUID hardcodé)
       updateData.replied_by = auth.userId
     }
 
