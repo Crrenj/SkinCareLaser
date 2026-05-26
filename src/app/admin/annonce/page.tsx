@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { Plus, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
+import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useBannersData } from './_hooks/useBannersData'
 import {
   INITIAL_BANNER_FORM,
@@ -17,6 +19,9 @@ import { BannerFormModal } from './_components/BannerFormModal'
 import { BannerDeleteModal } from './_components/BannerDeleteModal'
 
 export default function AnnoncePage() {
+  const t = useTranslations('Admin.annonce')
+  const tCrumbs = useTranslations('Admin.crumbs')
+  const tCommon = useTranslations('Admin.common')
   const { banners, loading, refresh, toggleActive, swapPositions } = useBannersData()
   const [previewMode, setPreviewMode] = useState(false)
   const [showModal, setShowModal] = useState(false)
@@ -71,11 +76,11 @@ export default function AnnoncePage() {
         setShowModal(false)
         setEditingBanner(null)
       } else {
-        toast.error('Erreur lors de la sauvegarde: ' + data.error)
+        toast.error(`${tCommon('saveError')}: ${data.error}`)
       }
     } catch (error) {
       console.error('Erreur sauvegarde banner:', error)
-      toast.error('Erreur lors de la sauvegarde')
+      toast.error(tCommon('saveError'))
     } finally {
       setSaving(false)
     }
@@ -89,58 +94,67 @@ export default function AnnoncePage() {
         setDeleteBannerId(null)
       } else {
         const data = await res.json()
-        toast.error('Erreur lors de la suppression: ' + data.error)
+        toast.error(`${tCommon('deleteError')}: ${data.error}`)
       }
     } catch (error) {
       console.error('Erreur suppression banner:', error)
-      toast.error('Erreur lors de la suppression')
+      toast.error(tCommon('deleteError'))
     }
   }
 
   const activeBanners = banners.filter((b) => b.is_active)
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Gestion des Bannières</h1>
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => setPreviewMode(!previewMode)}
-            className={`flex items-center px-4 py-2 rounded-md ${
-              previewMode
-                ? 'bg-gray-600 text-white hover:bg-gray-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {previewMode ? (
-              <EyeSlashIcon className="h-5 w-5 mr-2" />
-            ) : (
-              <EyeIcon className="h-5 w-5 mr-2" />
-            )}
-            {previewMode ? "Quitter l'aperçu" : 'Aperçu'}
-          </button>
-          <button
-            onClick={() => openModal()}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Créer une bannière
-          </button>
-        </div>
-      </div>
-
-      <BannerStatsCards banners={banners} />
-
-      {previewMode && <BannersPreview banners={activeBanners} />}
-
-      <BannersList
-        banners={banners}
-        loading={loading}
-        onMove={swapPositions}
-        onToggleActive={toggleActive}
-        onEdit={openModal}
-        onDelete={setDeleteBannerId}
+    <>
+      <PageHeader
+        crumbs={[
+          { label: tCrumbs('admin'), href: '/admin' },
+          { label: tCrumbs('ops') },
+          { label: tCrumbs('announce') },
+        ]}
+        title={t('title')}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setPreviewMode(!previewMode)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-[13px] rounded-md border transition-colors ${
+                previewMode
+                  ? 'bg-ink-900 text-sand-50 border-ink-900 hover:bg-ink-800'
+                  : 'bg-transparent text-ink-700 border-sand-300 hover:bg-sand-100 hover:text-ink-900'
+              }`}
+            >
+              {previewMode ? (
+                <EyeOff className="w-3.5 h-3.5" />
+              ) : (
+                <Eye className="w-3.5 h-3.5" />
+              )}
+              {previewMode ? t('previewHide') : t('previewShow')}
+            </button>
+            <button
+              type="button"
+              onClick={() => openModal()}
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-sand-50 text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+              {t('addButton')}
+            </button>
+          </>
+        }
       />
+
+      <div className="px-5 lg:px-8 py-6 flex flex-col gap-6">
+        <BannerStatsCards banners={banners} />
+        {previewMode && <BannersPreview banners={activeBanners} />}
+        <BannersList
+          banners={banners}
+          loading={loading}
+          onMove={swapPositions}
+          onToggleActive={toggleActive}
+          onEdit={openModal}
+          onDelete={setDeleteBannerId}
+        />
+      </div>
 
       <BannerFormModal
         open={showModal}
@@ -157,6 +171,6 @@ export default function AnnoncePage() {
         onCancel={() => setDeleteBannerId(null)}
         onConfirm={handleDelete}
       />
-    </div>
+    </>
   )
 }
