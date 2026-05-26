@@ -51,7 +51,6 @@ interface Product {
   isNew?: boolean
   isFeatured?: boolean
   volume?: string | null
-  soldRecent?: number
   tags?: TagItem[]
 }
 
@@ -315,9 +314,10 @@ export default function CatalogueClient({
     out.sort((a, b) => {
       switch (sortBy) {
         case 'bestsellers': {
-          // Featured + popularité récente, fallback alpha
-          const aw = (a.isFeatured ? 1000 : 0) + (a.soldRecent ?? 0)
-          const bw = (b.isFeatured ? 1000 : 0) + (b.soldRecent ?? 0)
+          // is_featured prioritaire, fallback alpha (la popularité réelle vit
+          // dans la vue v_bestsellers et n'est pas exposée sur products).
+          const aw = a.isFeatured ? 1 : 0
+          const bw = b.isFeatured ? 1 : 0
           if (aw !== bw) return bw - aw
           return a.name.localeCompare(b.name)
         }

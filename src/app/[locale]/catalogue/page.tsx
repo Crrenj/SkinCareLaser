@@ -49,7 +49,6 @@ type RawProduct = {
   is_new: boolean | null
   is_featured: boolean | null
   volume: string | null
-  sold_30d: number | null
   product_images: { url: string; alt: string | null }[] | null
   range: RangeJoin | null
   product_tags: { tag: TagItem | null }[] | null
@@ -80,7 +79,6 @@ export default async function Catalogue({
       is_new,
       is_featured,
       volume,
-      sold_30d,
       product_images ( url, alt ),
       range:ranges (
         id,
@@ -129,7 +127,6 @@ export default async function Catalogue({
     isNew: p.is_new ?? false,
     isFeatured: p.is_featured ?? false,
     volume: p.volume,
-    soldRecent: p.sold_30d ?? 0,
     images: p.product_images ?? [],
     brand: p.range?.brand?.name ?? '',
     range: p.range?.name ?? '',
