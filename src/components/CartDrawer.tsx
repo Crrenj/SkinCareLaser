@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useCart } from '@/hooks/useCart'
+import { useModalA11y } from '@/hooks/useModalA11y'
 import { CartLineItem } from '@/components/cart/CartLineItem'
 import { PopClose } from '@/components/ui/PopClose'
 import { Scrim } from '@/components/ui/Scrim'
@@ -23,21 +24,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const [reserveError] = useState<string | null>(null)
   const bodyRef = useRef<HTMLDivElement>(null)
   const [headerBordered, setHeaderBordered] = useState(false)
-
-  useEffect(() => {
-    if (!isOpen) return
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = prevOverflow
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [isOpen, onClose])
+  const dialogRef = useModalA11y<HTMLElement>(isOpen, onClose)
 
   useEffect(() => {
     const el = bodyRef.current
@@ -64,9 +51,11 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
       <Scrim visible={isOpen} onClick={onClose} />
 
       <aside
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label={t('drawerTitle')}
+        tabIndex={-1}
         className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-sand-50 flex flex-col
                     rounded-tl-[--pop-radius-drawer] rounded-bl-[--pop-radius-drawer]
                     shadow-[--pop-shadow-drawer-r] overflow-hidden

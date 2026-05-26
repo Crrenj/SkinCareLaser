@@ -59,11 +59,11 @@ export default function NavBar() {
           <Link href="/contact" className="hover:text-ink-900 transition-colors">
             {t('utility.delivery')}
           </Link>
-          <span className="text-ink-400">·</span>
+          <span className="text-ink-500">·</span>
           <Link href="/a-propos" className="hover:text-ink-900 transition-colors">
             {t('utility.pharmacists')}
           </Link>
-          <span className="text-ink-400">·</span>
+          <span className="text-ink-500">·</span>
           <Link href="/contact" className="hover:text-ink-900 transition-colors">
             {t('utility.help')}
           </Link>

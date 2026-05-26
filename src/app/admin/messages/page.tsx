@@ -256,7 +256,7 @@ export default function MessagesAdminPage() {
                       </div>
                       <div className="flex items-center gap-2 text-[12px] text-ink-500 mb-1.5 flex-wrap font-mono">
                         <span className="truncate max-w-[260px]">{message.user_email}</span>
-                        <span className="text-ink-400">·</span>
+                        <span className="text-ink-500">·</span>
                         <span>{new Date(message.created_at).toLocaleDateString('es-DO')}</span>
                       </div>
                       <p className="text-[13px] text-ink-700 line-clamp-2 leading-[1.5]">
@@ -296,7 +296,7 @@ export default function MessagesAdminPage() {
                 </h3>
                 <div className="flex items-center gap-2 text-[12px] text-ink-500 font-mono flex-wrap">
                   <span className="truncate">{selectedMessage.user_email}</span>
-                  <span className="text-ink-400">·</span>
+                  <span className="text-ink-500">·</span>
                   <span>
                     {new Date(selectedMessage.created_at).toLocaleString('es-DO', {
                       day: 'numeric',

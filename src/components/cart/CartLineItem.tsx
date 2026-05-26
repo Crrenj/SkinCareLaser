@@ -55,7 +55,7 @@ export function CartLineItem({
         }`}
         data-testid="cart-item"
       >
-        <div className="w-16 h-16 rounded-md bg-sand-200 overflow-hidden flex items-center justify-center text-ink-400 text-[9px] tracking-[0.1em] uppercase">
+        <div className="w-16 h-16 rounded-md bg-sand-200 overflow-hidden flex items-center justify-center text-ink-500 text-[9px] tracking-[0.1em] uppercase">
           {p.images[0] ? (
             <Image
               src={p.images[0].url}
@@ -115,7 +115,7 @@ export function CartLineItem({
       {/* Desktop : 5 colonnes alignées · Mobile : 2 rangées (image+texte+delete / qty+total) */}
       <div className="grid grid-cols-[72px_1fr_28px] lg:grid-cols-[96px_1fr_auto_auto_36px] gap-3 lg:gap-6 items-start lg:items-center">
         {/* Image */}
-        <div className="w-[72px] h-[72px] lg:w-24 lg:h-24 rounded-md lg:rounded-lg bg-sand-200 overflow-hidden flex items-center justify-center text-ink-400 text-[10px] tracking-[0.1em] uppercase">
+        <div className="w-[72px] h-[72px] lg:w-24 lg:h-24 rounded-md lg:rounded-lg bg-sand-200 overflow-hidden flex items-center justify-center text-ink-500 text-[10px] tracking-[0.1em] uppercase">
           {p.images[0] ? (
             <Image
               src={p.images[0].url}

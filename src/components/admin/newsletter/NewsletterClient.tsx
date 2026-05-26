@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Download, Search, Trash2, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 type Row = {
   id: string
@@ -54,7 +55,7 @@ export function NewsletterClient() {
     try {
       const res = await fetch(`/api/admin/newsletter/${row.id}`, { method: 'DELETE' })
       if (!res.ok) {
-        window.alert('Suppression échouée.')
+        toast.error('Suppression échouée.')
         return
       }
       setRows((prev) => prev.filter((r) => r.id !== row.id))
@@ -91,7 +92,7 @@ export function NewsletterClient() {
       {/* Filters + Export */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
         <div className="relative max-w-md flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
           <input
             type="search"
             value={search}

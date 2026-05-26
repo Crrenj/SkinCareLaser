@@ -66,7 +66,7 @@ export function ReservationSummary({
                 key={item.id}
                 className="grid grid-cols-[40px_1fr_auto] gap-2.5 text-[12.5px] items-start"
               >
-                <div className="w-10 h-10 bg-sand-200 rounded flex items-center justify-center text-[9px] tracking-[0.1em] uppercase text-ink-400 overflow-hidden">
+                <div className="w-10 h-10 bg-sand-200 rounded flex items-center justify-center text-[9px] tracking-[0.1em] uppercase text-ink-500 overflow-hidden">
                   {p.images[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

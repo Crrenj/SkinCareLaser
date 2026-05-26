@@ -86,7 +86,7 @@ export function LocaleSwitcher({
               {loc}
             </button>
             {i < routing.locales.length - 1 && (
-              <span className="text-ink-400" aria-hidden>
+              <span className="text-ink-500" aria-hidden>
                 ·
               </span>
             )}

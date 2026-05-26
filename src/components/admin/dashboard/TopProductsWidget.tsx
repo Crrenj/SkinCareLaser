@@ -42,12 +42,12 @@ export function TopProductsWidget({ rows }: { rows: TopProductRow[] }) {
             >
               <span
                 className={`font-serif text-[22px] text-center leading-none ${
-                  i === 0 ? 'text-clay-700' : 'text-ink-400'
+                  i === 0 ? 'text-clay-700' : 'text-ink-500'
                 }`}
               >
                 {i + 1}
               </span>
-              <span className="w-10 h-10 bg-sand-200 rounded text-[8px] tracking-[0.08em] uppercase text-ink-400 inline-flex items-center justify-center">
+              <span className="w-10 h-10 bg-sand-200 rounded text-[8px] tracking-[0.08em] uppercase text-ink-500 inline-flex items-center justify-center">
                 Pack
               </span>
               <div className="min-w-0">

@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
 import { ChevronRight, User as UserIcon, Shield } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { User } from '@supabase/supabase-js'
 import { Link, usePathname } from '@/i18n/navigation'
+import { useModalA11y } from '@/hooks/useModalA11y'
 import Logo from './Logo'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { PopClose } from '@/components/ui/PopClose'
@@ -32,24 +32,7 @@ export function MobileDrawer({
 }: MobileDrawerProps) {
   const t = useTranslations('Nav')
   const pathname = usePathname()
-
-  useEffect(() => {
-    if (!open) return
-    const previous = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = previous
-    }
-  }, [open])
-
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  const dialogRef = useModalA11y<HTMLElement>(open, onClose)
 
   if (!open) return null
 
@@ -65,11 +48,13 @@ export function MobileDrawer({
 
       {/* Drawer — rounded on right side */}
       <aside
+        ref={dialogRef}
         className="absolute top-0 left-0 h-full w-[320px] max-w-[85vw] bg-sand-50 flex flex-col overflow-hidden rounded-tr-[20px] rounded-br-[20px]"
         style={{ boxShadow: 'var(--pop-shadow-drawer-l)' }}
         role="dialog"
         aria-modal="true"
         aria-label={t('drawer.menuHeading')}
+        tabIndex={-1}
       >
         {/* Header — eyebrow + logo clay-700 */}
         <div className="flex items-start justify-between px-5 py-[18px]">

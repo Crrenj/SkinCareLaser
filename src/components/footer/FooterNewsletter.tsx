@@ -50,7 +50,7 @@ export function FooterNewsletter() {
           className="font-serif text-[32px] md:text-[40px] leading-[1.05] -tracking-[0.02em] text-sand-50 mb-2 [&_em]:not-italic [&_em]:italic [&_em]:text-clay-400"
           dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
         />
-        <p className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-400 max-w-[440px]">
+        <p className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-500 max-w-[440px]">
           {t('description')}
         </p>
       </div>

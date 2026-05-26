@@ -201,7 +201,7 @@ export function BannerFormModal({
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="banner-image" className={labelCls}>
                   URL de la imagen
-                  {form.banner_type === 'quote' && <span className="font-sans text-ink-400 text-[10px] normal-case tracking-normal ml-2">(opcional para quote)</span>}
+                  {form.banner_type === 'quote' && <span className="font-sans text-ink-500 text-[10px] normal-case tracking-normal ml-2">(opcional para quote)</span>}
                 </label>
                 <input id="banner-image" type="url"
                   required={form.banner_type !== 'quote'}

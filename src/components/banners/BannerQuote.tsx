@@ -70,7 +70,7 @@ export function BannerQuote({ id, eyebrow, title, attribution }: BannerQuoteProp
           &ldquo;{title}&rdquo;
         </p>
         {attribution && (
-          <p className="text-[13px] text-ink-400">
+          <p className="text-[13px] text-ink-500">
             <strong className="text-sand-200 font-semibold">{attribution.name}</strong>
             {attribution.title && <> · {attribution.title}</>}
           </p>

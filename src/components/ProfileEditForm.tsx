@@ -111,7 +111,7 @@ export default function ProfileEditForm({
           {t('emailLabel')}
         </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
+          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-500" />
           <input
             type="email"
             value={userEmail}
@@ -171,7 +171,7 @@ export default function ProfileEditForm({
           {t('displayNameLabel')}
         </label>
         <div className="relative">
-          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
+          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-500" />
           <input
             id="display_name"
             name="display_name"
@@ -193,7 +193,7 @@ export default function ProfileEditForm({
           {t('phoneLabel')}
         </label>
         <div className="relative">
-          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
+          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-500" />
           <input
             id="phone"
             name="phone"
@@ -220,7 +220,7 @@ export default function ProfileEditForm({
           {t('birthDateLabel')}
         </label>
         <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
+          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-500" />
           <input
             id="birth_date"
             name="birth_date"

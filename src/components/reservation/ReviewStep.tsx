@@ -84,7 +84,7 @@ export function ReviewStep({
                   idx < items.length - 1 ? 'border-b border-sand-200' : ''
                 }`}
               >
-                <div className="w-14 h-14 bg-sand-200 rounded-md flex items-center justify-center text-ink-400 text-[9px] tracking-[0.1em] uppercase overflow-hidden">
+                <div className="w-14 h-14 bg-sand-200 rounded-md flex items-center justify-center text-ink-500 text-[9px] tracking-[0.1em] uppercase overflow-hidden">
                   {p.images[0] ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img

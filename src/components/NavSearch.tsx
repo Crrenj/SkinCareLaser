@@ -455,7 +455,7 @@ function SearchResultRow({
             className="w-full h-full object-contain p-1"
           />
         ) : (
-          <span className="text-ink-400 text-[10px]">—</span>
+          <span className="text-ink-500 text-[10px]">—</span>
         )}
       </div>
       <div className="flex-1 min-w-0">

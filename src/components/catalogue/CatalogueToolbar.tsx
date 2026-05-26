@@ -59,7 +59,7 @@ export function CatalogueToolbar({ activeFilters, onClearAll, sort, onSortChange
             </button>
           </>
         ) : (
-          <span className="font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-400">
+          <span className="font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-500">
             {t('gridCuration')}
           </span>
         )}

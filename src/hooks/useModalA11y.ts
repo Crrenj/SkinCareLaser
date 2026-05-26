@@ -22,8 +22,8 @@ import { useEffect, useRef } from 'react'
  *     </div>
  *   )
  */
-export function useModalA11y(open: boolean, onClose: () => void) {
-  const dialogRef = useRef<HTMLDivElement>(null)
+export function useModalA11y<T extends HTMLElement = HTMLDivElement>(open: boolean, onClose: () => void) {
+  const dialogRef = useRef<T>(null)
 
   useEffect(() => {
     if (!open) return

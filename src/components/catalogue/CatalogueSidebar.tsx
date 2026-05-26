@@ -170,7 +170,7 @@ function Block({
       <div className="font-mono text-[11px] tracking-[0.16em] uppercase text-ink-700 mb-3.5 flex justify-between items-center">
         <span>{heading}</span>
         {count && (
-          <small className="font-sans normal-case tracking-normal text-ink-400 text-[12px]">
+          <small className="font-sans normal-case tracking-normal text-ink-500 text-[12px]">
             {count}
           </small>
         )}
@@ -212,7 +212,7 @@ function CheckboxRow({
       />
       <span className="flex-1">{label}</span>
       {count !== undefined && (
-        <span className="font-mono text-[12px] text-ink-400">{count}</span>
+        <span className="font-mono text-[12px] text-ink-500">{count}</span>
       )}
     </label>
   )

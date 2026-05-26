@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Search, Shield, ShieldOff, Mail, Phone, Globe, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 type Row = {
   id: string
@@ -64,9 +65,9 @@ export function UsersClient() {
         if (!res.ok) {
           const json = (await res.json().catch(() => null)) as { error?: string } | null
           if (json?.error === 'cannot_demote_self') {
-            window.alert('Vous ne pouvez pas vous retirer les droits admin.')
+            toast.error('Vous ne pouvez pas vous retirer les droits admin.')
           } else {
-            window.alert("La mise à jour a échoué.")
+            toast.error("La mise à jour a échoué.")
           }
           return
         }
@@ -99,7 +100,7 @@ export function UsersClient() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500" />
         <input
           type="search"
           value={search}
@@ -178,7 +179,7 @@ export function UsersClient() {
                     </td>
                     <td className="px-4 py-3 align-top text-ink-700">
                       <span className="inline-flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-ink-400" />
+                        <Globe className="w-3.5 h-3.5 text-ink-500" />
                         {r.preferredLocale ?? 'auto'}
                       </span>
                     </td>

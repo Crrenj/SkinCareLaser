@@ -71,7 +71,7 @@ export default function Footer() {
             </span>
           </span>
           <p
-            className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-400"
+            className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-500"
             dangerouslySetInnerHTML={{ __html: t.raw('tagline') as string }}
           />
           <div className="flex gap-2.5 mt-1">
@@ -129,7 +129,7 @@ export default function Footer() {
           {['Visa', 'Mastercard', 'PayPal', 'Azul'].map((label) => (
             <span
               key={label}
-              className="font-mono text-[10px] px-2 py-1 border border-ink-700 rounded-sm text-ink-400"
+              className="font-mono text-[10px] px-2 py-1 border border-ink-700 rounded-sm text-ink-500"
             >
               {label}
             </span>
@@ -162,7 +162,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
     <li>
       <Link
         href={href}
-        className="text-[13px] text-ink-400 hover:text-sand-50 transition-colors"
+        className="text-[13px] text-ink-500 hover:text-sand-50 transition-colors"
       >
         {label}
       </Link>

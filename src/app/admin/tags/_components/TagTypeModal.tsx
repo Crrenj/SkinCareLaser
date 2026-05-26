@@ -118,7 +118,7 @@ export function TagTypeModal({
               <div className="flex flex-col gap-[6px]">
                 <label htmlFor="type-initial-tag" className={labelCls}>
                   Primera etiqueta
-                  <span className="font-sans text-ink-400 text-[10px] normal-case tracking-normal ml-2">(opcional)</span>
+                  <span className="font-sans text-ink-500 text-[10px] normal-case tracking-normal ml-2">(opcional)</span>
                 </label>
                 <input
                   id="type-initial-tag"

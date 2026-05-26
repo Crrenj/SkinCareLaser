@@ -99,7 +99,7 @@ export function ConfirmationRecap({
               idx < items.length - 1 ? 'border-b border-sand-200' : ''
             }`}
           >
-            <div className="relative w-12 h-12 bg-sand-200 rounded flex items-center justify-center text-ink-400 text-[9px] tracking-[0.08em] uppercase overflow-hidden">
+            <div className="relative w-12 h-12 bg-sand-200 rounded flex items-center justify-center text-ink-500 text-[9px] tracking-[0.08em] uppercase overflow-hidden">
               {it.image ? (
                 <Image
                   src={it.image}

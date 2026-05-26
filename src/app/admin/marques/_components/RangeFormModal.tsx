@@ -75,7 +75,7 @@ export function RangeFormModal({
                 value={form.brand_id}
                 onChange={(e) => onFormChange({ ...form, brand_id: e.target.value })}
                 disabled={brandLocked}
-                className={`${inputCls} appearance-none disabled:bg-sand-100 disabled:text-ink-400`}
+                className={`${inputCls} appearance-none disabled:bg-sand-100 disabled:text-ink-500`}
               >
                 <option value="">Seleccionar marca</option>
                 {brands.map((brand) => (

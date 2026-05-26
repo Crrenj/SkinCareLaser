@@ -21,7 +21,7 @@ export function PdpQuantity({ value, onChange, min = 1, max = 99 }: PdpQuantityP
         onClick={decrement}
         disabled={value <= min}
         aria-label={t('decreaseAriaLabel')}
-        className="w-[30px] h-[30px] flex items-center justify-center text-ink-900 disabled:text-ink-400 disabled:cursor-not-allowed rounded-sm hover:bg-sand-100 transition-colors text-lg"
+        className="w-[30px] h-[30px] flex items-center justify-center text-ink-900 disabled:text-ink-500 disabled:cursor-not-allowed rounded-sm hover:bg-sand-100 transition-colors text-lg"
       >
         −
       </button>
@@ -31,7 +31,7 @@ export function PdpQuantity({ value, onChange, min = 1, max = 99 }: PdpQuantityP
         onClick={increment}
         disabled={value >= max}
         aria-label={t('increaseAriaLabel')}
-        className="w-[30px] h-[30px] flex items-center justify-center text-ink-900 disabled:text-ink-400 disabled:cursor-not-allowed rounded-sm hover:bg-sand-100 transition-colors text-lg"
+        className="w-[30px] h-[30px] flex items-center justify-center text-ink-900 disabled:text-ink-500 disabled:cursor-not-allowed rounded-sm hover:bg-sand-100 transition-colors text-lg"
       >
         +
       </button>

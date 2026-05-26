@@ -61,7 +61,7 @@ export function CataloguePagination({
             <span
               key={`e-${idx}`}
               aria-hidden
-              className="inline-flex items-center justify-center min-w-[24px] h-9 text-ink-400 select-none"
+              className="inline-flex items-center justify-center min-w-[24px] h-9 text-ink-500 select-none"
             >
               …
             </span>

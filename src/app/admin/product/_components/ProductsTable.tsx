@@ -85,7 +85,7 @@ export function ProductsTable({
                 >
                   <td className="px-4 py-3 align-middle">
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="w-[42px] h-[42px] bg-sand-200 border border-sand-300 rounded-md flex items-center justify-center text-ink-400 shrink-0 overflow-hidden">
+                      <span className="w-[42px] h-[42px] bg-sand-200 border border-sand-300 rounded-md flex items-center justify-center text-ink-500 shrink-0 overflow-hidden">
                         {product.image_url ? (
                           <Image
                             src={product.image_url}

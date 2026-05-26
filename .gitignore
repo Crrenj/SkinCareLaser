@@ -65,3 +65,5 @@ next-env.d.ts
 
 # Scripts de probe Playwright ad-hoc à la racine (sessions de debug)
 /_probe-*.mjs
+/_audit-*.mjs
+/_check-*.mjs

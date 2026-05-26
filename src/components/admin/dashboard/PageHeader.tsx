@@ -28,7 +28,7 @@ export function PageHeader({ crumbs, title, actions }: PageHeaderProps) {
               const isLast = i === crumbs.length - 1
               const sep =
                 i > 0 ? (
-                  <span aria-hidden className="mx-2 text-ink-400">
+                  <span aria-hidden className="mx-2 text-ink-500">
                     /
                   </span>
                 ) : null

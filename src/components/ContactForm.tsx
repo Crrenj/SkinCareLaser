@@ -93,7 +93,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
             {t('emailLabel')}
           </label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-400" />
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-500" />
             <input
               type="email"
               id="email"

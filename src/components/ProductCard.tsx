@@ -114,7 +114,7 @@ export default function ProductCard({ product }: Props) {
         <div className="flex justify-between items-baseline pt-3 mt-1.5 border-t border-sand-200">
           <div className="font-serif text-[24px] leading-none -tracking-[0.01em] text-ink-900">
             {isPromo && (
-              <span className="block font-mono text-[12px] text-ink-400 line-through mb-0.5">
+              <span className="block font-mono text-[12px] text-ink-500 line-through mb-0.5">
                 {product.oldPrice!.toFixed(0)} {product.currency.toUpperCase()}
               </span>
             )}
@@ -157,7 +157,7 @@ function StockBadge({ state, stock }: { state: 'in' | 'low' | 'out'; stock?: num
   const t = useTranslations('Catalogue')
   const color =
     state === 'out'
-      ? 'text-ink-400 before:bg-ink-400'
+      ? 'text-ink-500 before:bg-ink-400'
       : state === 'low'
         ? 'text-brick-600 before:bg-clay-600'
         : 'text-olive-600 before:bg-[#8AB672]'
