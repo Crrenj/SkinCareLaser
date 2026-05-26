@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon } from '@heroicons/react/24/outline'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useTagsData } from './_hooks/useTagsData'
 import { generateSlug } from './_lib/icons'
 import type {
@@ -23,7 +24,7 @@ const INITIAL_TYPE_FORM: TypeFormState = {
   name: '',
   slug: '',
   icon: 'TagIcon',
-  color: '#3B82F6',
+  color: '#8E5232',
   initialTag: '',
 }
 
@@ -155,31 +156,40 @@ export default function TagsPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Gestion des Tags</h1>
-        <button
-          onClick={() => openTypeModal()}
-          className="flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          Nouveau type de tag
-        </button>
-      </div>
-
-      <TagStatsCards categories={tagCategories} />
-
-      <TagCategoryGrid
-        categories={tagCategories}
-        loading={loading}
-        onEditType={(categoryId) =>
-          openTypeModal(tagTypes.find((t) => t.id === categoryId))
+    <>
+      <PageHeader
+        crumbs={[
+          { label: 'Admin', href: '/admin' },
+          { label: 'Catálogo' },
+          { label: 'Etiquetas' },
+        ]}
+        title="Etiquetas"
+        actions={
+          <button
+            type="button"
+            onClick={() => openTypeModal()}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-sand-50 text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+          >
+            <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+            Nuevo tipo de etiqueta
+          </button>
         }
-        onDeleteType={(categoryId) => setDeleteTarget({ type: 'type', id: categoryId })}
-        onCreateTag={(categoryId) => openTagModal(categoryId)}
-        onEditTag={(categoryId, tag) => openTagModal(categoryId, tag)}
-        onDeleteTag={(tagId) => setDeleteTarget({ type: 'tag', id: tagId })}
       />
+
+      <div className="px-5 lg:px-8 py-6 flex flex-col gap-6">
+        <TagStatsCards categories={tagCategories} />
+        <TagCategoryGrid
+          categories={tagCategories}
+          loading={loading}
+          onEditType={(categoryId) =>
+            openTypeModal(tagTypes.find((t) => t.id === categoryId))
+          }
+          onDeleteType={(categoryId) => setDeleteTarget({ type: 'type', id: categoryId })}
+          onCreateTag={(categoryId) => openTagModal(categoryId)}
+          onEditTag={(categoryId, tag) => openTagModal(categoryId, tag)}
+          onDeleteTag={(tagId) => setDeleteTarget({ type: 'tag', id: tagId })}
+        />
+      </div>
 
       <TagTypeModal
         open={showTypeModal}
@@ -206,6 +216,6 @@ export default function TagsPage() {
         onCancel={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
       />
-    </div>
+    </>
   )
 }

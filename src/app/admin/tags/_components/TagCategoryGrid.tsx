@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusIcon, PencilIcon, TrashIcon, TagIcon } from '@heroicons/react/24/outline'
+import { Plus, Pencil, Trash2, Tag as TagIcon, Loader2 } from 'lucide-react'
 import type { Tag, TagCategory } from '../_lib/types'
 
 type TagCategoryGridProps = {
@@ -23,122 +23,191 @@ export function TagCategoryGrid({
   onDeleteTag,
 }: TagCategoryGridProps) {
   if (loading) {
-    return <div className="text-center py-8">Chargement...</div>
+    return (
+      <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">
+        <Loader2 className="w-5 h-5 mx-auto mb-3 animate-spin text-clay-700" />
+        Cargando…
+      </div>
+    )
+  }
+
+  if (categories.length === 0) {
+    return (
+      <div className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]">
+        No hay tipos de etiqueta. Pulsa{' '}
+        <b className="text-ink-900 font-medium">Nuevo tipo de etiqueta</b> para crear el primero.
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      {categories.map((category) => {
-        const Icon = category.icon
-        return (
-          <div
-            key={category.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-          >
-            <div className="h-1" style={{ backgroundColor: category.color }} />
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center mr-4"
-                    style={{ backgroundColor: `${category.color}20` }}
-                  >
-                    <Icon className="h-7 w-7" style={{ color: category.color }} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900">{category.name}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {category.tags.length} tag{category.tags.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => onEditType(category.id)}
-                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Modifier le type"
-                    aria-label={`Modifier le type ${category.name}`}
-                  >
-                    <PencilIcon className="h-5 w-5" />
-                  </button>
-                  <button
-                    onClick={() => onDeleteType(category.id)}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Supprimer le type"
-                    aria-label={`Supprimer le type ${category.name}`}
-                    disabled={category.tags.length > 0}
-                  >
-                    <TrashIcon
-                      className={`h-5 w-5 ${category.tags.length > 0 ? 'opacity-50' : ''}`}
-                    />
-                  </button>
-                  <button
-                    onClick={() => onCreateTag(category.id)}
-                    className="flex items-center px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
-                    style={{ backgroundColor: category.color }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-                  >
-                    <PlusIcon className="h-4 w-4 mr-2" />
-                    Nouveau tag
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {category.tags.map((tag) => (
-                  <div
-                    key={tag.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors group"
-                  >
-                    <div className="flex items-center flex-1 min-w-0">
-                      <div
-                        className="w-2 h-2 rounded-full mr-3 flex-shrink-0"
-                        style={{ backgroundColor: category.color }}
-                      />
-                      <span className="text-sm font-medium text-gray-700 truncate">
-                        {tag.name}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => onEditTag(category.id, tag)}
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Modifier le tag"
-                        aria-label={`Modifier le tag ${tag.name}`}
-                      >
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => onDeleteTag(tag.id)}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="Supprimer le tag"
-                        aria-label={`Supprimer le tag ${tag.name}`}
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-
-                {category.tags.length === 0 && (
-                  <div className="col-span-full text-center py-8 text-gray-400">
-                    <TagIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">Aucun tag dans cette catégorie</p>
-                    <button
-                      onClick={() => onCreateTag(category.id)}
-                      className="mt-3 text-sm font-medium hover:underline"
-                      style={{ color: category.color }}
-                    >
-                      Ajouter le premier tag
-                    </button>
-                  </div>
-                )}
+    <div className="flex flex-col gap-5">
+      {categories.map((category) => (
+        <article
+          key={category.id}
+          className="bg-sand-50 border border-sand-300 rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(31,27,22,0.06),0_12px_32px_-8px_rgba(31,27,22,0.08)]"
+        >
+          <header className="flex items-center justify-between gap-3 px-5 py-4 border-b border-sand-300 bg-sand-100">
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                aria-hidden
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ background: category.color }}
+              />
+              <div className="leading-tight min-w-0">
+                <h3 className="font-serif text-[20px] text-ink-900 leading-tight truncate">
+                  {category.name}
+                </h3>
+                <span className="font-mono text-[11px] tracking-[0.06em] text-ink-500">
+                  {category.tags.length}{' '}
+                  {category.tags.length === 1 ? 'etiqueta' : 'etiquetas'} · {category.type}
+                </span>
               </div>
             </div>
-          </div>
-        )
-      })}
+            <div className="flex items-center gap-1.5">
+              <HeaderAction
+                label={`Editar tipo ${category.name}`}
+                title="Editar tipo"
+                onClick={() => onEditType(category.id)}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </HeaderAction>
+              <HeaderAction
+                label={`Eliminar tipo ${category.name}`}
+                title="Eliminar tipo"
+                onClick={() => onDeleteType(category.id)}
+                disabled={category.tags.length > 0}
+                danger
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </HeaderAction>
+              <button
+                type="button"
+                onClick={() => onCreateTag(category.id)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium bg-clay-700 text-sand-50 rounded-md hover:bg-clay-800 transition-colors"
+              >
+                <Plus className="w-3 h-3" strokeWidth={2.4} />
+                Etiqueta
+              </button>
+            </div>
+          </header>
+
+          {category.tags.length === 0 ? (
+            <div className="px-5 py-10 text-center text-ink-500">
+              <TagIcon className="w-6 h-6 mx-auto mb-2 opacity-50" />
+              <p className="text-[13px] mb-2">No hay etiquetas en este tipo.</p>
+              <button
+                type="button"
+                onClick={() => onCreateTag(category.id)}
+                className="text-[13px] font-medium text-clay-700 hover:text-clay-800 underline underline-offset-4 bg-transparent transition-colors"
+              >
+                Añadir la primera
+              </button>
+            </div>
+          ) : (
+            <ul className="m-0 p-0 list-none divide-y divide-sand-200">
+              {category.tags.map((tag) => (
+                <li
+                  key={tag.id}
+                  className="group grid grid-cols-[14px_1fr_auto] gap-3 items-center px-5 py-2.5 hover:bg-sand-100 transition-colors"
+                >
+                  <span
+                    aria-hidden
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ background: category.color }}
+                  />
+                  <div className="min-w-0 leading-tight">
+                    <b className="block text-[13.5px] font-medium text-ink-900 truncate">
+                      {tag.name}
+                    </b>
+                    <small className="block text-[11px] text-ink-500 font-mono">
+                      {tag.slug}
+                    </small>
+                  </div>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <RowAction
+                      label={`Editar ${tag.name}`}
+                      title="Editar etiqueta"
+                      onClick={() => onEditTag(category.id, tag)}
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </RowAction>
+                    <RowAction
+                      label={`Eliminar ${tag.name}`}
+                      title="Eliminar etiqueta"
+                      onClick={() => onDeleteTag(tag.id)}
+                      danger
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </RowAction>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+      ))}
     </div>
+  )
+}
+
+function HeaderAction({
+  children,
+  onClick,
+  title,
+  label,
+  disabled = false,
+  danger = false,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  title: string
+  label: string
+  disabled?: boolean
+  danger?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-label={label}
+      disabled={disabled}
+      className={`w-7 h-7 inline-flex items-center justify-center rounded-md border-0 bg-transparent text-ink-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+        danger
+          ? 'hover:bg-brick-600/10 hover:text-brick-600 disabled:hover:bg-transparent disabled:hover:text-ink-500'
+          : 'hover:bg-sand-200 hover:text-ink-900'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function RowAction({
+  children,
+  onClick,
+  title,
+  label,
+  danger = false,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  title: string
+  label: string
+  danger?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-label={label}
+      className={`w-7 h-7 inline-flex items-center justify-center rounded-md border-0 bg-transparent text-ink-500 transition-colors ${
+        danger ? 'hover:bg-brick-600/10 hover:text-brick-600' : 'hover:bg-sand-200 hover:text-ink-900'
+      }`}
+    >
+      {children}
+    </button>
   )
 }

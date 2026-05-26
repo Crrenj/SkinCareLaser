@@ -7,30 +7,44 @@ type TagStatsCardsProps = {
 }
 
 export function TagStatsCards({ categories }: TagStatsCardsProps) {
+  const totalTags = categories.reduce((sum, c) => sum + c.tags.length, 0)
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      {categories.map((category) => {
-        const Icon = category.icon
-        return (
-          <div
-            key={category.id}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
-          >
-            <div className="flex items-center">
-              <div
-                className="flex-shrink-0 p-3 rounded-lg"
-                style={{ backgroundColor: `${category.color}20` }}
-              >
-                <Icon className="h-6 w-6" style={{ color: category.color }} />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">{category.name}</p>
-                <p className="text-2xl font-semibold text-gray-900">{category.tags.length}</p>
-              </div>
-            </div>
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="bg-sand-50 border border-sand-300 rounded-xl px-5 py-4">
+        <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-500 mb-1.5">
+          Tipos
+        </div>
+        <span className="font-serif text-[32px] leading-none text-clay-700">
+          {categories.length}
+        </span>
+      </div>
+      <div className="bg-sand-50 border border-sand-300 rounded-xl px-5 py-4">
+        <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-500 mb-1.5">
+          Etiquetas
+        </div>
+        <span className="font-serif text-[32px] leading-none text-olive-600">{totalTags}</span>
+      </div>
+      {categories.slice(0, 2).map((category) => (
+        <div
+          key={category.id}
+          className="bg-sand-50 border border-sand-300 rounded-xl px-5 py-4"
+        >
+          <div className="flex items-center gap-2 mb-1.5">
+            <span
+              aria-hidden
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ background: category.color }}
+            />
+            <span className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-500 truncate">
+              {category.name}
+            </span>
           </div>
-        )
-      })}
+          <span className="font-serif text-[32px] leading-none text-ink-900">
+            {category.tags.length}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }
