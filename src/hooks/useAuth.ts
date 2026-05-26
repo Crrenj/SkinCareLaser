@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useCart } from './useCart'
 
 export function useAuth() {
   const { refreshCart } = useCart()
+  const previousUserIdRef = useRef<string | null | undefined>(undefined)
 
   useEffect(() => {
     // Handlers définis dans useEffect pour ne pas les inclure dans les deps
@@ -43,12 +44,26 @@ export function useAuth() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          await handleUserLogin()
-        } else if (event === 'SIGNED_OUT') {
+        const incomingUserId = session?.user?.id ?? null
+        const previousUserId = previousUserIdRef.current
+        // Supabase ré-émet `SIGNED_IN` au focus de tab et après chaque
+        // TOKEN_REFRESHED. On ne merge que sur une vraie transition
+        // (null/undefined -> user). Sinon on re-fetchait le panier
+        // (et autres effets) à chaque retour d'onglet.
+        if (event === 'SIGNED_IN' && incomingUserId && incomingUserId !== previousUserId) {
+          if (previousUserId === null || previousUserId === undefined) {
+            await handleUserLogin()
+          }
+          previousUserIdRef.current = incomingUserId
+        } else if (event === 'SIGNED_OUT' && previousUserId !== null) {
+          previousUserIdRef.current = null
           await handleUserLogout()
+        } else if (event === 'INITIAL_SESSION') {
+          // Initial load : enregistre l'identité sans déclencher le merge
+          // (le panier serveur connaît déjà cette session).
+          previousUserIdRef.current = incomingUserId
         }
-      }
+      },
     )
 
     return () => subscription.unsubscribe()

@@ -31,7 +31,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     setDrawerOpen(false)
   }, [pathname])
 
-  if (loading) {
+  // Spinner uniquement au tout premier render quand on n'a encore aucune
+  // info sur l'utilisateur. Une fois user+isAdmin connus, on garde le
+  // contenu visible même si un re-check passe en `loading=true` (évite
+  // le flash spinner à chaque retour de tab).
+  if (loading && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-sand-100">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-sand-300 border-t-clay-700" />
