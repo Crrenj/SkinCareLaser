@@ -1506,6 +1506,48 @@
       "emptyCategoryCta": "Add the first one",
       "kpiTypes": "Types",
       "kpiTags": "Tags"
+    },
+    "messages": {
+      "title": "Messages",
+      "searchPlaceholder": "Search by subject, email or content…",
+      "kpiTotal": "Total",
+      "kpiUnread": "Unread",
+      "kpiRead": "Read",
+      "kpiReplied": "Replied",
+      "kpiArchived": "Archived",
+      "kpiToday": "Today",
+      "kpiWeek": "This week",
+      "filterAll": "All",
+      "filterUnread": "Unread",
+      "filterRead": "Read",
+      "filterReplied": "Replied",
+      "filterArchived": "Archived",
+      "emptyState": "No messages.",
+      "loadError": "Failed to load messages.",
+      "statusUnread": "Unread",
+      "statusRead": "Read",
+      "statusReplied": "Replied",
+      "statusArchived": "Archived",
+      "priorityUrgent": "Urgent",
+      "priorityHigh": "High",
+      "messageHeading": "Message:",
+      "actionMarkRead": "Mark as read",
+      "actionMarkReplied": "Mark as replied",
+      "actionArchive": "Archive",
+      "actionDelete": "Delete",
+      "modalCloseAria": "Close",
+      "metaStatus": "Status:",
+      "metaPriority": "Priority:",
+      "metaRepliedAt": "Replied at:",
+      "deleteConfirmTitle": "Delete message",
+      "deleteConfirmBody": "Are you sure you want to delete this message?",
+      "deleteConfirmLabel": "Delete"
+    },
+    "annonce": {
+      "title": "Announcements",
+      "addButton": "Create announcement",
+      "previewShow": "Preview",
+      "previewHide": "Close preview"
     }
   }
 }

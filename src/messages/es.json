@@ -1506,6 +1506,48 @@
       "emptyCategoryCta": "Añadir la primera",
       "kpiTypes": "Tipos",
       "kpiTags": "Etiquetas"
+    },
+    "messages": {
+      "title": "Mensajes",
+      "searchPlaceholder": "Buscar por asunto, email o contenido…",
+      "kpiTotal": "Total",
+      "kpiUnread": "No leídos",
+      "kpiRead": "Leídos",
+      "kpiReplied": "Respondidos",
+      "kpiArchived": "Archivados",
+      "kpiToday": "Hoy",
+      "kpiWeek": "Esta semana",
+      "filterAll": "Todos",
+      "filterUnread": "No leídos",
+      "filterRead": "Leídos",
+      "filterReplied": "Respondidos",
+      "filterArchived": "Archivados",
+      "emptyState": "No hay mensajes.",
+      "loadError": "Error al cargar los mensajes.",
+      "statusUnread": "No leído",
+      "statusRead": "Leído",
+      "statusReplied": "Respondido",
+      "statusArchived": "Archivado",
+      "priorityUrgent": "Urgente",
+      "priorityHigh": "Alta",
+      "messageHeading": "Mensaje:",
+      "actionMarkRead": "Marcar como leído",
+      "actionMarkReplied": "Marcar como respondido",
+      "actionArchive": "Archivar",
+      "actionDelete": "Eliminar",
+      "modalCloseAria": "Cerrar",
+      "metaStatus": "Estado:",
+      "metaPriority": "Prioridad:",
+      "metaRepliedAt": "Respondido el:",
+      "deleteConfirmTitle": "Eliminar el mensaje",
+      "deleteConfirmBody": "¿Seguro que quieres eliminar este mensaje?",
+      "deleteConfirmLabel": "Eliminar"
+    },
+    "annonce": {
+      "title": "Anuncios",
+      "addButton": "Crear anuncio",
+      "previewShow": "Vista previa",
+      "previewHide": "Cerrar vista previa"
     }
   }
 }
