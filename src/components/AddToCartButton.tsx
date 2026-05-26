@@ -5,7 +5,7 @@ import { ShoppingCart, Check, Loader2, Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCart } from '@/hooks/useCart'
 
-type Variant = 'default' | 'outline' | 'ghost' | 'icon' | 'card-cta'
+type Variant = 'default' | 'outline' | 'ghost' | 'icon' | 'card-cta' | 'card-cta-quick'
 
 interface AddToCartButtonProps {
   productId: string
@@ -13,6 +13,8 @@ interface AddToCartButtonProps {
   className?: string
   variant?: Variant
   size?: 'sm' | 'md' | 'lg'
+  /** Texte override pour le variant `card-cta-quick`. */
+  label?: string
 }
 
 export function AddToCartButton({
@@ -20,7 +22,8 @@ export function AddToCartButton({
   disabled = false,
   className = '',
   variant = 'default',
-  size = 'md'
+  size = 'md',
+  label,
 }: AddToCartButtonProps) {
   const t = useTranslations('AddToCart')
   const { addToCart } = useCart()
@@ -67,6 +70,32 @@ export function AddToCartButton({
         ) : (
           <Plus size={18} />
         )}
+      </button>
+    )
+  }
+
+  if (variant === 'card-cta-quick') {
+    const quickLabel = disabled
+      ? t('unavailable')
+      : isAdding
+        ? t('adding')
+        : showSuccess
+          ? t('added')
+          : (label ?? t('add'))
+    return (
+      <button
+        type="button"
+        onClick={handleAddToCart}
+        disabled={disabled || isAdding}
+        className={`bg-ink-900 text-sand-50 border-0 px-4 py-2.5 rounded-[3px] text-[13px] font-medium inline-flex items-center justify-center gap-2 transition-colors hover:bg-clay-700 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        data-testid="add-to-cart-button"
+      >
+        {isAdding ? (
+          <Loader2 size={14} className="animate-spin" />
+        ) : showSuccess ? (
+          <Check size={14} />
+        ) : null}
+        {quickLabel}
       </button>
     )
   }

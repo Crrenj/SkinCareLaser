@@ -43,7 +43,13 @@ type RawProduct = {
   name: string
   description: string | null
   price: string | number
+  old_price: string | number | null
   currency: string
+  stock: number | null
+  is_new: boolean | null
+  is_featured: boolean | null
+  volume: string | null
+  sold_30d: number | null
   product_images: { url: string; alt: string | null }[] | null
   range: RangeJoin | null
   product_tags: { tag: TagItem | null }[] | null
@@ -68,7 +74,13 @@ export default async function Catalogue({
       name,
       description,
       price,
+      old_price,
       currency,
+      stock,
+      is_new,
+      is_featured,
+      volume,
+      sold_30d,
       product_images ( url, alt ),
       range:ranges (
         id,
@@ -79,6 +91,7 @@ export default async function Catalogue({
         tag:tags_with_types ( name, tag_type )
       )
     `)
+    .eq('is_active', true)
     .limit(500)
     .returns<RawProduct[]>()
 
@@ -110,7 +123,13 @@ export default async function Catalogue({
     name: p.name,
     description: p.description ?? '',
     price: Number(p.price),
+    oldPrice: p.old_price !== null && p.old_price !== undefined ? Number(p.old_price) : undefined,
     currency: p.currency,
+    stock: p.stock ?? undefined,
+    isNew: p.is_new ?? false,
+    isFeatured: p.is_featured ?? false,
+    volume: p.volume,
+    soldRecent: p.sold_30d ?? 0,
     images: p.product_images ?? [],
     brand: p.range?.brand?.name ?? '',
     range: p.range?.name ?? '',
@@ -120,9 +139,9 @@ export default async function Catalogue({
   }))
 
   return (
-    <div className="flex flex-col min-h-screen bg-[color:var(--background)]">
+    <div className="flex flex-col min-h-screen bg-sand-50">
       <NavBar />
-      <main id="main-content" className="flex-grow p-6">
+      <main id="main-content" className="flex-grow">
         <CatalogueClient
           products={mappedProducts}
           itemsByType={itemsByType}
