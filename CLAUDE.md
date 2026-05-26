@@ -149,20 +149,28 @@ Modèle (résumé) :
 ### i18n (next-intl)
 
 - **Config** : `src/i18n/routing.ts` (3 locales, default `fr`, `localePrefix: 'always'`)
-- **Loader** : `src/i18n/request.ts` charge `src/messages/{fr,es,en}.json`
+- **Loader** : `src/i18n/request.ts` — résolution duale depuis 2026-05-26 :
+  - segment `[locale]` URL → pages publiques `/fr/...`, `/es/...`, `/en/...`
+  - sinon fallback **cookie `farmau_admin_locale`** → pages `/admin/*` (pas de segment locale dans l'URL, switch in-place via le footer sidebar)
+  - fallback final : `routing.defaultLocale` (fr)
+  - export `ADMIN_LOCALE_COOKIE` réutilisable
 - **Navigation helper** : `src/i18n/navigation.ts` expose `Link`, `useRouter`, `usePathname`, `redirect` locale-aware
 - **Composants Client** : `useTranslations('Namespace')`
 - **Composants Server** : `await getTranslations({ locale, namespace: 'Namespace' })` + `setRequestLocale(locale)` pour ISR
 - **`LocaleSwitcher`** : composant utilisé dans NavBar (variant inline) + MobileDrawer (variant block)
+- **Admin LocaleSwitcher** : inline dans `Sidebar.tsx` (3 boutons FR/ES/EN) → POST `/api/admin/set-locale` (admin-only, valide la locale, pose le cookie 1 an `sameSite=lax`) → `router.refresh()` pour recharger les messages serveur
 - **Helpers SEO** : `src/lib/seo.ts` (`localizedPath`, `buildLanguageAlternates` avec `x-default`)
 
 Namespaces principaux dans `src/messages/*.json` :
 - `Nav`, `Footer`, `LocaleSwitcher`, `Banner` — chrome
 - `Home`, `Catalogue`, `Filters`, `Product`, `Cart`, `Reservation`, `AddToCart`
-- `Login`, `Signup`, `Profile`, `Contact`, `ContactForm`, `About`, `Favoris`
-- `PageMeta.{home,catalogue,...}` — title + description SEO par page
+- `Login`, `Signup`, `Profile`, `Contact`, `ContactForm`, `Favoris`
+- `About.{hero,stats,manifest,team,criteria,visit,partner,review,cta}` — refonte 8 sections Sprint 4 (2026-05-26)
+- `Pharmacie` (renommé de `Pharmacies` 2026-05-23, page unique Cerros de Gurabo)
+- `PageMeta.{home,catalogue,pharmacie,about,...}` — title + description SEO par page
 - `NavSearch` — recherche dropdown (placeholder, recents, popular, no-results, keyboard hints)
 - `Home.{hero,bestsellers,byNeed,brands,expertise,routine}` — sections home sprint 2
+- `Admin.{chrome,sidebar,crumbs,common,stockState,product,marques,stock,tags,messages,annonce}` — admin localisé (2026-05-26, ~130 clés) ; chrome + 4 pages catalogue + messages + annonce chrome. Restant à localiser : modaux d'édition + pages reservations/users/newsletter/settings/setup.
 
 ### Système de réservation (catalogue + click & collect)
 
@@ -186,14 +194,27 @@ Fichiers clés :
 
 Découpage par scope/page :
 - **`src/components/home/*`** — `HomeHero`, `HomeBestsellers`, `HomeByNeed`, `HomeBrands`, `HomeExpertise`, `HomeRoutine`, `HomeSectionHeader` (header partagé)
+- **`src/components/about/*`** (Sprint 4, 2026-05-26) — `AboutSectionHead` (header numéroté partagé), `AboutHero`, `AboutStats`, `AboutManifest`, `AboutTeam`, `AboutCriteria`, `AboutVisit`, `AboutPartner` (Skin Laser Center carte clinique partenaire), `AboutLeaveReview` (CTA Google Reviews), `AboutCta`
+- **`src/components/catalogue/*`** (Sprint 4, 2026-05-26) — `CatalogueHeader` (breadcrumb + serif 88px + compteur 60px), `CatalogueToolbar` (sticky, chips actifs + sort dropdown), `CatalogueSidebar` (flat 280px, chips toggle pour `types-peau`/`ingredients`, checkboxes ailleurs), `CataloguePagination` (tiles mono 36×36), `FiltersMobileSheet` + `FiltersPill` (déjà existants pour mobile)
 - **`src/components/banners/*`** — `BannerEditorial`, `BannerHero`, `BannerQuote`. `Banner.tsx` racine est un dispatcher sur `type` + normalize pour rétro-compat des 6 anciens `banner_type`.
 - **`src/components/pdp/*`** — `PdpGallery`, `PdpAccordions` (5 `<details>` natifs), `PdpPharmacist` (variantes A/B, conditionnel), `PdpStickyBar` (IntersectionObserver mobile), `PdpTrustSignals`, `PdpQuantity`, `PdpStockBadge`, `PdpWishlistButton`
 - **`src/components/footer/*`** — `FooterNewsletter` (form POST `/api/newsletter` optimistic). Le `Footer.tsx` racine est sur fond `ink-900` avec grid 5 colonnes (Brand+socials | Produits | Besoins | Service | FARMAU) + bottom bar legal/payments.
+- **`src/components/admin/dashboard/*`** — `Sidebar` (sticky `top-0 h-screen`, LocaleSwitcher FR/ES/EN inline qui pose le cookie + `router.refresh()`), `PageHeader` (crumbs + title serif + actions, partagé par toutes les pages admin Sprint 3), `StatusBadge`, widgets dashboard (`RevenueWidget`, `LowStockWidget`, `TopProductsWidget`, `RecentReservationsWidget`, `RecentMessagesWidget`)
 - **`src/components/NavSearch.tsx`** — input + dropdown sticky avec recents (localStorage `farmau:search:recents`), popular categories, résultats live SWR `/api/search`, bestsellers fallback en no-result, navigation clavier ↑↓ ↵ Esc, `⌘K`/`Ctrl+K` global.
 - **`src/components/MobileDrawer.tsx`** — off-canvas fullscreen, nav serif italique actif, LocaleSwitcher block, footer login/admin/signout.
 - **`src/components/Logo.tsx`** — cercle sand-50 + glyph `F` Instrument Serif italic + wordmark FARMAU, taille paramétrique.
 - **`src/components/Breadcrumb.tsx`** — fil d'Ariane générique séparateur `›`.
 - **`src/components/ProductCardHeart.tsx`** — bouton heart top-right de l'image ProductCard, propagation arrêtée (la card est un `<Link>`).
+- **`src/components/ProductCard.tsx`** — refonte Sprint 4 : aspect 4/5, flags top-left auto-dérivés (`isFeatured`/`isNew`/`oldPrice` → `best/new/promo`), fav top-right pill, quick-add hover via `AddToCartButton variant="card-cta-quick"`, prix serif 24px + suffix `/{volume}` mono, stock dot. data-testid `product-card` préservé.
+
+**Shell admin** (`src/app/admin/`) :
+- `layout.tsx` (Server) — résout la locale via `getLocale()` + charge messages via `getMessages()` + wrap avec `NextIntlClientProvider`, délègue à `_AdminShell` la logique client.
+- `_AdminShell.tsx` (Client) — auth-gate via `useIsAdmin`, sidebar desktop + drawer mobile + barre mobile sticky. Affiche le spinner full-screen uniquement quand `loading && !user` (premier mount), pas sur re-check (évite le flash « reload » au retour de tab).
+
+**Primitives UI partagées** (`src/components/ui/` — ajoutées en parallèle des docs 2026-05-26) :
+- `PopClose.tsx` — bouton X de fermeture standardisé (drawers, modales)
+- `Scrim.tsx` — overlay backdrop standardisé
+- Utilisés par `Sidebar.tsx`, `CartDrawer.tsx`, `MobileDrawer.tsx`, `ConfirmDialog.tsx`, `ReservationDrawer.tsx`. Si tu ajoutes un nouveau drawer/modal, réutilise ces primitives.
 
 ## Conventions
 
@@ -205,7 +226,39 @@ Découpage par scope/page :
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest sur PR et push main.
 
-## État du projet (2026-05-23)
+## État du projet (2026-05-26)
+
+### Fait ✅ (session 2026-05-26 — refontes design Sprint 4 + Sprint 3 admin + i18n admin + UX fixes)
+
+14 commits livrés (`e30e7a2` → `5228dfa`). Deux grands chantiers visuels (`/a-propos` + `/catalogue` design Sprint 4 ; toutes les pages admin design Sprint 3) + plomberie i18n pour l'admin + nettoyage copy + un fix UX critique.
+
+**Design Sprint 4 — pages publiques** :
+- `e30e7a2` refactor(pharmacie): collapse `PICKUP_LOCATIONS[3]` → singleton `PICKUP_LOCATION` (Cerros de Gurabo aligné sur `shop_settings`), rename `/pharmacies` → `/pharmacie`, supprime mentions « plusieurs pharmacies »
+- `db8ad45` feat(a-propos): refonte éditoriale 8 sections — `AboutHero` (serif 120px + bottle SVG) · `AboutStats` ink-900 4 KPIs · `AboutManifest` pull-quote + sticky aside · `AboutTeam` 3 portraits SVG · `AboutCriteria` 4 filtres numérotés + cert aside ink-900 · `AboutVisit` SVG map Santiago + info card depuis `shop_settings` · **`AboutPartner`** clinique Skin Laser Center (même bâtiment, vraies infos Facebook + Maps) · **`AboutLeaveReview`** CTA Google Reviews honnête (pharmacie neuve) · `AboutCta` finale + consultation card. Drop des composants legacy `ReviewCard.tsx` + `BestProductsCard.tsx`.
+- `4d4262a` feat(catalogue): refonte éditoriale — `CatalogueHeader` (breadcrumb mono + serif 88px + compteur 60px + activeCount) · `CatalogueToolbar` sticky (chips ink-900/clay-700 + sort dropdown) · `CatalogueSidebar` flat 280px (pas d'accordion, chips toggle pour types-peau/ingredients) · `CataloguePagination` (tiles 36×36 mono ink-900 active) · `ProductCard` redesign (aspect 4/5, gradient sand, flags clay/olive/brick auto depuis isFeatured/isNew/oldPrice, fav top-right pill bg-sand-50/85, quick-add hover via nouveau variant `card-cta-quick`, prix serif 24px + suffix `/{volume}` mono, stock dot olive/brick/ink). SELECT étendu `old_price/stock/is_new/is_featured/volume` + filtre `is_active=true`. Drop `Filters.tsx` (310 LOC orphelin). Drop input de recherche local (NavSearch s'en charge). Sort `bestsellers` désormais `is_featured` + alpha.
+- `f54834b` fix(catalogue): drop `sold_30d` du SELECT (colonne vit sur la vue `v_bestsellers`, pas sur `products` table) — Vercel envoyait 400 sur tous les GET /rest/v1/products après le commit Sprint 4.
+
+**Copy/branding cleanup** :
+- `cd3bf6a` refactor(copy): drop toutes les promesses de consultation dermatologue à la pharmacie — `pharmacien-dermatologue` → `pharmacien`, `prescribe/recetar` → `recommend/referenciar`, suppression « consultation gratuite » + « sans rdv » + « café offert ». Tous les CTAs « Parler à un pharmacien » deviennent « Nous écrire sur WhatsApp ». FAQ et CTA finale renvoient explicitement vers la clinique partenaire Skin Laser Center pour les diagnostics dermato. Reformulation alignée avec la réalité : pharmacie qui répond aux questions produit, clinique pour les consultations.
+
+**Design Sprint 3 — pages admin** :
+- `4b9d76c` feat(admin/product): PageHeader + sticky filterbar sand-100 + bouton clay-700 + `ProductsTable` restylée (sand-50, sand-200 dividers, status pill avec dot, stock mono ochre/brick, action icons hover sand-200/brick).
+- `5b1722f` feat(admin/marques): idem + `BrandStatsCards` simplifiée (3 KPIs sand-50 serif 32px au lieu des cercles colorés) + `BrandsTable` (brand serif 18px, slug mono, range row sand-100/60 avec icône Layers, pill "Gama" clay-200).
+- `131230b` feat(admin/stock): idem + 4 KPI tiles (CheckCircle/AlertTriangle/XCircle accent olive/ochre/brick) + tabs statut (Sin stock paint brick-600 quand actif) + modal restylé serif + clay button.
+- `13a8fc5` feat(admin/tags): idem **mais garde structure `tag_types → tags`** (per user "adapte au système existant", pas la liste plate du design). Chaque type devient une `<article>` sand-50 avec dot couleur en header et tags en `<li>` (au lieu de chips).
+- `14fbf19` feat(admin/messages): PageHeader + 7 KPIs sand-50 + filterbar 5 pills statut + liste sand-50 (lignes non lues `bg-clay-50/50` avec dot clay) + status pills (clay/ink/olive/sand) + priority icons brick/ochre + modal restylé.
+- `de00c36` feat(admin/annonce): chrome seulement (PageHeader + toggle Aperçu ghost/ink + bouton clay-700). `BannerStatsCards/List/Preview` + modales gardent leur style legacy pour cette passe.
+
+**Admin sidebar + i18n** :
+- `030f1f1` feat(admin/sidebar): `sticky top-0 h-screen` (le bouton Cerrar sesión reste visible quoi qu'on scroll dans une grosse table) + premier groupe « Sitio público » avec 3 Link FR/ES/EN vers la home publique.
+- `8a9fc5e` feat(admin): **i18n admin in-place** — `src/i18n/request.ts` fallback cookie `farmau_admin_locale` quand pas de segment `[locale]` URL, `AdminLayout` (Server) wrap avec `NextIntlClientProvider`, nouveau `_AdminShell` (Client) héberge auth-gate + sidebar + barre mobile, route `POST /api/admin/set-locale` admin-only pose le cookie. Les 3 boutons FR/ES/EN du footer sidebar deviennent un vrai switcher (POST + `router.refresh()`, locale courante en `bg-ink-900`). Namespace `Admin.{chrome,sidebar,crumbs,common,stockState,product,marques,stock,tags}` ajouté en FR/ES/EN (~100 clés). Localisé : sidebar, AdminLayout mobile, dashboard, `/admin/product`, `/admin/marques`, `/admin/stock`, `/admin/tags`. Pas localisé encore : `/admin/messages` et `/admin/annonce` (ajoutées dans les 2 commits suivants) ; modaux d'édition ; pages `reservations/users/newsletter/settings/setup`.
+- `14fbf19` (déjà cité) ajoute `Admin.messages` namespace (~30 clés).
+- `de00c36` (déjà cité) ajoute `Admin.annonce` namespace (4 clés).
+
+**UX fix critique** :
+- `5228dfa` fix(auth): plus de flash spinner « reload » à chaque changement de tab. Supabase v2 ré-émet `SIGNED_IN` à chaque retour de focus → `useIsAdmin` repassait `loading=true` → `_AdminShell` affichait son spinner full-screen → re-render = sensation de reload. `useAuth` rejouait aussi `merge_anon_cart_to_user` RPC + `refreshCart`. Fix par `useRef<string|null>` qui retient l'ID user précédent dans les deux hooks : `SIGNED_IN` avec même ID est ignoré, on n'agit que sur les vraies transitions (`null↔user`, `userA→userB`). `_AdminShell` ne montre plus son spinner que si `loading && !user` (premier mount uniquement). Évènement `INITIAL_SESSION` enregistre l'ID sans side-effect.
+
+**État DB / TS / tests** : 0 erreur tsc, 0 warning lint, 8/8 vitest. Le cookie `farmau_admin_locale` a 1 an de durée et `sameSite=lax`. Pas de migration DB cette session.
 
 ### Fait ✅ (session 2026-05-23 — suite, audit design "Modernisation - pages importantes")
 
@@ -334,22 +387,39 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 
 ### Reste à faire
 
+**Localisation admin (suite, gros morceau)** :
+- **Modaux d'édition** : `ProductFormModal`, `BrandFormModal`, `RangeFormModal`, `TagModal`, `TagTypeModal`, `TagDeleteModal`, `ProductDeleteModal`, `BannerFormModal`, `BannerDeleteModal` — labels de formulaire encore en espagnol/français.
+- **Pages admin non touchées** : `/admin/reservations` (498 LOC + sous-composants `components/admin/reservations/*`), `/admin/messages` chrome OK mais modal action labels à étendre si besoin, `/admin/users`, `/admin/newsletter`, `/admin/settings` (395 LOC), `/admin/setup` (210 LOC) — gardent leur copy actuelle.
+- Ajouter clés à `Admin.{reservations,users,newsletter,settings,setup}` quand on s'y attaque.
+
+**Sprint 3 Admin Anuncios — refonte architecturale séparée** :
+Le design Sprint 3 propose une grille à 4 slots fixes (Hero / Banner / Card / Modal) avec previews CSS réelles + 5 status sémantiques + KPIs par slot (Impresiones / Clics / CTR). Notre schéma actuel `banners` (text type, position int) ne supporte pas cette structure. À envisager : enum strict `banner_slot_type` + tracking d'impressions/clics + dashboard analytics par slot.
+
 **Quick wins** :
 - Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
 - AggregateRating sur `ProductJsonLd` si système de reviews un jour
 - Investiguer la flakiness des tests Playwright `wishlist-anon` + `cart Suppression` en run unifié (passent isolés — probable cold-compile race)
+- **Lazy load des messages JSON par locale** : `request.ts` charge `import('../messages/${locale}.json')` à chaque requête — déjà côté Next.js `import()` dynamic donc OK, mais à vérifier sur la bande passante client si on rajoute beaucoup de clés.
 
 **Accessibilité** :
 - Audit contraste palette sand/clay (certains hover passent juste WCAG AA)
-- Standardisation CTAs `bg-blue-*` → palette sand/clay (audit UX #13 — visuel à valider)
+- Standardisation CTAs `bg-blue-*` → palette sand/clay (audit UX #13 — visuel à valider). Update 2026-05-26 : `/admin/messages,annonce,product,marques,stock,tags` sont propres. Restent les pages admin non touchées et probablement quelques recoins (login, signup, …).
 
-**Contenu éditorial** :
+**Contenu éditorial / About** :
+- Photos d'équipe réelles dans `AboutTeam.tsx` (silhouettes SVG génériques actuellement)
+- Vrais noms/numéros de l'équipe (`Dra. María Pérez`, `Andrés Reyes`, `Yarisa Tavárez` sont des placeholders du design Sprint 4)
+- Stat "60+ marques · 353 références · 7 farmacéuticos · 12 ans" — à confirmer vs DB
+- "Reg. Sanitario DGM-42-2014" — placeholder, mettre le vrai numéro
+- Avis Google réels dans `AboutLeaveReview` (placeholder « pharmacie neuve, laisse ton avis » actuellement — passer en mosaïque si historique d'avis se constitue)
+- Adresse exacte Skin Laser Center dans `AboutPartner` (actuellement `Même bâtiment · entrée Calle 3`)
+
+**Contenu éditorial — autres** :
 - Blog : table `posts` + admin CRUD + `/blog` + `/blog/[slug]` + sitemap (Footer "blog" pointe encore vers `/a-propos`)
 - Saisie INCI / benefits / pharmacist_advice sur les 353 produits (colonnes prêtes, contenu à fournir)
 - Traductions ES/EN du contenu juridique `/legal/*` (FR uniquement actuellement)
 
 **Consommation `shop_settings` à finir** :
-- Tunnel réservation lit encore `SHIPPING_COSTS` / `PICKUP_LOCATIONS` (`lib/shipping.ts` constants) + `NEXT_PUBLIC_WHATSAPP_NUMBER` env var. Le swap nécessite de passer PICKUP_LOCATIONS de 3-array à single-pickup (changement UX — séparé)
+- Tunnel réservation : `lib/shipping.ts` expose maintenant `PICKUP_LOCATION` (singleton) aligné sur les valeurs de `shop_settings`, mais c'est une constante figée — un changement admin de `shop_settings.pickup_*` ne se propage pas. Idéal : SSR la pickup info dans `ReservationClient` via `getShopSettings()`.
 - Footer + CartEmpty utilisent encore `NEXT_PUBLIC_WHATSAPP_NUMBER`
 - `metadata.openGraph.siteName` pourrait lire `shop_name` depuis settings
 
@@ -357,6 +427,7 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 - Double opt-in newsletter (provider d'envoi : Resend/Postmark)
 - Audit Storage policies (2 buckets publics avec policy `select` large — flag Supabase advisor)
 - Refactor `auth.uid()` non wrappé dans `(SELECT auth.uid())` dans les policies RLS (perf, audit DB #3)
+- 4 fichiers untracked à la racine (`_audit-reservation.mjs`, `_audit-screenshots.mjs`, `_check-chips.mjs`, `_check-pagination.mjs`) — soit déplacer dans `scripts/`, soit gitignore, soit supprimer si plus utiles.
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
 
