@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useLocale, useTranslations } from 'next-intl'
-import { PICKUP_LOCATIONS, SHIPPING_COSTS } from '@/lib/shipping'
+import { PICKUP_LOCATION, SHIPPING_COSTS } from '@/lib/shipping'
 import { formatPrice } from '@/lib/formatPrice'
 import { toLocaleTag } from '@/lib/constants'
 
@@ -27,7 +27,7 @@ export type ConfirmationAddress = {
 
 export type ConfirmationShipping =
   | { kind: 'delivery'; zone: 'santo_domingo' | 'interior' }
-  | { kind: 'pickup'; pickupId: string }
+  | { kind: 'pickup'; pickupId?: string }
 
 type Props = {
   items: ConfirmationItem[]
@@ -60,10 +60,7 @@ export function ConfirmationRecap({
   const shippingCost =
     !shipping || shipping.kind === 'pickup' ? 0 : SHIPPING_COSTS[shipping.zone]
   const total = subtotal + shippingCost
-  const pickup =
-    shipping?.kind === 'pickup'
-      ? PICKUP_LOCATIONS.find((p) => p.id === shipping.pickupId)
-      : undefined
+  const pickup = shipping?.kind === 'pickup' ? PICKUP_LOCATION : undefined
 
   const shippingTitle = !shipping
     ? null

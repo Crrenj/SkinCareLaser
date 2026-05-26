@@ -203,7 +203,7 @@
       "manifesto": "Our manifesto",
       "brands": "All brands",
       "blog": "Journal",
-      "stores": "Stores"
+      "stores": "Our pharmacy"
     },
     "socials": {
       "instagram": "Instagram",
@@ -332,7 +332,7 @@
           "free": "Free"
         }
       },
-      "pickupHeader": "Choose the pickup point",
+      "pickupHeader": "Pickup at our pharmacy",
       "continue": "Continue to review",
       "backToAddress": "← Edit address"
     },
@@ -371,7 +371,6 @@
       "cart_empty": "Your cart is empty.",
       "already_active": "You already have an active reservation.",
       "shipping_required": "Please choose a shipping option.",
-      "pickup_required": "Please choose a pickup location.",
       "generic": "Reservation failed, please try again."
     },
     "successTitle": "Reservation confirmed!",
@@ -404,7 +403,7 @@
         "step2Title": "You reach us via WhatsApp",
         "step2Body": "Open WhatsApp with the button above. The message is pre-filled — just send it. We can also call you if you prefer.",
         "step3Title": "We confirm availability and price",
-        "step3Body": "We check stock in pharmacy, confirm the total, and offer payment methods: cash, bank transfer or at one of our partner pharmacies.",
+        "step3Body": "We check stock in pharmacy, confirm the total, and offer payment methods: cash, bank transfer or directly at the pharmacy.",
         "step4Title": "You receive your order",
         "step4Body": "24-48 hours in Santo Domingo · 3-5 days for the rest of the country · or whenever you'd like to pick it up in pharmacy."
       },
@@ -853,7 +852,7 @@
       "title": "Frequently asked questions — FARMAU",
       "description": "Everything you need to know about reservation, products, your account, pickup and privacy at FARMAU."
     },
-    "pharmacies": {
+    "pharmacie": {
       "title": "Our pharmacy — FARMAU Santiago",
       "description": "Address, hours and access of the FARMAU pharmacy in Cerros de Gurabo, Santiago, Dominican Republic."
     },
@@ -986,7 +985,7 @@
         "heading": "Pickup at the pharmacy",
         "q1": {
           "q": "Where is the pharmacy located?",
-          "a": "Calle Jesús de Galíndez, esq. Calle 3, Cerros de Gurabo, Santiago. See <a href='/pharmacies'>the pharmacy page</a> for the map and directions."
+          "a": "Calle Jesús de Galíndez, esq. Calle 3, Cerros de Gurabo, Santiago. See <a href='/pharmacie'>the pharmacy page</a> for the map and directions."
         },
         "q2": {
           "q": "What are the pickup hours?",
@@ -1024,7 +1023,7 @@
       "form": "Contact form"
     }
   },
-  "Pharmacies": {
+  "Pharmacie": {
     "eyebrow": "Our pharmacy",
     "title": "One place, <em>all the care.</em>",
     "subtitle": "The entire FARMAU selection is available for click & collect at our pharmacy in Cerros de Gurabo, Santiago.",

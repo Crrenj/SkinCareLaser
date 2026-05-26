@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/contact', priority: 0.5, changeFrequency: 'monthly' },
     { path: '/livraison', priority: 0.5, changeFrequency: 'monthly' },
     { path: '/faq', priority: 0.5, changeFrequency: 'monthly' },
-    { path: '/pharmacies', priority: 0.6, changeFrequency: 'monthly' },
+    { path: '/pharmacie', priority: 0.6, changeFrequency: 'monthly' },
     { path: '/manifeste', priority: 0.4, changeFrequency: 'monthly' },
     { path: '/legal/mentions-legales', priority: 0.3, changeFrequency: 'yearly' },
     { path: '/legal/cgv', priority: 0.3, changeFrequency: 'yearly' },

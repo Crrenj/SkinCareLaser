@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Loader2 } from 'lucide-react'
 import type { CartItem } from '@/types/cart'
-import { PICKUP_LOCATIONS, SHIPPING_COSTS } from '@/lib/shipping'
+import { PICKUP_LOCATION, SHIPPING_COSTS } from '@/lib/shipping'
 import { formatPrice } from '@/lib/formatPrice'
 import type { AddressData } from './AddressStep'
 import type { ShippingSelection } from './ShippingStep'
@@ -45,8 +45,7 @@ export function ReviewStep({
   const [note, setNote] = useState(initialNote)
 
   const shippingCost = SHIPPING_COSTS[shipping.zone]
-  const pickup =
-    shipping.zone === 'pickup' ? PICKUP_LOCATIONS.find((p) => p.id === shipping.pickupId) : null
+  const pickup = shipping.zone === 'pickup' ? PICKUP_LOCATION : null
 
   const shippingTitle =
     shipping.zone === 'pickup' ? tDeliv('pickup') : tDeliv(shipping.zone)

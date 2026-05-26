@@ -11,7 +11,7 @@ type SettingsUpdate = Database['public']['Tables']['shop_settings']['Update']
  * GET  : retourne la ligne complète. Admin-only ici par symétrie avec les
  *        autres /api/admin/*, mais la RLS autorise aussi la lecture publique
  *        directement via supabase (sans passer par cette route) — utile pour
- *        afficher les infos boutique sur les pages /livraison, /pharmacies,
+ *        afficher les infos boutique sur les pages /livraison, /pharmacie,
  *        /contact, etc.
  *
  * PATCH : met à jour les champs envoyés (allowlist explicite). Réservé admin.

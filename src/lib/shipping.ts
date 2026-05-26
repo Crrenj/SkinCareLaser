@@ -27,33 +27,18 @@ export const SHIPPING_COSTS: Record<ShippingZone, number> = {
 }
 
 /**
- * Liste statique des points de retrait en attendant la table
- * `pickup_locations` côté DB. Quand la table existe, remplacer cette
- * source par une query Supabase.
+ * FARMAU n'opère qu'une seule pharmacie, à Cerros de Gurabo (Santiago).
+ * Les vraies coordonnées sont éditables via `shop_settings` (admin) — cette
+ * constante reste le fallback statique pour les composants client qui ne
+ * passent pas encore par SSR.
  */
-export const PICKUP_LOCATIONS: readonly PickupLocation[] = [
-  {
-    id: 'naco',
-    name: 'Farmacia FARMAU Naco',
-    address: 'Av. Tiradentes 32 · Santo Domingo',
-    hours: 'Lun-Sáb 8h-20h · Dom 9h-14h',
-    phone: '+1 809 111 2233',
-  },
-  {
-    id: 'piantini',
-    name: 'Farmacia FARMAU Piantini',
-    address: 'Av. Winston Churchill 1099 · Santo Domingo',
-    hours: 'Lun-Sáb 8h-21h',
-    phone: '+1 809 111 2244',
-  },
-  {
-    id: 'santiago',
-    name: 'Farmacia FARMAU Santiago',
-    address: 'Calle del Sol 45 · Santiago de los Caballeros',
-    hours: 'Lun-Vie 9h-19h · Sáb 9h-15h',
-    phone: '+1 809 222 3344',
-  },
-] as const
+export const PICKUP_LOCATION: PickupLocation = {
+  id: 'santiago',
+  name: 'Farmacia FARMAU Cerros de Gurabo',
+  address: 'Calle Jesús de Galíndez Esq. Calle 3, Cerros de Gurabo · Santiago',
+  hours: 'Lun-Vie 6h30-17h · Sáb 8h-16h',
+  phone: '+1 809 724 3940',
+}
 
 /**
  * Détermine la zone à partir du code postal (5 chiffres). Renvoie
@@ -72,6 +57,6 @@ export function shippingCostFor(zone: ShippingZone): number {
   return SHIPPING_COSTS[zone]
 }
 
-export function getPickupLocation(id: string): PickupLocation | undefined {
-  return PICKUP_LOCATIONS.find((p) => p.id === id)
+export function getPickupLocation(): PickupLocation {
+  return PICKUP_LOCATION
 }

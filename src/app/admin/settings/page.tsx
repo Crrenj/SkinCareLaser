@@ -230,7 +230,7 @@ function ShopTab({ form, update }: TabProps) {
     <div>
       <h2 className="text-xl font-semibold text-gray-900 mb-2">Identité & contacts</h2>
       <p className="text-sm text-gray-500 mb-6">
-        Affiché dans le footer, les pages /contact, /pharmacies, et les liens WhatsApp.
+        Affiché dans le footer, les pages /contact, /pharmacie, et les liens WhatsApp.
       </p>
 
       <div className="space-y-5">
@@ -346,7 +346,7 @@ function ShippingTab({ form, update }: TabProps) {
       <section>
         <h2 className="text-xl font-semibold text-gray-900 mb-2">Point de retrait</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Affiché dans le tunnel et sur la page /pharmacies. Le retrait sur place est gratuit.
+          Affiché dans le tunnel et sur la page /pharmacie. Le retrait sur place est gratuit.
         </p>
         <div className="space-y-5">
           <Field id="pickup_name" label="Nom du point de retrait">

@@ -1,5 +1,4 @@
 import {
-  PICKUP_LOCATIONS,
   SHIPPING_COSTS,
   type PickupLocation,
   type ShippingZone,
@@ -92,6 +91,3 @@ export function buildReservationWhatsappLink(p: ReservationPayload): string {
   return `https://wa.me/${digits}?text=${message}`
 }
 
-export function findPickupLocation(id: string): PickupLocation | undefined {
-  return PICKUP_LOCATIONS.find((p) => p.id === id)
-}

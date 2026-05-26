@@ -47,7 +47,7 @@ const BRAND_LINKS = [
   { key: 'manifesto', href: '/manifeste' },
   { key: 'brands', href: '/marques' },
   { key: 'blog', href: '/a-propos' },
-  { key: 'stores', href: '/pharmacies' },
+  { key: 'stores', href: '/pharmacie' },
 ] as const
 
 export default function Footer() {

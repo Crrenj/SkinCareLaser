@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { ArrowRight } from 'lucide-react'
-import { PICKUP_LOCATIONS, SHIPPING_COSTS, type ShippingZone } from '@/lib/shipping'
+import { PICKUP_LOCATION, SHIPPING_COSTS, type ShippingZone } from '@/lib/shipping'
 import { formatPrice } from '@/lib/formatPrice'
 import { ReservationDisclaimer } from './ReservationDisclaimer'
 
@@ -23,18 +23,10 @@ export function ShippingStep({ initial, onSubmit, onBack }: Props) {
   const fmt = (n: number) => formatPrice(n, { locale })
 
   const [zone, setZone] = useState<ShippingZone>(initial.zone)
-  const [pickupId, setPickupId] = useState<string>(
-    initial.zone === 'pickup' ? initial.pickupId : PICKUP_LOCATIONS[0]?.id ?? '',
-  )
-  const [error, setError] = useState<string | null>(null)
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (zone === 'pickup' && !pickupId) {
-      setError(t('zones.pickup.title'))
-      return
-    }
-    onSubmit(zone === 'pickup' ? { zone, pickupId } : { zone })
+    onSubmit(zone === 'pickup' ? { zone, pickupId: PICKUP_LOCATION.id } : { zone })
   }
 
   return (
@@ -79,56 +71,21 @@ export function ShippingStep({ initial, onSubmit, onBack }: Props) {
               {t('pickupHeader')}
             </p>
             <div className="grid gap-2">
-              {PICKUP_LOCATIONS.map((loc) => {
-                const checked = loc.id === pickupId
-                return (
-                  <label
-                    key={loc.id}
-                    className={`grid grid-cols-[18px_1fr] gap-3 px-3.5 py-3 rounded-lg border cursor-pointer items-start transition-colors ${
-                      checked
-                        ? 'border-clay-700 bg-clay-50 shadow-[0_0_0_1px_var(--color-clay-700)_inset]'
-                        : 'border-sand-300 bg-sand-50 hover:bg-sand-100'
-                    }`}
-                  >
-                    <span
-                      className={`relative w-3.5 h-3.5 rounded-full border-2 mt-1 ${
-                        checked
-                          ? 'border-clay-700 bg-clay-50 after:content-[""] after:absolute after:inset-[2px] after:rounded-full after:bg-clay-700'
-                          : 'border-sand-500 bg-sand-50'
-                      }`}
-                    />
-                    <input
-                      type="radio"
-                      name="pickup"
-                      value={loc.id}
-                      checked={checked}
-                      onChange={() => setPickupId(loc.id)}
-                      className="sr-only"
-                    />
-                    <div>
-                      <div className="text-[13.5px] font-semibold text-ink-900">{loc.name}</div>
-                      <div className="text-[12px] text-ink-500 mt-0.5 leading-[1.45]">
-                        {loc.address} · {loc.hours} · {loc.phone}
-                      </div>
-                    </div>
-                  </label>
-                )
-              })}
+              <div className="grid grid-cols-[18px_1fr] gap-3 px-3.5 py-3 rounded-lg border border-clay-700 bg-clay-50 shadow-[0_0_0_1px_var(--color-clay-700)_inset] items-start">
+                <span className="relative w-3.5 h-3.5 rounded-full border-2 border-clay-700 bg-clay-50 mt-1 after:content-[''] after:absolute after:inset-[2px] after:rounded-full after:bg-clay-700" />
+                <div>
+                  <div className="text-[13.5px] font-semibold text-ink-900">{PICKUP_LOCATION.name}</div>
+                  <div className="text-[12px] text-ink-500 mt-0.5 leading-[1.45]">
+                    {PICKUP_LOCATION.address} · {PICKUP_LOCATION.hours} · {PICKUP_LOCATION.phone}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
       </div>
 
       <ReservationDisclaimer />
-
-      {error && (
-        <p
-          role="alert"
-          className="text-[13px] text-brick-600 bg-brick-600/10 border border-brick-600/25 rounded-lg px-3 py-2"
-        >
-          {error}
-        </p>
-      )}
 
       <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3">
         <button

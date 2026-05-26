@@ -84,7 +84,7 @@ La table `admin_users` est la **source de vérité unifiée** : middleware, `req
 - `src/app/[locale]/a-propos/page.tsx`, `/contact/page.tsx`
 - `src/app/[locale]/livraison/page.tsx` — click & collect workflow
 - `src/app/[locale]/faq/page.tsx` — 5 sections, 19 Q&A, `<details>` natifs
-- `src/app/[locale]/pharmacies/page.tsx` — page pharmacie (1 lieu, sans table DB)
+- `src/app/[locale]/pharmacie/page.tsx` — page pharmacie (1 lieu, sans table DB)
 - `src/app/[locale]/manifeste/page.tsx` — valeurs/positionnement
 
 *Legal (FR uniquement pour le contenu juridique, UI tri-langue)*

@@ -21,13 +21,13 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  const t = await getTranslations({ locale, namespace: 'PageMeta.pharmacies' })
+  const t = await getTranslations({ locale, namespace: 'PageMeta.pharmacie' })
   return {
     title: t('title'),
     description: t('description'),
     alternates: {
-      canonical: localizedPath(locale, '/pharmacies'),
-      languages: buildLanguageAlternates('/pharmacies'),
+      canonical: localizedPath(locale, '/pharmacie'),
+      languages: buildLanguageAlternates('/pharmacie'),
     },
     openGraph: {
       title: t('title'),
@@ -38,14 +38,14 @@ export async function generateMetadata({
   }
 }
 
-export default async function PharmaciesPage({
+export default async function PharmaciePage({
   params,
 }: {
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
   setRequestLocale(locale)
-  const t = await getTranslations('Pharmacies')
+  const t = await getTranslations('Pharmacie')
   const settings = await getShopSettings()
   const phoneHref = telHref(settings.contact_phone)
   const waHref = whatsappHref(settings.whatsapp_number)

@@ -203,7 +203,7 @@
       "manifesto": "Notre manifeste",
       "brands": "Toutes les marques",
       "blog": "Journal",
-      "stores": "Points de vente"
+      "stores": "Notre pharmacie"
     },
     "socials": {
       "instagram": "Instagram",
@@ -332,7 +332,7 @@
           "free": "Gratuit"
         }
       },
-      "pickupHeader": "Choisissez le point de retrait",
+      "pickupHeader": "Retrait à notre pharmacie",
       "continue": "Continuer vers le récapitulatif",
       "backToAddress": "← Modifier l'adresse"
     },
@@ -371,7 +371,6 @@
       "cart_empty": "Votre panier est vide.",
       "already_active": "Vous avez déjà une réservation active.",
       "shipping_required": "Veuillez choisir un mode de livraison.",
-      "pickup_required": "Veuillez choisir un point de retrait.",
       "generic": "Erreur lors de la réservation, veuillez réessayer."
     },
     "successTitle": "Réservation enregistrée !",
@@ -853,7 +852,7 @@
       "title": "Questions fréquentes — FARMAU",
       "description": "Tout ce qu'il faut savoir sur la réservation, les produits, votre compte, le retrait et la confidentialité chez FARMAU."
     },
-    "pharmacies": {
+    "pharmacie": {
       "title": "Notre pharmacie — FARMAU Santiago",
       "description": "Adresse, horaires et accès de la pharmacie FARMAU à Cerros de Gurabo, Santiago, République Dominicaine."
     },
@@ -986,7 +985,7 @@
         "heading": "Retrait en pharmacie",
         "q1": {
           "q": "Où se trouve la pharmacie ?",
-          "a": "Calle Jesús de Galíndez, esq. Calle 3, Cerros de Gurabo, Santiago. Voir <a href='/pharmacies'>la page pharmacie</a> pour la carte et l'accès."
+          "a": "Calle Jesús de Galíndez, esq. Calle 3, Cerros de Gurabo, Santiago. Voir <a href='/pharmacie'>la page pharmacie</a> pour la carte et l'accès."
         },
         "q2": {
           "q": "Quels sont les horaires de retrait ?",
@@ -1024,7 +1023,7 @@
       "form": "Formulaire de contact"
     }
   },
-  "Pharmacies": {
+  "Pharmacie": {
     "eyebrow": "Notre pharmacie",
     "title": "Un seul lieu, <em>tout le soin.</em>",
     "subtitle": "Toute la sélection FARMAU est disponible en click & collect à notre pharmacie de Cerros de Gurabo, Santiago.",

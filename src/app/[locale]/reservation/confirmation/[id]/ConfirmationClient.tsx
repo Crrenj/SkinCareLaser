@@ -9,7 +9,7 @@ import {
   buildReservationWhatsappLink,
   type ReservationPayload,
 } from '@/lib/whatsapp'
-import { PICKUP_LOCATIONS } from '@/lib/shipping'
+import { PICKUP_LOCATION } from '@/lib/shipping'
 import { buildReservationReference } from '@/lib/reservation'
 import { ConfirmationHeader } from '@/components/confirmation/ConfirmationHeader'
 import { WhatsappHero } from '@/components/confirmation/WhatsappHero'
@@ -82,10 +82,6 @@ export default function ConfirmationClient({
   const subtotal = draft?.subtotal ?? totalPrice
   const payload: ReservationPayload = useMemo(() => {
     const sh = draft?.shipping
-    const pickup =
-      sh?.kind === 'pickup'
-        ? PICKUP_LOCATIONS.find((p) => p.id === sh.pickupId)
-        : undefined
 
     const fallbackContact = {
       firstName: firstName ?? '',
@@ -95,8 +91,8 @@ export default function ConfirmationClient({
     }
 
     const shipping: ReservationPayload['shipping'] =
-      sh?.kind === 'pickup' && pickup
-        ? { kind: 'pickup', pickup }
+      sh?.kind === 'pickup'
+        ? { kind: 'pickup', pickup: PICKUP_LOCATION }
         : sh?.kind === 'delivery' && draft?.address
           ? {
               kind: 'delivery',
@@ -107,13 +103,8 @@ export default function ConfirmationClient({
                 postalCode: draft.address.postalCode,
               },
             }
-          : // Sans draft : on coordonne juste par référence, pas d'adresse
-            {
-              kind: 'pickup',
-              pickup:
-                PICKUP_LOCATIONS[0] ??
-                ({ id: 'main', name: 'FARMAU', address: '', hours: '', phone: '' } as const),
-            }
+          : // Sans draft : on coordonne par référence + retrait à l'unique pharmacie
+            { kind: 'pickup', pickup: PICKUP_LOCATION }
 
     return {
       reference,
