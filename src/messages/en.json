@@ -8,8 +8,8 @@
       "catalogueDescription": "Discover our selection of certified dermatology products",
       "aboutTitle": "About us",
       "aboutDescription": "Learn more about our team and expertise",
-      "consultationTitle": "Consultation",
-      "consultationDescription": "Consult our pharmacist-dermatologists"
+      "consultationTitle": "Click & collect",
+      "consultationDescription": "Reserve your products via WhatsApp"
     },
     "hero": {
       "eyebrow": "Pharmacist selection",
@@ -57,8 +57,8 @@
     "expertise": {
       "eyebrow": "Our approach",
       "title": "A <em>pharmacy,</em><br>not a store.",
-      "p1": "Every product in our catalogue is selected, tested and recommended by our pharmacist-dermatologists. We don't sell what's pitched to us — we sell what we'd prescribe.",
-      "p2": "If you have a question about your skin, write to us. A real human, trained in dermo-cosmetics, will reply the same day.",
+      "p1": "Every product in our catalogue is selected and tested by our pharmacists before reaching the shelf. We don't list what's pitched to us — we list what we recommend.",
+      "p2": "For a dermatology consultation, book an appointment with our partner clinic <strong>Skin Laser Center</strong>, in the same building.",
       "cta": "Learn more about FARMAU",
       "signature": "— An initiative led by a collective of Dominican pharmacists."
     },
@@ -166,7 +166,7 @@
     },
     "newsletter": {
       "title": "Once a month,<br><em>no more.</em>",
-      "description": "New releases, pharmacist tips, and subscriber-only offers. Promise it's short.",
+      "description": "Product news, dermo-cosmetic tips, and subscriber-only offers. Promise it's short.",
       "placeholder": "your@email.com",
       "submit": "Subscribe",
       "submitting": "…",
@@ -264,12 +264,12 @@
     "empty": {
       "title": "Your cart is",
       "titleEmphasis": "empty",
-      "lede": "Time to start your routine. Browse the catalog or ask a pharmacist for advice.",
+      "lede": "Time to start your routine. Browse the catalog or message us on WhatsApp for any product question.",
       "ctaCatalogue": "Browse the catalog",
-      "ctaPharmacist": "Talk to a pharmacist",
+      "ctaPharmacist": "Message us on WhatsApp",
       "bestsellersEyebrow": "Need an idea?",
       "bestsellersTitle": "Our pharmacists' favorites",
-      "mobileLede": "Browse the catalog or ask a pharmacist for advice."
+      "mobileLede": "Browse the catalog or message us on WhatsApp."
     },
     "errors": {
       "alreadyActive": "You already have an active reservation. Wait for its resolution or contact us via WhatsApp.",
@@ -506,7 +506,7 @@
     "signInLink": "Sign in",
     "termsAccept": "By signing up you accept our <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
     "aside": {
-      "quote": "Every product in the catalog has been hand-picked by a pharmacist-dermatologist.",
+      "quote": "Every product in the catalog has been hand-picked by a pharmacist.",
       "cite": "— FARMAU scientific committee"
     },
     "errors": {
@@ -585,7 +585,7 @@
   },
   "Contact": {
     "headerTitle": "Contact us",
-    "headerSubtitle": "Our team of pharmacist-dermatologists is at your disposal to answer your questions",
+    "headerSubtitle": "Our team answers your questions about products and orders",
     "contactInfoHeading": "Our details",
     "addressHeading": "Address",
     "addressLine1": "Calle Jesus de Galindez Esq. Calle 3",
@@ -604,7 +604,7 @@
   },
   "ContactForm": {
     "title": "Contact us",
-    "intro": "A question, advice, or a quote request? Our team replies within 24-48h.",
+    "intro": "A question about a product or a quote request? Our team replies within 24-48h.",
     "success": "Your message has been sent successfully! We'll reply quickly.",
     "emailLabel": "Email address *",
     "emailPlaceholder": "your@email.com",
@@ -631,7 +631,7 @@
     "hero": {
       "eyebrow": "About · FARMAU",
       "title": "A <em>pharmacy,</em><br>not a shop.",
-      "sub": "We are the first dermo-cosmetic pharmacy in Santiago run by <strong>pharmacists trained in dermatology</strong>. Every product in our catalogue is selected, tested, and prescribed the way we would prescribe it to our own patients.",
+      "sub": "We are the first dermo-cosmetic pharmacy in Santiago. Every product in our catalogue is <strong>selected and tested by our pharmacists</strong> — for a dermatology consultation, we refer you to our partner clinic <strong>Skin Laser Center</strong>.",
       "metaFoundedLabel": "Founded",
       "metaFoundedValue": "2014",
       "metaCity": "Santiago de los Caballeros",
@@ -639,8 +639,8 @@
       "metaRegValue": "DGM-42-2014",
       "stampYear": "Year 12.",
       "stampCountry": "Dominican Republic",
-      "cardTitle": "We prescribe what we sell.",
-      "cardBody": "If we wouldn't give it to our patients, it isn't in this catalogue.",
+      "cardTitle": "We list what we recommend.",
+      "cardBody": "If we wouldn't recommend it to a relative, it isn't in this catalogue.",
       "imageAlt": "Editorial composition with FARMAU bottle"
     },
     "stats": {
@@ -653,20 +653,20 @@
       "refsValue": "353",
       "refsLabel": "Curated references",
       "teamValue": "7",
-      "teamLabel": "Pharmacists · dermatologists"
+      "teamLabel": "Pharmacists · trained team"
     },
     "manifest": {
       "num": "02",
       "eyebrow": "Manifesto · what we stand for",
-      "title": "We don't sell what we're<br>offered — we sell <em>what we'd prescribe.</em>",
+      "title": "We don't list what we're<br>offered — we list <em>what we recommend.</em>",
       "sideHeading": "Three commitments.",
       "side1": "Human advice",
       "side2": "Pharmacist curation",
       "side3": "No brand commissions",
       "sideNote": "Our team receives no commissions from brands. We recommend based on evidence, not margin.",
       "p1": "Dominican skin <em>lives under a particular sun,</em> in particular humidity, with particular water. Generic internet recommendations don't know it.",
-      "p2": "We do. Every product in the catalogue was <em>evaluated in consultation</em> before reaching the shelf — and every customer gets the same advice as a patient.",
-      "p3": "If you have a doubt, write us. <em>A real person,</em> trained in dermo-cosmetics, will answer the same day.",
+      "p2": "We do. Every product in the catalogue was <em>evaluated</em> by our pharmacists before reaching the shelf — and our selection criteria are public, further down on this page.",
+      "p3": "For product or availability questions, write us. <em>A real person</em> responds on WhatsApp the same day. For a dermatology diagnosis, we refer you to our partner clinic <strong>Skin Laser Center</strong>.",
       "signMark": "— FARMAU",
       "signLine": "Pharmacist collective · Santiago, D.R."
     },
@@ -676,7 +676,7 @@
       "title": "Behind the counter,<br><em>seven people trained</em> in dermo-cosmetics.",
       "lede": "Each one with an area of expertise — from teen acne to photo-protection on mature skin. No AI, no chatbot.",
       "leadLabel": "Founder · Technical director",
-      "leadRole": "Founder · Pharmacist · Dermatologist",
+      "leadRole": "Founder · Pharmacist",
       "leadName": "Dra. María Pérez Espinal",
       "leadCreds": "UASD '08 · Dermo-cosmetic specialization CIDESCO Barcelona '12 · 14 years of clinical practice.",
       "leadQuote": "Pharmacy-grade dermo-cosmetics, explained by the people who practice it every day.",
@@ -721,8 +721,8 @@
     "visit": {
       "num": "05",
       "eyebrow": "The pharmacy · come see us",
-      "title": "We're in central<br>Santiago, <em>no appointment needed.</em>",
-      "lede": "A physical pharmacy with free in-store consultation. Drop by in the morning — the coffee's on us.",
+      "title": "We're in central<br>Santiago, <em>in pharmacy.</em>",
+      "lede": "A neighbourhood physical pharmacy. Drop by during our hours to pick up an order or ask a product question.",
       "mapAlt": "Map of Santiago",
       "infoTitle": "Drop in <em>whenever you want.</em>",
       "addressLabel": "Address",
@@ -770,11 +770,11 @@
       "partnerCta": "See Skin Laser Center reviews"
     },
     "cta": {
-      "title": "Want to <em>talk to a pharmacist?</em>",
-      "body": "Message us on WhatsApp, drop in, or call us. The consultation is free and the answer comes the same day — no chatbot, no form, no hard sell.",
+      "title": "Got a <em>product question?</em>",
+      "body": "Message us on WhatsApp, drop in, or call us for product questions and orders. For a dermatology diagnosis, book an appointment with our partner clinic <strong>Skin Laser Center</strong>, in the same building.",
       "ctaWa": "Open WhatsApp",
       "ctaVisit": "Visit the pharmacy",
-      "cardTitle": "Free consultation",
+      "cardTitle": "Quick reply",
       "rowResponseLabel": "Response time",
       "rowResponseValue": "< 4 h",
       "rowLangsLabel": "Languages",
@@ -782,9 +782,9 @@
       "rowAvailLabel": "Available",
       "rowAvailValue": "Mon–Sat · 8am–8pm",
       "rowByLabel": "Answered by",
-      "rowByValue": "Pharmacist",
-      "rowCostLabel": "Cost",
-      "rowCostValue": "Free"
+      "rowByValue": "FARMAU team",
+      "rowCostLabel": "Scope",
+      "rowCostValue": "Products & orders"
     }
   },
   "Catalogue": {
@@ -900,7 +900,7 @@
       "returnsTitle": "Free returns — 30 days",
       "returnsBody": "If the product doesn't suit you, we'll exchange it",
       "askPharmacistTitle": "A question about this product?",
-      "askPharmacistCta": "Ask our pharmacist →"
+      "askPharmacistCta": "Message us on WhatsApp →"
     },
     "accordions": {
       "description": "Description",
@@ -914,8 +914,8 @@
       "downloadPdf": "Download full leaflet (PDF)"
     },
     "pharmacist": {
-      "eyebrow": "Pharmacist's advice",
-      "askCta": "Ask for personalized advice",
+      "eyebrow": "Pharmacist's note",
+      "askCta": "Ask about this product",
       "fallbackQuote": "For any question about this product, contact our pharmacist team.",
       "fallbackAttrib": "FARMAU team"
     },
@@ -937,7 +937,7 @@
   "PageMeta": {
     "home": {
       "title": "FARMAU — Pharmacist-grade dermocosmetics",
-      "description": "Dermocosmetic selection certified by pharmacist-dermatologists. Click & collect in Santiago, Dominican Republic."
+      "description": "Dermocosmetic selection certified by pharmacists. Click & collect in Santiago, Dominican Republic."
     },
     "catalogue": {
       "title": "Catalogue — FARMAU",
@@ -945,11 +945,11 @@
     },
     "contact": {
       "title": "Contact — FARMAU",
-      "description": "Contact our pharmacist-dermatologists. Address, phone, WhatsApp, hours."
+      "description": "Contact our pharmacists. Address, phone, WhatsApp, hours."
     },
     "about": {
       "title": "About — FARMAU",
-      "description": "First 100% dermatological pharmacy in the Dominican Republic. Our values, our team, our quality commitments."
+      "description": "Dermo-cosmetic pharmacy in Santiago, Dominican Republic. Our values, our team, our quality commitments."
     },
     "login": {
       "title": "Sign in — FARMAU",
@@ -970,7 +970,7 @@
     "product": {
       "titleTemplate": "{name} — {brand} | FARMAU",
       "descriptionWithDesc": "{name} by {brand}. {description}",
-      "descriptionFallback": "{name} by {brand}. Available for reservation at FARMAU, dermatological pharmacy in the Dominican Republic."
+      "descriptionFallback": "{name} by {brand}. Available for reservation at FARMAU, dermo-cosmetic pharmacy in the Dominican Republic."
     },
     "brand": {
       "titleTemplate": "{name} — Dermocosmetic products | FARMAU",
@@ -982,7 +982,7 @@
     },
     "need": {
       "titleTemplate": "{name} — Dermocosmetic care | FARMAU",
-      "description": "Dermocosmetic products for {name}. Selection certified by our pharmacist-dermatologists, available for reservation at FARMAU."
+      "description": "Dermocosmetic products for {name}. Selection certified by our pharmacists, available for reservation at FARMAU."
     },
     "delivery": {
       "title": "Delivery & pickup — FARMAU",
@@ -1095,7 +1095,7 @@
         },
         "q2": {
           "q": "How do I know which product to choose?",
-          "a": "Filter the catalogue by <a href='/besoins/hydratation'>need</a> (acne, hydration, anti-ageing…) or by skin type. If in doubt, a pharmacist can advise you on WhatsApp."
+          "a": "Filter the catalogue by <a href='/besoins/hydratation'>need</a> (acne, hydration, anti-ageing…) or by skin type. For a dermatology diagnosis, book an appointment with our partner clinic <a href='/a-propos'>Skin Laser Center</a>."
         },
         "q3": {
           "q": "Can prices change between reservation and pickup?",
@@ -1103,7 +1103,7 @@
         },
         "q4": {
           "q": "What if a product doesn't suit me after use?",
-          "a": "In line with practice for opened hygiene and skincare products, they cannot be returned. Ask a pharmacist before pickup if you have any doubt about tolerance."
+          "a": "In line with practice for opened hygiene and skincare products, they cannot be returned. If in doubt about tolerance, book an appointment with our partner clinic before buying."
         }
       },
       "account": {
@@ -1137,7 +1137,7 @@
         },
         "q4": {
           "q": "Do you ship to home?",
-          "a": "Not for now. FARMAU operates as click & collect only, to ensure the cold chain for sensitive products and pharmaceutical advice."
+          "a": "Not for now. FARMAU operates as click & collect only, to ensure the cold chain for sensitive products and in-pharmacy pickup."
         }
       },
       "privacy": {
@@ -1184,7 +1184,7 @@
     "forWho": {
       "eyebrow": "For whom",
       "title": "A 100% dermo pharmacy.",
-      "body": "FARMAU is dedicated to pharmacist-grade dermocosmetic care. Our team is trained for personalized advice: reactive skin, acne, anti-ageing, photoprotection."
+      "body": "FARMAU is dedicated to pharmacist-grade dermo-cosmetic care: reactive skin, acne, anti-ageing, photoprotection. For a consultation, our partner clinic Skin Laser Center is in the same building."
     }
   },
   "Manifesto": {
@@ -1280,7 +1280,7 @@
       "heading": "Preferences",
       "subtitle": "Customize your communications and interface language.",
       "newsletterHeading": "Monthly newsletter",
-      "newsletterDescription": "Once a month max: new arrivals, pharmacist tips, subscriber-only offers.",
+      "newsletterDescription": "Once a month max: new arrivals, dermo-cosmetic tips, subscriber-only offers.",
       "newsletterLoading": "Loading your preference…",
       "newsletterOn": "Subscribed to the newsletter",
       "newsletterOff": "Not subscribed",

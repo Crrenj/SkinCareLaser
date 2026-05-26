@@ -22,7 +22,7 @@ const sans = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: "FARMAU — Dermo-cosmétique d'expert pharmacien",
-  description: "Sélection dermo-cosmétique certifiée par des pharmaciens-dermatologues. Livraison en République Dominicaine.",
+  description: "Sélection dermo-cosmétique curatée par des pharmaciens. Click & collect en République Dominicaine.",
   metadataBase: new URL("https://farmau.do"),
 };
 

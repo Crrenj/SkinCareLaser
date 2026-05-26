@@ -197,7 +197,7 @@ export function BannerFormModal({
                   htmlFor="banner-attribution-title"
                   className="block text-xs text-gray-600 mb-1"
                 >
-                  Titre (ex: Pharmacienne-dermatologue, Santo Domingo)
+                  Titre (ex: Pharmacienne, Santo Domingo)
                 </label>
                 <input
                   id="banner-attribution-title"
