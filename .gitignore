@@ -42,6 +42,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# MCP config (contient des clés API)
+.mcp.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
