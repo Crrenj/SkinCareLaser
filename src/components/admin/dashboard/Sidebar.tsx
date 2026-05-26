@@ -8,6 +8,7 @@ import {
   Building2,
   ClipboardList,
   Cog,
+  Globe,
   Home,
   LogOut,
   Mail,
@@ -18,6 +19,12 @@ import {
   X,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
+
+const PUBLIC_LOCALES = [
+  { code: 'fr', label: 'FR' },
+  { code: 'es', label: 'ES' },
+  { code: 'en', label: 'EN' },
+] as const
 
 type NavItem = {
   href: string
@@ -198,9 +205,25 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
         ))}
       </div>
 
-      <div className="border-t border-sand-300 pt-3 mt-2 flex flex-col gap-0.5">
+      <div className="border-t border-sand-300 pt-3 mt-2 flex flex-col gap-1.5 shrink-0">
+        <div className="px-3 flex items-center gap-2 text-[11px] text-ink-500">
+          <Globe className="w-3 h-3 shrink-0" aria-hidden />
+          <span className="tracking-[0.14em] uppercase font-semibold">Sitio público</span>
+        </div>
+        <div className="px-3 flex gap-1.5" role="group" aria-label="Ver sitio público en otro idioma">
+          {PUBLIC_LOCALES.map((loc) => (
+            <Link
+              key={loc.code}
+              href={`/${loc.code}`}
+              onClick={onCloseMobile}
+              className="flex-1 inline-flex items-center justify-center px-2 py-1.5 text-[12px] font-mono font-medium border border-sand-300 bg-sand-50 text-ink-700 rounded-md hover:border-ink-900 hover:text-ink-900 hover:bg-sand-200 transition-colors"
+            >
+              {loc.label}
+            </Link>
+          ))}
+        </div>
         {email && (
-          <p className="px-3 pt-1 text-[11px] text-ink-500 truncate" title={email}>
+          <p className="px-3 pt-1.5 text-[11px] text-ink-500 truncate" title={email}>
             {email}
           </p>
         )}
@@ -218,10 +241,10 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop static */}
+      {/* Desktop sticky : reste collé en haut de l'écran quand le main scroll */}
       <aside
         data-testid="admin-sidebar"
-        className="hidden lg:flex w-[240px] shrink-0 bg-sand-100 border-r border-sand-300 px-3 py-5"
+        className="hidden lg:flex w-[240px] shrink-0 bg-sand-100 border-r border-sand-300 px-3 py-5 sticky top-0 h-screen"
       >
         {content}
       </aside>
