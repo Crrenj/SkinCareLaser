@@ -1,7 +1,7 @@
 'use client'
 
-import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useModalA11y } from '@/hooks/useModalA11y'
+import { PopClose } from '@/components/ui/PopClose'
 import { generateSlug } from '../_lib/icons'
 import type { Tag, TagCategory, TagFormState } from '../_lib/types'
 
@@ -15,6 +15,11 @@ type TagModalProps = {
   onClose: () => void
   onSubmit: (e: React.FormEvent) => void
 }
+
+const inputCls =
+  'w-full px-3 py-[10px] border border-sand-300 rounded-lg text-[13.5px] text-ink-900 bg-sand-50 transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:shadow-[0_0_0_3px_rgba(142,82,50,.14)]'
+const labelCls =
+  'font-mono text-[10.5px] tracking-[0.12em] uppercase text-ink-700 font-semibold'
 
 export function TagModal({
   open,
@@ -33,7 +38,7 @@ export function TagModal({
 
   return (
     <div
-      className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
       onClick={onClose}
       aria-hidden="true"
     >
@@ -44,83 +49,81 @@ export function TagModal({
         aria-labelledby="tag-modal-title"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-xl bg-white"
+        className="relative mx-auto w-full max-w-[520px] bg-sand-50 flex flex-col overflow-hidden"
+        style={{
+          borderRadius: 'var(--pop-radius-modal)',
+          boxShadow: 'var(--pop-shadow-floating)',
+        }}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h3 id="tag-modal-title" className="text-lg font-bold text-gray-900">
-            {editingTag ? 'Modifier le tag' : 'Nouveau tag'}
-          </h3>
-          <button
-            onClick={onClose}
-            aria-label="Fermer"
-            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <XMarkIcon className="h-5 w-5 text-gray-400" />
-          </button>
-        </div>
-
-        <form onSubmit={onSubmit} className="space-y-4">
+        <header className="px-[22px] py-[18px] flex justify-between items-start border-b border-sand-200 shrink-0">
           <div>
-            <span className="block text-sm font-medium text-gray-700 mb-1">Catégorie</span>
-            <div className="px-3 py-2 bg-gray-100 rounded-lg text-sm text-gray-700 font-medium">
-              {currentCategory?.name || 'Catégorie'}
+            <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
+              Catálogo · {currentCategory?.name || 'etiquetas'}
+            </span>
+            <h3 id="tag-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
+              {editingTag ? 'Editar etiqueta' : 'Nueva etiqueta'}
+            </h3>
+          </div>
+          <PopClose onClick={onClose} />
+        </header>
+
+        <form onSubmit={onSubmit}>
+          <div className="px-[22px] py-[18px] flex flex-col gap-3">
+            <div className="flex flex-col gap-[6px]">
+              <label htmlFor="tag-name" className={labelCls}>
+                Nombre <span className="text-brick-600 ml-1">*</span>
+              </label>
+              <input
+                id="tag-name"
+                type="text"
+                required
+                value={form.name}
+                onChange={(e) =>
+                  onFormChange({
+                    ...form,
+                    name: e.target.value,
+                    slug: editingTag ? form.slug : generateSlug(e.target.value),
+                  })
+                }
+                className={`${inputCls} font-serif !text-[15px]`}
+                placeholder="Ej. Pieles sensibles"
+              />
+            </div>
+
+            <div className="flex flex-col gap-[6px]">
+              <label htmlFor="tag-slug" className={labelCls}>Slug</label>
+              <input
+                id="tag-slug"
+                type="text"
+                required
+                value={form.slug}
+                onChange={(e) => onFormChange({ ...form, slug: e.target.value })}
+                className={`${inputCls} font-mono !text-[12.5px]`}
+              />
+              <span className="text-[11.5px] text-ink-500 font-serif italic">
+                Identificador único para URL
+              </span>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="tag-name" className="block text-sm font-medium text-gray-700 mb-1">
-              Nom du tag
-            </label>
-            <input
-              id="tag-name"
-              type="text"
-              required
-              value={form.name}
-              onChange={(e) =>
-                onFormChange({
-                  ...form,
-                  name: e.target.value,
-                  slug: editingTag ? form.slug : generateSlug(e.target.value),
-                })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
-              placeholder="Ex: Hydratant"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="tag-slug" className="block text-sm font-medium text-gray-700 mb-1">
-              Slug
-            </label>
-            <input
-              id="tag-slug"
-              type="text"
-              required
-              value={form.slug}
-              onChange={(e) => onFormChange({ ...form, slug: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
-              placeholder="Ex: hydratant"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Identifiant unique pour l&apos;URL (lettres minuscules et tirets)
-            </p>
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              Annuler
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {editingTag ? 'Modifier' : 'Créer'}
-            </button>
-          </div>
+          <footer className="px-[22px] py-[14px] pb-[18px] border-t border-sand-200 relative">
+            <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-ink-900 border-0 rounded-[10px] hover:bg-ink-800 transition-colors"
+              >
+                {editingTag ? 'Guardar' : 'Crear'}
+              </button>
+            </div>
+          </footer>
         </form>
       </div>
     </div>

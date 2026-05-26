@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { X } from 'lucide-react'
 
 type TagTypeKey = 'categories' | 'besoins' | 'typesPeau' | 'ingredients'
 
@@ -154,40 +153,34 @@ export function FiltersMobileSheet({
       }}
       aria-labelledby="filters-sheet-title"
     >
-      <div className="flex justify-center py-2">
+      {/* Handle — wider, more visible */}
+      <div className="flex justify-center py-2.5">
         <span
           aria-hidden
-          className="w-9 h-1 rounded-full bg-sand-400"
+          className="w-12 h-[5px] rounded-full bg-sand-400 opacity-70"
         />
       </div>
 
-      <header className="px-5 pb-3 flex justify-between items-center border-b border-sand-300 gap-3">
-        <h2
-          id="filters-sheet-title"
-          className="font-serif text-[22px] text-ink-900 m-0 flex items-baseline gap-2"
-        >
-          {t('sheetTitle')}
-          <small className="font-sans text-[11.5px] text-ink-500 font-medium">
+      {/* Header — eyebrow count + title with active count */}
+      <header className="px-[22px] pb-4 flex justify-between items-start gap-3">
+        <div>
+          <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-0.5">
             {t('productCount', { count: matchedCount })}
-          </small>
-        </h2>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={onClearAll}
-            className="text-[12px] text-ink-700 hover:text-brick-600 underline underline-offset-[3px] bg-transparent px-2 py-1 transition-colors"
+          </span>
+          <h2
+            id="filters-sheet-title"
+            className="font-serif text-[24px] text-ink-900 m-0 flex items-baseline gap-1.5"
           >
-            {t('clearAll')}
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            aria-label={t('closeAriaLabel')}
-            className="w-8 h-8 flex items-center justify-center rounded-md text-ink-700 hover:bg-sand-200 hover:text-ink-900 transition-colors"
-          >
-            <X className="w-[18px] h-[18px]" />
-          </button>
+            {t('sheetTitle')}
+          </h2>
         </div>
+        <button
+          type="button"
+          onClick={onClearAll}
+          className="text-[12px] text-ink-700 hover:text-brick-600 underline underline-offset-[3px] bg-transparent border-0 px-1 py-1 transition-colors mt-1"
+        >
+          {t('clearAll')}
+        </button>
       </header>
 
       <div className="flex-1 overflow-y-auto">
@@ -295,13 +288,13 @@ export function FiltersMobileSheet({
                       type="button"
                       onClick={() => onTagToggle(tagTypeSlug, item)}
                       aria-pressed={on}
-                      className={`px-3 py-1.5 rounded-full text-[12px] leading-[1.3] border transition-colors ${
+                      className={`px-3 py-[7px] rounded-[10px] text-[12.5px] leading-[1.3] border transition-colors inline-flex items-center gap-1 ${
                         on
-                          ? 'bg-ink-900 text-sand-50 border-ink-900'
-                          : 'bg-sand-50 text-ink-800 border-sand-400 hover:border-ink-700'
+                          ? 'bg-clay-700 text-sand-50 border-clay-700'
+                          : 'bg-sand-50 text-ink-700 border-sand-300 hover:border-ink-700'
                       }`}
                     >
-                      {item}
+                      {item}{on && ' ✓'}
                     </button>
                   )
                 })}
@@ -311,24 +304,16 @@ export function FiltersMobileSheet({
         })}
       </div>
 
-      <footer className="px-4 py-3.5 flex gap-2.5 bg-sand-50 border-t border-sand-300 shadow-[0_-8px_16px_-8px_rgba(31,27,22,0.06)]">
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="flex-1 h-12 rounded-lg bg-transparent border border-ink-900 text-ink-900 text-[14px] font-medium hover:bg-ink-900 hover:text-sand-50 transition-colors"
-        >
-          {t('cancel')}
-        </button>
+      {/* Footer — single CTA with scroll-fade + safe-area */}
+      <footer className="px-[22px] pt-3 pb-[max(18px,env(safe-area-inset-bottom,18px))] bg-sand-50 relative">
+        <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
         <button
           type="button"
           onClick={handleApply}
           disabled={matchedCount === 0}
-          className="flex-[2] h-12 rounded-lg bg-clay-700 text-sand-50 text-[14px] font-medium hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full h-[50px] rounded-xl bg-clay-700 text-sand-50 text-[14.5px] font-medium hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
         >
-          {t('applyButton')}
-          <span className="font-normal opacity-90 text-[12.5px]">
-            {t('applyCount', { count: matchedCount })}
-          </span>
+          {t('applyButton')} · {t('applyCount', { count: matchedCount })}
         </button>
       </footer>
     </dialog>

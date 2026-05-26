@@ -1,13 +1,12 @@
 'use client'
 
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { AlertTriangle } from 'lucide-react'
 import { useModalA11y } from '@/hooks/useModalA11y'
 
 type DeleteConfirmModalProps = {
   id: string | null
   title: string
   description: string
-  /** id stable pour aria-labelledby (sinon collisions si plusieurs modals montés). */
   labelId: string
   onCancel: () => void
   onConfirm: (id: string) => void
@@ -26,7 +25,7 @@ export function DeleteConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
       onClick={onCancel}
       aria-hidden="true"
     >
@@ -37,30 +36,40 @@ export function DeleteConfirmModal({
         aria-labelledby={labelId}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+        className="relative mx-auto w-full max-w-[420px] bg-sand-50 flex flex-col overflow-hidden"
+        style={{
+          borderRadius: 'var(--pop-radius-modal)',
+          boxShadow: 'var(--pop-shadow-floating)',
+        }}
       >
-        <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-            <TrashIcon className="h-6 w-6 text-red-600" />
+        <div className="px-[26px] pt-6 pb-4 flex flex-col gap-[14px]">
+          <div className="w-11 h-11 rounded-xl inline-flex items-center justify-center bg-brick-50 text-brick-600">
+            <AlertTriangle className="w-[22px] h-[22px]" strokeWidth={1.6} />
           </div>
-          <h3 id={labelId} className="mt-2 text-lg font-medium text-gray-900">
+
+          <h3 id={labelId} className="font-serif text-[22px] leading-[1.15] text-ink-900 -tracking-[0.01em] m-0">
             {title}
           </h3>
-          <p className="mt-2 text-sm text-gray-500">{description}</p>
-          <div className="mt-4 flex justify-center space-x-3">
-            <button
-              onClick={onCancel}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200"
-            >
-              Annuler
-            </button>
-            <button
-              onClick={() => onConfirm(id)}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700"
-            >
-              Supprimer
-            </button>
-          </div>
+          <p className="font-serif text-[14.5px] leading-[1.5] text-ink-700 italic m-0">
+            {description}
+          </p>
+        </div>
+
+        <div className="px-[26px] pb-[22px] pt-[14px] flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            onClick={() => onConfirm(id)}
+            className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-brick-600 border-0 rounded-[10px] hover:bg-brick-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brick-600 focus-visible:ring-offset-2"
+          >
+            Supprimer
+          </button>
         </div>
       </div>
     </div>

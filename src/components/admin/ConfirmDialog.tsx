@@ -1,36 +1,20 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import { useModalA11y } from '@/hooks/useModalA11y'
 
 type ConfirmOptions = {
-  /** Titre affiché en gras au-dessus du message. Défaut: "Confirmer". */
   title?: string
-  /** Texte du bouton de confirmation. Défaut: "Confirmer". */
   confirmLabel?: string
-  /** Texte du bouton d'annulation. Défaut: "Annuler". */
   cancelLabel?: string
-  /** Style du bouton de confirmation. Défaut: "danger" (red). */
-  tone?: 'danger' | 'primary'
+  tone?: 'danger' | 'warning' | 'primary'
 }
 
 type PromptState = ConfirmOptions & { message: string } & {
   resolve: (value: boolean) => void
 }
 
-/**
- * Remplacement accessible pour `window.confirm`. Renvoie une Promise<boolean>
- * comme l'API native, mais affiche une vraie modale (role=dialog + focus trap
- * + Escape + scroll lock).
- *
- * Usage :
- *   const { confirm, dialog } = useConfirmDialog()
- *   const onDelete = async () => {
- *     if (!(await confirm('Supprimer cet élément ?'))) return
- *     // ... action
- *   }
- *   return <>{dialog}{...rest}</>
- */
 export function useConfirmDialog() {
   const [prompt, setPrompt] = useState<PromptState | null>(null)
   const pendingRef = useRef<((value: boolean) => void) | null>(null)
@@ -74,7 +58,7 @@ type ConfirmDialogModalProps = {
   message: string
   confirmLabel: string
   cancelLabel: string
-  tone: 'danger' | 'primary'
+  tone: 'danger' | 'warning' | 'primary'
   onCancel: () => void
   onConfirm: () => void
 }
@@ -92,14 +76,23 @@ function ConfirmDialogModal({
   const dialogRef = useModalA11y(open, onCancel)
   if (!open) return null
 
-  const confirmClass =
+  const confirmBg =
     tone === 'danger'
-      ? 'bg-red-600 hover:bg-red-700'
-      : 'bg-blue-600 hover:bg-blue-700'
+      ? 'bg-brick-600 hover:bg-brick-800 focus-visible:ring-brick-600'
+      : tone === 'warning'
+        ? 'bg-ochre-600 hover:bg-ochre-600/90 focus-visible:ring-ochre-600'
+        : 'bg-clay-700 hover:bg-clay-800 focus-visible:ring-clay-700'
+
+  const iconBg =
+    tone === 'danger'
+      ? 'bg-brick-50 text-brick-600'
+      : tone === 'warning'
+        ? 'bg-ochre-200 text-ochre-600'
+        : 'bg-clay-50 text-clay-700'
 
   return (
     <div
-      className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
       onClick={onCancel}
       aria-hidden="true"
     >
@@ -111,28 +104,45 @@ function ConfirmDialogModal({
         aria-describedby="confirm-dialog-message"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white"
+        className="relative mx-auto w-full max-w-[420px] bg-sand-50 overflow-hidden flex flex-col"
+        style={{
+          borderRadius: 'var(--pop-radius-modal)',
+          boxShadow: 'var(--pop-shadow-floating)',
+        }}
       >
-        <h3 id="confirm-dialog-title" className="text-lg font-bold text-gray-900 mb-2">
-          {title}
-        </h3>
-        <p id="confirm-dialog-message" className="text-sm text-gray-600 mb-6">
-          {message}
-        </p>
-        <div className="flex justify-end space-x-3">
+        <div className="px-[26px] pt-6 pb-4 flex flex-col gap-[14px]">
+          {/* Warning icon */}
+          <div className={`w-11 h-11 rounded-xl inline-flex items-center justify-center ${iconBg}`}>
+            <AlertTriangle className="w-[22px] h-[22px]" strokeWidth={1.6} />
+          </div>
+
+          <h3
+            id="confirm-dialog-title"
+            className="font-serif text-[22px] leading-[1.15] text-ink-900 -tracking-[0.01em] m-0"
+          >
+            {title}
+          </h3>
+
+          <p
+            id="confirm-dialog-message"
+            className="font-serif text-[14.5px] leading-[1.5] text-ink-700 italic m-0"
+          >
+            {message}
+          </p>
+        </div>
+
+        <div className="px-[26px] pb-[22px] pt-[14px] flex justify-end gap-2">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+            className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] cursor-pointer hover:bg-sand-100 hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-500 transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${confirmClass} ${
-              tone === 'danger' ? 'focus-visible:ring-red-500' : 'focus-visible:ring-blue-500'
-            }`}
+            className={`px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 border-0 rounded-[10px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 transition-colors ${confirmBg}`}
           >
             {confirmLabel}
           </button>

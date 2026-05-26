@@ -251,6 +251,7 @@
     "clearCart": "Vider le panier",
     "clearCartConfirm": "Vider le panier ?",
     "drawerClose": "Fermer le panier",
+    "drawerEyebrow": "Ma commande",
     "drawerTitle": "Panier",
     "drawerProductsCount": "{count, plural, =0 {0 produit} =1 {1 produit} other {# produits}}",
     "trustNoPayment": {

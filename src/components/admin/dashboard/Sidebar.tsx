@@ -16,8 +16,8 @@ import {
   Megaphone,
   Tag,
   Users,
-  X,
 } from 'lucide-react'
+import { PopClose } from '@/components/ui/PopClose'
 import { useLocale, useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
 
@@ -175,22 +175,20 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
 
   const content = (
     <nav className="flex flex-col gap-2 h-full">
-      <div className="flex items-center justify-between px-3 pb-4 mb-1 border-b border-sand-300">
-        <Link
-          href="/admin"
-          className="font-serif text-[24px] tracking-[0.01em] text-ink-900"
-          onClick={onCloseMobile}
-        >
-          FARMAU
-        </Link>
-        <button
-          type="button"
-          onClick={onCloseMobile}
-          className="lg:hidden w-8 h-8 rounded-md text-ink-700 hover:bg-sand-200 flex items-center justify-center"
-          aria-label={tChrome('openMenu')}
-        >
-          <X className="w-5 h-5" />
-        </button>
+      <div className="flex items-start justify-between px-3 pb-4 mb-1 border-b border-sand-300">
+        <div>
+          <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium">
+            Admin
+          </span>
+          <Link
+            href="/admin"
+            className="block font-serif text-[22px] tracking-[-.01em] text-ink-900 mt-1.5"
+            onClick={onCloseMobile}
+          >
+            FARMAU
+          </Link>
+        </div>
+        <PopClose onClick={onCloseMobile} className="lg:hidden" label={tChrome('openMenu')} />
       </div>
 
       <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
@@ -302,10 +300,10 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
         {content}
       </aside>
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — blurred scrim + rounded drawer */}
       <div
         aria-hidden={!mobileOpen}
-        className={`lg:hidden fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm transition-opacity duration-200 ${
+        className={`lg:hidden fixed inset-0 z-40 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%] transition-opacity duration-200 ${
           mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onCloseMobile}
@@ -315,9 +313,13 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Menu admin"
-        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-[240px] bg-sand-100 border-r border-sand-300 px-3 py-5 transform transition-transform duration-200 ease-in-out ${
+        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-[260px] bg-sand-100 px-3 py-5 transform transition-transform duration-200 overflow-y-auto rounded-tr-[20px] rounded-br-[20px] ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        } overflow-y-auto`}
+        }`}
+        style={{
+          transitionTimingFunction: 'var(--pop-ease)',
+          boxShadow: 'var(--pop-shadow-drawer-l)',
+        }}
       >
         {content}
       </aside>

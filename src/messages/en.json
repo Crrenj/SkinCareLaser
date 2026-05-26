@@ -251,6 +251,7 @@
     "clearCart": "Clear cart",
     "clearCartConfirm": "Clear the cart?",
     "drawerClose": "Close cart",
+    "drawerEyebrow": "My order",
     "drawerTitle": "Cart",
     "drawerProductsCount": "{count, plural, =0 {0 products} =1 {1 product} other {# products}}",
     "trustNoPayment": {

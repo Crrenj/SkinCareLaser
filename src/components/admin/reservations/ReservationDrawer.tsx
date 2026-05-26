@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowRight, Loader2, X } from 'lucide-react'
+import { ArrowRight, Loader2 } from 'lucide-react'
+import { PopClose } from '@/components/ui/PopClose'
 import type { Reservation } from './types'
 import {
   STATUS_BADGE_CLASS,
@@ -49,7 +50,6 @@ export function ReservationDrawer({
     setSaveState('idle')
   }, [r.id, r.admin_notes])
 
-  // Autosave 800ms après la dernière frappe
   const handleNoteChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value
@@ -73,7 +73,6 @@ export function ReservationDrawer({
     [onUpdateNote, r.id],
   )
 
-  // Esc ferme le drawer
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -84,131 +83,99 @@ export function ReservationDrawer({
 
   return (
     <>
+      {/* Mobile scrim */}
       <div
-        className="lg:hidden fixed inset-0 z-30 bg-ink-900/40 backdrop-blur-sm"
+        className="lg:hidden fixed inset-0 z-30 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
         onClick={onClose}
         aria-hidden
       />
+
       <aside
         role="dialog"
         aria-modal="true"
         aria-labelledby="reservation-drawer-title"
-        className="fixed lg:absolute top-0 right-0 bottom-0 z-40 w-full sm:w-[520px] bg-sand-50 border-l border-sand-300 shadow-[-12px_0_32px_-8px_rgba(31,27,22,0.18)] flex flex-col"
+        className="fixed lg:absolute top-0 right-0 bottom-0 z-40 w-full sm:w-[520px] bg-sand-50 flex flex-col overflow-hidden rounded-tl-[--pop-radius-drawer] rounded-bl-[--pop-radius-drawer]"
+        style={{ boxShadow: 'var(--pop-shadow-drawer-r)' }}
       >
-        <header className="px-6 pt-5 pb-4 border-b border-sand-300 flex justify-between items-start gap-3">
+        {/* Header — eyebrow ref+date, name as title, status badge */}
+        <header className="px-[22px] pt-[18px] pb-4 flex justify-between items-start gap-3">
           <div className="flex flex-col gap-1.5 min-w-0">
+            <span className="font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium">
+              {ref} · {date.abs}
+            </span>
             <h3
               id="reservation-drawer-title"
-              className="font-serif text-[22px] lg:text-[24px] text-ink-900 m-0"
+              className="font-serif text-[22px] text-ink-900 m-0 mt-1"
             >
               {r.contact_name || 'Sin nombre'}
             </h3>
-            <span className="font-mono text-[11.5px] text-ink-500">
-              {ref} · {date.abs}
-            </span>
             <span
-              className={`self-start inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
+              className={`self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.04em] uppercase mt-1 ${
                 STATUS_BADGE_CLASS[r.status]
               }`}
             >
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
               {STATUS_LABEL_ES[r.status]}
             </span>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar"
-            className="w-8 h-8 rounded-md text-ink-700 hover:bg-sand-200 hover:text-ink-900 transition-colors flex items-center justify-center"
-          >
-            <X className="w-[18px] h-[18px]" />
-          </button>
+          <PopClose onClick={onClose} />
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+        {/* Body — sections in cards */}
+        <div className="flex-1 overflow-y-auto px-[22px] py-[14px] flex flex-col gap-[14px]">
           <Section title="Cliente">
-            <Block>
-              <strong className="text-ink-900 font-semibold block mb-1">
-                {r.contact_name || 'Sin nombre'}
-              </strong>
-              <a
-                href={`tel:${r.contact_phone}`}
-                className="text-clay-700 font-medium inline-flex items-center gap-1.5 no-underline"
-              >
-                <span aria-hidden>📱</span> {r.contact_phone}
-              </a>
-              <div className="text-[12px] text-ink-500 mt-1">
-                <a
-                  href={`mailto:${r.contact_email}`}
-                  className="hover:text-ink-900 transition-colors no-underline text-ink-500"
-                >
-                  {r.contact_email}
-                </a>
-              </div>
-            </Block>
+            <CardBlock>
+              <Row label="Nombre" value={r.contact_name || '—'} />
+              <Row label="Tel" value={r.contact_phone} isLink={`tel:${r.contact_phone}`} />
+              <Row label="Email" value={r.contact_email} isLink={`mailto:${r.contact_email}`} />
+            </CardBlock>
           </Section>
 
           <Section
-            title={`Artículos · ${r.items.length} ${r.items.length === 1 ? 'producto' : 'productos'}`}
+            title={`Productos · ${r.items.length} ${r.items.length === 1 ? 'producto' : 'productos'}`}
           >
-            <Block className="px-3.5 py-1">
+            <CardBlock className="px-[14px] py-1">
               <div className="flex flex-col">
                 {r.items.map((it, idx) => (
                   <div
                     key={it.id}
-                    className={`grid grid-cols-[38px_minmax(0,1fr)_auto] gap-3 items-center py-2 text-[13px] ${
+                    className={`grid grid-cols-[1fr_auto] gap-2 py-2 text-[12.5px] ${
                       idx < r.items.length - 1 ? 'border-b border-sand-200' : ''
                     }`}
                   >
-                    <span className="w-[38px] h-[38px] bg-sand-200 rounded text-[8px] uppercase tracking-[0.08em] text-ink-400 inline-flex items-center justify-center">
-                      Pack
-                    </span>
-                    <div className="min-w-0">
-                      <b className="font-medium text-ink-900 block truncate">
-                        {it.quantity}× {it.product_name}
-                      </b>
-                      <small className="block text-[10.5px] text-ink-500 mt-0.5">
-                        {fmtDOP(it.unit_price)} DOP / ud
+                    <div className="text-ink-900">
+                      {it.product_name}
+                      <small className="block text-ink-500 font-mono text-[10.5px] mt-0.5">
+                        ×{it.quantity} · {fmtDOP(it.unit_price)} DOP / ud
                       </small>
                     </div>
-                    <span className="font-serif text-[15px] text-right whitespace-nowrap">
-                      {fmtDOP(it.unit_price * it.quantity)}
-                      <small className="font-sans text-[10px] text-ink-500 ml-1">DOP</small>
+                    <span className="font-mono text-[12px] text-ink-900 text-right">
+                      {fmtDOP(it.unit_price * it.quantity)} DOP
                     </span>
                   </div>
                 ))}
               </div>
-            </Block>
+            </CardBlock>
           </Section>
 
-          <div className="grid grid-cols-1 gap-3.5">
-            <Section title="Estado">
-              <Block>
-                <strong className="text-ink-900 font-semibold block mb-1">
-                  {STATUS_LABEL_ES[r.status]}
-                </strong>
-                <span className="text-[12px] text-ink-700">
-                  Actualizada {relativeAndAbsolute(r.updated_at).rel.toLowerCase()}
+          <Section title="Total">
+            <CardBlock>
+              <Row label="Subtotal" value={`${fmtDOP(r.total_price)} DOP`} />
+              <div className="flex justify-between items-baseline py-[7px] font-semibold">
+                <span className="text-[11px] tracking-[0.06em] uppercase text-ink-900 font-medium">
+                  Total
                 </span>
-              </Block>
-            </Section>
-          </div>
-
-          <div className="flex justify-between items-baseline px-4 py-3 bg-sand-100 border border-sand-300 rounded-lg">
-            <span className="text-[11px] tracking-[0.08em] uppercase text-ink-700">
-              Total a coordinar
-            </span>
-            <span className="font-serif text-[22px] text-ink-900 leading-none whitespace-nowrap">
-              {fmtDOP(r.total_price)}
-              <small className="font-sans text-[11px] text-ink-500 ml-1">DOP</small>
-            </span>
-          </div>
+                <span className="font-mono text-[14px] text-ink-900">{fmtDOP(r.total_price)} DOP</span>
+              </div>
+            </CardBlock>
+          </Section>
 
           <Section title="Nota interna · solo equipo FARMAU">
             <textarea
               value={note}
               onChange={handleNoteChange}
               placeholder="Ej. Stock confirmado en farmacia. Cliente prefiere efectivo."
-              className="w-full min-h-[80px] px-3 py-2.5 rounded-md border border-sand-300 bg-sand-50 text-[13px] text-ink-900 leading-[1.5] resize-y focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors"
+              className="w-full min-h-[80px] px-3 py-2.5 rounded-[10px] border border-sand-200 bg-sand-50 text-[13px] text-ink-900 leading-[1.5] resize-y focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors"
             />
             <span className="text-[11px] text-ink-500 mt-1 inline-flex items-center gap-1">
               {saveState === 'saving' && (
@@ -222,13 +189,16 @@ export function ReservationDrawer({
           </Section>
         </div>
 
-        <footer className="px-6 py-4 border-t border-sand-300 bg-sand-50 flex flex-col gap-2.5">
+        {/* Footer — scroll-fade + action buttons */}
+        <footer className="px-[22px] py-[14px] pb-[18px] bg-sand-50 flex flex-col gap-2.5 relative">
+          <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
+
           <div className="grid grid-cols-2 gap-2">
             {r.contact_phone && (
               <button
                 type="button"
                 onClick={() => onWhatsapp(r)}
-                className="h-11 rounded-lg bg-[#25D366] hover:bg-[#1ebd5a] text-white text-[13px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors"
+                className="h-11 rounded-[10px] bg-[#25D366] hover:bg-[#1ebd5a] text-white text-[13px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M20.5 3.4C18.3 1.2 15.3 0 12.1 0 5.5 0 .2 5.3.2 11.9c0 2.1.6 4.1 1.6 5.9L0 24l6.4-1.7c1.7.9 3.7 1.4 5.7 1.4 6.6 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.5-8.4z" />
@@ -241,7 +211,7 @@ export function ReservationDrawer({
                 type="button"
                 onClick={() => onAdvance(r)}
                 disabled={busy}
-                className="h-11 rounded-lg bg-clay-700 hover:bg-clay-800 text-sand-50 text-[13px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="h-11 rounded-[10px] bg-ink-900 hover:bg-ink-800 text-sand-50 text-[13px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {nextLabel}
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -250,18 +220,19 @@ export function ReservationDrawer({
               <button
                 type="button"
                 disabled
-                className="h-11 rounded-lg bg-transparent border border-sand-300 text-ink-500 text-[13px] cursor-not-allowed"
+                className="h-11 rounded-[10px] bg-transparent border border-sand-300 text-ink-500 text-[13px] cursor-not-allowed"
               >
                 Sin acción siguiente
               </button>
             )}
           </div>
+
           {r.status !== 'cancelled' && (
             <button
               type="button"
               onClick={() => onCancel(r)}
               disabled={busy}
-              className="self-center text-[12px] text-brick-600 underline underline-offset-[3px] bg-transparent disabled:opacity-50 hover:text-brick-600/80 transition-colors"
+              className="self-center text-[11.5px] text-ink-500 hover:text-brick-600 underline underline-offset-[3px] bg-transparent disabled:opacity-50 transition-colors py-0.5"
             >
               Cancelar reserva
             </button>
@@ -281,7 +252,7 @@ function Section({
 }) {
   return (
     <section className="flex flex-col gap-2">
-      <h4 className="text-[11px] tracking-[0.16em] uppercase text-ink-500 font-semibold m-0">
+      <h4 className="text-[10.5px] tracking-[0.16em] uppercase text-ink-700 font-semibold m-0">
         {title}
       </h4>
       {children}
@@ -289,7 +260,7 @@ function Section({
   )
 }
 
-function Block({
+function CardBlock({
   children,
   className = '',
 }: {
@@ -298,9 +269,37 @@ function Block({
 }) {
   return (
     <div
-      className={`bg-sand-100 border border-sand-300 rounded-lg px-3.5 py-3 text-[13.5px] leading-[1.55] ${className}`}
+      className={`bg-sand-50 border border-sand-200 rounded-[10px] px-[14px] py-1 text-[13px] ${className}`}
     >
       {children}
+    </div>
+  )
+}
+
+function Row({
+  label,
+  value,
+  isLink,
+}: {
+  label: string
+  value: string
+  isLink?: string
+}) {
+  return (
+    <div className="flex justify-between items-baseline py-[7px] border-b border-sand-200 last:border-b-0 gap-[14px]">
+      <span className="text-ink-500 text-[11px] tracking-[0.06em] uppercase font-medium shrink-0">
+        {label}
+      </span>
+      {isLink ? (
+        <a
+          href={isLink}
+          className="font-mono text-[12.5px] text-ink-900 text-right hover:text-clay-700 transition-colors truncate"
+        >
+          {value}
+        </a>
+      ) : (
+        <span className="font-mono text-[12.5px] text-ink-900 text-right truncate">{value}</span>
+      )}
     </div>
   )
 }

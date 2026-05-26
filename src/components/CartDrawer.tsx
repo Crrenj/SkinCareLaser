@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { X } from 'lucide-react'
 import { useRouter } from '@/i18n/navigation'
 import { useCart } from '@/hooks/useCart'
 import { CartLineItem } from '@/components/cart/CartLineItem'
-import { CartSummary } from '@/components/cart/CartSummary'
+import { PopClose } from '@/components/ui/PopClose'
+import { Scrim } from '@/components/ui/Scrim'
+import { CartDrawerSummary } from '@/components/cart/CartDrawerSummary'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -20,8 +21,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   const [reserving, setReserving] = useState(false)
   const [reserveError] = useState<string | null>(null)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const [headerBordered, setHeaderBordered] = useState(false)
 
-  /* Scroll-lock + Esc */
   useEffect(() => {
     if (!isOpen) return
     const prevOverflow = document.body.style.overflow
@@ -37,7 +39,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     }
   }, [isOpen, onClose])
 
-  // "Reservar" depuis le drawer → ferme + ouvre le tunnel /reservation
+  useEffect(() => {
+    const el = bodyRef.current
+    if (!el || !isOpen) return
+    const onScroll = () => setHeaderBordered(el.scrollTop > 2)
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [isOpen])
+
   const handleReserve = useCallback(() => {
     setReserving(true)
     onClose()
@@ -52,47 +61,45 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 z-40 bg-ink-900/40 backdrop-blur-sm transition-opacity duration-200 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={onClose}
-        aria-hidden
-      />
+      <Scrim visible={isOpen} onClick={onClose} />
 
-      {/* Drawer */}
       <aside
         role="dialog"
         aria-modal="true"
         aria-label={t('drawerTitle')}
-        className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-sand-50 shadow-2xl
-                    flex flex-col transform transition-transform duration-200 ease-in-out
+        className={`fixed top-0 right-0 z-50 h-full w-full sm:w-[420px] bg-sand-50 flex flex-col
+                    rounded-tl-[--pop-radius-drawer] rounded-bl-[--pop-radius-drawer]
+                    shadow-[--pop-shadow-drawer-r] overflow-hidden
+                    transform transition-transform duration-200
                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{
+          transitionTimingFunction: 'var(--pop-ease)',
+          boxShadow: 'var(--pop-shadow-drawer-r)',
+        }}
         data-testid="cart-drawer"
       >
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-4 border-b border-sand-300 shrink-0">
-          <h2 className="font-serif text-[22px] lg:text-[24px] text-ink-900 m-0">
-            {t('drawerTitle')}
-            <span className="ml-2 font-sans text-[12px] text-ink-500 font-normal">
-              {t('drawerProductsCount', { count: totalItems })}
+        {/* Header — border only on scroll */}
+        <header className={`flex items-start justify-between px-[22px] py-[18px] shrink-0 transition-[border-color] duration-150 ${
+          headerBordered ? 'border-b border-sand-200' : 'border-b border-transparent'
+        }`}>
+          <div>
+            <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
+              {t('drawerEyebrow') ?? 'Mi pedido'}
             </span>
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-md text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors"
-            aria-label={t('drawerClose')}
-          >
-            <X className="w-5 h-5" />
-          </button>
+            <h2 className="font-serif text-[22px] text-ink-900 m-0 leading-[1.1] flex items-baseline gap-2">
+              {t('drawerTitle')}
+              <span className="text-clay-700 italic text-[18px]">
+                — {totalItems}
+              </span>
+            </h2>
+          </div>
+          <PopClose onClick={onClose} label={t('drawerClose')} />
         </header>
 
-        {/* Liste items (scrollable) */}
-        <div className="flex-1 overflow-y-auto py-2">
+        {/* Body (scrollable) */}
+        <div ref={bodyRef} className="flex-1 overflow-y-auto px-[22px] py-[14px]">
           {items.length === 0 ? (
-            <div className="px-6 py-16 text-center text-ink-500 text-[14px]">
+            <div className="py-16 text-center text-ink-500 text-[14px]">
               {t('empty.title')} <em className="text-clay-700 not-italic">{t('empty.titleEmphasis')}</em>.
             </div>
           ) : (
@@ -108,23 +115,27 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           )}
         </div>
 
-        {/* Footer summary */}
+        {/* Footer with summary card + CTA */}
         {items.length > 0 && (
-          <div className="shrink-0">
-            <CartSummary
-              subtotal={totalPrice}
-              variant="drawer"
-              onReserve={handleReserve}
-              reserving={reserving}
-              error={reserveError}
-            />
-            <button
-              type="button"
-              onClick={handleClearCart}
-              className="block w-full text-center text-[12px] text-ink-500 underline underline-offset-4 hover:text-brick-600 transition-colors pb-5"
-            >
-              {t('clearCart')}
-            </button>
+          <div className="shrink-0 relative">
+            {/* Scroll-fade gradient */}
+            <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
+            <div className="px-[22px] pb-[18px] pt-[14px]">
+              <CartDrawerSummary
+                subtotal={totalPrice}
+                itemCount={totalItems}
+                onReserve={handleReserve}
+                reserving={reserving}
+                error={reserveError}
+              />
+              <button
+                type="button"
+                onClick={handleClearCart}
+                className="block w-full text-center text-[12px] text-ink-500 underline underline-offset-[3px] hover:text-brick-600 transition-colors py-1 mt-1"
+              >
+                {t('clearCart')}
+              </button>
+            </div>
           </div>
         )}
       </aside>

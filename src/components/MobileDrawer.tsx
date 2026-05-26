@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect } from 'react'
-import { X, ChevronRight, User as UserIcon, Shield } from 'lucide-react'
+import { ChevronRight, User as UserIcon, Shield } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { User } from '@supabase/supabase-js'
 import { Link, usePathname } from '@/i18n/navigation'
 import Logo from './Logo'
 import { LocaleSwitcher } from './LocaleSwitcher'
+import { PopClose } from '@/components/ui/PopClose'
 
 const NAV_LINKS = [
   { href: '/', labelKey: 'home' as const },
@@ -32,7 +33,6 @@ export function MobileDrawer({
   const t = useTranslations('Nav')
   const pathname = usePathname()
 
-  // Lock scroll quand le drawer est ouvert.
   useEffect(() => {
     if (!open) return
     const previous = document.body.style.overflow
@@ -42,7 +42,6 @@ export function MobileDrawer({
     }
   }, [open])
 
-  // Close on Escape.
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -56,36 +55,37 @@ export function MobileDrawer({
 
   return (
     <div className="lg:hidden fixed inset-0 z-50">
-      {/* Overlay */}
+      {/* Scrim — blurred backdrop */}
       <button
         type="button"
         aria-label={t('closeMenuAriaLabel')}
         onClick={onClose}
-        className="absolute inset-0 bg-ink-900/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
       />
 
-      {/* Drawer */}
+      {/* Drawer — rounded on right side */}
       <aside
-        className="absolute top-0 left-0 h-full w-[320px] max-w-[85vw] bg-sand-50 flex flex-col shadow-2xl"
+        className="absolute top-0 left-0 h-full w-[320px] max-w-[85vw] bg-sand-50 flex flex-col overflow-hidden rounded-tr-[20px] rounded-br-[20px]"
+        style={{ boxShadow: 'var(--pop-shadow-drawer-l)' }}
         role="dialog"
         aria-modal="true"
         aria-label={t('drawer.menuHeading')}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-sand-200">
-          <Logo size={48} onClick={onClose} />
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t('closeMenuAriaLabel')}
-            className="w-9 h-9 flex items-center justify-center text-ink-800 hover:bg-sand-100 rounded-sm"
-          >
-            <X size={22} strokeWidth={1.6} />
-          </button>
+        {/* Header — eyebrow + logo clay-700 */}
+        <div className="flex items-start justify-between px-5 py-[18px]">
+          <div>
+            <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium">
+              FARMAU
+            </span>
+            <div className="mt-2">
+              <Logo size={48} onClick={onClose} variant="clay" />
+            </div>
+          </div>
+          <PopClose onClick={onClose} label={t('closeMenuAriaLabel')} />
         </div>
 
-        {/* Main nav */}
-        <nav className="px-5 py-3 border-b border-sand-200">
+        {/* Main nav — serif links with hover bg */}
+        <nav className="flex-1 px-4 py-3 flex flex-col gap-1 overflow-y-auto">
           {NAV_LINKS.map((link) => {
             const active = pathname === link.href
             return (
@@ -93,62 +93,64 @@ export function MobileDrawer({
                 key={link.href}
                 href={link.href}
                 onClick={onClose}
-                className={`flex items-center justify-between py-2.5 font-serif text-[22px] -tracking-[0.01em] ${
-                  active ? 'text-clay-700 italic' : 'text-ink-900'
+                className={`flex items-center justify-between py-3 px-[14px] font-serif text-[22px] -tracking-[0.01em] rounded-[10px] leading-[1.1] transition-colors ${
+                  active
+                    ? 'text-clay-700 bg-clay-50'
+                    : 'text-ink-900 hover:bg-sand-100'
                 }`}
               >
                 {t(link.labelKey)}
-                <ChevronRight size={18} strokeWidth={1.5} className="opacity-60" />
+                <ChevronRight size={16} strokeWidth={1.5} className="opacity-55" />
               </Link>
             )
           })}
+
+          {/* Service section */}
+          <div className="mt-2">
+            <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-500 font-semibold px-[14px] py-[14px] pb-[6px]">
+              {t('drawer.serviceHeading')}
+            </div>
+            <Link
+              href="/livraison"
+              onClick={onClose}
+              className="block px-[14px] py-2 text-[13.5px] text-ink-700 rounded-lg hover:bg-sand-100 hover:text-ink-900"
+            >
+              {t('utility.delivery')}
+            </Link>
+            <Link
+              href="/pharmacie"
+              onClick={onClose}
+              className="block px-[14px] py-2 text-[13.5px] text-ink-700 rounded-lg hover:bg-sand-100 hover:text-ink-900"
+            >
+              {t('utility.pharmacists')}
+            </Link>
+            <Link
+              href="/contact"
+              onClick={onClose}
+              className="block px-[14px] py-2 text-[13.5px] text-ink-700 rounded-lg hover:bg-sand-100 hover:text-ink-900"
+            >
+              {t('utility.help')}
+            </Link>
+          </div>
+
+          {/* Language switcher */}
+          <div className="mt-2 px-[14px]">
+            <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-500 font-semibold mb-2 pt-3">
+              {t('languageLabel')}
+            </div>
+            <LocaleSwitcher variant="block" onBeforeSwitch={onClose} />
+          </div>
         </nav>
 
-        {/* Service section */}
-        <div className="px-5 py-4 border-b border-sand-200">
-          <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-500 font-medium mb-2">
-            {t('drawer.serviceHeading')}
-          </div>
-          <Link
-            href="/contact"
-            onClick={onClose}
-            className="block py-2 text-sm text-ink-800 hover:text-clay-700"
-          >
-            {t('utility.delivery')}
-          </Link>
-          <Link
-            href="/contact"
-            onClick={onClose}
-            className="block py-2 text-sm text-ink-800 hover:text-clay-700"
-          >
-            {t('utility.pharmacists')}
-          </Link>
-          <Link
-            href="/contact"
-            onClick={onClose}
-            className="block py-2 text-sm text-ink-800 hover:text-clay-700"
-          >
-            {t('utility.help')}
-          </Link>
-        </div>
-
-        {/* Language switcher */}
-        <div className="px-5 py-4 border-b border-sand-200">
-          <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-500 font-medium mb-2">
-            {t('languageLabel')}
-          </div>
-          <LocaleSwitcher variant="block" onBeforeSwitch={onClose} />
-        </div>
-
-        {/* Footer */}
-        <div className="mt-auto px-5 py-4 bg-sand-200 flex flex-col gap-2.5">
+        {/* Footer — distinct sand-100 zone */}
+        <div className="px-5 py-5 bg-sand-100 flex flex-col gap-2.5">
           {user ? (
             <>
               {isAdmin && (
                 <Link
                   href="/admin/product"
                   onClick={onClose}
-                  className="flex items-center gap-3 px-3.5 py-2.5 bg-white border border-sand-300 rounded-sm text-sm font-medium text-ink-900"
+                  className="flex items-center gap-3 px-3.5 py-2.5 bg-sand-50 border border-sand-200 rounded-[10px] text-sm font-medium text-ink-900"
                 >
                   <Shield size={18} strokeWidth={1.5} className="text-ink-700" />
                   {t('adminDashboardAriaLabel')}
@@ -157,7 +159,7 @@ export function MobileDrawer({
               <Link
                 href="/account/profile"
                 onClick={onClose}
-                className="flex items-center gap-3 px-3.5 py-2.5 bg-white border border-sand-300 rounded-sm text-sm font-medium text-ink-900"
+                className="flex items-center gap-3 px-3.5 py-2.5 bg-sand-50 border border-sand-200 rounded-[10px] text-sm font-medium text-ink-900"
               >
                 <UserIcon size={18} strokeWidth={1.5} className="text-ink-700" />
                 {t('drawer.myAccountCta')}
@@ -168,7 +170,7 @@ export function MobileDrawer({
                   onSignOut()
                   onClose()
                 }}
-                className="text-left px-3.5 py-2 text-sm text-brick-600 hover:underline"
+                className="text-left px-3.5 py-2 text-[11px] text-ink-500 underline underline-offset-[3px] hover:text-brick-600"
               >
                 {t('signOut')}
               </button>
@@ -177,7 +179,7 @@ export function MobileDrawer({
             <Link
               href="/login"
               onClick={onClose}
-              className="flex items-center gap-3 px-3.5 py-2.5 bg-white border border-sand-300 rounded-sm text-sm font-medium text-ink-900"
+              className="flex items-center gap-3 px-3.5 py-2.5 bg-sand-50 border border-sand-200 rounded-[10px] text-sm font-medium text-ink-900"
             >
               <UserIcon size={18} strokeWidth={1.5} className="text-ink-700" />
               {t('drawer.loginCta')}
