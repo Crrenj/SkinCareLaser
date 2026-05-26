@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { PencilIcon, TrashIcon, PhotoIcon } from '@heroicons/react/24/outline'
+import { Pencil, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react'
 import type { Product, Tag, TagType } from '../_lib/types'
 
 type ProductsTableProps = {
@@ -26,173 +26,183 @@ export function ProductsTable({
   onPageChange,
 }: ProductsTableProps) {
   const colorOf = (tag: Tag) =>
-    tagTypes.find((t) => t.id === tag.tag_type_id)?.color || '#6B7280'
+    tagTypes.find((t) => t.id === tag.tag_type_id)?.color || 'var(--color-ink-500)'
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" />
-          <p className="mt-2 text-gray-500">Chargement...</p>
-        </div>
+      <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">
+        <Loader2 className="w-5 h-5 mx-auto mb-3 animate-spin text-clay-700" />
+        Cargando…
+      </div>
+    )
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]">
+        No hay productos.
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <table className="min-w-full">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Produit
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Marque
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Tags
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Prix
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Stock
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {products.map((product) => {
-            const productTags = (product.product_tags || product.tags || []) as
-              | { tag: Tag }[]
-              | Tag[]
-            const tagList = productTags.map((t) => ('tag' in t ? t.tag : (t as Tag)))
-            return (
-              <tr key={product.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-16 w-16">
-                      {product.image_url ? (
-                        <Image
-                          src={product.image_url}
-                          alt={product.name}
-                          width={64}
-                          height={64}
-                          className="h-16 w-16 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="h-16 w-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <PhotoIcon className="h-8 w-8 text-gray-400" />
-                        </div>
+    <div className="bg-sand-50 border border-sand-300 rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(31,27,22,0.06),0_12px_32px_-8px_rgba(31,27,22,0.08)]">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-[13.5px]">
+          <thead className="bg-sand-100 border-b border-sand-300">
+            <tr>
+              <Th>Producto</Th>
+              <Th>Marca</Th>
+              <Th>Etiquetas</Th>
+              <Th align="right">Precio</Th>
+              <Th align="right">Stock</Th>
+              <Th align="right">Estado</Th>
+              <Th className="w-[88px]"></Th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => {
+              const productTags = (product.product_tags || product.tags || []) as
+                | { tag: Tag }[]
+                | Tag[]
+              const tagList = productTags.map((t) => ('tag' in t ? t.tag : (t as Tag)))
+              const stockState =
+                product.stock > 10 ? 'ok' : product.stock > 0 ? 'low' : 'out'
+              return (
+                <tr
+                  key={product.id}
+                  className={`border-b border-sand-200 last:border-b-0 transition-colors hover:bg-sand-100 ${
+                    stockState === 'low'
+                      ? 'bg-[rgba(181,133,43,0.04)]'
+                      : stockState === 'out'
+                        ? 'bg-[rgba(139,58,46,0.04)]'
+                        : ''
+                  }`}
+                >
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="w-[42px] h-[42px] bg-sand-200 border border-sand-300 rounded-md flex items-center justify-center text-ink-400 shrink-0 overflow-hidden">
+                        {product.image_url ? (
+                          <Image
+                            src={product.image_url}
+                            alt=""
+                            width={42}
+                            height={42}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="w-4 h-4" />
+                        )}
+                      </span>
+                      <div className="min-w-0 leading-tight">
+                        <b className="block text-[13.5px] font-medium text-ink-900 truncate">
+                          {product.name}
+                        </b>
+                        <small className="block text-[11.5px] text-ink-500 font-mono truncate">
+                          {product.slug}
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle text-ink-800">
+                    {product.brand?.name || '—'}
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex flex-wrap gap-1.5 max-w-[280px]">
+                      {tagList.slice(0, 3).map((tag) => (
+                        <span
+                          key={tag.id}
+                          className="inline-flex items-center gap-1.5 text-[11px] px-2 py-0.5 rounded-full border bg-sand-50"
+                          style={{
+                            borderColor: 'var(--color-sand-300)',
+                            color: 'var(--color-ink-800)',
+                          }}
+                        >
+                          <span
+                            aria-hidden
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ background: colorOf(tag) }}
+                          />
+                          {tag.name}
+                        </span>
+                      ))}
+                      {tagList.length > 3 && (
+                        <span className="text-[11px] text-ink-500 self-center">
+                          +{tagList.length - 3}
+                        </span>
                       )}
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                      <div className="text-sm text-gray-500">{product.slug}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{product.brand?.name || '-'}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {tagList.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white"
-                        style={{ backgroundColor: colorOf(tag) }}
+                  </td>
+                  <td className="px-4 py-3 align-middle text-right">
+                    <span className="font-serif text-[16px] text-ink-900 leading-none whitespace-nowrap">
+                      {product.price}
+                      <small className="font-sans text-[10.5px] text-ink-500 ml-1">
+                        {product.currency.toUpperCase()}
+                      </small>
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 align-middle text-right">
+                    <span
+                      className={`font-mono text-[12.5px] font-medium whitespace-nowrap ${
+                        stockState === 'out'
+                          ? 'text-brick-600'
+                          : stockState === 'low'
+                            ? 'text-[#B5852B]'
+                            : 'text-ink-900'
+                      }`}
+                    >
+                      {product.stock}
+                      <small className="text-ink-500 font-sans text-[10.5px] font-normal ml-1">
+                        uds
+                      </small>
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 align-middle text-right">
+                    <StockPill state={stockState} />
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <div className="flex gap-1 justify-end opacity-60 group-hover:opacity-100 transition-opacity">
+                      <RowAction
+                        label={`Editar ${product.name}`}
+                        title="Editar"
+                        onClick={() => onEdit(product)}
                       >
-                        {tag.name}
-                      </span>
-                    ))}
-                    {tagList.length > 3 && (
-                      <span className="text-xs text-gray-500">+{tagList.length - 3} autres</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {product.price} {product.currency}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      product.stock > 10
-                        ? 'bg-green-100 text-green-800'
-                        : product.stock > 0
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {product.stock > 10
-                      ? 'En stock'
-                      : product.stock > 0
-                        ? 'Stock faible'
-                        : 'Rupture'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => onEdit(product)}
-                      className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                      title="Modifier"
-                      aria-label={`Modifier le produit ${product.name}`}
-                    >
-                      <PencilIcon className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(product.id)}
-                      className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                      title="Supprimer"
-                      aria-label={`Supprimer le produit ${product.name}`}
-                    >
-                      <TrashIcon className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </RowAction>
+                      <RowAction
+                        label={`Eliminar ${product.name}`}
+                        title="Eliminar"
+                        onClick={() => onDelete(product.id)}
+                        danger
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </RowAction>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
 
-      <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div className="flex-1 flex justify-between sm:hidden">
-          <button
-            onClick={() => onPageChange(Math.max(1, page - 1))}
-            disabled={page === 1}
-            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-          >
-            Précédent
-          </button>
-          <button
-            onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-            disabled={page === totalPages}
-            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-          >
-            Suivant
-          </button>
-        </div>
-        <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
-          <nav
-            className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-            aria-label="Pagination"
-          >
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-5 py-3.5 bg-sand-50 border-t border-sand-200 text-[12.5px] text-ink-700">
+          <span>
+            Página <b className="text-ink-900 font-medium">{page}</b> de{' '}
+            <b className="text-ink-900 font-medium">{totalPages}</b>
+          </span>
+          <nav aria-label="Paginación" className="flex flex-wrap gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p}
+                type="button"
                 onClick={() => onPageChange(p)}
                 aria-current={page === p ? 'page' : undefined}
-                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                className={`min-w-[32px] px-2.5 py-1 border rounded-md font-sans transition-colors ${
                   page === p
-                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    ? 'bg-ink-900 text-sand-50 border-ink-900 font-medium'
+                    : 'bg-sand-50 text-ink-700 border-sand-300 hover:bg-sand-100'
                 }`}
               >
                 {p}
@@ -200,7 +210,70 @@ export function ProductsTable({
             ))}
           </nav>
         </div>
-      </div>
+      )}
     </div>
+  )
+}
+
+function Th({
+  children = null,
+  align = 'left',
+  className = '',
+}: {
+  children?: React.ReactNode
+  align?: 'left' | 'right' | 'center'
+  className?: string
+}) {
+  return (
+    <th
+      className={`text-${align} px-4 py-2.5 text-[11px] font-semibold text-ink-500 tracking-[0.12em] uppercase whitespace-nowrap ${className}`}
+    >
+      {children}
+    </th>
+  )
+}
+
+function StockPill({ state }: { state: 'ok' | 'low' | 'out' }) {
+  const map = {
+    ok: { label: 'Activo', bg: 'bg-olive-600/15', text: 'text-olive-600', dot: 'bg-olive-600' },
+    low: { label: 'Stock bajo', bg: 'bg-[rgba(181,133,43,0.15)]', text: 'text-[#7A5A1C]', dot: 'bg-[#B5852B]' },
+    out: { label: 'Sin stock', bg: 'bg-brick-600/12', text: 'text-brick-600', dot: 'bg-brick-600' },
+  } as const
+  const s = map[state]
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap ${s.bg} ${s.text}`}
+    >
+      <span aria-hidden className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+      {s.label}
+    </span>
+  )
+}
+
+function RowAction({
+  children,
+  onClick,
+  title,
+  label,
+  danger = false,
+}: {
+  children: React.ReactNode
+  onClick: () => void
+  title: string
+  label: string
+  danger?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-label={label}
+      className={`w-7 h-7 inline-flex items-center justify-center rounded-md border-0 bg-transparent text-ink-500 transition-colors ${
+        danger ? 'hover:bg-brick-600/10 hover:text-brick-600' : 'hover:bg-sand-200 hover:text-ink-900'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
