@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useBrandsData } from './_hooks/useBrandsData'
 import {
   INITIAL_BRAND_FORM,
@@ -146,46 +147,52 @@ export default function MarquesPage() {
   )
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Gestion des marques</h1>
-        <button
-          onClick={() => openBrandModal()}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          <PlusIcon className="h-5 w-5 mr-2" />
-          Ajouter une marque
-        </button>
-      </div>
+    <>
+      <PageHeader
+        crumbs={[
+          { label: 'Admin', href: '/admin' },
+          { label: 'Catálogo' },
+          { label: 'Marcas' },
+        ]}
+        title="Marcas"
+        actions={
+          <button
+            type="button"
+            onClick={() => openBrandModal()}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-sand-50 text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+          >
+            <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
+            Añadir marca
+          </button>
+        }
+      />
 
-      <BrandStatsCards brands={brands} />
-
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <label htmlFor="marques-search" className="sr-only">
-            Rechercher une marque
-          </label>
+      <div className="bg-sand-100 border-b border-sand-300 px-5 lg:px-8 py-3.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 sticky top-[88px] z-[4]">
+        <label className="flex items-center gap-2 bg-sand-50 border border-sand-300 rounded-md px-3 py-1.5 text-ink-700 min-w-0 flex-1 max-w-md">
+          <Search className="w-3.5 h-3.5 shrink-0" aria-hidden />
+          <span className="sr-only">Buscar una marca</span>
           <input
-            id="marques-search"
-            type="text"
-            placeholder="Rechercher une marque..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent"
+            type="search"
+            placeholder="Buscar por nombre o slug…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 min-w-0 bg-transparent border-0 outline-none text-[13.5px] text-ink-900 placeholder:text-ink-500"
           />
-        </div>
+        </label>
       </div>
 
-      <BrandsTable
-        brands={filteredBrands}
-        loading={loading}
-        onEditBrand={openBrandModal}
-        onDeleteBrand={setDeleteBrandId}
-        onCreateRange={(brandId) => openRangeModal(undefined, brandId)}
-        onEditRange={openRangeModal}
-        onDeleteRange={setDeleteRangeId}
-      />
+      <div className="px-5 lg:px-8 py-6 flex flex-col gap-6">
+        <BrandStatsCards brands={brands} />
+        <BrandsTable
+          brands={filteredBrands}
+          loading={loading}
+          onEditBrand={openBrandModal}
+          onDeleteBrand={setDeleteBrandId}
+          onCreateRange={(brandId) => openRangeModal(undefined, brandId)}
+          onEditRange={openRangeModal}
+          onDeleteRange={setDeleteRangeId}
+        />
+      </div>
 
       <BrandFormModal
         open={showBrandModal}
@@ -209,8 +216,8 @@ export default function MarquesPage() {
 
       <DeleteConfirmModal
         id={deleteBrandId}
-        title="Supprimer la marque"
-        description="Êtes-vous sûr de vouloir supprimer cette marque ? Cette action est irréversible."
+        title="Eliminar marca"
+        description="¿Seguro que quieres eliminar esta marca? Esta acción es irreversible."
         labelId="brand-delete-modal-title"
         onCancel={() => setDeleteBrandId(null)}
         onConfirm={handleBrandDelete}
@@ -218,12 +225,12 @@ export default function MarquesPage() {
 
       <DeleteConfirmModal
         id={deleteRangeId}
-        title="Supprimer la gamme"
-        description="Êtes-vous sûr de vouloir supprimer cette gamme ? Cette action est irréversible."
+        title="Eliminar gama"
+        description="¿Seguro que quieres eliminar esta gama? Esta acción es irreversible."
         labelId="range-delete-modal-title"
         onCancel={() => setDeleteRangeId(null)}
         onConfirm={handleRangeDelete}
       />
-    </div>
+    </>
   )
 }

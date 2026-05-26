@@ -1,6 +1,5 @@
 'use client'
 
-import { TagIcon, Squares2X2Icon } from '@heroicons/react/24/outline'
 import type { Brand } from '../_lib/types'
 
 type BrandStatsCardsProps = {
@@ -9,49 +8,39 @@ type BrandStatsCardsProps = {
 
 export function BrandStatsCards({ brands }: BrandStatsCardsProps) {
   const totalRanges = brands.reduce((sum, brand) => sum + (brand.ranges?.length || 0), 0)
+  const avgRanges = brands.length > 0 ? Math.round((totalRanges / brands.length) * 10) / 10 : 0
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <TagIcon className="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-500">Total marques</p>
-            <p className="text-2xl font-semibold text-gray-900">{brands.length}</p>
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <Kpi label="Marcas" value={brands.length} />
+      <Kpi label="Gamas" value={totalRanges} accent="olive" />
+      <Kpi label="Gamas / marca" value={avgRanges} suffix="prom." />
+    </div>
+  )
+}
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <div className="h-8 w-8 bg-green-600 rounded-full flex items-center justify-center">
-              <Squares2X2Icon className="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-500">Total gammes</p>
-            <p className="text-2xl font-semibold text-gray-900">{totalRanges}</p>
-          </div>
-        </div>
+function Kpi({
+  label,
+  value,
+  suffix,
+  accent = 'clay',
+}: {
+  label: string
+  value: number
+  suffix?: string
+  accent?: 'clay' | 'olive'
+}) {
+  const accentClass = accent === 'olive' ? 'text-olive-600' : 'text-clay-700'
+  return (
+    <div className="bg-sand-50 border border-sand-300 rounded-xl px-5 py-4">
+      <div className="font-mono text-[10.5px] tracking-[0.16em] uppercase text-ink-500 mb-1.5">
+        {label}
       </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center">
-          <div className="flex-shrink-0">
-            <div className="h-8 w-8 bg-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
-            </div>
-          </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-500">Marques actives</p>
-            <p className="text-2xl font-semibold text-gray-900">{brands.length}</p>
-          </div>
-        </div>
+      <div className="flex items-baseline gap-2">
+        <span className={`font-serif text-[32px] leading-none ${accentClass}`}>{value}</span>
+        {suffix && (
+          <span className="font-mono text-[11px] text-ink-500 tracking-[0.06em]">{suffix}</span>
+        )}
       </div>
     </div>
   )
