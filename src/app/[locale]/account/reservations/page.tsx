@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { ArrowRight } from 'lucide-react'
@@ -73,7 +74,7 @@ export default async function AccountReservationsPage({
     .returns<ReservationRow[]>()
 
   if (error) {
-    console.error('[account/reservations] fetch error:', error)
+    logger.error('[account/reservations] fetch error:', error)
   }
 
   const reservations = data ?? []

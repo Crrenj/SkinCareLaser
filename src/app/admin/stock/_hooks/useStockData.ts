@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -30,7 +31,7 @@ export function useStockData() {
       setStockItems(data.items || [])
       setStats(data.stats || { total: 0, ok: 0, low: 0, out: 0 })
     } catch (error) {
-      console.error('Erreur récupération stock:', error)
+      logger.error('Erreur récupération stock:', error)
     } finally {
       setLoading(false)
     }
@@ -60,7 +61,7 @@ export function useStockData() {
       await fetchStockData()
       return true
     } catch (error) {
-      console.error('Erreur sauvegarde stock:', error)
+      logger.error('Erreur sauvegarde stock:', error)
       toast.error(tCommon('saveError'))
       return false
     }

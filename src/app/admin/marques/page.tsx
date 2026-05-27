@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
@@ -81,7 +82,7 @@ export default function MarquesPage() {
         toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
-      console.error('Erreur sauvegarde brand:', error)
+      logger.error('Erreur sauvegarde brand:', error)
       toast.error(tCommon('saveError'))
     }
   }
@@ -106,7 +107,7 @@ export default function MarquesPage() {
         toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
-      console.error('Erreur sauvegarde range:', error)
+      logger.error('Erreur sauvegarde range:', error)
       toast.error(tCommon('saveError'))
     }
   }
@@ -128,7 +129,7 @@ export default function MarquesPage() {
         toast.error(`${tCommon('deleteError')}: ${error.error}`)
       }
     } catch (error) {
-      console.error('Erreur suppression brand:', error)
+      logger.error('Erreur suppression brand:', error)
       toast.error(tCommon('deleteError'))
     }
   }
@@ -150,7 +151,7 @@ export default function MarquesPage() {
         toast.error(`${tCommon('deleteError')}: ${error.error}`)
       }
     } catch (error) {
-      console.error('Erreur suppression range:', error)
+      logger.error('Erreur suppression range:', error)
       toast.error(tCommon('deleteError'))
     }
   }

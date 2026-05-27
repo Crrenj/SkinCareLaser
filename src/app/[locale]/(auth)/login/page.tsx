@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -110,7 +111,7 @@ function LoginForm() {
         router.push(redirectPath)
       }
     } catch (err) {
-      console.error('Erreur login:', err)
+      logger.error('Erreur login:', err)
       setError('generic')
       setLoading(false)
       setRedirecting(false)

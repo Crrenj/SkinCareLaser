@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 export type RateLimitResult = {
@@ -18,7 +19,7 @@ export async function checkRateLimit(
   windowSec: number,
 ): Promise<RateLimitResult> {
   if (!supabaseAdmin) {
-    console.error('[rateLimit] supabaseAdmin null, fail-open')
+    logger.error('[rateLimit] supabaseAdmin null, fail-open')
     return { allowed: true, retryAfter: 0 }
   }
 
@@ -29,7 +30,7 @@ export async function checkRateLimit(
   })
 
   if (error) {
-    console.error('[rateLimit] RPC error, fail-open:', error.message)
+    logger.error('[rateLimit] RPC error, fail-open:', error.message)
     return { allowed: true, retryAfter: 0 }
   }
 

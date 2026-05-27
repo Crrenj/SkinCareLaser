@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -17,13 +18,13 @@ export async function GET() {
       .order('name', { ascending: true })
 
     if (error) {
-      console.error('Erreur récupération tags:', error)
+      logger.error('Erreur récupération tags:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(tags || [])
   } catch (error) {
-    console.error('Erreur API tags:', error)
+    logger.error('Erreur API tags:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Erreur création tag:', error)
+      logger.error('Erreur création tag:', error)
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Ce tag existe déjà' }, { status: 409 })
       }
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Erreur API création tag:', error)
+    logger.error('Erreur API création tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

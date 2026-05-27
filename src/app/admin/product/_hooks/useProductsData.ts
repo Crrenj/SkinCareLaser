@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Brand, Product, Tag, TagType } from '../_lib/types'
@@ -43,7 +44,7 @@ export function useProductsData({ page, search }: Args) {
         }
       }
     } catch (error) {
-      console.error('Erreur chargement produits:', error)
+      logger.error('Erreur chargement produits:', error)
       setProducts([])
       setTotalPages(1)
     } finally {
@@ -69,7 +70,7 @@ export function useProductsData({ page, search }: Args) {
         if (Array.isArray(tagsData)) setTags(tagsData)
         if (Array.isArray(typesData)) setTagTypes(typesData)
       } catch (error) {
-        console.error('Erreur chargement marques/tags:', error)
+        logger.error('Erreur chargement marques/tags:', error)
       }
     }
     fetchStatic()

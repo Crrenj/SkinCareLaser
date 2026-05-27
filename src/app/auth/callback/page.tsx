@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -29,7 +30,7 @@ function AuthCallbackInner() {
         // 1. Erreurs OAuth explicites (state mismatch, user refused, etc.)
         const providerError = searchParams.get('error')
         if (providerError) {
-          console.error('OAuth provider error:', providerError, searchParams.get('error_description'))
+          logger.error('OAuth provider error:', providerError, searchParams.get('error_description'))
           router.replace(`/login?error=oauth_failed`)
           return
         }
@@ -39,7 +40,7 @@ function AuthCallbackInner() {
         if (code) {
           const { error: exchErr } = await supabase.auth.exchangeCodeForSession(code)
           if (exchErr) {
-            console.error('exchangeCodeForSession error:', exchErr)
+            logger.error('exchangeCodeForSession error:', exchErr)
             router.replace(`/login?error=oauth_failed`)
             return
           }
@@ -51,7 +52,7 @@ function AuthCallbackInner() {
 
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         if (sessionError) {
-          console.error('Callback session error:', sessionError)
+          logger.error('Callback session error:', sessionError)
           router.replace('/login?error=session_error')
           return
         }
@@ -65,7 +66,7 @@ function AuthCallbackInner() {
         const { data: isAdminRpc, error: rpcError } = await supabase.rpc('is_user_admin', {
           check_user_id: session.user.id,
         })
-        if (rpcError) console.warn('Callback is_user_admin error:', rpcError)
+        if (rpcError) logger.warn('Callback is_user_admin error:', rpcError)
 
         const isAdmin =
           isAdminRpc === true ||
@@ -110,7 +111,7 @@ function AuthCallbackInner() {
         await new Promise((resolve) => setTimeout(resolve, 200))
         router.replace(destination)
       } catch (err) {
-        console.error('Callback unexpected error:', err)
+        logger.error('Callback unexpected error:', err)
         router.replace('/login?error=callback_error')
       }
     }

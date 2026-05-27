@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
@@ -41,7 +42,7 @@ export async function PATCH(request: NextRequest) {
     .eq('id', user.id)
 
   if (error) {
-    console.error('[/api/account/preferences]', error)
+    logger.error('[/api/account/preferences]', error)
     return NextResponse.json({ error: 'update_failed' }, { status: 500 })
   }
 

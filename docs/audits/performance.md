@@ -1,10 +1,10 @@
 # Audit Performance
 
-Dernière mise à jour : 2026-05-26
+Dernière mise à jour : 2026-05-27
 
 ## Synthèse
 
-**Note : B (7/10) — améliorations majeures, quelques risques à scale**
+**Note : B+ (8/10) — pagination serveur, ISR, images optimisées**
 
 L'architecture App Router + ISR est maintenant correctement configurée. Toutes les pages publiques ont un `revalidate` approprié, toutes les images utilisent `next/image`, et les indexes DB couvrent les FK critiques.
 
@@ -41,10 +41,8 @@ Tous migrés vers `next/image`. 0 `<img>` brut restant.
 ### ~~4. Middleware admin 2 round-trips~~ ⚠️ PARTIEL
 Middleware fait toujours `getUser()` + RPC `is_user_admin`. Atténué par le fix `useRef` qui évite les re-checks au focus tab.
 
-### 5. CatalogueClient — 500+ produits SSR — ❌ OUVERT (High)
-`CatalogueClient` reçoit tous les produits actifs (353 actuellement, limite 500 en DB).
-Le filtrage est 100% client-side. Le HTML initial est massif.
-**Recommandation** : pagination serveur ou infinite scroll avec limit(24) + offset.
+### ~~5. CatalogueClient — 500+ produits SSR~~ ✅ FERMÉ (session 2026-05-27)
+Pagination serveur implémentée : filtrage, tri, comptage facetté côté serveur. 24 produits/page. Filtres URL-driven (?brand=, ?need=, ?sort=, ?page=). CatalogueClient 513→230 LOC. Nouveau `lib/catalogueFilters.ts`.
 
 ### 6. Pas de code splitting client — ❌ OUVERT (Medium)
 Aucun `next/dynamic` avec `ssr: false` détecté. Les composants client (cart, account, wishlist) sont hydratés même si non visibles.
@@ -73,7 +71,7 @@ Désinstallé.
 
 ## Recommandations
 
-1. **(High)** Paginer CatalogueClient côté serveur (24 produits/page)
+1. ~~**(High)** Paginer CatalogueClient~~ ✅ (24/page, filtres serveur)
 2. **(Medium)** Code-split les composants lourds client-only (drawers, modales)
 3. **(Low)** Configurer `Cache-Control` headers pour les routes ISR
 4. **(Low)** Lazy-load les images galerie PDP (seules les 2-3 premières eager)

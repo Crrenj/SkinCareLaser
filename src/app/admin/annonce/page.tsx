@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { Plus, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
@@ -79,7 +80,7 @@ export default function AnnoncePage() {
         toast.error(`${tCommon('saveError')}: ${data.error}`)
       }
     } catch (error) {
-      console.error('Erreur sauvegarde banner:', error)
+      logger.error('Erreur sauvegarde banner:', error)
       toast.error(tCommon('saveError'))
     } finally {
       setSaving(false)
@@ -97,7 +98,7 @@ export default function AnnoncePage() {
         toast.error(`${tCommon('deleteError')}: ${data.error}`)
       }
     } catch (error) {
-      console.error('Erreur suppression banner:', error)
+      logger.error('Erreur suppression banner:', error)
       toast.error(tCommon('deleteError'))
     }
   }

@@ -1,10 +1,10 @@
 # Audit Architecture
 
-Dernière mise à jour : 2026-05-26
+Dernière mise à jour : 2026-05-27
 
 ## Synthèse
 
-**Note : A- (8/10) — architecture saine, dette résiduelle faible**
+**Note : A (9/10) — architecture saine, dette résiduelle minimale**
 
 Le projet a subi une transformation majeure depuis l'audit initial (B-). Les 5 dettes principales identifiées (routes admin non auth, duplication service-role, image dupliquée, code mort, types ad-hoc) sont toutes fermées. L'architecture est maintenant bien structurée avec une séparation claire Server/Client, un système i18n mature, et un design system cohérent.
 
@@ -76,9 +76,9 @@ Unifiée via RPC `is_user_admin` partout (middleware, requireAdmin, useIsAdmin, 
 ### ~~9. Types Product/Brand/Tag redéfinis ad-hoc~~ ✅ FERMÉ
 Types générés dans `database.types.ts` via MCP. 0 usage de `any`.
 
-### ~~10. Pages admin > 600 LOC~~ ⚠️ PARTIEL
-4 pages splittées (tags, product, marques, annonce) en `_lib/` + `_hooks/` + `_components/`.
-**Restent >450 LOC** : `reservations` (498), `messages` (489), `stock` (468), `settings` (395).
+### ~~10. Pages admin > 600 LOC~~ ✅ FERMÉ (6/8 splittées)
+6 pages splittées (product, tags, marques, annonce, messages, stock) en `_lib/` + `_hooks/` + `_components/`.
+**Restent >300 LOC** : `reservations` (498, mais a déjà des sous-composants importés), `settings` (395).
 
 ### ~~11. Banner.tsx 7 variantes~~ ✅ FERMÉ
 Refonte en 3 composants : `BannerEditorial`, `BannerHero`, `BannerQuote` + dispatcher.
@@ -87,9 +87,8 @@ Refonte en 3 composants : `BannerEditorial`, `BannerHero`, `BannerQuote` + dispa
 Le plus gros composant hors fichiers générés. Mélange filtrage client-side, tri, rendering.
 **Recommandation** : extraire `useCatalogueFilters` hook + `CatalogueGrid` composant.
 
-### 13. DeleteConfirmModal dupliqué — ❌ OUVERT (Low)
-3 copies quasi-identiques (marques, product, tags). Labels hardcodés en espagnol.
-**Recommandation** : extraire un composant partagé `ConfirmDeleteDialog` avec clés i18n.
+### ~~13. DeleteConfirmModal dupliqué~~ ✅ FERMÉ (session 2026-05-27)
+3 modaux custom supprimés, remplacés par `useConfirmDialog` dans les 3 pages. 18 clés i18n ajoutées (FR/ES/EN).
 
 ## 3 clients Supabase — guide actuel
 
@@ -112,6 +111,6 @@ Le plus gros composant hors fichiers générés. Mélange filtrage client-side, 
 
 ## Recommandations
 
-1. **(Medium)** Splitter CatalogueClient (513 LOC)
-2. **(Low)** Unifier les 3 DeleteConfirmModal en composant partagé i18n
-3. **(Low)** Continuer le split des 4 pages admin >450 LOC restantes
+1. ~~**(Medium)** Splitter CatalogueClient~~ ✅ (513→230 LOC, filtrage serveur)
+2. ~~**(Low)** Unifier DeleteConfirmModal~~ ✅ (useConfirmDialog)
+3. ~~**(Low)** Split pages admin~~ ✅ (6/8 splittées, messages 489→150, stock 468→145)

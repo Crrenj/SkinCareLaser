@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
@@ -24,7 +25,7 @@ export async function GET() {
     .eq('user_id', user.id)
 
   if (error) {
-    console.error('[/api/wishlist GET]', error)
+    logger.error('[/api/wishlist GET]', error)
     return NextResponse.json({ error: 'fetch_failed' }, { status: 500 })
   }
 
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .eq('product_id', productId)
     if (error) {
-      console.error('[/api/wishlist DELETE]', error)
+      logger.error('[/api/wishlist DELETE]', error)
       return NextResponse.json({ error: 'delete_failed' }, { status: 500 })
     }
     return NextResponse.json({ added: false })
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
     .insert({ user_id: user.id, product_id: productId })
 
   if (error) {
-    console.error('[/api/wishlist INSERT]', error)
+    logger.error('[/api/wishlist INSERT]', error)
     return NextResponse.json({ error: 'insert_failed' }, { status: 500 })
   }
 

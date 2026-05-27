@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -87,7 +88,7 @@ export async function GET(req: NextRequest) {
       totalCount: filteredItems.length,
     })
   } catch (error) {
-    console.error('Erreur récupération stock:', error)
+    logger.error('Erreur récupération stock:', error)
     const message = error instanceof Error ? error.message : 'Erreur lors de la récupération du stock'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -122,7 +123,7 @@ export async function PUT(req: NextRequest) {
     if (error) throw error
     return NextResponse.json({ success: true, product: data })
   } catch (error) {
-    console.error('Erreur mise à jour stock:', error)
+    logger.error('Erreur mise à jour stock:', error)
     const message = error instanceof Error ? error.message : 'Erreur lors de la mise à jour du stock'
     return NextResponse.json({ error: message }, { status: 500 })
   }

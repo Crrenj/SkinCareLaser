@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
@@ -74,7 +75,7 @@ export default function ProductPage() {
         toast.error(`${tCommon('saveError')}: ${error.error}`)
       }
     } catch (error) {
-      console.error('Erreur sauvegarde:', error)
+      logger.error('Erreur sauvegarde:', error)
       toast.error(tCommon('saveError'))
     }
   }
@@ -96,7 +97,7 @@ export default function ProductPage() {
         toast.error(`${tCommon('deleteError')}: ${error.error}`)
       }
     } catch (error) {
-      console.error('Erreur suppression:', error)
+      logger.error('Erreur suppression:', error)
       toast.error(tCommon('deleteError'))
     }
   }

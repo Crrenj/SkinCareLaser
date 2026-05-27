@@ -1,10 +1,10 @@
 # Audit Developer Experience
 
-Dernière mise à jour : 2026-05-26
+Dernière mise à jour : 2026-05-27
 
 ## Synthèse
 
-**Note : B+ (7.5/10) — DX solide avec quelques gaps en CI et deps**
+**Note : A- (8/10) — CI complet, SDKs à jour, DX solide**
 
 Amélioration majeure depuis 6/10 initial. TypeScript strict avec 0 erreur et 0 warning ESLint, pre-commit hooks actifs, CI sur PR/push, et un setup de test Playwright mature.
 
@@ -16,7 +16,7 @@ Amélioration majeure depuis 6/10 initial. TypeScript strict avec 0 erreur et 0 
 | **TypeScript** | ✅ STRICT | `strict: true`, **0 erreur tsc**, **0 `any`**, 0 `@ts-ignore` |
 | **Lint** | ✅ | **0 warning ESLint** (0 erreur) |
 | **Pre-commit** | ✅ | Husky + lint-staged → `eslint --fix --no-warn-ignored` sur TS/TSX stagés |
-| **CI** | ⚠️ | lint + tsc + vitest. **Manque E2E + build step** |
+| **CI** | ✅ | lint + tsc + vitest + **build** + **Playwright chromium** (needs secrets) |
 | **Tests unit** | ⚠️ | 1 fichier (8 tests auth). Pas de tests hooks/API/utils |
 | **Tests E2E** | ✅ | 11 specs Playwright, multi-navigateur (Chromium/Firefox/WebKit/mobile) |
 | **Documentation** | ✅ | `CLAUDE.md` exhaustif, `HANDOFF.md`, audits complets |
@@ -48,22 +48,14 @@ Husky + lint-staged configurés.
 ### ~~7. 35 `alert()` natifs~~ ✅ QUASI-FERMÉ
 31 `toast()` via sonner. **3 `alert()` restants** dans admin users/newsletter.
 
-### 8. E2E Playwright pas dans CI — ❌ OUVERT (High)
-Les 11 specs ne tournent qu'en local. Pas de workflow GitHub Actions pour Playwright.
-**Recommandation** : ajouter un job Playwright dans CI (avec `--project=chromium` pour la rapidité).
+### ~~8. E2E Playwright pas dans CI~~ ✅ FERMÉ (session 2026-05-27)
+Job Playwright chromium ajouté au CI avec upload artifacts. Nécessite 3 secrets GitHub configurés.
 
-### 9. Step `build` manquant dans CI — ❌ OUVERT (High)
-`npm run build` n'est pas vérifié en CI. Un build cassé peut passer les checks.
-**Recommandation** : ajouter `npm run build` au workflow.
+### ~~9. Step `build` manquant dans CI~~ ✅ FERMÉ (session 2026-05-27)
+`npm run build` ajouté au job CI principal.
 
-### 10. Supabase SDKs en retard — ❌ OUVERT (Medium)
-| Package | Version actuelle | Dernière |
-|---|---|---|
-| `@supabase/supabase-js` | 2.50.3 | 2.106+ |
-| `@supabase/ssr` | 0.6.1 | 0.10+ |
-
-44+ versions mineures de retard sur supabase-js. Corrections sécurité et perf manquées.
-**Recommandation** : mettre à jour progressivement (pas de breaking changes entre mineurs).
+### ~~10. Supabase SDKs en retard~~ ✅ FERMÉ (session 2026-05-27)
+supabase-js 2.50→2.106, ssr 0.6→0.10. 3 routes API corrigées pour les types plus stricts.
 
 ### 11. 126 `console.error/log` — ❌ OUVERT (Low)
 Pas de logger structuré (pino, winston). Pas de corrélation possible en prod.

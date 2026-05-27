@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import useSWR, { mutate } from 'swr'
 import { CartResponse, AddToCartRequest } from '@/types/cart'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
@@ -18,7 +19,7 @@ const fetcher = async (url: string): Promise<CartResponse> => {
     
     return response.json()
   } catch (error) {
-    console.error('Erreur lors de la récupération du panier:', error)
+    logger.error('Erreur lors de la récupération du panier:', error)
     throw error
   }
 }
@@ -111,7 +112,7 @@ export function useCart() {
       // Revalider avec les vraies données
       await refreshCart()
     } catch (error) {
-      console.error('Erreur ajout panier:', error)
+      logger.error('Erreur ajout panier:', error)
       // Revenir à l'état précédent en cas d'erreur
       await refreshCart()
       throw error
@@ -154,7 +155,7 @@ export function useCart() {
       // Revalider avec les vraies données
       await refreshCart()
     } catch (error) {
-      console.error('Erreur suppression panier:', error)
+      logger.error('Erreur suppression panier:', error)
       // Revenir à l'état précédent en cas d'erreur
       await refreshCart()
       throw error
@@ -205,7 +206,7 @@ export function useCart() {
       // Revalider avec les vraies données
       await refreshCart()
     } catch (error) {
-      console.error('Erreur mise à jour panier:', error)
+      logger.error('Erreur mise à jour panier:', error)
       // Revenir à l'état précédent en cas d'erreur
       await refreshCart()
       throw error
@@ -243,7 +244,7 @@ export function useCart() {
       // Revalider avec les vraies données
       await refreshCart()
     } catch (error) {
-      console.error('Erreur vidage panier:', error)
+      logger.error('Erreur vidage panier:', error)
       // Revenir à l'état précédent en cas d'erreur
       await refreshCart()
       throw error

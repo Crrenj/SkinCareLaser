@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from './supabaseServer'
 import { supabaseAdmin } from './supabaseAdmin'
@@ -31,7 +32,7 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
   } = await supabase.auth.getUser()
 
   if (userError && userError.name !== 'AuthSessionMissingError') {
-    console.error('requireAdmin getUser error:', userError.message)
+    logger.error('requireAdmin getUser error:', userError.message)
   }
 
   if (!user) {
@@ -62,7 +63,7 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
     .maybeSingle()
 
   if (adminError) {
-    console.error('requireAdmin admin lookup error:', adminError)
+    logger.error('requireAdmin admin lookup error:', adminError)
     return {
       ok: false,
       response: NextResponse.json({ error: 'Erreur serveur' }, { status: 500 }),

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
   // 23505 = unique violation → email déjà inscrit, on traite comme un succès
   // pour ne pas leak l'existence d'un compte. Toute autre erreur = 500.
   if (error && error.code !== '23505') {
-    console.error('[/api/newsletter]', error)
+    logger.error('[/api/newsletter]', error)
     return NextResponse.json({ error: 'insert_failed' }, { status: 500 })
   }
 
@@ -102,7 +103,7 @@ export async function GET() {
     .maybeSingle()
 
   if (error) {
-    console.error('[/api/newsletter GET]', error)
+    logger.error('[/api/newsletter GET]', error)
     return NextResponse.json({ error: 'select_failed' }, { status: 500 })
   }
 
@@ -130,7 +131,7 @@ export async function DELETE() {
     .eq('email', user.email.toLowerCase())
 
   if (error) {
-    console.error('[/api/newsletter DELETE]', error)
+    logger.error('[/api/newsletter DELETE]', error)
     return NextResponse.json({ error: 'delete_failed' }, { status: 500 })
   }
 

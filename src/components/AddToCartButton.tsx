@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { ShoppingCart, Check, Loader2, Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -45,7 +46,7 @@ export function AddToCartButton({
       setShowSuccess(true)
       setTimeout(() => setShowSuccess(false), 2000)
     } catch (error) {
-      console.error('Erreur ajout au panier:', error)
+      logger.error('Erreur ajout au panier:', error)
     } finally {
       setIsAdding(false)
     }

@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { SWRConfig } from 'swr'
 import { ReactNode } from 'react'
 
@@ -21,7 +22,7 @@ export function SWRProvider({ children }: SWRProviderProps) {
         focusThrottleInterval: 5000,
         loadingTimeout: 3000,
         onError: (error) => {
-          console.error('SWR Error:', error)
+          logger.error('SWR Error:', error)
         }
       }}
     >

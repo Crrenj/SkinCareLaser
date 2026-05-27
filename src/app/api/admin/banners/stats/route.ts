@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
       .eq('id', bannerId)
 
     if (updateError) {
-      console.error('Erreur lors de la mise à jour des statistiques:', updateError)
+      logger.error('Erreur lors de la mise à jour des statistiques:', updateError)
       return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
     }
 
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
       [column]: newCount,
     })
   } catch (error) {
-    console.error('Erreur dans POST /api/admin/banners/stats:', error)
+    logger.error('Erreur dans POST /api/admin/banners/stats:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

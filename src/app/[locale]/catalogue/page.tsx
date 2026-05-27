@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
@@ -107,7 +108,7 @@ export default async function Catalogue({
     .returns<TagItem[]>()
 
   if (pErr || tErr) {
-    console.error(pErr || tErr)
+    logger.error(pErr || tErr)
     return <p className="p-6">{t('loadError')}</p>
   }
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
 
   if (error) {
-    console.error('[admin/reservations] GET error:', error)
+    logger.error('[admin/reservations] GET error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -131,7 +132,7 @@ export async function PATCH(request: NextRequest) {
     .single()
 
   if (error) {
-    console.error('[admin/reservations] PATCH error:', error)
+    logger.error('[admin/reservations] PATCH error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

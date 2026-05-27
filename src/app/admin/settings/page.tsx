@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { Store, Truck, Loader2 } from 'lucide-react'
@@ -70,7 +71,7 @@ export default function SettingsPage() {
       toast.success('Paramètres sauvegardés')
       mutate(json, { revalidate: false })
     } catch (err) {
-      console.error('PATCH /api/admin/settings:', err)
+      logger.error('PATCH /api/admin/settings:', err)
       toast.error('Erreur réseau')
     } finally {
       setSaving(false)

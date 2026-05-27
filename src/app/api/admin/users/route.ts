@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   })
 
   if (usersErr) {
-    console.error('[/api/admin/users] listUsers error', usersErr)
+    logger.error('[/api/admin/users] listUsers error', usersErr)
     return NextResponse.json({ error: 'list_failed' }, { status: 500 })
   }
 

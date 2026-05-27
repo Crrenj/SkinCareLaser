@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
@@ -36,7 +37,7 @@ export function OAuthButtons({ intent = 'login', next = '/' }: OAuthButtonsProps
       },
     })
     if (error) {
-      console.error('OAuth error:', error)
+      logger.error('OAuth error:', error)
       setBusy(null)
     }
     // Sinon : redirection externe en cours, on laisse busy actif

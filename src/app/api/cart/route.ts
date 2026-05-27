@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
@@ -58,7 +59,7 @@ export async function GET() {
     })
 
     if (cartError) {
-      console.error('Erreur création panier:', cartError)
+      logger.error('Erreur création panier:', cartError)
       return NextResponse.json(
         { error: 'Erreur lors de la création du panier' },
         { status: 500 }
@@ -86,7 +87,7 @@ export async function GET() {
       .eq('cart_id', cartId)
 
     if (itemsError) {
-      console.error('Erreur récupération items:', itemsError)
+      logger.error('Erreur récupération items:', itemsError)
       return NextResponse.json(
         { error: 'Erreur lors de la récupération du panier' },
         { status: 500 }
@@ -154,7 +155,7 @@ export async function GET() {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Erreur API panier:', error)
+    logger.error('Erreur API panier:', error)
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }
@@ -220,7 +221,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (rpcError) {
-      console.error('Erreur RPC add_to_cart:', rpcError)
+      logger.error('Erreur RPC add_to_cart:', rpcError)
       return NextResponse.json(
         { error: 'Erreur lors de l\'ajout au panier' },
         { status: 500 }
@@ -229,7 +230,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erreur POST panier:', error)
+    logger.error('Erreur POST panier:', error)
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }
@@ -269,7 +270,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     if (rpcError) {
-      console.error('Erreur RPC remove_from_cart:', rpcError)
+      logger.error('Erreur RPC remove_from_cart:', rpcError)
       return NextResponse.json(
         { error: 'Erreur lors de la suppression' },
         { status: 500 }
@@ -278,7 +279,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erreur DELETE panier:', error)
+    logger.error('Erreur DELETE panier:', error)
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
@@ -58,7 +59,7 @@ export async function GET(request: NextRequest) {
       .returns<RawBestseller[]>()
 
     if (error) {
-      console.error('[/api/search bestsellers]', error)
+      logger.error('[/api/search bestsellers]', error)
       return NextResponse.json({ q: '', hits: [], error: 'search_failed' }, { status: 500 })
     }
 
@@ -98,7 +99,7 @@ export async function GET(request: NextRequest) {
     .returns<RawHit[]>()
 
   if (error) {
-    console.error('[/api/search]', error)
+    logger.error('[/api/search]', error)
     return NextResponse.json({ q, hits: [], error: 'search_failed' }, { status: 500 })
   }
 

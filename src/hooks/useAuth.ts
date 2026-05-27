@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useCart } from './useCart'
@@ -15,11 +16,11 @@ export function useAuth() {
       try {
         const res = await fetch('/api/cart/merge', { method: 'POST' })
         if (!res.ok) {
-          console.error('Erreur fusion panier:', res.status)
+          logger.error('Erreur fusion panier:', res.status)
         }
         await refreshCart()
       } catch (error) {
-        console.error('Erreur lors de la fusion du panier:', error)
+        logger.error('Erreur lors de la fusion du panier:', error)
       }
     }
 
@@ -27,7 +28,7 @@ export function useAuth() {
       try {
         await refreshCart()
       } catch (error) {
-        console.error('Erreur lors de la déconnexion:', error)
+        logger.error('Erreur lors de la déconnexion:', error)
       }
     }
 

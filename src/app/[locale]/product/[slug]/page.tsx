@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import type { Metadata } from 'next'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getTranslations } from 'next-intl/server'
@@ -178,7 +179,7 @@ export default async function ProductPage({
     .single<RawProduct>()
 
   if (pErr || !prodRaw) {
-    if (pErr) console.error('Product fetch error:', pErr)
+    if (pErr) logger.error('Product fetch error:', pErr)
     notFound()
   }
 

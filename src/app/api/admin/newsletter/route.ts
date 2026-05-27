@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
 
   if (error) {
-    console.error('[/api/admin/newsletter] select error', error)
+    logger.error('[/api/admin/newsletter] select error', error)
     return NextResponse.json({ error: 'select_failed' }, { status: 500 })
   }
 

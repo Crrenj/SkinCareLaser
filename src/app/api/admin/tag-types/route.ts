@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -19,13 +20,13 @@ export async function GET() {
       .order('created_at', { ascending: true })
 
     if (error) {
-      console.error('Erreur récupération types de tags:', error)
+      logger.error('Erreur récupération types de tags:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json(tagTypes || [])
   } catch (error) {
-    console.error('Erreur API types de tags:', error)
+    logger.error('Erreur API types de tags:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (typeError) {
-      console.error('Erreur création type de tag:', typeError)
+      logger.error('Erreur création type de tag:', typeError)
       if (typeError.code === '23505') {
         return NextResponse.json({ error: 'Ce type existe déjà' }, { status: 409 })
       }
@@ -69,14 +70,14 @@ export async function POST(request: NextRequest) {
         })
 
       if (tagError) {
-        console.error('Erreur création tag initial:', tagError)
+        logger.error('Erreur création tag initial:', tagError)
         // On ne retourne pas d'erreur car le type a été créé avec succès
       }
     }
 
     return NextResponse.json(tagType)
   } catch (error) {
-    console.error('Erreur API création type de tag:', error)
+    logger.error('Erreur API création type de tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

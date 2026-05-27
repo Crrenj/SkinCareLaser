@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useCart } from '@/hooks/useCart'
@@ -63,7 +64,7 @@ export default function ProductClient({
     try {
       await addToCart(product.id, quantity)
     } catch (error) {
-      console.error('Erreur ajout au panier:', error)
+      logger.error('Erreur ajout au panier:', error)
     }
   }
 

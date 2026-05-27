@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { BannerData } from '../_lib/types'
@@ -21,10 +22,10 @@ export function useBannersData() {
       if (res.ok) {
         setBanners(data.banners || [])
       } else {
-        console.error('Erreur fetch banners:', data.error)
+        logger.error('Erreur fetch banners:', data.error)
       }
     } catch (error) {
-      console.error('Erreur fetch banners:', error)
+      logger.error('Erreur fetch banners:', error)
     } finally {
       setLoading(false)
     }
@@ -51,7 +52,7 @@ export function useBannersData() {
           toast.error('Erreur lors de la mise à jour: ' + data.error)
         }
       } catch (error) {
-        console.error('Erreur toggle active:', error)
+        logger.error('Erreur toggle active:', error)
       }
     },
     [banners, refresh],
@@ -84,7 +85,7 @@ export function useBannersData() {
         ])
         await refresh()
       } catch (error) {
-        console.error('Erreur swap positions:', error)
+        logger.error('Erreur swap positions:', error)
       }
     },
     [banners, refresh],

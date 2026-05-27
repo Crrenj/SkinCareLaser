@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -45,13 +46,13 @@ export async function GET(request: NextRequest) {
     const { data: banners, error } = await query
 
     if (error) {
-      console.error('Erreur lors de la récupération des bannières:', error)
+      logger.error('Erreur lors de la récupération des bannières:', error)
       return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
     }
 
     return NextResponse.json({ banners })
   } catch (error) {
-    console.error('Erreur dans GET /api/admin/banners:', error)
+    logger.error('Erreur dans GET /api/admin/banners:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -128,13 +129,13 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Erreur lors de la création de la bannière:', error)
+      logger.error('Erreur lors de la création de la bannière:', error)
       return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 })
     }
 
     return NextResponse.json({ banner }, { status: 201 })
   } catch (error) {
-    console.error('Erreur dans POST /api/admin/banners:', error)
+    logger.error('Erreur dans POST /api/admin/banners:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -197,13 +198,13 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Erreur lors de la mise à jour de la bannière:', error)
+      logger.error('Erreur lors de la mise à jour de la bannière:', error)
       return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
     }
 
     return NextResponse.json({ banner })
   } catch (error) {
-    console.error('Erreur dans PUT /api/admin/banners:', error)
+    logger.error('Erreur dans PUT /api/admin/banners:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -226,13 +227,13 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabaseAdmin.from('banners').delete().eq('id', id)
 
     if (error) {
-      console.error('Erreur lors de la suppression de la bannière:', error)
+      logger.error('Erreur lors de la suppression de la bannière:', error)
       return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 })
     }
 
     return NextResponse.json({ message: 'Bannière supprimée avec succès' })
   } catch (error) {
-    console.error('Erreur dans DELETE /api/admin/banners:', error)
+    logger.error('Erreur dans DELETE /api/admin/banners:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

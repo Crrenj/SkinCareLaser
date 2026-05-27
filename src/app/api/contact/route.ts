@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
@@ -68,7 +69,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      console.error('Erreur création message:', error)
+      logger.error('Erreur création message:', error)
       return NextResponse.json(
         { 
           success: false,
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Erreur API contact:', error)
+    logger.error('Erreur API contact:', error)
     return NextResponse.json(
       { 
         success: false,
@@ -144,14 +145,14 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Erreur récupération messages utilisateur:', error)
+      logger.error('Erreur récupération messages utilisateur:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ messages })
 
   } catch (error) {
-    console.error('Erreur API GET contact:', error)
+    logger.error('Erreur API GET contact:', error)
     return NextResponse.json(
       { error: 'Erreur serveur' },
       { status: 500 }

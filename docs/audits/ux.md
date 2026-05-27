@@ -1,10 +1,10 @@
 # Audit UX / Product
 
-Dernière mise à jour : 2026-05-26
+Dernière mise à jour : 2026-05-27
 
 ## Synthèse
 
-**Note : B (7/10) — expérience cohérente, quelques optimisations perf restantes**
+**Note : B+ (7.5/10) — expérience cohérente, catalogue paginé serveur**
 
 Amélioration massive depuis 4/10 initial. Les 3 frictions majeures (tunnel d'achat cassé, catalogue limité à 100 produits, incohérence visuelle) sont toutes résolues. Le site est maintenant un catalogue dermo-cosmétique fonctionnel avec réservation click & collect, wishlist, recherche live, et i18n complet.
 
@@ -54,10 +54,8 @@ Rate limit ajouté. La validation email reste côté RPC mais le formulaire fonc
 ### ~~6. Dropdown langue non fonctionnel~~ ✅ FERMÉ
 `LocaleSwitcher` fonctionnel desktop + mobile. Admin : cookie-based switcher in-place.
 
-### 7. Filtres catalogue 100% client-side — ❌ OUVERT (Medium)
-Le filtrage, tri, et comptage se font en mémoire côté client sur les 353 produits.
-Acceptable à cette échelle mais pas scalable au-delà de ~500 produits.
-**Recommandation** : migrer vers filtrage serveur avec query params pour le scale.
+### ~~7. Filtres catalogue 100% client-side~~ ✅ FERMÉ (session 2026-05-27)
+Filtrage, tri, comptage facetté et pagination migrés côté serveur. 24 produits/page. Filtres URL-driven.
 
 ### ~~8. Homepage vide~~ ✅ FERMÉ
 7 sections data-driven. Bestsellers via `v_bestsellers`, besoins via `tags.featured_on_home`, marques live.
@@ -71,9 +69,8 @@ Table RLS + API + heart ProductCard + PDP + page `/favoris`.
 ### ~~11. `alert()` natifs~~ ✅ QUASI-FERMÉ
 31 toasts via sonner. **3 `alert()` restants** (admin users/newsletter).
 
-### 12. 3 `alert()` restants — ❌ OUVERT (Low)
-`UsersClient.tsx` (2) + `NewsletterClient.tsx` (1).
-**Recommandation** : migrer vers `toast.error()`.
+### ~~12. 3 `alert()` restants~~ ✅ FERMÉ (session 2026-05-27)
+0 alert() restant.
 
 ### ~~13-14. Autres findings~~ ✅ FERMÉS
 
@@ -102,6 +99,6 @@ Table RLS + API + heart ProductCard + PDP + page `/favoris`.
 
 ## Recommandations
 
-1. **(Medium)** Migrer les filtres catalogue vers le serveur pour le scale
-2. **(Low)** Migrer les 3 derniers `alert()` vers toasts
+1. ~~**(Medium)** Filtres catalogue serveur~~ ✅
+2. ~~**(Low)** 3 derniers alert()~~ ✅
 3. **(Low)** Ajouter des landing pages éditorial pour les marques populaires (contenu)

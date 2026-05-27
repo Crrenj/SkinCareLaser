@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
@@ -88,7 +89,7 @@ async function adminAuthMiddleware(request: NextRequest) {
       error,
     } = await supabase.auth.getUser()
     if (error && error.name !== 'AuthSessionMissingError') {
-      console.error('Middleware getUser error:', error.message)
+      logger.error('Middleware getUser error:', error.message)
     }
 
     if (!user) {
@@ -112,7 +113,7 @@ async function adminAuthMiddleware(request: NextRequest) {
       return NextResponse.redirect(redirectUrl)
     }
   } catch (e) {
-    console.error('Middleware error:', e)
+    logger.error('Middleware error:', e)
     const redirectUrl = new URL('/login', request.url)
     redirectUrl.searchParams.set('error', 'middleware_error')
     return NextResponse.redirect(redirectUrl)

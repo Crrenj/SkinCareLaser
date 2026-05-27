@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import ProfileEditForm from '@/components/ProfileEditForm'
@@ -43,7 +44,7 @@ export default async function ProfilePage({
     .maybeSingle()
 
   if (error) {
-    console.error('[profile] fetch error:', error)
+    logger.error('[profile] fetch error:', error)
   }
 
   const { required, from } = await searchParams

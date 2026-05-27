@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useState } from 'react'
 import { TagIcon } from '@heroicons/react/24/outline'
 import { iconMap } from '../_lib/icons'
@@ -39,10 +40,10 @@ export function useTagsData() {
         }))
         setTagCategories(grouped)
       } else {
-        console.error('Erreur chargement données tags:', typesData)
+        logger.error('Erreur chargement données tags:', typesData)
       }
     } catch (error) {
-      console.error('Erreur fetch tags:', error)
+      logger.error('Erreur fetch tags:', error)
     } finally {
       setLoading(false)
     }

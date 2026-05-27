@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -29,7 +30,7 @@ export async function PATCH(
       .single()
 
     if (error) {
-      console.error('Erreur mise à jour type de tag:', error)
+      logger.error('Erreur mise à jour type de tag:', error)
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Ce slug existe déjà' }, { status: 409 })
       }
@@ -38,7 +39,7 @@ export async function PATCH(
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Erreur API mise à jour type de tag:', error)
+    logger.error('Erreur API mise à jour type de tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -63,7 +64,7 @@ export async function DELETE(
       .limit(1)
 
     if (checkError) {
-      console.error('Erreur vérification tags:', checkError)
+      logger.error('Erreur vérification tags:', checkError)
       return NextResponse.json({ error: checkError.message }, { status: 500 })
     }
 
@@ -77,13 +78,13 @@ export async function DELETE(
     const { error } = await supabaseAdmin.from('tag_types').delete().eq('id', id)
 
     if (error) {
-      console.error('Erreur suppression type de tag:', error)
+      logger.error('Erreur suppression type de tag:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erreur API suppression type de tag:', error)
+    logger.error('Erreur API suppression type de tag:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

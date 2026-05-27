@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -24,7 +25,7 @@ export async function DELETE(
     .eq('id', id)
 
   if (error) {
-    console.error('[/api/admin/newsletter/[id]] delete error', error)
+    logger.error('[/api/admin/newsletter/[id]] delete error', error)
     return NextResponse.json({ error: 'delete_failed' }, { status: 500 })
   }
 

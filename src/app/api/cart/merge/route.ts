@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
@@ -24,7 +25,7 @@ export async function POST() {
   })
 
   if (error) {
-    console.error('[/api/cart/merge]', error)
+    logger.error('[/api/cart/merge]', error)
     return NextResponse.json({ error: 'merge_failed' }, { status: 500 })
   }
 

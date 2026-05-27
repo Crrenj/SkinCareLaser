@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
@@ -123,7 +124,7 @@ export default function SignupPage() {
           .eq('id', data.user.id)
 
         if (profileError) {
-          console.error('Erreur mise à jour profil:', profileError)
+          logger.error('Erreur mise à jour profil:', profileError)
         }
 
         setSuccess(true)
@@ -131,7 +132,7 @@ export default function SignupPage() {
       }
     } catch (err) {
       setError('generic')
-      console.error('Erreur signup:', err)
+      logger.error('Erreur signup:', err)
     } finally {
       setLoading(false)
     }

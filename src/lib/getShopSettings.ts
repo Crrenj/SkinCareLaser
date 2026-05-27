@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import 'server-only'
 import { cache } from 'react'
 import { createSupabaseServerClient } from './supabaseServer'
@@ -48,12 +49,12 @@ export const getShopSettings = cache(async (): Promise<ShopSettings> => {
       .single()
 
     if (error || !data) {
-      if (error) console.error('[getShopSettings]', error.message)
+      if (error) logger.error('[getShopSettings]', error.message)
       return FALLBACK
     }
     return data
   } catch (error) {
-    console.error('[getShopSettings] unexpected', error)
+    logger.error('[getShopSettings] unexpected', error)
     return FALLBACK
   }
 })

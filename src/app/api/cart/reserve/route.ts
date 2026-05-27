@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
@@ -25,7 +26,7 @@ export async function POST() {
   } = await supabase.auth.getSession()
 
   if (sessionError) {
-    console.error('[reserve] session error:', sessionError)
+    logger.error('[reserve] session error:', sessionError)
     return NextResponse.json(
       { success: false, error: 'Erreur de session', code: 'session_error' },
       { status: 500 },
@@ -51,7 +52,7 @@ export async function POST() {
     .maybeSingle()
 
   if (cartError) {
-    console.error('[reserve] cart lookup error:', cartError)
+    logger.error('[reserve] cart lookup error:', cartError)
     return NextResponse.json(
       { success: false, error: 'Erreur serveur', code: 'cart_lookup_error' },
       { status: 500 },
@@ -134,7 +135,7 @@ export async function POST() {
           { status: 400 },
         )
       default:
-        console.error('[reserve] RPC error:', rpcError)
+        logger.error('[reserve] RPC error:', rpcError)
         return NextResponse.json(
           {
             success: false,

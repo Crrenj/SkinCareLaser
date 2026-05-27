@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState, useEffect, useCallback } from 'react'
 import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
 import type { ContactMessage, MessageStats, StatusFilter } from '../_lib/types'
@@ -21,10 +22,10 @@ export function useMessagesData(statusFilter: StatusFilter) {
         setMessages(data.messages || [])
         setStats(data.stats)
       } else {
-        console.error('Erreur chargement messages:', data.error)
+        logger.error('Erreur chargement messages:', data.error)
       }
     } catch (error) {
-      console.error('Erreur:', error)
+      logger.error('Erreur:', error)
     } finally {
       setLoading(false)
     }
@@ -43,7 +44,7 @@ export function useMessagesData(statusFilter: StatusFilter) {
       })
       if (response.ok) loadMessages()
     } catch (error) {
-      console.error('Erreur marquer comme lu:', error)
+      logger.error('Erreur marquer comme lu:', error)
     }
   }
 
@@ -61,7 +62,7 @@ export function useMessagesData(statusFilter: StatusFilter) {
       if (response.ok) loadMessages()
       return response.ok
     } catch (error) {
-      console.error('Erreur changement statut:', error)
+      logger.error('Erreur changement statut:', error)
       return false
     }
   }
@@ -79,7 +80,7 @@ export function useMessagesData(statusFilter: StatusFilter) {
       if (response.ok) loadMessages()
       return response.ok
     } catch (error) {
-      console.error('Erreur suppression:', error)
+      logger.error('Erreur suppression:', error)
       return false
     }
   }

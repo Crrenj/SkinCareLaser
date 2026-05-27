@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -46,13 +47,13 @@ export async function PATCH(
       .from('admin_users')
       .upsert({ user_id: id }, { onConflict: 'user_id', ignoreDuplicates: true })
     if (error) {
-      console.error('[/api/admin/users/[id]] upsert error', error)
+      logger.error('[/api/admin/users/[id]] upsert error', error)
       return NextResponse.json({ error: 'upsert_failed' }, { status: 500 })
     }
   } else {
     const { error } = await supabaseAdmin.from('admin_users').delete().eq('user_id', id)
     if (error) {
-      console.error('[/api/admin/users/[id]] delete error', error)
+      logger.error('[/api/admin/users/[id]] delete error', error)
       return NextResponse.json({ error: 'delete_failed' }, { status: 500 })
     }
   }

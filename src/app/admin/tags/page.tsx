@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -95,7 +96,7 @@ export default function TagsPage() {
         toast.error(data.error || tCommon('saveError'))
       }
     } catch (error) {
-      console.error('Erreur sauvegarde tag:', error)
+      logger.error('Erreur sauvegarde tag:', error)
       toast.error(tCommon('saveError'))
     }
   }
@@ -132,7 +133,7 @@ export default function TagsPage() {
         toast.error(data.error || tCommon('saveError'))
       }
     } catch (error) {
-      console.error('Erreur sauvegarde type:', error)
+      logger.error('Erreur sauvegarde type:', error)
       toast.error(tCommon('saveError'))
     }
   }
@@ -154,7 +155,7 @@ export default function TagsPage() {
         toast.error(error.error || tCommon('deleteError'))
       }
     } catch (error) {
-      console.error('Erreur suppression tag:', error)
+      logger.error('Erreur suppression tag:', error)
       toast.error(tCommon('deleteError'))
     }
   }
@@ -176,7 +177,7 @@ export default function TagsPage() {
         toast.error(error.error || tCommon('deleteError'))
       }
     } catch (error) {
-      console.error('Erreur suppression type:', error)
+      logger.error('Erreur suppression type:', error)
       toast.error(tCommon('deleteError'))
     }
   }

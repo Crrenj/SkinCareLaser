@@ -1,5 +1,6 @@
 'use client'
 
+import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import type { Brand, Range } from '../_lib/types'
@@ -41,7 +42,7 @@ export function useBrandsData() {
         setRanges([])
       }
     } catch (error) {
-      console.error('Erreur fetch brands/ranges:', error)
+      logger.error('Erreur fetch brands/ranges:', error)
       setBrands([])
       setRanges([])
     } finally {

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest) {
     const { data: messages, error, count } = await query
 
     if (error) {
-      console.error('Erreur récupération messages:', error)
+      logger.error('Erreur récupération messages:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
       stats: statsData,
     })
   } catch (error) {
-    console.error('Erreur API messages:', error)
+    logger.error('Erreur API messages:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -89,13 +90,13 @@ export async function PATCH(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Erreur mise à jour message:', error)
+      logger.error('Erreur mise à jour message:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ message: data })
   } catch (error) {
-    console.error('Erreur API PATCH messages:', error)
+    logger.error('Erreur API PATCH messages:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
@@ -118,13 +119,13 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabaseAdmin.from('contact_messages').delete().eq('id', id)
 
     if (error) {
-      console.error('Erreur suppression message:', error)
+      logger.error('Erreur suppression message:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Erreur API DELETE messages:', error)
+    logger.error('Erreur API DELETE messages:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }
