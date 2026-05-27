@@ -101,12 +101,12 @@ La table `admin_users` est la **source de vérité unifiée** : middleware, `req
 - `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, `setup` (diag), `settings` (démo)
 
 **API** :
-- `src/app/api/admin/*` — **20 routes** service-role (toutes `requireAdmin()`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export)
+- `src/app/api/admin/*` — **20 routes** service-role (toutes `requireAdmin()`, toutes validées Zod via `src/lib/schemas.ts`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export)
 - `src/app/api/account/preferences` — PATCH auth-only (preferred_locale)
-- `src/app/api/cart/{,reserve}` — public (rate-limited pour reserve)
-- `src/app/api/contact` — public + rate limit (5/min/IP)
+- `src/app/api/cart/{,reserve,merge}` — public (rate-limited pour reserve, merge = httpOnly cookie server-side)
+- `src/app/api/contact` — public + rate limit (5/min/IP) + CSRF origin check
 - `src/app/api/search` — public ilike + mode `?bestsellers=1`
-- `src/app/api/newsletter` — POST publique (rate-limited) OU auth (re-sub depuis preferences) + GET/DELETE auth-only
+- `src/app/api/newsletter` — POST publique (rate-limited + CSRF) OU auth (re-sub depuis preferences) + GET/DELETE auth-only
 - `src/app/api/wishlist` — auth required
 - `src/app/auth/callback` — OAuth Supabase
 
@@ -140,11 +140,11 @@ Modèle (résumé) :
 - `newsletter_subscribers` (email UNIQUE, lang CHECK, RLS service-role only)
 - `rate_limit_buckets` (fixed-window pour /api/contact + /api/newsletter)
 - `shop_settings` (single-row `id = 1 CHECK`, RLS public SELECT + admin UPDATE via `is_user_admin`) — nom, contact, pickup, tarifs livraison, édité via `/admin/settings`
-- `orders` + `order_items` (legacy, pas branché — peut-être à supprimer)
+- ~~`orders` + `order_items`~~ — supprimées (migration `20260527110000`, 0 ligne, jamais branchées)
 - `banners` (sprint 2 : 3 variantes `editorial`/`hero`/`quote` + colonnes `direction`, `attribution_name/title/photo_url` ; legacy 6 types tolérés dans la colonne `text`), `contact_messages`
 - Vue `v_bestsellers` : tri produits par `sold_30d desc` + `is_featured desc` + `created_at desc`, consommée par home + nav-search fallback
 
-État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à stock=50, 100 DOP placeholder** (tous ont un `range_id`), 299 product_images, 36 tags, 844 product_tags, 1 admin, 1 row dans shop_settings.
+État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à stock=50, 100 DOP placeholder** (tous ont un `range_id`), 299 product_images, 36 tags, 844 product_tags, 1 admin, 1 row dans shop_settings. Tables `orders`/`order_items` supprimées (migration `20260527110000`). 28 RLS policies optimisées avec `(SELECT auth.uid())` + `is_user_admin` STABLE (migration `20260527100000`).
 
 ### i18n (next-intl)
 
@@ -170,7 +170,10 @@ Namespaces principaux dans `src/messages/*.json` :
 - `PageMeta.{home,catalogue,pharmacie,about,...}` — title + description SEO par page
 - `NavSearch` — recherche dropdown (placeholder, recents, popular, no-results, keyboard hints)
 - `Home.{hero,bestsellers,byNeed,brands,expertise,routine}` — sections home sprint 2
-- `Admin.{chrome,sidebar,crumbs,common,stockState,product,marques,stock,tags,messages,annonce}` — admin localisé (2026-05-26, ~130 clés) ; chrome + 4 pages catalogue + messages + annonce chrome. Restant à localiser : modaux d'édition + pages reservations/users/newsletter/settings/setup.
+- `Admin.{chrome,sidebar,crumbs,common,stockState,product,marques,stock,tags,messages,annonce}` — admin localisé (2026-05-26, ~130 clés)
+- `Admin.{modals.product,modals.brand,modals.range,modals.tag,modals.tagType,modals.banner}` — 6 modaux d'édition (2026-05-27, ~120 clés)
+- `Admin.{reservations,users,newsletter,settings,setup}` — 5 pages admin restantes (2026-05-27, ~150 clés). **Admin entièrement localisé FR/ES/EN (~400 clés).**
+- `Error` — error boundary (title, body, retry, home)
 
 ### Système de réservation (catalogue + click & collect)
 
@@ -385,12 +388,23 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 - Wishlist système complet (commits `e35b307` + `cd9ebd1`) : table `wishlists` RLS + `/api/wishlist` GET/POST toggle + `useWishlist` hook + `ProductCardHeart` + `PdpWishlistButton` fonctionnel + page `/favoris`
 - Migration consolidée sprint 2 (`cf8f581`) : 12 nouvelles colonnes products, tags.featured_on_home, 4 colonnes banners (direction + attribution_*), table wishlists + RLS, vue v_bestsellers, 7 indexes FK
 
-### Reste à faire
+### Fait ✅ (session 2026-05-27 soir — 19 tâches techniques, 17 commits `b00aa82`→`85fa6ad`)
 
-**Localisation admin (suite, gros morceau)** :
-- **Modaux d'édition** : `ProductFormModal`, `BrandFormModal`, `RangeFormModal`, `TagModal`, `TagTypeModal`, `TagDeleteModal`, `ProductDeleteModal`, `BannerFormModal`, `BannerDeleteModal` — labels de formulaire encore en espagnol/français.
-- **Pages admin non touchées** : `/admin/reservations` (498 LOC + sous-composants `components/admin/reservations/*`), `/admin/messages` chrome OK mais modal action labels à étendre si besoin, `/admin/users`, `/admin/newsletter`, `/admin/settings` (395 LOC), `/admin/setup` (210 LOC) — gardent leur copy actuelle.
-- Ajouter clés à `Admin.{reservations,users,newsletter,settings,setup}` quand on s'y attaque.
+**Sécurité (5)** : cookie `cart_id` httpOnly + `/api/cart/merge` server-side, CSRF origin check newsletter+contact (`src/lib/csrf.ts`), Zod validation sur 20 routes admin (`src/lib/schemas.ts`), CSP+Permissions-Policy headers, `(SELECT auth.uid())` dans 28 RLS policies + `is_user_admin` STABLE (migration `20260527100000`).
+
+**Accessibilité (2)** : `aria-invalid`+`aria-describedby` sur login/signup, `aria-live="polite"` newsletter. Error boundaries `error.tsx` sur `[locale]` + `admin` (namespace `Error` FR/ES/EN).
+
+**Architecture / DX (4)** : `src/lib/logger.ts` + 128 `console.error/warn` → `logger.error/warn` (49 fichiers). Drop `orders`+`order_items` (0 ligne) + `v_bestsellers` sans dépendance orders (migration `20260527110000`). CI `npm run typecheck`. Suppression 3 modaux orphelins (224 LOC).
+
+**SEO (2)** : JSON-LD `CollectionPage` sur `/catalogue` + `/marques`. `og:image` dynamique sur `/marques/[slug]` + `/besoins/[slug]`.
+
+**shop_settings SSR (2)** : confirmation réservation lit pickup depuis `getShopSettings()`. Footer (async Server Component) et CartEmpty lisent WhatsApp depuis DB.
+
+**i18n admin complet (2, ~270 clés)** : 6 modaux d'édition + 5 pages admin + sous-composants (UsersClient, NewsletterClient) — namespaces `Admin.{modals.*,reservations,users,newsletter,settings,setup}`. **L'admin est entièrement localisé FR/ES/EN.**
+
+**Nouvelle dépendance** : `zod` (validation API).
+
+### Reste à faire
 
 **Sprint 3 Admin Anuncios — refonte architecturale séparée** :
 Le design Sprint 3 propose une grille à 4 slots fixes (Hero / Banner / Card / Modal) avec previews CSS réelles + 5 status sémantiques + KPIs par slot (Impresiones / Clics / CTR). Notre schéma actuel `banners` (text type, position int) ne supporte pas cette structure. À envisager : enum strict `banner_slot_type` + tracking d'impressions/clics + dashboard analytics par slot.
@@ -399,11 +413,8 @@ Le design Sprint 3 propose une grille à 4 slots fixes (Hero / Banner / Card / M
 - Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
 - AggregateRating sur `ProductJsonLd` si système de reviews un jour
 - Investiguer la flakiness des tests Playwright `wishlist-anon` + `cart Suppression` en run unifié (passent isolés — probable cold-compile race)
-- **Lazy load des messages JSON par locale** : `request.ts` charge `import('../messages/${locale}.json')` à chaque requête — déjà côté Next.js `import()` dynamic donc OK, mais à vérifier sur la bande passante client si on rajoute beaucoup de clés.
-
-**Accessibilité** :
-- Audit contraste palette sand/clay (certains hover passent juste WCAG AA)
-- Standardisation CTAs `bg-blue-*` → palette sand/clay (audit UX #13 — visuel à valider). Update 2026-05-26 : `/admin/messages,annonce,product,marques,stock,tags` sont propres. Restent les pages admin non touchées et probablement quelques recoins (login, signup, …).
+- `metadata.openGraph.siteName` pourrait lire `shop_name` depuis `shop_settings`
+- **Lazy load des messages JSON par locale** : `request.ts` charge `import('../messages/${locale}.json')` à chaque requête — déjà côté Next.js `import()` dynamic donc OK, mais à vérifier sur la bande passante client (~1 616 clés/locale)
 
 **Contenu éditorial / About** :
 - Photos d'équipe réelles dans `AboutTeam.tsx` (silhouettes SVG génériques actuellement)
@@ -418,15 +429,10 @@ Le design Sprint 3 propose une grille à 4 slots fixes (Hero / Banner / Card / M
 - Saisie INCI / benefits / pharmacist_advice sur les 353 produits (colonnes prêtes, contenu à fournir)
 - Traductions ES/EN du contenu juridique `/legal/*` (FR uniquement actuellement)
 
-**Consommation `shop_settings` à finir** :
-- Tunnel réservation : `lib/shipping.ts` expose maintenant `PICKUP_LOCATION` (singleton) aligné sur les valeurs de `shop_settings`, mais c'est une constante figée — un changement admin de `shop_settings.pickup_*` ne se propage pas. Idéal : SSR la pickup info dans `ReservationClient` via `getShopSettings()`.
-- Footer + CartEmpty utilisent encore `NEXT_PUBLIC_WHATSAPP_NUMBER`
-- `metadata.openGraph.siteName` pourrait lire `shop_name` depuis settings
-
 **Hygiène long terme** :
 - Double opt-in newsletter (provider d'envoi : Resend/Postmark)
 - Audit Storage policies (2 buckets publics avec policy `select` large — flag Supabase advisor)
-- Refactor `auth.uid()` non wrappé dans `(SELECT auth.uid())` dans les policies RLS (perf, audit DB #3)
+- Code splitting client components (`next/dynamic`) pour CatalogueClient, ReservationClient
 - 4 fichiers untracked à la racine (`_audit-reservation.mjs`, `_audit-screenshots.mjs`, `_check-chips.mjs`, `_check-pagination.mjs`) — soit déplacer dans `scripts/`, soit gitignore, soit supprimer si plus utiles.
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
