@@ -5,6 +5,7 @@ import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
+import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
 import { useProductsData } from './_hooks/useProductsData'
 import {
   INITIAL_PRODUCT_FORM,
@@ -13,7 +14,6 @@ import {
 } from './_lib/types'
 import { ProductsTable } from './_components/ProductsTable'
 import { ProductFormModal } from './_components/ProductFormModal'
-import { ProductDeleteModal } from './_components/ProductDeleteModal'
 
 export default function ProductPage() {
   const t = useTranslations('Admin.product')
@@ -26,8 +26,8 @@ export default function ProductPage() {
 
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [deleteProductId, setDeleteProductId] = useState<string | null>(null)
   const [formData, setFormData] = useState<ProductFormState>(INITIAL_PRODUCT_FORM)
+  const { confirm, dialog } = useConfirmDialog()
 
   const openModal = (product?: Product) => {
     if (product) {
@@ -80,11 +80,17 @@ export default function ProductPage() {
   }
 
   const handleDelete = async (id: string) => {
+    const ok = await confirm(t('deleteConfirmBody'), {
+      title: t('deleteConfirmTitle'),
+      confirmLabel: tCommon('delete'),
+      cancelLabel: tCommon('cancel'),
+      tone: 'danger',
+    })
+    if (!ok) return
     try {
       const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
       if (res.ok) {
         refreshProducts()
-        setDeleteProductId(null)
       } else {
         const error = await res.json()
         toast.error(`${tCommon('deleteError')}: ${error.error}`)
@@ -139,7 +145,7 @@ export default function ProductPage() {
           loading={loading}
           tagTypes={tagTypes}
           onEdit={openModal}
-          onDelete={setDeleteProductId}
+          onDelete={handleDelete}
           page={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
@@ -158,11 +164,7 @@ export default function ProductPage() {
         onSubmit={handleSubmit}
       />
 
-      <ProductDeleteModal
-        productId={deleteProductId}
-        onCancel={() => setDeleteProductId(null)}
-        onConfirm={handleDelete}
-      />
+      {dialog}
     </>
   )
 }

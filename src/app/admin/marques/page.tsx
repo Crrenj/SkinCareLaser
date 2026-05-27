@@ -5,6 +5,7 @@ import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
+import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
 import { useBrandsData } from './_hooks/useBrandsData'
 import {
   INITIAL_BRAND_FORM,
@@ -18,7 +19,6 @@ import { BrandStatsCards } from './_components/BrandStatsCards'
 import { BrandsTable } from './_components/BrandsTable'
 import { BrandFormModal } from './_components/BrandFormModal'
 import { RangeFormModal } from './_components/RangeFormModal'
-import { DeleteConfirmModal } from './_components/DeleteConfirmModal'
 
 export default function MarquesPage() {
   const t = useTranslations('Admin.marques')
@@ -32,8 +32,7 @@ export default function MarquesPage() {
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null)
   const [editingRange, setEditingRange] = useState<Range | null>(null)
   const [brandLockedInRangeModal, setBrandLockedInRangeModal] = useState(false)
-  const [deleteBrandId, setDeleteBrandId] = useState<string | null>(null)
-  const [deleteRangeId, setDeleteRangeId] = useState<string | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   const [brandForm, setBrandForm] = useState<BrandFormState>(INITIAL_BRAND_FORM)
   const [rangeForm, setRangeForm] = useState<RangeFormState>(INITIAL_RANGE_FORM)
@@ -113,14 +112,20 @@ export default function MarquesPage() {
   }
 
   const handleBrandDelete = async (id: string) => {
+    const ok = await confirm(t('deleteBrandConfirmBody'), {
+      title: t('deleteBrandConfirmTitle'),
+      confirmLabel: tCommon('delete'),
+      cancelLabel: tCommon('cancel'),
+      tone: 'danger',
+    })
+    if (!ok) return
     try {
       const res = await fetch(`/api/admin/brands/${id}`, { method: 'DELETE' })
       if (res.ok) {
         refresh()
-        setDeleteBrandId(null)
       } else {
         const error = await res.json()
-        toast.error(`${tCommon('saveError')}: ${error.error}`)
+        toast.error(`${tCommon('deleteError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur suppression brand:', error)
@@ -129,14 +134,20 @@ export default function MarquesPage() {
   }
 
   const handleRangeDelete = async (id: string) => {
+    const ok = await confirm(t('deleteRangeConfirmBody'), {
+      title: t('deleteRangeConfirmTitle'),
+      confirmLabel: tCommon('delete'),
+      cancelLabel: tCommon('cancel'),
+      tone: 'danger',
+    })
+    if (!ok) return
     try {
       const res = await fetch(`/api/admin/ranges/${id}`, { method: 'DELETE' })
       if (res.ok) {
         refresh()
-        setDeleteRangeId(null)
       } else {
         const error = await res.json()
-        toast.error(`${tCommon('saveError')}: ${error.error}`)
+        toast.error(`${tCommon('deleteError')}: ${error.error}`)
       }
     } catch (error) {
       console.error('Erreur suppression range:', error)
@@ -191,10 +202,10 @@ export default function MarquesPage() {
           brands={filteredBrands}
           loading={loading}
           onEditBrand={openBrandModal}
-          onDeleteBrand={setDeleteBrandId}
+          onDeleteBrand={handleBrandDelete}
           onCreateRange={(brandId) => openRangeModal(undefined, brandId)}
           onEditRange={openRangeModal}
-          onDeleteRange={setDeleteRangeId}
+          onDeleteRange={handleRangeDelete}
         />
       </div>
 
@@ -218,23 +229,7 @@ export default function MarquesPage() {
         onSubmit={handleRangeSubmit}
       />
 
-      <DeleteConfirmModal
-        id={deleteBrandId}
-        title={t('deleteBrandConfirmTitle')}
-        description={t('deleteBrandConfirmBody')}
-        labelId="brand-delete-modal-title"
-        onCancel={() => setDeleteBrandId(null)}
-        onConfirm={handleBrandDelete}
-      />
-
-      <DeleteConfirmModal
-        id={deleteRangeId}
-        title={t('deleteRangeConfirmTitle')}
-        description={t('deleteRangeConfirmBody')}
-        labelId="range-delete-modal-title"
-        onCancel={() => setDeleteRangeId(null)}
-        onConfirm={handleRangeDelete}
-      />
+      {dialog}
     </>
   )
 }

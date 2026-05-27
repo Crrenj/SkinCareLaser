@@ -1434,7 +1434,9 @@
       "editAria": "Edit {name}",
       "editTitle": "Edit",
       "deleteAria": "Delete {name}",
-      "deleteTitle": "Delete"
+      "deleteTitle": "Delete",
+      "deleteConfirmTitle": "Delete product",
+      "deleteConfirmBody": "This product will be removed from the catalogue. You can recreate it manually."
     },
     "marques": {
       "title": "Brands",
@@ -1506,7 +1508,11 @@
       "emptyCategoryTitle": "No tags in this type.",
       "emptyCategoryCta": "Add the first one",
       "kpiTypes": "Types",
-      "kpiTags": "Tags"
+      "kpiTags": "Tags",
+      "deleteTagConfirmTitle": "Delete tag",
+      "deleteTagConfirmBody": "This tag will be removed from all associated products.",
+      "deleteTypeConfirmTitle": "Delete tag type",
+      "deleteTypeConfirmBody": "This type and all its tags will be deleted. Products will not be affected."
     },
     "messages": {
       "title": "Messages",

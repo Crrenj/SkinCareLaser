@@ -1434,7 +1434,9 @@
       "editAria": "Modifier {name}",
       "editTitle": "Modifier",
       "deleteAria": "Supprimer {name}",
-      "deleteTitle": "Supprimer"
+      "deleteTitle": "Supprimer",
+      "deleteConfirmTitle": "Supprimer le produit",
+      "deleteConfirmBody": "Ce produit sera supprimé du catalogue. Vous pourrez le recréer manuellement."
     },
     "marques": {
       "title": "Marques",
@@ -1506,7 +1508,11 @@
       "emptyCategoryTitle": "Aucune étiquette dans ce type.",
       "emptyCategoryCta": "Ajouter la première",
       "kpiTypes": "Types",
-      "kpiTags": "Étiquettes"
+      "kpiTags": "Étiquettes",
+      "deleteTagConfirmTitle": "Supprimer l'étiquette",
+      "deleteTagConfirmBody": "Cette étiquette sera retirée de tous les produits associés.",
+      "deleteTypeConfirmTitle": "Supprimer le type d'étiquette",
+      "deleteTypeConfirmBody": "Ce type et toutes ses étiquettes seront supprimés. Les produits ne seront pas affectés."
     },
     "messages": {
       "title": "Messages",

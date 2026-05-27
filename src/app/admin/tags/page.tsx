@@ -5,10 +5,10 @@ import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
+import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
 import { useTagsData } from './_hooks/useTagsData'
 import { generateSlug } from './_lib/icons'
 import type {
-  DeleteTarget,
   Tag,
   TagFormState,
   TagType,
@@ -18,7 +18,6 @@ import { TagStatsCards } from './_components/TagStatsCards'
 import { TagCategoryGrid } from './_components/TagCategoryGrid'
 import { TagModal } from './_components/TagModal'
 import { TagTypeModal } from './_components/TagTypeModal'
-import { TagDeleteModal } from './_components/TagDeleteModal'
 
 const INITIAL_TAG_FORM: TagFormState = { name: '', slug: '', tag_type_id: '' }
 const INITIAL_TYPE_FORM: TypeFormState = {
@@ -40,7 +39,7 @@ export default function TagsPage() {
   const [editingTag, setEditingTag] = useState<Tag | null>(null)
   const [editingType, setEditingType] = useState<TagType | null>(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
+  const { confirm, dialog } = useConfirmDialog()
 
   const [tagForm, setTagForm] = useState<TagFormState>(INITIAL_TAG_FORM)
   const [typeForm, setTypeForm] = useState<TypeFormState>(INITIAL_TYPE_FORM)
@@ -138,23 +137,46 @@ export default function TagsPage() {
     }
   }
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return
+  const handleDeleteTag = async (tagId: string) => {
+    const ok = await confirm(t('deleteTagConfirmBody'), {
+      title: t('deleteTagConfirmTitle'),
+      confirmLabel: tCommon('delete'),
+      cancelLabel: tCommon('cancel'),
+      tone: 'danger',
+    })
+    if (!ok) return
     try {
-      const url =
-        deleteTarget.type === 'tag'
-          ? `/api/admin/tags/${deleteTarget.id}`
-          : `/api/admin/tag-types/${deleteTarget.id}`
-      const res = await fetch(url, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/tags/${tagId}`, { method: 'DELETE' })
       if (res.ok) {
         refresh()
-        setDeleteTarget(null)
       } else {
         const error = await res.json()
         toast.error(error.error || tCommon('deleteError'))
       }
     } catch (error) {
-      console.error('Erreur suppression:', error)
+      console.error('Erreur suppression tag:', error)
+      toast.error(tCommon('deleteError'))
+    }
+  }
+
+  const handleDeleteType = async (typeId: string) => {
+    const ok = await confirm(t('deleteTypeConfirmBody'), {
+      title: t('deleteTypeConfirmTitle'),
+      confirmLabel: tCommon('delete'),
+      cancelLabel: tCommon('cancel'),
+      tone: 'danger',
+    })
+    if (!ok) return
+    try {
+      const res = await fetch(`/api/admin/tag-types/${typeId}`, { method: 'DELETE' })
+      if (res.ok) {
+        refresh()
+      } else {
+        const error = await res.json()
+        toast.error(error.error || tCommon('deleteError'))
+      }
+    } catch (error) {
+      console.error('Erreur suppression type:', error)
       toast.error(tCommon('deleteError'))
     }
   }
@@ -188,10 +210,10 @@ export default function TagsPage() {
           onEditType={(categoryId) =>
             openTypeModal(tagTypes.find((t) => t.id === categoryId))
           }
-          onDeleteType={(categoryId) => setDeleteTarget({ type: 'type', id: categoryId })}
+          onDeleteType={handleDeleteType}
           onCreateTag={(categoryId) => openTagModal(categoryId)}
           onEditTag={(categoryId, tag) => openTagModal(categoryId, tag)}
-          onDeleteTag={(tagId) => setDeleteTarget({ type: 'tag', id: tagId })}
+          onDeleteTag={handleDeleteTag}
         />
       </div>
 
@@ -215,11 +237,7 @@ export default function TagsPage() {
         onSubmit={handleTagSubmit}
       />
 
-      <TagDeleteModal
-        target={deleteTarget}
-        onCancel={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-      />
+      {dialog}
     </>
   )
 }
