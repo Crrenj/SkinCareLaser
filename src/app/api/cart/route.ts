@@ -24,9 +24,9 @@ async function resolveCartContext(): Promise<{
   if (!anonId) {
     anonId = crypto.randomUUID()
     cookieStore.set('cart_id', anonId, {
-      maxAge: 60 * 60 * 24 * 30, // 30 jours
+      maxAge: 60 * 60 * 24 * 30,
       sameSite: 'lax',
-      httpOnly: false, // accès client (legacy)
+      httpOnly: true,
     })
   }
   return { userId: null, anonId }

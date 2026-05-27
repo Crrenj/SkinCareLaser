@@ -13,21 +13,11 @@ export function useAuth() {
     // tout en respectant react-hooks/exhaustive-deps.
     const handleUserLogin = async () => {
       try {
-        const cartId = getCookie('cart_id')
-        if (!cartId) return
-        // Via RPC SECURITY DEFINER : la policy RLS UPDATE de carts exige
-        // auth.uid() = user_id, ce qui empêche le merge en mode direct
-        // (le cart cible a user_id IS NULL). La RPC valide auth.uid() puis
-        // bypass RLS pour reclaim ou fusionner le cart anonyme.
-        const { error } = await supabase.rpc('merge_anon_cart_to_user', {
-          p_anon_id: cartId,
-        })
-        if (error) {
-          console.error('Erreur fusion panier:', error)
-        } else {
-          deleteCookie('cart_id')
-          await refreshCart()
+        const res = await fetch('/api/cart/merge', { method: 'POST' })
+        if (!res.ok) {
+          console.error('Erreur fusion panier:', res.status)
         }
+        await refreshCart()
       } catch (error) {
         console.error('Erreur lors de la fusion du panier:', error)
       }
@@ -35,7 +25,6 @@ export function useAuth() {
 
     const handleUserLogout = async () => {
       try {
-        deleteCookie('cart_id')
         await refreshCart()
       } catch (error) {
         console.error('Erreur lors de la déconnexion:', error)
@@ -126,20 +115,4 @@ export function useAuth() {
   }
 }
 
-// Utilitaires pour les cookies
-function getCookie(name: string): string | null {
-  if (typeof document === 'undefined') return null
-  
-  const value = `; ${document.cookie}`
-  const parts = value.split(`; ${name}=`)
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift() || null
-  }
-  return null
-}
-
-function deleteCookie(name: string): void {
-  if (typeof document === 'undefined') return
-  
-  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`
-} 
+ 
