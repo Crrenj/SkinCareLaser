@@ -67,6 +67,9 @@ export const stockBody = z.object({
   stock: z.number().int().min(0, 'Le stock ne peut pas être négatif'),
 })
 
+const VALID_SLOTS = ['hero', 'banner', 'card', 'modal'] as const
+const VALID_STATUSES = ['draft', 'scheduled', 'active', 'paused', 'expired'] as const
+
 export const bannerCreate = z.object({
   title: z.string().min(1, 'title requis'),
   description: z.string().nullish(),
@@ -76,6 +79,8 @@ export const bannerCreate = z.object({
   banner_type: z.enum(VALID_BANNER_TYPES),
   position: z.number().int().optional(),
   is_active: z.boolean().optional(),
+  slot: z.enum(VALID_SLOTS).default('banner'),
+  status: z.enum(VALID_STATUSES).default('draft'),
   start_date: z.string().nullish(),
   end_date: z.string().nullish(),
   direction: z.enum(['left', 'right']).nullish(),
@@ -94,6 +99,8 @@ export const bannerUpdate = z.object({
   banner_type: z.enum(VALID_BANNER_TYPES).optional(),
   position: z.number().int().optional(),
   is_active: z.boolean().optional(),
+  slot: z.enum(VALID_SLOTS).optional(),
+  status: z.enum(VALID_STATUSES).optional(),
   start_date: z.string().nullish(),
   end_date: z.string().nullish(),
   direction: z.enum(['left', 'right']).nullish(),
@@ -142,4 +149,29 @@ export const uploadBody = z.object({
   file: z.string().min(1, 'file requis'),
   fileName: z.string().min(1, 'fileName requis'),
   contentType: z.string().min(1, 'contentType requis'),
+})
+
+export const postCreate = z.object({
+  title: z.string().min(1, 'title requis'),
+  slug: z.string().min(1, 'slug requis'),
+  excerpt: z.string().nullish(),
+  body: z.string().default(''),
+  cover_image_url: z.string().nullish(),
+  author_name: z.string().nullish(),
+  locale: z.enum(['fr', 'es', 'en']).default('fr'),
+  is_published: z.boolean().default(false),
+  published_at: z.string().nullish(),
+})
+
+export const postUpdate = z.object({
+  id: z.string().uuid('id requis'),
+  title: z.string().min(1).optional(),
+  slug: z.string().min(1).optional(),
+  excerpt: z.string().nullish(),
+  body: z.string().optional(),
+  cover_image_url: z.string().nullish(),
+  author_name: z.string().nullish(),
+  locale: z.enum(['fr', 'es', 'en']).optional(),
+  is_published: z.boolean().optional(),
+  published_at: z.string().nullish(),
 })

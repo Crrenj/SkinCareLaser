@@ -46,7 +46,9 @@ export type Database = {
           link_text: string | null
           link_url: string | null
           position: number
+          slot: Database["public"]["Enums"]["banner_slot"]
           start_date: string | null
+          status: Database["public"]["Enums"]["banner_status"]
           title: string
           updated_at: string | null
           view_count: number | null
@@ -67,7 +69,9 @@ export type Database = {
           link_text?: string | null
           link_url?: string | null
           position?: number
+          slot?: Database["public"]["Enums"]["banner_slot"]
           start_date?: string | null
+          status?: Database["public"]["Enums"]["banner_status"]
           title: string
           updated_at?: string | null
           view_count?: number | null
@@ -88,7 +92,9 @@ export type Database = {
           link_text?: string | null
           link_url?: string | null
           position?: number
+          slot?: Database["public"]["Enums"]["banner_slot"]
           start_date?: string | null
+          status?: Database["public"]["Enums"]["banner_status"]
           title?: string
           updated_at?: string | null
           view_count?: number | null
@@ -236,6 +242,7 @@ export type Database = {
       }
       newsletter_subscribers: {
         Row: {
+          confirmation_token: string | null
           confirmed_at: string | null
           created_at: string
           email: string
@@ -245,6 +252,7 @@ export type Database = {
           user_agent: string | null
         }
         Insert: {
+          confirmation_token?: string | null
           confirmed_at?: string | null
           created_at?: string
           email: string
@@ -254,6 +262,7 @@ export type Database = {
           user_agent?: string | null
         }
         Update: {
+          confirmation_token?: string | null
           confirmed_at?: string | null
           created_at?: string
           email?: string
@@ -264,83 +273,50 @@ export type Database = {
         }
         Relationships: []
       }
-      order_items: {
+      posts: {
         Row: {
+          author_name: string | null
+          body: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string | null
           id: string
-          order_id: string | null
-          product_id: string | null
-          quantity: number
-          unit_price: number | null
+          is_published: boolean
+          locale: string
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string
         }
         Insert: {
+          author_name?: string | null
+          body?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
           id?: string
-          order_id?: string | null
-          product_id?: string | null
-          quantity: number
-          unit_price?: number | null
+          is_published?: boolean
+          locale?: string
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string
         }
         Update: {
+          author_name?: string | null
+          body?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
           id?: string
-          order_id?: string | null
-          product_id?: string | null
-          quantity?: number
-          unit_price?: number | null
+          is_published?: boolean
+          locale?: string
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "v_bestsellers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      orders: {
-        Row: {
-          created_at: string | null
-          id: string
-          status: Database["public"]["Enums"]["order_status"] | null
-          total: number | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["order_status"] | null
-          total?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["order_status"] | null
-          total?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "orders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       product_images: {
         Row: {
@@ -895,6 +871,56 @@ export type Database = {
           usage: string | null
           volume: string | null
         }
+        Insert: {
+          benefits?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string | null
+          inci?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          name?: string | null
+          old_price?: number | null
+          pharmacist_advice?: string | null
+          pharmacist_name?: string | null
+          price?: number | null
+          skin_type?: string[] | null
+          slug?: string | null
+          sold_30d?: never
+          stock?: number | null
+          technical_pdf_url?: string | null
+          texture?: string | null
+          updated_at?: string | null
+          usage?: string | null
+          volume?: string | null
+        }
+        Update: {
+          benefits?: string[] | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string | null
+          inci?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          is_new?: boolean | null
+          name?: string | null
+          old_price?: number | null
+          pharmacist_advice?: string | null
+          pharmacist_name?: string | null
+          price?: number | null
+          skin_type?: string[] | null
+          slug?: string | null
+          sold_30d?: never
+          stock?: number | null
+          technical_pdf_url?: string | null
+          texture?: string | null
+          updated_at?: string | null
+          usage?: string | null
+          volume?: string | null
+        }
         Relationships: []
       }
     }
@@ -931,11 +957,7 @@ export type Database = {
       mark_message_as_read: { Args: { p_message_id: string }; Returns: boolean }
       merge_anon_cart_to_user: { Args: { p_anon_id: string }; Returns: string }
       remove_from_cart: {
-        Args: {
-          p_anon_id?: string
-          p_product_id: string
-          p_user_id?: string
-        }
+        Args: { p_anon_id?: string; p_product_id: string; p_user_id?: string }
         Returns: undefined
       }
       reorder_banners: {
@@ -944,6 +966,8 @@ export type Database = {
       }
     }
     Enums: {
+      banner_slot: "hero" | "banner" | "card" | "modal"
+      banner_status: "draft" | "scheduled" | "active" | "paused" | "expired"
       order_status: "pending" | "paid" | "shipped" | "completed" | "cancelled"
       reservation_status:
         | "pending"
@@ -1078,6 +1102,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      banner_slot: ["hero", "banner", "card", "modal"],
+      banner_status: ["draft", "scheduled", "active", "paused", "expired"],
       order_status: ["pending", "paid", "shipped", "completed", "cancelled"],
       reservation_status: [
         "pending",

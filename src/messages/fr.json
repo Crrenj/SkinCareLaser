@@ -1377,7 +1377,8 @@
       "navAnnounce": "Annonces",
       "navUsers": "Utilisateurs",
       "navNewsletter": "Newsletter",
-      "navSettings": "Configuration"
+      "navSettings": "Configuration",
+      "navBlog": "Blog"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1418,8 +1419,7 @@
       "create": "Créer",
       "required": "*",
       "saving": "Enregistrement…",
-      "active": "Actif",
-      "saving": "Enregistrement…"
+      "active": "Actif"
     },
     "modals": {
       "product": {
@@ -1812,6 +1812,34 @@
       "resourceGuide": "Guide complet du système admin",
       "resourceDocs": "Documentation Supabase - API Keys",
       "resourceTip": "Astuce : Ne partagez jamais votre clé de service !"
+    },
+    "blog": {
+      "title": "Blog",
+      "articles": "articles",
+      "newPost": "Nouvel article",
+      "empty": "Aucun article. Créez votre premier article de blog.",
+      "published": "Publié",
+      "draft": "Brouillon",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "createTitle": "Nouvel article",
+      "editTitle": "Modifier l'article",
+      "fieldTitle": "Titre",
+      "fieldSlug": "Slug URL",
+      "fieldLocale": "Langue",
+      "fieldAuthor": "Auteur",
+      "fieldExcerpt": "Extrait",
+      "fieldBody": "Contenu (HTML)",
+      "fieldCover": "Image de couverture (URL)",
+      "fieldPublished": "Publié",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "created": "Article créé",
+      "updated": "Article mis à jour",
+      "deleted": "Article supprimé",
+      "deleteError": "Erreur lors de la suppression",
+      "errorTitleSlug": "Le titre et le slug sont requis"
     }
   },
   "Error": {
@@ -1819,5 +1847,12 @@
     "body": "Une erreur inattendue s'est produite. Réessayez ou retournez à l'accueil.",
     "retry": "Réessayer",
     "home": "Accueil"
+  },
+  "Blog": {
+    "metaTitle": "Blog · FARMAU",
+    "metaDescription": "Conseils dermo-cosmétiques, nouveautés produits et actualités de votre pharmacie FARMAU.",
+    "heading": "Blog",
+    "subtitle": "Conseils, actualités et nouveautés dermo-cosmétiques",
+    "empty": "Aucun article pour le moment. Revenez bientôt !"
   }
 }

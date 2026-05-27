@@ -1377,7 +1377,8 @@
       "navAnnounce": "Announcements",
       "navUsers": "Users",
       "navNewsletter": "Newsletter",
-      "navSettings": "Settings"
+      "navSettings": "Settings",
+      "navBlog": "Blog"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1810,6 +1811,34 @@
       "resourceGuide": "Full admin system guide",
       "resourceDocs": "Supabase documentation - API Keys",
       "resourceTip": "Tip: Never share your service key!"
+    },
+    "blog": {
+      "title": "Blog",
+      "articles": "articles",
+      "newPost": "New article",
+      "empty": "No articles yet. Create your first blog post.",
+      "published": "Published",
+      "draft": "Draft",
+      "edit": "Edit",
+      "delete": "Delete",
+      "createTitle": "New article",
+      "editTitle": "Edit article",
+      "fieldTitle": "Title",
+      "fieldSlug": "URL slug",
+      "fieldLocale": "Language",
+      "fieldAuthor": "Author",
+      "fieldExcerpt": "Excerpt",
+      "fieldBody": "Content (HTML)",
+      "fieldCover": "Cover image (URL)",
+      "fieldPublished": "Published",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…",
+      "created": "Article created",
+      "updated": "Article updated",
+      "deleted": "Article deleted",
+      "deleteError": "Error deleting article",
+      "errorTitleSlug": "Title and slug are required"
     }
   },
   "Error": {
@@ -1817,5 +1846,12 @@
     "body": "An unexpected error occurred. Try again or go back to the homepage.",
     "retry": "Retry",
     "home": "Home"
+  },
+  "Blog": {
+    "metaTitle": "Blog · FARMAU",
+    "metaDescription": "Dermo-cosmetic advice, product news and updates from your FARMAU pharmacy.",
+    "heading": "Blog",
+    "subtitle": "Advice, news and dermo-cosmetic updates",
+    "empty": "No articles yet. Check back soon!"
   }
 }

@@ -8,6 +8,7 @@ import {
   Building2,
   ClipboardList,
   Cog,
+  FileText,
   Globe,
   Home,
   LogOut,
@@ -39,6 +40,7 @@ type NavItem = {
     | 'navReservations'
     | 'navMessages'
     | 'navAnnounce'
+    | 'navBlog'
     | 'navUsers'
     | 'navNewsletter'
     | 'navSettings'
@@ -84,6 +86,7 @@ const SECTIONS: Section[] = [
       },
       { href: '/admin/messages', labelKey: 'navMessages', icon: Mail, badgeKey: 'messages', badgeVariant: 'alert' },
       { href: '/admin/annonce', labelKey: 'navAnnounce', icon: Megaphone },
+      { href: '/admin/blog', labelKey: 'navBlog', icon: FileText },
     ],
   },
   {

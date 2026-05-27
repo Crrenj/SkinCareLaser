@@ -10,14 +10,24 @@ import { useBannersData } from './_hooks/useBannersData'
 import {
   INITIAL_BANNER_FORM,
   LEGACY_TO_NEW,
+  SLOT_LABELS,
   type BannerData,
   type BannerFormState,
+  type BannerSlot,
 } from './_lib/types'
 import { BannerStatsCards } from './_components/BannerStatsCards'
 import { BannersList } from './_components/BannersList'
 import { BannersPreview } from './_components/BannersPreview'
 import { BannerFormModal } from './_components/BannerFormModal'
 import { BannerDeleteModal } from './_components/BannerDeleteModal'
+
+const SLOT_TABS: Array<{ key: BannerSlot | 'all'; label: string }> = [
+  { key: 'all', label: 'Tous' },
+  ...(['hero', 'banner', 'card', 'modal'] as BannerSlot[]).map(s => ({
+    key: s,
+    label: SLOT_LABELS[s],
+  })),
+]
 
 export default function AnnoncePage() {
   const t = useTranslations('Admin.annonce')
@@ -30,6 +40,7 @@ export default function AnnoncePage() {
   const [deleteBannerId, setDeleteBannerId] = useState<string | null>(null)
   const [formData, setFormData] = useState<BannerFormState>(INITIAL_BANNER_FORM)
   const [saving, setSaving] = useState(false)
+  const [activeSlot, setActiveSlot] = useState<BannerSlot | 'all'>('all')
 
   const openModal = (banner?: BannerData) => {
     if (banner) {
@@ -46,6 +57,8 @@ export default function AnnoncePage() {
         banner_type: normalizedType,
         position: banner.position,
         is_active: banner.is_active,
+        slot: banner.slot ?? 'banner',
+        status: banner.status ?? 'draft',
         start_date: banner.start_date || '',
         end_date: banner.end_date || '',
         direction: inferredDirection,
@@ -55,7 +68,11 @@ export default function AnnoncePage() {
       })
     } else {
       setEditingBanner(null)
-      setFormData({ ...INITIAL_BANNER_FORM, position: banners.length + 1 })
+      setFormData({
+        ...INITIAL_BANNER_FORM,
+        position: banners.length + 1,
+        slot: activeSlot === 'all' ? 'banner' : activeSlot,
+      })
     }
     setShowModal(true)
   }
@@ -146,10 +163,34 @@ export default function AnnoncePage() {
 
       <div className="px-5 lg:px-8 py-6 flex flex-col gap-6">
         <BannerStatsCards banners={banners} />
+
+        {/* Slot filter tabs */}
+        <div className="flex items-center gap-2">
+          {SLOT_TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveSlot(tab.key)}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                activeSlot === tab.key
+                  ? 'bg-ink-900 text-sand-50'
+                  : 'bg-sand-50 text-ink-600 border border-sand-200 hover:bg-sand-100'
+              }`}
+            >
+              {tab.label}
+              <span className="ml-1.5 font-mono text-xs opacity-60">
+                {tab.key === 'all'
+                  ? banners.length
+                  : banners.filter(b => b.slot === tab.key).length}
+              </span>
+            </button>
+          ))}
+        </div>
+
         {previewMode && <BannersPreview banners={activeBanners} />}
         <BannersList
           banners={banners}
           loading={loading}
+          activeSlot={activeSlot}
           onMove={swapPositions}
           onToggleActive={toggleActive}
           onEdit={openModal}

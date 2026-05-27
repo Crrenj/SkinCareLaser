@@ -1,59 +1,59 @@
 'use client'
 
-import { EyeIcon } from '@heroicons/react/24/outline'
-import type { BannerData } from '../_lib/types'
+import { Eye, MousePointerClick, BarChart3, Layers } from 'lucide-react'
+import { SLOT_LABELS, type BannerData, type BannerSlot } from '../_lib/types'
 
 type BannerStatsCardsProps = {
   banners: BannerData[]
 }
 
+const SLOTS: BannerSlot[] = ['hero', 'banner', 'card', 'modal']
+
 export function BannerStatsCards({ banners }: BannerStatsCardsProps) {
-  const activeCount = banners.filter((b) => b.is_active).length
-  const totalViews = banners.reduce((sum, b) => sum + b.view_count, 0)
-  const totalClicks = banners.reduce((sum, b) => sum + b.click_count, 0)
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <Card label="Total Bannières" value={banners.length} badge="T" badgeBg="bg-blue-600" />
-      <Card
-        label="Bannières Actives"
-        value={activeCount}
-        icon={<EyeIcon className="h-8 w-8 text-green-600" />}
-      />
-      <Card label="Vues Totales" value={totalViews} badge="V" badgeBg="bg-purple-600" />
-      <Card label="Clics Totaux" value={totalClicks} badge="C" badgeBg="bg-orange-600" />
-    </div>
-  )
-}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {SLOTS.map(slot => {
+        const slotBanners = banners.filter(b => b.slot === slot)
+        const active = slotBanners.filter(b => b.status === 'active').length
+        const views = slotBanners.reduce((s, b) => s + (b.view_count ?? 0), 0)
+        const clicks = slotBanners.reduce((s, b) => s + (b.click_count ?? 0), 0)
+        const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) : '—'
 
-function Card({
-  label,
-  value,
-  badge,
-  badgeBg,
-  icon,
-}: {
-  label: string
-  value: number
-  badge?: string
-  badgeBg?: string
-  icon?: React.ReactNode
-}) {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
-          {icon ?? (
-            <div className={`h-8 w-8 ${badgeBg} rounded-full flex items-center justify-center`}>
-              <span className="text-white font-bold text-sm">{badge}</span>
+        return (
+          <article
+            key={slot}
+            className="rounded-xl bg-sand-50 border border-sand-200 p-5"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif text-lg text-ink-900">
+                {SLOT_LABELS[slot]}
+              </h3>
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                active > 0 ? 'bg-olive-100 text-olive-700' : 'bg-sand-200 text-ink-400'
+              }`}>
+                {active}/{slotBanners.length}
+              </span>
             </div>
-          )}
-        </div>
-        <div className="ml-4">
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-        </div>
-      </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <Eye className="mx-auto h-4 w-4 text-ink-400 mb-1" />
+                <p className="font-mono text-sm text-ink-900">{views.toLocaleString()}</p>
+                <p className="text-[10px] text-ink-400 font-mono uppercase">Vues</p>
+              </div>
+              <div>
+                <MousePointerClick className="mx-auto h-4 w-4 text-ink-400 mb-1" />
+                <p className="font-mono text-sm text-ink-900">{clicks.toLocaleString()}</p>
+                <p className="text-[10px] text-ink-400 font-mono uppercase">Clics</p>
+              </div>
+              <div>
+                <BarChart3 className="mx-auto h-4 w-4 text-ink-400 mb-1" />
+                <p className="font-mono text-sm text-ink-900">{ctr}%</p>
+                <p className="text-[10px] text-ink-400 font-mono uppercase">CTR</p>
+              </div>
+            </div>
+          </article>
+        )
+      })}
     </div>
   )
 }

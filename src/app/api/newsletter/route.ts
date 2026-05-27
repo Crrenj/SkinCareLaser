@@ -4,6 +4,8 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import { checkOrigin } from '@/lib/csrf'
+import { resend, FROM_EMAIL } from '@/lib/resend'
+import { randomBytes } from 'crypto'
 
 /**
  * /api/newsletter — gestion newsletter.
@@ -64,18 +66,58 @@ export async function POST(request: NextRequest) {
   const ip = getClientIp(request)
   const userAgent = request.headers.get('user-agent')?.slice(0, 500) ?? null
 
+  const useDoubleOptIn = !!resend && !!body.email
+
+  const confirmationToken = useDoubleOptIn
+    ? randomBytes(32).toString('hex')
+    : null
+
   const { error } = await supabaseAdmin.from('newsletter_subscribers').insert({
     email,
     lang,
     ip,
     user_agent: userAgent,
+    confirmed_at: useDoubleOptIn ? null : new Date().toISOString(),
+    confirmation_token: confirmationToken,
   })
 
-  // 23505 = unique violation → email déjà inscrit, on traite comme un succès
-  // pour ne pas leak l'existence d'un compte. Toute autre erreur = 500.
   if (error && error.code !== '23505') {
     logger.error('[/api/newsletter]', error)
     return NextResponse.json({ error: 'insert_failed' }, { status: 500 })
+  }
+
+  if (useDoubleOptIn && resend && confirmationToken && error?.code !== '23505') {
+    const baseUrl = request.headers.get('origin') ?? 'https://farmau.do'
+    const confirmUrl = `${baseUrl}/api/newsletter/confirm?token=${confirmationToken}`
+    try {
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: email,
+        subject: lang === 'es'
+          ? 'Confirma tu suscripción · FARMAU'
+          : lang === 'en'
+            ? 'Confirm your subscription · FARMAU'
+            : 'Confirmez votre inscription · FARMAU',
+        html: `
+          <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
+            <h1 style="font-size: 24px; margin-bottom: 16px;">FARMAU</h1>
+            <p style="font-size: 16px; line-height: 1.6; color: #333;">
+              ${lang === 'es'
+                ? 'Haz clic abajo para confirmar tu suscripción a nuestra newsletter.'
+                : lang === 'en'
+                  ? 'Click below to confirm your newsletter subscription.'
+                  : 'Cliquez ci-dessous pour confirmer votre inscription à notre newsletter.'}
+            </p>
+            <a href="${confirmUrl}"
+               style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: #6B5B4F; color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px;">
+              ${lang === 'es' ? 'Confirmar' : lang === 'en' ? 'Confirm' : 'Confirmer'}
+            </a>
+          </div>
+        `,
+      })
+    } catch (emailErr) {
+      logger.error('[/api/newsletter] resend error:', emailErr)
+    }
   }
 
   return NextResponse.json({ ok: true })

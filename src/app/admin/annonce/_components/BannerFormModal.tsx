@@ -3,7 +3,8 @@
 import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
-import type { BannerData, BannerFormState, BannerType } from '../_lib/types'
+import type { BannerData, BannerFormState, BannerSlot, BannerStatus, BannerType } from '../_lib/types'
+import { SLOT_LABELS, STATUS_LABELS } from '../_lib/types'
 
 type BannerFormModalProps = {
   open: boolean
@@ -111,6 +112,36 @@ export function BannerFormModal({
               {isNewType && (
                 <span className="text-[11.5px] text-ink-500 font-serif italic mt-1">{t(TYPE_HINT_KEYS[hintType])}</span>
               )}
+            </div>
+
+            {/* Slot + Status */}
+            <div className="grid grid-cols-2 gap-3 mb-[14px]">
+              <div className="flex flex-col gap-[6px]">
+                <label htmlFor="banner-slot" className={labelCls}>Slot</label>
+                <select
+                  id="banner-slot"
+                  value={form.slot}
+                  onChange={(e) => onFormChange({ ...form, slot: e.target.value as BannerSlot })}
+                  className={inputCls}
+                >
+                  {(Object.keys(SLOT_LABELS) as BannerSlot[]).map(s => (
+                    <option key={s} value={s}>{SLOT_LABELS[s]}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-[6px]">
+                <label htmlFor="banner-status" className={labelCls}>Status</label>
+                <select
+                  id="banner-status"
+                  value={form.status}
+                  onChange={(e) => onFormChange({ ...form, status: e.target.value as BannerStatus })}
+                  className={inputCls}
+                >
+                  {(Object.keys(STATUS_LABELS) as BannerStatus[]).map(s => (
+                    <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Content fields */}

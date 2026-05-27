@@ -2,7 +2,16 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
-import CartClient from '@/components/CartClient'
+import dynamic from 'next/dynamic'
+
+const CartClient = dynamic(() => import('@/components/CartClient'), {
+  loading: () => (
+    <div className="mx-auto max-w-3xl px-4 py-12 space-y-4">
+      <div className="h-8 w-40 rounded bg-sand-200 animate-pulse" />
+      <div className="h-48 w-full rounded bg-sand-200 animate-pulse" />
+    </div>
+  ),
+})
 import { getShopSettings, whatsappHref } from '@/lib/getShopSettings'
 
 export async function generateMetadata({

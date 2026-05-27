@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: '/livraison', priority: 0.5, changeFrequency: 'monthly' },
     { path: '/faq', priority: 0.5, changeFrequency: 'monthly' },
     { path: '/pharmacie', priority: 0.6, changeFrequency: 'monthly' },
+    { path: '/blog', priority: 0.7, changeFrequency: 'weekly' },
     { path: '/manifeste', priority: 0.4, changeFrequency: 'monthly' },
     { path: '/legal/mentions-legales', priority: 0.3, changeFrequency: 'yearly' },
     { path: '/legal/cgv', priority: 0.3, changeFrequency: 'yearly' },
@@ -101,5 +102,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   }))
 
-  return [...staticEntries, ...brandEntries, ...needEntries, ...productEntries]
+  // Blog posts
+  const { data: blogPosts } = await supabase
+    .from('posts')
+    .select('slug, updated_at')
+    .eq('is_published', true)
+
+  const blogEntries: MetadataRoute.Sitemap = (blogPosts ?? [])
+    .filter((p) => p.slug)
+    .map((p) => ({
+      url: `${BASE_URL}/${routing.defaultLocale}/blog/${p.slug}`,
+      lastModified: p.updated_at ? new Date(p.updated_at) : now,
+      changeFrequency: 'weekly',
+      priority: 0.6,
+      alternates: {
+        languages: Object.fromEntries(
+          routing.locales.map((loc) => [loc, `${BASE_URL}/${loc}/blog/${p.slug}`]),
+        ),
+      },
+    }))
+
+  return [...staticEntries, ...brandEntries, ...needEntries, ...productEntries, ...blogEntries]
 }

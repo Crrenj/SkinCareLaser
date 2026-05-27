@@ -3,8 +3,19 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
-import ReservationClient from './ReservationClient'
+import nextDynamic from 'next/dynamic'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+
+const ReservationClient = nextDynamic(() => import('./ReservationClient'), {
+  loading: () => (
+    <div className="mx-auto max-w-2xl px-4 py-12 space-y-4">
+      <div className="h-8 w-48 rounded bg-sand-200 animate-pulse" />
+      <div className="h-64 w-full rounded bg-sand-200 animate-pulse" />
+    </div>
+  ),
+})
+
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
   params,
@@ -19,8 +30,6 @@ export async function generateMetadata({
     robots: { index: false, follow: false },
   }
 }
-
-export const dynamic = 'force-dynamic'
 
 export default async function ReservationPage({
   params,

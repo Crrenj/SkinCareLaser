@@ -47,7 +47,7 @@ const BRAND_LINKS = [
   { key: 'about', href: '/a-propos' },
   { key: 'manifesto', href: '/manifeste' },
   { key: 'brands', href: '/marques' },
-  { key: 'blog', href: '/a-propos' },
+  { key: 'blog', href: '/blog' },
   { key: 'stores', href: '/pharmacie' },
 ] as const
 

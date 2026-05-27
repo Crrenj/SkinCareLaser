@@ -1377,7 +1377,8 @@
       "navAnnounce": "Anuncios",
       "navUsers": "Usuarios",
       "navNewsletter": "Newsletter",
-      "navSettings": "Configuración"
+      "navSettings": "Configuración",
+      "navBlog": "Blog"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1810,6 +1811,34 @@
       "resourceGuide": "Guía completa del sistema admin",
       "resourceDocs": "Documentación Supabase - API Keys",
       "resourceTip": "Consejo: ¡Nunca compartas tu clave de servicio!"
+    },
+    "blog": {
+      "title": "Blog",
+      "articles": "artículos",
+      "newPost": "Nuevo artículo",
+      "empty": "Sin artículos. Crea tu primer artículo de blog.",
+      "published": "Publicado",
+      "draft": "Borrador",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "createTitle": "Nuevo artículo",
+      "editTitle": "Editar artículo",
+      "fieldTitle": "Título",
+      "fieldSlug": "Slug URL",
+      "fieldLocale": "Idioma",
+      "fieldAuthor": "Autor",
+      "fieldExcerpt": "Extracto",
+      "fieldBody": "Contenido (HTML)",
+      "fieldCover": "Imagen de portada (URL)",
+      "fieldPublished": "Publicado",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "created": "Artículo creado",
+      "updated": "Artículo actualizado",
+      "deleted": "Artículo eliminado",
+      "deleteError": "Error al eliminar",
+      "errorTitleSlug": "El título y el slug son obligatorios"
     }
   },
   "Error": {
@@ -1817,5 +1846,12 @@
     "body": "Ocurrió un error inesperado. Intenta de nuevo o vuelve al inicio.",
     "retry": "Reintentar",
     "home": "Inicio"
+  },
+  "Blog": {
+    "metaTitle": "Blog · FARMAU",
+    "metaDescription": "Consejos dermo-cosméticos, novedades de productos y actualidad de tu farmacia FARMAU.",
+    "heading": "Blog",
+    "subtitle": "Consejos, actualidad y novedades dermo-cosméticas",
+    "empty": "No hay artículos por el momento. ¡Vuelve pronto!"
   }
 }

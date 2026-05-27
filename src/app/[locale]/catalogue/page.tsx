@@ -4,7 +4,20 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
-import CatalogueClient from '@/components/CatalogueClient'
+import dynamic from 'next/dynamic'
+
+const CatalogueClient = dynamic(() => import('@/components/CatalogueClient'), {
+  loading: () => (
+    <div className="mx-auto max-w-7xl px-4 py-12">
+      <div className="h-10 w-48 rounded bg-sand-200 animate-pulse mb-8" />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <div key={i} className="aspect-[4/5] rounded bg-sand-200 animate-pulse" />
+        ))}
+      </div>
+    </div>
+  ),
+})
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import {
   parseFilters,

@@ -4,7 +4,20 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
-import ProductClient from '@/components/ProductClient'
+import dynamic from 'next/dynamic'
+
+const ProductClient = dynamic(() => import('@/components/ProductClient'), {
+  loading: () => (
+    <div className="mx-auto max-w-7xl px-4 py-12 grid md:grid-cols-2 gap-8">
+      <div className="aspect-square rounded bg-sand-200 animate-pulse" />
+      <div className="space-y-4">
+        <div className="h-8 w-64 rounded bg-sand-200 animate-pulse" />
+        <div className="h-6 w-32 rounded bg-sand-200 animate-pulse" />
+        <div className="h-24 w-full rounded bg-sand-200 animate-pulse" />
+      </div>
+    </div>
+  ),
+})
 import { ProductJsonLd } from '@/components/pdp/ProductJsonLd'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { JSX } from 'react'
