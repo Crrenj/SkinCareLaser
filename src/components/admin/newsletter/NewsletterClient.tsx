@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Download, Search, Trash2, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 type Row = {
@@ -18,6 +19,8 @@ type Stats = { total: number; byLang: Record<string, number> }
 const LIMIT = 500
 
 export function NewsletterClient() {
+  const t = useTranslations('Admin.newsletter')
+  const tc = useTranslations('Admin.common')
   const [rows, setRows] = useState<Row[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -39,23 +42,23 @@ export function NewsletterClient() {
       setRows(data.subscribers ?? [])
       setStats(data.stats ?? null)
     } catch {
-      setError('Erreur de chargement')
+      setError(t('loadError'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     load(search, lang)
   }, [load, search, lang])
 
   const handleDelete = useCallback(async (row: Row) => {
-    if (!window.confirm(`Supprimer ${row.email} de la liste ?`)) return
+    if (!window.confirm(t('confirmDelete', { email: row.email }))) return
     setDeletingId(row.id)
     try {
       const res = await fetch(`/api/admin/newsletter/${row.id}`, { method: 'DELETE' })
       if (!res.ok) {
-        toast.error('Suppression échouée.')
+        toast.error(t('deleteFailed'))
         return
       }
       setRows((prev) => prev.filter((r) => r.id !== row.id))
@@ -70,7 +73,7 @@ export function NewsletterClient() {
     } finally {
       setDeletingId(null)
     }
-  }, [])
+  }, [t])
 
   const handleExportCsv = useCallback(() => {
     const params = new URLSearchParams({ format: 'csv', limit: '5000' })
@@ -83,7 +86,7 @@ export function NewsletterClient() {
     <div className="flex flex-col gap-5">
       {/* Stats header */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard label="Total" value={stats?.total ?? 0} />
+        <StatCard label={t('statTotal')} value={stats?.total ?? 0} />
         <StatCard label="FR" value={stats?.byLang.fr ?? 0} />
         <StatCard label="ES" value={stats?.byLang.es ?? 0} />
         <StatCard label="EN" value={stats?.byLang.en ?? 0} />
@@ -97,7 +100,7 @@ export function NewsletterClient() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar email…"
+            placeholder={t('searchPlaceholder')}
             className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
           />
         </div>
@@ -106,7 +109,7 @@ export function NewsletterClient() {
           onChange={(e) => setLang(e.target.value as typeof lang)}
           className="h-10 px-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
         >
-          <option value="all">Todos los idiomas</option>
+          <option value="all">{t('allLangs')}</option>
           <option value="fr">Français</option>
           <option value="es">Español</option>
           <option value="en">English</option>
@@ -117,7 +120,7 @@ export function NewsletterClient() {
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-md text-[12.5px] font-medium bg-clay-700 hover:bg-clay-800 text-sand-50 transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
-          Exportar CSV
+          {t('exportCsv')}
         </button>
       </div>
 
@@ -126,24 +129,24 @@ export function NewsletterClient() {
         {loading ? (
           <div className="flex items-center justify-center py-16 text-ink-500">
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Cargando…
+            {tc('loading')}
           </div>
         ) : error ? (
           <div className="py-16 text-center text-brick-600">{error}</div>
         ) : rows.length === 0 ? (
           <div className="py-16 text-center text-ink-500">
-            Ningún abonado para esta selección.
+            {t('emptySearch')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[13.5px]">
               <thead>
                 <tr className="bg-sand-100 text-left text-[11px] uppercase tracking-[0.12em] text-ink-500 font-semibold border-b border-sand-300">
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Idioma</th>
-                  <th className="px-4 py-3">Suscrito</th>
-                  <th className="px-4 py-3">Confirmado</th>
-                  <th className="px-4 py-3 text-right">Acción</th>
+                  <th className="px-4 py-3">{t('colEmail')}</th>
+                  <th className="px-4 py-3">{t('colLang')}</th>
+                  <th className="px-4 py-3">{t('colSubscribed')}</th>
+                  <th className="px-4 py-3">{t('colConfirmed')}</th>
+                  <th className="px-4 py-3 text-right">{t('colAction')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,7 +190,7 @@ export function NewsletterClient() {
                         ) : (
                           <Trash2 className="w-3 h-3" />
                         )}
-                        Supprimer
+                        {t('deleteBtn')}
                       </button>
                     </td>
                   </tr>
@@ -200,7 +203,7 @@ export function NewsletterClient() {
 
       {rows.length === LIMIT && (
         <p className="text-[12.5px] text-ink-500 italic">
-          Affichage limité à {LIMIT} lignes. Affinez le filtre pour voir le reste.
+          {t('limitHint', { limit: LIMIT })}
         </p>
       )}
     </div>

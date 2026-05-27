@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Download, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
@@ -22,6 +23,7 @@ import {
 const PAGE_SIZE = 25
 
 export default function ReservationsAdminPage() {
+  const t = useTranslations('Admin.reservations')
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -46,15 +48,15 @@ export default function ReservationsAdminPage() {
       if (filter !== 'all') params.set('status', filter)
       const res = await fetch(`/api/admin/reservations?${params}`)
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Error de carga')
+      if (!res.ok) throw new Error(json.error || t('errorLoad'))
       setReservations(json.reservations ?? [])
       setCounts(json.counts ?? {})
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error desconocido')
+      setError(e instanceof Error ? e.message : t('errorUnknown'))
     } finally {
       setLoading(false)
     }
-  }, [filter])
+  }, [filter, t])
 
   useEffect(() => {
     fetchData()
@@ -154,12 +156,12 @@ export default function ReservationsAdminPage() {
         if (!res.ok) throw new Error(json.error || 'Error')
         await fetchData()
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Error de actualización')
+        setError(e instanceof Error ? e.message : t('errorUpdate'))
       } finally {
         setBusyId(null)
       }
     },
-    [fetchData],
+    [fetchData, t],
   )
 
   const updateNote = useCallback(async (id: string, value: string) => {
@@ -170,29 +172,29 @@ export default function ReservationsAdminPage() {
     })
     if (!res.ok) {
       const json = await res.json().catch(() => ({}))
-      throw new Error(json.error || 'Error al guardar nota')
+      throw new Error(json.error || t('errorSaveNote'))
     }
     setReservations((prev) =>
       prev.map((r) => (r.id === id ? { ...r, admin_notes: value } : r)),
     )
-  }, [])
+  }, [t])
 
   const buildWhatsappLink = useCallback((r: Reservation) => {
     const phone = r.contact_phone.replace(/\D/g, '')
     const ref = buildReservationRef(r.id, r.created_at)
     const lines = [
-      `¡Hola ${r.contact_name || ''}!`.trim(),
+      t('whatsappHello', { name: r.contact_name || '' }).trim(),
       '',
-      `Te contactamos por tu reserva *#${ref}* en FARMAU.`,
+      t('whatsappIntro', { ref }),
       '',
       ...r.items.map((it) => `• ${it.quantity}× ${it.product_name}`),
       '',
-      `Total a coordinar: ${fmtDOP(r.total_price)} ${r.currency || DEFAULT_CURRENCY}.`,
+      t('whatsappTotal', { amount: fmtDOP(r.total_price), currency: r.currency || DEFAULT_CURRENCY }),
       '',
-      '¿Coordinamos el pago y la entrega?',
+      t('whatsappCta'),
     ]
     return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
-  }, [])
+  }, [t])
 
   const openWhatsapp = useCallback(
     (r: Reservation) => {
@@ -214,14 +216,14 @@ export default function ReservationsAdminPage() {
   const cancelReservation = useCallback(
     async (r: Reservation) => {
       const ok = await confirm(
-        '¿Cancelar esta reserva? Esta acción es irreversible.',
-        { title: 'Cancelar reserva', confirmLabel: 'Cancelar la reserva' },
+        t('cancelConfirm'),
+        { title: t('cancelTitle'), confirmLabel: t('cancelButton') },
       )
       if (!ok) return
       await updateStatus(r.id, 'cancelled')
       setExpandedId(null)
     },
-    [updateStatus, confirm],
+    [updateStatus, confirm, t],
   )
 
   const bulkAdvance = useCallback(async () => {
@@ -236,15 +238,15 @@ export default function ReservationsAdminPage() {
 
   const bulkCancel = useCallback(async () => {
     const ok = await confirm(
-      `¿Cancelar ${selectedRows.length} reservas? Esta acción es irreversible.`,
-      { title: 'Cancelar reservas', confirmLabel: 'Cancelar las reservas' },
+      t('bulkCancelConfirm', { count: selectedRows.length }),
+      { title: t('bulkCancelTitle'), confirmLabel: t('bulkCancelButton') },
     )
     if (!ok) return
     for (const r of selectedRows) {
       await updateStatus(r.id, 'cancelled')
     }
     setSelectedIds(new Set())
-  }, [selectedRows, updateStatus, confirm])
+  }, [selectedRows, updateStatus, confirm, t])
 
   const bulkWhatsapp = useCallback(() => {
     // Ouvre un onglet WhatsApp pour chaque sélection
@@ -259,10 +261,10 @@ export default function ReservationsAdminPage() {
       <PageHeader
         crumbs={[
           { label: 'Admin', href: '/admin' },
-          { label: 'Operaciones' },
-          { label: 'Reservas' },
+          { label: t('crumbOps') },
+          { label: t('title') },
         ]}
-        title={`Reservas`}
+        title={t('title')}
         actions={
           <>
             <button
@@ -270,22 +272,22 @@ export default function ReservationsAdminPage() {
               className="h-9 px-3.5 rounded-md text-[13px] border border-sand-300 bg-transparent text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors inline-flex items-center gap-1.5"
               onClick={() => {
                 if (typeof window === 'undefined') return
-                toast.info('Exportación CSV próximamente.')
+                toast.info(t('exportCsvSoon'))
               }}
             >
               <Download className="w-3.5 h-3.5" />
-              Exportar CSV
+              {t('exportCsv')}
             </button>
             <button
               type="button"
               className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-clay-800 text-sand-50 inline-flex items-center gap-1.5 transition-colors"
               onClick={() => {
                 if (typeof window === 'undefined') return
-                toast.info('Crear reserva manual próximamente.')
+                toast.info(t('newManualSoon'))
               }}
             >
               <Plus className="w-3.5 h-3.5" />
-              Nueva manual
+              {t('newManual')}
             </button>
           </>
         }
@@ -293,7 +295,7 @@ export default function ReservationsAdminPage() {
 
       {/* Sous-titre compteurs */}
       <div className="px-5 lg:px-8 pt-3 text-[12.5px] text-ink-500">
-        {totalCount} totales · {pendingCount} sin contactar
+        {t('countTotal', { count: totalCount })} · {t('countPending', { count: pendingCount })}
       </div>
 
       <FilterBar
@@ -330,7 +332,7 @@ export default function ReservationsAdminPage() {
             <Loader2 className="w-8 h-8 animate-spin text-clay-700" />
           </div>
         ) : pageRows.length === 0 ? (
-          <EmptyState onReset={() => {
+          <EmptyState t={t} onReset={() => {
             setSearch('')
             setFilter('all')
             setSort('newest')
@@ -351,11 +353,11 @@ export default function ReservationsAdminPage() {
         {!loading && pageRows.length > 0 && totalPages > 1 && (
           <div className="flex justify-between items-center px-5 lg:px-3 py-4 text-[12.5px] text-ink-700 border-t border-sand-200 bg-sand-50">
             <span>
-              Mostrando{' '}
-              <b className="font-semibold text-ink-900">
-                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, visible.length)}
-              </b>{' '}
-              de <b className="font-semibold text-ink-900">{visible.length}</b> reservas
+              {t('showing', {
+                from: (page - 1) * PAGE_SIZE + 1,
+                to: Math.min(page * PAGE_SIZE, visible.length),
+                total: visible.length,
+              })}
             </span>
             <Pagination page={page} totalPages={totalPages} onChange={setPage} />
           </div>
@@ -378,7 +380,7 @@ export default function ReservationsAdminPage() {
   )
 }
 
-function EmptyState({ onReset }: { onReset: () => void }) {
+function EmptyState({ t, onReset }: { t: (key: string, values?: Record<string, string | number>) => string; onReset: () => void }) {
   return (
     <div className="py-16 px-5 text-center flex flex-col items-center gap-3.5">
       <svg width="80" height="80" viewBox="0 0 120 120" aria-hidden>
@@ -404,20 +406,20 @@ function EmptyState({ onReset }: { onReset: () => void }) {
         </g>
       </svg>
       <h3 className="font-serif text-[26px] text-ink-900 m-0 leading-[1.1]">
-        Ninguna reserva{' '}
+        {t('emptyTitle')}{' '}
         <em className="not-italic text-clay-700" style={{ fontStyle: 'italic' }}>
-          coincide.
+          {t('emptyTitleEmphasis')}
         </em>
       </h3>
       <p className="text-[13px] text-ink-700 max-w-xs m-0 leading-[1.5]">
-        Prueba con otro estado, otro rango de fechas o limpia la búsqueda.
+        {t('emptyBody')}
       </p>
       <button
         type="button"
         onClick={onReset}
         className="mt-2 h-9 px-4 rounded-md text-[13px] border border-sand-300 bg-transparent text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors"
       >
-        Limpiar todo
+        {t('emptyReset')}
       </button>
     </div>
   )

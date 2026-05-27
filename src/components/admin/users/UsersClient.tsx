@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Search, Shield, ShieldOff, Mail, Phone, Globe, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 type Row = {
@@ -20,6 +21,8 @@ type Row = {
 const PER_PAGE = 50
 
 export function UsersClient() {
+  const t = useTranslations('Admin.users')
+  const tc = useTranslations('Admin.common')
   const [rows, setRows] = useState<Row[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -38,11 +41,11 @@ export function UsersClient() {
       const data = (await res.json()) as { users: Row[] }
       setRows(data.users ?? [])
     } catch {
-      setError('Erreur de chargement')
+      setError(t('loadError'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     load(page, search)
@@ -52,8 +55,8 @@ export function UsersClient() {
     async (row: Row) => {
       if (!window.confirm(
           row.isAdmin
-            ? `Retirer les droits admin à ${row.email} ?`
-            : `Promouvoir ${row.email} comme admin ?`,
+            ? t('confirmDemote', { email: row.email ?? '' })
+            : t('confirmPromote', { email: row.email ?? '' }),
         )) return
       setUpdatingId(row.id)
       try {
@@ -65,9 +68,9 @@ export function UsersClient() {
         if (!res.ok) {
           const json = (await res.json().catch(() => null)) as { error?: string } | null
           if (json?.error === 'cannot_demote_self') {
-            toast.error('Vous ne pouvez pas vous retirer les droits admin.')
+            toast.error(t('errorCannotDemoteSelf'))
           } else {
-            toast.error("La mise à jour a échoué.")
+            toast.error(t('errorUpdateFailed'))
           }
           return
         }
@@ -78,7 +81,7 @@ export function UsersClient() {
         setUpdatingId(null)
       }
     },
-    [],
+    [t],
   )
 
   const stats = useMemo(() => {
@@ -93,9 +96,9 @@ export function UsersClient() {
     <div className="flex flex-col gap-5">
       {/* Stats header */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-        <StatCard label="Usuarios (página)" value={stats.total} />
-        <StatCard label="Administradores" value={stats.admins} />
-        <StatCard label="Con teléfono" value={stats.withPhone} />
+        <StatCard label={t('statUsersPage')} value={stats.total} />
+        <StatCard label={t('statAdmins')} value={stats.admins} />
+        <StatCard label={t('statWithPhone')} value={stats.withPhone} />
       </div>
 
       {/* Search */}
@@ -108,7 +111,7 @@ export function UsersClient() {
             setPage(1)
             setSearch(e.target.value)
           }}
-          placeholder="Buscar email, nombre, teléfono…"
+          placeholder={t('searchPlaceholder')}
           className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
         />
       </div>
@@ -118,25 +121,25 @@ export function UsersClient() {
         {loading ? (
           <div className="flex items-center justify-center py-16 text-ink-500">
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Cargando…
+            {tc('loading')}
           </div>
         ) : error ? (
           <div className="py-16 text-center text-brick-600">{error}</div>
         ) : rows.length === 0 ? (
           <div className="py-16 text-center text-ink-500">
-            Ningún usuario para esta búsqueda.
+            {t('emptySearch')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[13.5px]">
               <thead>
                 <tr className="bg-sand-100 text-left text-[11px] uppercase tracking-[0.12em] text-ink-500 font-semibold border-b border-sand-300">
-                  <th className="px-4 py-3">Usuario</th>
-                  <th className="px-4 py-3">Contacto</th>
-                  <th className="px-4 py-3">Idioma</th>
-                  <th className="px-4 py-3">Creado</th>
-                  <th className="px-4 py-3">Última conexión</th>
-                  <th className="px-4 py-3 text-right">Rol</th>
+                  <th className="px-4 py-3">{t('colUser')}</th>
+                  <th className="px-4 py-3">{t('colContact')}</th>
+                  <th className="px-4 py-3">{t('colLang')}</th>
+                  <th className="px-4 py-3">{t('colCreated')}</th>
+                  <th className="px-4 py-3">{t('colLastLogin')}</th>
+                  <th className="px-4 py-3 text-right">{t('colRole')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,7 +190,7 @@ export function UsersClient() {
                       {formatDate(r.createdAt)}
                     </td>
                     <td className="px-4 py-3 align-top text-ink-700">
-                      {r.lastSignInAt ? formatDate(r.lastSignInAt) : <span className="text-ink-500 italic">Nunca</span>}
+                      {r.lastSignInAt ? formatDate(r.lastSignInAt) : <span className="text-ink-500 italic">{t('never')}</span>}
                     </td>
                     <td className="px-4 py-3 align-top text-right">
                       <button
@@ -207,7 +210,7 @@ export function UsersClient() {
                         ) : (
                           <ShieldOff className="w-3 h-3" />
                         )}
-                        {r.isAdmin ? 'Admin' : 'Promover'}
+                        {r.isAdmin ? t('admin') : t('promote')}
                       </button>
                     </td>
                   </tr>
@@ -220,7 +223,7 @@ export function UsersClient() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between text-[12.5px] text-ink-500">
-        <span>Página {page}</span>
+        <span>{t('pageLabel', { page })}</span>
         <div className="flex gap-2">
           <button
             type="button"
@@ -228,7 +231,7 @@ export function UsersClient() {
             disabled={page === 1 || loading}
             className="px-3 py-1.5 rounded-sm border border-sand-300 hover:bg-sand-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Anterior
+            {t('pagePrev')}
           </button>
           <button
             type="button"
@@ -236,7 +239,7 @@ export function UsersClient() {
             disabled={loading || rows.length < PER_PAGE}
             className="px-3 py-1.5 rounded-sm border border-sand-300 hover:bg-sand-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Siguiente
+            {t('pageNext')}
           </button>
         </div>
       </div>

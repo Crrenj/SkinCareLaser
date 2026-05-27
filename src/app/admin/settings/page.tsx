@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 import { Store, Truck, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 import type { Database } from '@/lib/database.types'
 
 type ShopSettings = Database['public']['Tables']['shop_settings']['Row']
@@ -18,6 +19,7 @@ const fetcher = async (url: string): Promise<ShopSettings> => {
 }
 
 export default function SettingsPage() {
+  const t = useTranslations('Admin.settings')
   const { data, mutate, isLoading, error } = useSWR<ShopSettings>(
     '/api/admin/settings',
     fetcher,
@@ -65,14 +67,14 @@ export default function SettingsPage() {
       })
       const json = await res.json()
       if (!res.ok) {
-        toast.error(json.error || 'Erreur de sauvegarde')
+        toast.error(json.error || t('saveError'))
         return
       }
-      toast.success('Paramètres sauvegardés')
+      toast.success(t('saveSuccess'))
       mutate(json, { revalidate: false })
     } catch (err) {
       logger.error('PATCH /api/admin/settings:', err)
-      toast.error('Erreur réseau')
+      toast.error(t('networkError'))
     } finally {
       setSaving(false)
     }
@@ -94,7 +96,7 @@ export default function SettingsPage() {
     return (
       <div className="p-8">
         <p className="text-red-700 bg-red-50 border border-red-200 rounded-md p-4 text-sm">
-          Impossible de charger les paramètres boutique.
+          {t('loadError')}
         </p>
       </div>
     )
@@ -104,9 +106,9 @@ export default function SettingsPage() {
     <form onSubmit={handleSave} className="p-8 max-w-4xl">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Paramètres boutique</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Mis à jour {new Date(form.updated_at).toLocaleString('fr-FR')}
+            {t('updatedAt', { date: new Date(form.updated_at).toLocaleDateString() })}
           </p>
         </div>
       </div>
@@ -119,13 +121,13 @@ export default function SettingsPage() {
               active={tab === 'shop'}
               onClick={() => setTab('shop')}
               icon={Store}
-              label="Boutique"
+              label={t('tabShop')}
             />
             <TabButton
               active={tab === 'shipping'}
               onClick={() => setTab('shipping')}
               icon={Truck}
-              label="Livraison & retrait"
+              label={t('tabShipping')}
             />
           </nav>
         </div>
@@ -134,17 +136,17 @@ export default function SettingsPage() {
         <div className="flex-1">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             {tab === 'shop' && (
-              <ShopTab form={form} update={update} />
+              <ShopTab form={form} update={update} t={t} />
             )}
             {tab === 'shipping' && (
-              <ShippingTab form={form} update={update} />
+              <ShippingTab form={form} update={update} t={t} />
             )}
           </div>
 
           {/* Sticky save bar */}
           {isDirty && (
             <div className="sticky bottom-4 mt-4 bg-ink-900 text-white rounded-lg shadow-lg p-4 flex items-center justify-between">
-              <span className="text-sm">Modifications non enregistrées</span>
+              <span className="text-sm">{t('unsavedChanges')}</span>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -152,7 +154,7 @@ export default function SettingsPage() {
                   disabled={saving}
                   className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 rounded-md disabled:opacity-50"
                 >
-                  Annuler
+                  {t('resetBtn')}
                 </button>
                 <button
                   type="submit"
@@ -160,7 +162,7 @@ export default function SettingsPage() {
                   className="px-4 py-2 text-sm font-medium bg-clay-700 hover:bg-clay-800 rounded-md disabled:opacity-50 inline-flex items-center gap-2"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Enregistrer
+                  {t('saveBtn')}
                 </button>
               </div>
             </div>
@@ -224,18 +226,19 @@ function Field({
 type TabProps = {
   form: ShopSettings
   update: <K extends keyof ShopSettings>(field: K, value: ShopSettings[K]) => void
+  t: ReturnType<typeof useTranslations<'Admin.settings'>>
 }
 
-function ShopTab({ form, update }: TabProps) {
+function ShopTab({ form, update, t }: TabProps) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">Identité & contacts</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('shopTitle')}</h2>
       <p className="text-sm text-gray-500 mb-6">
-        Affiché dans le footer, les pages /contact, /pharmacie, et les liens WhatsApp.
+        {t('shopHint')}
       </p>
 
       <div className="space-y-5">
-        <Field id="shop_name" label="Nom de la boutique">
+        <Field id="shop_name" label={t('shopName')}>
           <input
             id="shop_name"
             type="text"
@@ -246,7 +249,7 @@ function ShopTab({ form, update }: TabProps) {
           />
         </Field>
 
-        <Field id="shop_tagline" label="Tagline" hint="Phrase courte sous le logo, OG description par défaut.">
+        <Field id="shop_tagline" label={t('tagline')} hint={t('taglineHint')}>
           <input
             id="shop_tagline"
             type="text"
@@ -257,7 +260,7 @@ function ShopTab({ form, update }: TabProps) {
         </Field>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Field id="contact_email" label="Email de contact">
+          <Field id="contact_email" label={t('contactEmail')}>
             <input
               id="contact_email"
               type="email"
@@ -266,7 +269,7 @@ function ShopTab({ form, update }: TabProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
-          <Field id="contact_phone" label="Téléphone">
+          <Field id="contact_phone" label={t('contactPhone')}>
             <input
               id="contact_phone"
               type="tel"
@@ -279,8 +282,8 @@ function ShopTab({ form, update }: TabProps) {
 
         <Field
           id="whatsapp_number"
-          label="Numéro WhatsApp"
-          hint="Format international sans espaces (ex: +18094122468). Utilisé pour les liens wa.me/* des réservations."
+          label={t('whatsappNumber')}
+          hint={t('whatsappHint')}
         >
           <input
             id="whatsapp_number"
@@ -296,19 +299,19 @@ function ShopTab({ form, update }: TabProps) {
   )
 }
 
-function ShippingTab({ form, update }: TabProps) {
+function ShippingTab({ form, update, t }: TabProps) {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Tarifs de livraison</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('shippingTitle')}</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Affichés dans le tunnel de réservation à l&apos;étape « livraison » et sur la page /livraison.
+          {t('shippingHint')}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field
             id="shipping_santo_domingo"
-            label="Santo Domingo (DOP)"
-            hint="DN + Gran Santo Domingo · livraison 24-48h."
+            label={t('shippingSantoDomingo')}
+            hint={t('shippingSantoDomingoHint')}
           >
             <input
               id="shipping_santo_domingo"
@@ -325,8 +328,8 @@ function ShippingTab({ form, update }: TabProps) {
           </Field>
           <Field
             id="shipping_interior"
-            label="Interior del país (DOP)"
-            hint="Tout le reste du pays · livraison 3-5 jours."
+            label={t('shippingInterior')}
+            hint={t('shippingInteriorHint')}
           >
             <input
               id="shipping_interior"
@@ -345,12 +348,12 @@ function ShippingTab({ form, update }: TabProps) {
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Point de retrait</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('pickupTitle')}</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Affiché dans le tunnel et sur la page /pharmacie. Le retrait sur place est gratuit.
+          {t('pickupHint')}
         </p>
         <div className="space-y-5">
-          <Field id="pickup_name" label="Nom du point de retrait">
+          <Field id="pickup_name" label={t('pickupName')}>
             <input
               id="pickup_name"
               type="text"
@@ -359,7 +362,7 @@ function ShippingTab({ form, update }: TabProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
-          <Field id="pickup_address" label="Adresse complète">
+          <Field id="pickup_address" label={t('pickupAddress')}>
             <textarea
               id="pickup_address"
               rows={2}
@@ -369,17 +372,17 @@ function ShippingTab({ form, update }: TabProps) {
             />
           </Field>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Field id="pickup_hours" label="Horaires d'ouverture">
+            <Field id="pickup_hours" label={t('pickupHours')}>
               <input
                 id="pickup_hours"
                 type="text"
                 value={form.pickup_hours ?? ''}
                 onChange={(e) => update('pickup_hours', e.target.value)}
-                placeholder="Lun-Vie 6h30-17h · Sáb 8h-16h"
+                placeholder="Lun-Vie 6h30-17h · Sab 8h-16h"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
               />
             </Field>
-            <Field id="pickup_phone" label="Téléphone pharmacie">
+            <Field id="pickup_phone" label={t('pickupPhone')}>
               <input
                 id="pickup_phone"
                 type="tel"
