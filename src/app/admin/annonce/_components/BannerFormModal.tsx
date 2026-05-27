@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import type { BannerData, BannerFormState, BannerType } from '../_lib/types'
@@ -16,10 +17,10 @@ type BannerFormModalProps = {
 
 const NEW_TYPES: BannerType[] = ['editorial', 'hero', 'quote']
 
-const TYPE_HINTS: Record<'editorial' | 'hero' | 'quote', string> = {
-  editorial: 'Image + texte 2 colonnes, 320px. Pour mettre en avant un produit ou une gamme.',
-  hero: 'Plein-bleed avec overlay sombre, 480px. Pour le hero de la home ou une campagne.',
-  quote: 'Citation pharmacien sur fond ink-900, 220px. Pas de CTA, pas d image requise.',
+const TYPE_HINT_KEYS: Record<'editorial' | 'hero' | 'quote', string> = {
+  editorial: 'typeHintEditorial',
+  hero: 'typeHintHero',
+  quote: 'typeHintQuote',
 }
 
 const inputCls =
@@ -36,6 +37,8 @@ export function BannerFormModal({
   onSubmit,
   saving,
 }: BannerFormModalProps) {
+  const t = useTranslations('Admin.modals.banner')
+  const tc = useTranslations('Admin.common')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -62,15 +65,15 @@ export function BannerFormModal({
         <header className="flex items-start justify-between px-[22px] py-[18px] shrink-0">
           <div>
             <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
-              {editingBanner ? `Anuncios · ${form.banner_type}` : 'Anuncios · nuevo'}
+              {editingBanner ? t('eyebrowEdit', { slug: form.banner_type }) : t('eyebrowNew')}
             </span>
             <h3 id="annonce-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
-              {editingBanner ? form.title || 'Editar anuncio' : 'Nuevo anuncio'}
+              {editingBanner ? form.title || t('titleEdit') : t('titleNew')}
             </h3>
             {editingBanner && form.is_active && (
               <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-semibold tracking-[0.08em] uppercase bg-olive-50 text-olive-800 border border-olive-200">
                 <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-                Activo
+                {t('activeLabel')}
               </div>
             )}
           </div>
@@ -82,7 +85,7 @@ export function BannerFormModal({
           <div className="flex-1 overflow-y-auto px-[22px] py-[18px]">
             {/* Type selection */}
             <div className="flex flex-col gap-[6px] mb-[14px]">
-              <span className={labelCls}>Tipo de anuncio <span className="text-brick-600 ml-1">*</span></span>
+              <span className={labelCls}>{t('typeLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span></span>
               <div className="grid grid-cols-3 gap-2 mt-1">
                 {NEW_TYPES.map((type) => (
                   <label
@@ -106,17 +109,17 @@ export function BannerFormModal({
                 ))}
               </div>
               {isNewType && (
-                <span className="text-[11.5px] text-ink-500 font-serif italic mt-1">{TYPE_HINTS[hintType]}</span>
+                <span className="text-[11.5px] text-ink-500 font-serif italic mt-1">{t(TYPE_HINT_KEYS[hintType])}</span>
               )}
             </div>
 
             {/* Content fields */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">Contenido</div>
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionContent')}</div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="banner-title" className={labelCls}>
-                  Título <span className="text-brick-600 ml-1">*</span>
+                  {t('titleLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
                 </label>
                 <input
                   id="banner-title"
@@ -125,13 +128,13 @@ export function BannerFormModal({
                   value={form.title}
                   onChange={(e) => onFormChange({ ...form, title: e.target.value })}
                   className={`${inputCls} font-serif !text-[18px]`}
-                  placeholder="Verano sin compromisos"
+                  placeholder={t('titlePlaceholder')}
                 />
               </div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="banner-description" className={labelCls}>
-                  {form.banner_type === 'quote' ? 'Citación' : 'Subtítulo'}
+                  {form.banner_type === 'quote' ? t('quoteLabel') : t('descriptionLabel')}
                 </label>
                 <textarea
                   id="banner-description"
@@ -145,7 +148,7 @@ export function BannerFormModal({
 
               {form.banner_type === 'editorial' && (
                 <div className="flex flex-col gap-[6px] mb-[14px]">
-                  <span className={labelCls}>Dirección</span>
+                  <span className={labelCls}>{t('directionLabel')}</span>
                   <div className="grid grid-cols-2 gap-2 mt-1">
                     {(['left', 'right'] as const).map((dir) => (
                       <label
@@ -162,7 +165,7 @@ export function BannerFormModal({
                           onChange={() => onFormChange({ ...form, direction: dir })}
                           className="sr-only"
                         />
-                        Image à {dir === 'left' ? 'gauche' : 'droite'}
+                        {dir === 'left' ? t('directionImageLeft') : t('directionImageRight')}
                       </label>
                     ))}
                   </div>
@@ -171,21 +174,21 @@ export function BannerFormModal({
 
               {form.banner_type === 'quote' && (
                 <div className="bg-sand-100 rounded-xl p-[14px] mb-[14px] flex flex-col gap-3">
-                  <div className="font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-semibold">Attribution</div>
+                  <div className="font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-semibold">{t('sectionAttribution')}</div>
                   <div className="flex flex-col gap-[6px]">
-                    <label htmlFor="banner-attribution-name" className="text-[11.5px] text-ink-700">Nom</label>
+                    <label htmlFor="banner-attribution-name" className="text-[11.5px] text-ink-700">{t('attrNameLabel')}</label>
                     <input id="banner-attribution-name" type="text" value={form.attribution_name}
                       onChange={(e) => onFormChange({ ...form, attribution_name: e.target.value })}
                       className={inputCls} placeholder="Dra. María Rosa Cabrera" />
                   </div>
                   <div className="flex flex-col gap-[6px]">
-                    <label htmlFor="banner-attribution-title" className="text-[11.5px] text-ink-700">Titre</label>
+                    <label htmlFor="banner-attribution-title" className="text-[11.5px] text-ink-700">{t('attrTitleLabel')}</label>
                     <input id="banner-attribution-title" type="text" value={form.attribution_title}
                       onChange={(e) => onFormChange({ ...form, attribution_title: e.target.value })}
                       className={inputCls} placeholder="Pharmacienne, Santo Domingo" />
                   </div>
                   <div className="flex flex-col gap-[6px]">
-                    <label htmlFor="banner-attribution-photo" className="text-[11.5px] text-ink-700">Photo URL</label>
+                    <label htmlFor="banner-attribution-photo" className="text-[11.5px] text-ink-700">{t('attrPhotoLabel')}</label>
                     <input id="banner-attribution-photo" type="url" value={form.attribution_photo_url}
                       onChange={(e) => onFormChange({ ...form, attribution_photo_url: e.target.value })}
                       className={inputCls} placeholder="https://…" />
@@ -196,12 +199,12 @@ export function BannerFormModal({
 
             {/* Image + CTA */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">Imagen y enlace</div>
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionImageLink')}</div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="banner-image" className={labelCls}>
-                  URL de la imagen
-                  {form.banner_type === 'quote' && <span className="font-sans text-ink-500 text-[10px] normal-case tracking-normal ml-2">(opcional para quote)</span>}
+                  {t('imageUrlLabel')}
+                  {form.banner_type === 'quote' && <span className="font-sans text-ink-500 text-[10px] normal-case tracking-normal ml-2">({t('optionalForQuote')})</span>}
                 </label>
                 <input id="banner-image" type="url"
                   required={form.banner_type !== 'quote'}
@@ -212,13 +215,13 @@ export function BannerFormModal({
 
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="banner-link" className={labelCls}>CTA destino</label>
+                  <label htmlFor="banner-link" className={labelCls}>{t('ctaDestLabel')}</label>
                   <input id="banner-link" type="url" value={form.link_url}
                     onChange={(e) => onFormChange({ ...form, link_url: e.target.value })}
                     className={`${inputCls} font-mono !text-[12px]`} placeholder="/catalogo?categoria=solar" />
                 </div>
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="banner-link-text" className={labelCls}>CTA label</label>
+                  <label htmlFor="banner-link-text" className={labelCls}>{t('ctaLabelLabel')}</label>
                   <input id="banner-link-text" type="text" value={form.link_text}
                     onChange={(e) => onFormChange({ ...form, link_text: e.target.value })}
                     className={inputCls} placeholder="Descubrir" />
@@ -226,27 +229,27 @@ export function BannerFormModal({
               </div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
-                <label htmlFor="banner-position" className={labelCls}>Posición</label>
+                <label htmlFor="banner-position" className={labelCls}>{t('positionLabel')}</label>
                 <input id="banner-position" type="number" min="1" value={form.position}
                   onChange={(e) => onFormChange({ ...form, position: parseInt(e.target.value, 10) || 1 })}
                   className={inputCls} />
-                <span className="text-[11.5px] text-ink-500 font-serif italic">Orden de visualización (1 = primero)</span>
+                <span className="text-[11.5px] text-ink-500 font-serif italic">{t('positionHint')}</span>
               </div>
             </div>
 
             {/* Programación */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">Programación</div>
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionSchedule')}</div>
 
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="banner-start" className={labelCls}>Fecha inicio</label>
+                  <label htmlFor="banner-start" className={labelCls}>{t('startDateLabel')}</label>
                   <input id="banner-start" type="date" value={form.start_date}
                     onChange={(e) => onFormChange({ ...form, start_date: e.target.value })}
                     className={inputCls} />
                 </div>
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="banner-end" className={labelCls}>Fecha fin</label>
+                  <label htmlFor="banner-end" className={labelCls}>{t('endDateLabel')}</label>
                   <input id="banner-end" type="date" value={form.end_date}
                     onChange={(e) => onFormChange({ ...form, end_date: e.target.value })}
                     className={inputCls} />
@@ -255,9 +258,9 @@ export function BannerFormModal({
 
               <div className="flex items-center justify-between p-3 bg-sand-50 border border-sand-200 rounded-[10px] mb-[14px]">
                 <div className="text-[13.5px] text-ink-900">
-                  Anuncio activo
+                  {t('activeLabel')}
                   <small className="block text-[11.5px] text-ink-500 font-serif italic mt-0.5">
-                    Visible en el sitio público.
+                    {t('activeHint')}
                   </small>
                 </div>
                 <button
@@ -281,16 +284,16 @@ export function BannerFormModal({
             <div className="flex justify-between items-center">
               <span className="text-[11.5px] text-ink-500 font-serif italic flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-clay-700" />
-                Sin guardar
+                {tc('unsaved')}
               </span>
               <div className="flex gap-2 items-center">
                 <button type="button" onClick={onClose}
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors">
-                  Cancelar
+                  {tc('cancel')}
                 </button>
                 <button type="submit" disabled={saving}
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-clay-700 border-0 rounded-[10px] hover:bg-clay-800 transition-colors disabled:opacity-50">
-                  {saving ? 'Guardando…' : editingBanner ? 'Guardar' : 'Crear anuncio'}
+                  {saving ? tc('saving') : editingBanner ? tc('save') : t('submitCreate')}
                 </button>
               </div>
             </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { generateSlug } from '@/lib/slug'
@@ -31,6 +32,8 @@ export function RangeFormModal({
   onClose,
   onSubmit,
 }: RangeFormModalProps) {
+  const t = useTranslations('Admin.modals.range')
+  const tc = useTranslations('Admin.common')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -56,10 +59,10 @@ export function RangeFormModal({
         <header className="px-[22px] py-[18px] flex justify-between items-start border-b border-sand-200 shrink-0">
           <div>
             <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
-              Marcas · gamas
+              {editingRange ? t('eyebrowEdit', { slug: editingRange.slug }) : t('eyebrowNew')}
             </span>
             <h3 id="range-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
-              {editingRange ? 'Editar gama' : 'Nueva gama'}
+              {editingRange ? t('titleEdit') : t('titleNew')}
             </h3>
           </div>
           <PopClose onClick={onClose} />
@@ -68,7 +71,7 @@ export function RangeFormModal({
         <form onSubmit={onSubmit}>
           <div className="px-[22px] py-[18px] flex flex-col gap-3">
             <div className="flex flex-col gap-[6px]">
-              <label htmlFor="range-brand" className={labelCls}>Marca</label>
+              <label htmlFor="range-brand" className={labelCls}>{t('brandLabel')}</label>
               <select
                 id="range-brand"
                 required
@@ -77,7 +80,7 @@ export function RangeFormModal({
                 disabled={brandLocked}
                 className={`${inputCls} appearance-none disabled:bg-sand-100 disabled:text-ink-500`}
               >
-                <option value="">Seleccionar marca</option>
+                <option value="">{t('brandPlaceholder')}</option>
                 {brands.map((brand) => (
                   <option key={brand.id} value={brand.id}>{brand.name}</option>
                 ))}
@@ -86,7 +89,7 @@ export function RangeFormModal({
 
             <div className="flex flex-col gap-[6px]">
               <label htmlFor="range-name" className={labelCls}>
-                Nombre <span className="text-brick-600 ml-1">*</span>
+                {t('nameLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
               </label>
               <input
                 id="range-name"
@@ -101,12 +104,12 @@ export function RangeFormModal({
                   })
                 }
                 className={`${inputCls} font-serif !text-[15px]`}
-                placeholder="Ej. Hydrance"
+                placeholder={t('namePlaceholder')}
               />
             </div>
 
             <div className="flex flex-col gap-[6px]">
-              <label htmlFor="range-slug" className={labelCls}>Slug</label>
+              <label htmlFor="range-slug" className={labelCls}>{t('slugLabel')}</label>
               <input
                 id="range-slug"
                 type="text"
@@ -126,13 +129,13 @@ export function RangeFormModal({
                 onClick={onClose}
                 className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
               >
-                Cancelar
+                {tc('cancel')}
               </button>
               <button
                 type="submit"
                 className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-clay-700 border-0 rounded-[10px] hover:bg-clay-800 transition-colors"
               >
-                {editingRange ? 'Guardar' : 'Crear gama'}
+                {editingRange ? tc('save') : t('submitCreate')}
               </button>
             </div>
           </footer>

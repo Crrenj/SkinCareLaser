@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { generateSlug } from '@/lib/slug'
@@ -22,6 +23,8 @@ export function BrandFormModal({
   onClose,
   onSubmit,
 }: BrandFormModalProps) {
+  const t = useTranslations('Admin.modals.brand')
+  const tc = useTranslations('Admin.common')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -45,10 +48,10 @@ export function BrandFormModal({
         <header className="flex items-start justify-between px-[22px] py-[18px] shrink-0">
           <div>
             <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
-              {editingBrand ? `Marca · ${form.slug || '—'}` : 'Marcas · nueva'}
+              {editingBrand ? t('eyebrowEdit', { slug: form.slug || '—' }) : t('eyebrowNew')}
             </span>
             <h3 id="brand-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
-              {editingBrand ? form.name || 'Editar marca' : 'Nueva marca'}
+              {editingBrand ? form.name || t('titleEdit') : t('titleNew')}
             </h3>
           </div>
           <PopClose onClick={onClose} />
@@ -59,15 +62,15 @@ export function BrandFormModal({
           <div className="flex-1 overflow-y-auto px-[22px] py-[18px] flex flex-col gap-0">
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
               <div className="font-serif text-[17px] text-ink-900 mb-3 flex justify-between items-baseline">
-                Identidad
+                {t('sectionIdentity')}
                 <small className="font-mono text-[10.5px] text-ink-500 tracking-[0.06em]">
-                  visible en catálogo
+                  {t('sectionHint')}
                 </small>
               </div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="brand-name" className="font-mono text-[10.5px] tracking-[0.12em] uppercase text-ink-700 font-semibold flex justify-between items-center">
-                  Nombre <span className="text-brick-600 ml-1">*</span>
+                  {t('nameLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
                 </label>
                 <input
                   id="brand-name"
@@ -82,13 +85,13 @@ export function BrandFormModal({
                     })
                   }
                   className="w-full px-3 py-[10px] border border-sand-300 rounded-lg font-serif text-[18px] text-ink-900 bg-sand-50 transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:shadow-[0_0_0_3px_rgba(142,82,50,.14)]"
-                  placeholder="Ej. ISDIN"
+                  placeholder={t('namePlaceholder')}
                 />
               </div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="brand-slug" className="font-mono text-[10.5px] tracking-[0.12em] uppercase text-ink-700 font-semibold flex justify-between items-center">
-                  Slug
+                  {t('slugLabel')}
                 </label>
                 <input
                   id="brand-slug"
@@ -112,7 +115,7 @@ export function BrandFormModal({
             <div className="flex justify-between items-center">
               <span className="text-[11.5px] text-ink-500 font-serif italic flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-clay-700" />
-                Sin guardar
+                {tc('unsaved')}
               </span>
               <div className="flex gap-2 items-center">
                 <button
@@ -120,13 +123,13 @@ export function BrandFormModal({
                   onClick={onClose}
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
                 >
-                  Cancelar
+                  {tc('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-clay-700 border-0 rounded-[10px] hover:bg-clay-800 transition-colors"
                 >
-                  {editingBrand ? 'Guardar' : 'Crear marca'}
+                  {editingBrand ? tc('save') : t('submitCreate')}
                 </button>
               </div>
             </div>

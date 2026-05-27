@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { generateSlug } from '@/lib/slug'
@@ -34,6 +35,8 @@ export function ProductFormModal({
   onClose,
   onSubmit,
 }: ProductFormModalProps) {
+  const t = useTranslations('Admin.modals.product')
+  const tc = useTranslations('Admin.common')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -77,10 +80,10 @@ export function ProductFormModal({
         <header className="flex items-start justify-between px-[22px] py-[18px] shrink-0">
           <div>
             <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
-              {editingProduct ? `Catálogo · ${form.slug || '—'}` : 'Catálogo · nuevo'}
+              {editingProduct ? t('eyebrowEdit', { slug: form.slug || '—' }) : t('eyebrowNew')}
             </span>
             <h3 id="product-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
-              {editingProduct ? form.name || 'Editar producto' : 'Nuevo producto'}
+              {editingProduct ? form.name || t('titleEdit') : t('titleNew')}
             </h3>
           </div>
           <PopClose onClick={onClose} />
@@ -91,11 +94,11 @@ export function ProductFormModal({
           <div className="flex-1 overflow-y-auto px-[22px] py-[18px]">
             {/* Informations de base */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">Información</div>
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionInfo')}</div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
                 <label htmlFor="product-name" className={labelCls}>
-                  Nombre del producto <span className="text-brick-600 ml-1">*</span>
+                  {t('nameLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
                 </label>
                 <input
                   id="product-name"
@@ -110,13 +113,13 @@ export function ProductFormModal({
                     })
                   }
                   className={`${inputCls} font-serif !text-[18px]`}
-                  placeholder="Ej. Fotoprotector Fusion Water 50+"
+                  placeholder={t('namePlaceholder')}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="product-slug" className={labelCls}>Slug</label>
+                  <label htmlFor="product-slug" className={labelCls}>{t('slugLabel')}</label>
                   <input
                     id="product-slug"
                     type="text"
@@ -127,7 +130,7 @@ export function ProductFormModal({
                   />
                 </div>
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="product-image" className={labelCls}>Image (PNG)</label>
+                  <label htmlFor="product-image" className={labelCls}>{t('imageLabel')}</label>
                   <input
                     id="product-image"
                     type="file"
@@ -139,7 +142,7 @@ export function ProductFormModal({
               </div>
 
               <div className="flex flex-col gap-[6px] mb-[14px]">
-                <label htmlFor="product-description" className={labelCls}>Descripción corta</label>
+                <label htmlFor="product-description" className={labelCls}>{t('descriptionLabel')}</label>
                 <textarea
                   id="product-description"
                   value={form.description}
@@ -152,11 +155,11 @@ export function ProductFormModal({
 
             {/* Prix & stock */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">Inventario</div>
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionInventory')}</div>
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
                 <div className="flex flex-col gap-[6px]">
                   <label htmlFor="product-price" className={labelCls}>
-                    PVP (DOP) <span className="text-brick-600 ml-1">*</span>
+                    {t('priceLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
                   </label>
                   <input
                     id="product-price"
@@ -171,7 +174,7 @@ export function ProductFormModal({
                 </div>
                 <div className="flex flex-col gap-[6px]">
                   <label htmlFor="product-stock" className={labelCls}>
-                    Stock <span className="text-brick-600 ml-1">*</span>
+                    {t('stockLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
                   </label>
                   <input
                     id="product-stock"
@@ -188,24 +191,24 @@ export function ProductFormModal({
 
             {/* Marque et gamme */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">Marca y gama</div>
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionBrandRange')}</div>
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="product-brand" className={labelCls}>Marca</label>
+                  <label htmlFor="product-brand" className={labelCls}>{t('brandLabel')}</label>
                   <select
                     id="product-brand"
                     value={form.brand_id}
                     onChange={(e) => onFormChange({ ...form, brand_id: e.target.value, range_id: '' })}
                     className={`${inputCls} appearance-none`}
                   >
-                    <option value="">Seleccionar marca</option>
+                    <option value="">{t('brandPlaceholder')}</option>
                     {brands.map((brand) => (
                       <option key={brand.id} value={brand.id}>{brand.name}</option>
                     ))}
                   </select>
                 </div>
                 <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="product-range" className={labelCls}>Gama</label>
+                  <label htmlFor="product-range" className={labelCls}>{t('rangeLabel')}</label>
                   <select
                     id="product-range"
                     value={form.range_id}
@@ -213,7 +216,7 @@ export function ProductFormModal({
                     disabled={!form.brand_id}
                     className={`${inputCls} appearance-none disabled:bg-sand-100 disabled:text-ink-500`}
                   >
-                    <option value="">Seleccionar gama</option>
+                    <option value="">{t('rangePlaceholder')}</option>
                     {selectedBrandRanges.map((range) => (
                       <option key={range.id} value={range.id}>{range.name}</option>
                     ))}
@@ -237,7 +240,7 @@ export function ProductFormModal({
             <div className="flex justify-between items-center">
               <span className="text-[11.5px] text-ink-500 font-serif italic flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-clay-700" />
-                Sin guardar
+                {tc('unsaved')}
               </span>
               <div className="flex gap-2 items-center">
                 <button
@@ -245,13 +248,13 @@ export function ProductFormModal({
                   onClick={onClose}
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
                 >
-                  Cancelar
+                  {tc('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-ink-900 border-0 rounded-[10px] hover:bg-ink-800 transition-colors"
                 >
-                  {editingProduct ? 'Guardar' : 'Crear producto'}
+                  {editingProduct ? tc('save') : t('submitCreate')}
                 </button>
               </div>
             </div>

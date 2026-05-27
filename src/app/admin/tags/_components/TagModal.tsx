@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { generateSlug } from '../_lib/icons'
@@ -31,6 +32,8 @@ export function TagModal({
   onClose,
   onSubmit,
 }: TagModalProps) {
+  const t = useTranslations('Admin.modals.tag')
+  const tc = useTranslations('Admin.common')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -58,10 +61,10 @@ export function TagModal({
         <header className="px-[22px] py-[18px] flex justify-between items-start border-b border-sand-200 shrink-0">
           <div>
             <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
-              Catálogo · {currentCategory?.name || 'etiquetas'}
+              {editingTag ? t('eyebrowEdit', { slug: currentCategory?.name || '' }) : t('eyebrowNew')}
             </span>
             <h3 id="tag-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
-              {editingTag ? 'Editar etiqueta' : 'Nueva etiqueta'}
+              {editingTag ? t('titleEdit') : t('titleNew')}
             </h3>
           </div>
           <PopClose onClick={onClose} />
@@ -71,7 +74,7 @@ export function TagModal({
           <div className="px-[22px] py-[18px] flex flex-col gap-3">
             <div className="flex flex-col gap-[6px]">
               <label htmlFor="tag-name" className={labelCls}>
-                Nombre <span className="text-brick-600 ml-1">*</span>
+                {t('nameLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
               </label>
               <input
                 id="tag-name"
@@ -86,12 +89,12 @@ export function TagModal({
                   })
                 }
                 className={`${inputCls} font-serif !text-[15px]`}
-                placeholder="Ej. Pieles sensibles"
+                placeholder={t('namePlaceholder')}
               />
             </div>
 
             <div className="flex flex-col gap-[6px]">
-              <label htmlFor="tag-slug" className={labelCls}>Slug</label>
+              <label htmlFor="tag-slug" className={labelCls}>{t('slugLabel')}</label>
               <input
                 id="tag-slug"
                 type="text"
@@ -114,13 +117,13 @@ export function TagModal({
                 onClick={onClose}
                 className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
               >
-                Cancelar
+                {tc('cancel')}
               </button>
               <button
                 type="submit"
                 className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-ink-900 border-0 rounded-[10px] hover:bg-ink-800 transition-colors"
               >
-                {editingTag ? 'Guardar' : 'Crear'}
+                {editingTag ? tc('save') : t('submitCreate')}
               </button>
             </div>
           </footer>

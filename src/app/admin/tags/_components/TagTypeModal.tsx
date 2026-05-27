@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { generateSlug } from '../_lib/icons'
@@ -29,6 +30,8 @@ export function TagTypeModal({
   onClose,
   onSubmit,
 }: TagTypeModalProps) {
+  const t = useTranslations('Admin.modals.tagType')
+  const tc = useTranslations('Admin.common')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -54,10 +57,10 @@ export function TagTypeModal({
         <header className="px-[22px] py-[18px] flex justify-between items-start border-b border-sand-200 shrink-0">
           <div>
             <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
-              Catálogo · taxonomía
+              {editingType ? t('eyebrowEdit', { slug: form.slug || '' }) : t('eyebrowNew')}
             </span>
             <h3 id="tag-type-modal-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
-              {editingType ? 'Editar tipo' : 'Nuevo tipo de etiqueta'}
+              {editingType ? t('titleEdit') : t('titleNew')}
             </h3>
           </div>
           <PopClose onClick={onClose} />
@@ -67,7 +70,7 @@ export function TagTypeModal({
           <div className="px-[22px] py-[18px] flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
             <div className="flex flex-col gap-[6px]">
               <label htmlFor="type-name" className={labelCls}>
-                Nombre <span className="text-brick-600 ml-1">*</span>
+                {t('nameLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
               </label>
               <input
                 id="type-name"
@@ -82,12 +85,12 @@ export function TagTypeModal({
                   })
                 }
                 className={`${inputCls} font-serif !text-[15px]`}
-                placeholder="Ej. Beneficio"
+                placeholder={t('namePlaceholder')}
               />
             </div>
 
             <div className="flex flex-col gap-[6px]">
-              <label htmlFor="type-slug" className={labelCls}>Slug</label>
+              <label htmlFor="type-slug" className={labelCls}>{t('slugLabel')}</label>
               <input
                 id="type-slug"
                 type="text"
@@ -99,7 +102,7 @@ export function TagTypeModal({
             </div>
 
             <div className="flex flex-col gap-[6px]">
-              <span className={labelCls}>Icono</span>
+              <span className={labelCls}>{t('iconLabel')}</span>
               <IconPicker
                 value={form.icon}
                 onChange={(icon) => onFormChange({ ...form, icon })}
@@ -107,7 +110,7 @@ export function TagTypeModal({
             </div>
 
             <div className="flex flex-col gap-[6px]">
-              <span className={labelCls}>Color</span>
+              <span className={labelCls}>{t('colorLabel')}</span>
               <ColorPicker
                 value={form.color}
                 onChange={(color) => onFormChange({ ...form, color })}
@@ -117,8 +120,7 @@ export function TagTypeModal({
             {!editingType && (
               <div className="flex flex-col gap-[6px]">
                 <label htmlFor="type-initial-tag" className={labelCls}>
-                  Primera etiqueta
-                  <span className="font-sans text-ink-500 text-[10px] normal-case tracking-normal ml-2">(opcional)</span>
+                  {t('initialTagLabel')}
                 </label>
                 <input
                   id="type-initial-tag"
@@ -126,7 +128,7 @@ export function TagTypeModal({
                   value={form.initialTag}
                   onChange={(e) => onFormChange({ ...form, initialTag: e.target.value })}
                   className={inputCls}
-                  placeholder="Ej. Hidratante"
+                  placeholder={t('initialTagNameLabel')}
                 />
               </div>
             )}
@@ -140,13 +142,13 @@ export function TagTypeModal({
                 onClick={onClose}
                 className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
               >
-                Cancelar
+                {tc('cancel')}
               </button>
               <button
                 type="submit"
                 className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-clay-700 border-0 rounded-[10px] hover:bg-clay-800 transition-colors"
               >
-                {editingType ? 'Guardar' : 'Crear tipo'}
+                {editingType ? tc('save') : t('submitCreate')}
               </button>
             </div>
           </footer>
