@@ -1556,5 +1556,11 @@
       "previewShow": "Aperçu",
       "previewHide": "Fermer l'aperçu"
     }
+  },
+  "Error": {
+    "title": "Oups",
+    "body": "Une erreur inattendue s'est produite. Réessayez ou retournez à l'accueil.",
+    "retry": "Réessayer",
+    "home": "Accueil"
   }
 }

@@ -1556,5 +1556,11 @@
       "previewShow": "Preview",
       "previewHide": "Close preview"
     }
+  },
+  "Error": {
+    "title": "Oops",
+    "body": "An unexpected error occurred. Try again or go back to the homepage.",
+    "retry": "Retry",
+    "home": "Home"
   }
 }

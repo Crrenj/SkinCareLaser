@@ -1556,5 +1556,11 @@
       "previewShow": "Vista previa",
       "previewHide": "Cerrar vista previa"
     }
+  },
+  "Error": {
+    "title": "Ups",
+    "body": "Ocurrió un error inesperado. Intenta de nuevo o vuelve al inicio.",
+    "retry": "Reintentar",
+    "home": "Inicio"
   }
 }
