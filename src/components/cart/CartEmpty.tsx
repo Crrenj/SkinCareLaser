@@ -18,17 +18,14 @@ type SearchHit = {
   image: string | null
 }
 
-export function CartEmpty() {
+export function CartEmpty({ whatsappLink: waLinkProp }: { whatsappLink?: string }) {
   const t = useTranslations('Cart.empty')
   const locale = useLocale()
   const fmt = (n: number) => formatPrice(n, { locale })
 
   const { data } = useSWR<{ hits: SearchHit[] }>('/api/search?bestsellers=1&limit=3', fetcher)
   const hits = data?.hits ?? []
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
-  const whatsappLink = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.replace(/\D/g, '')}`
-    : '/contact'
+  const whatsappLink = waLinkProp ?? '/contact'
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 lg:py-24 text-center flex flex-col items-center gap-4">

@@ -1,8 +1,9 @@
 import { Instagram, Facebook } from 'lucide-react'
 import { SiWhatsapp } from 'react-icons/si'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { FooterNewsletter } from './footer/FooterNewsletter'
+import { getShopSettings, whatsappHref } from '@/lib/getShopSettings'
 
 // `categories` tag_type est vide en DB (taxonomie à créer) ; en attendant on
 // pointe les liens qui ont un besoin équivalent vers /besoins/[slug] et
@@ -50,8 +51,10 @@ const BRAND_LINKS = [
   { key: 'stores', href: '/pharmacie' },
 ] as const
 
-export default function Footer() {
-  const t = useTranslations('Footer')
+export default async function Footer() {
+  const t = await getTranslations('Footer')
+  const settings = await getShopSettings()
+  const waLink = whatsappHref(settings.whatsapp_number) ?? '#'
 
   return (
     <footer className="bg-ink-900 text-sand-200 px-6 lg:px-16 pt-16 lg:pt-20">
@@ -78,7 +81,7 @@ export default function Footer() {
             <SocialIcon href="https://instagram.com" label={t('socials.instagram')}>
               <Instagram size={16} strokeWidth={1.6} />
             </SocialIcon>
-            <SocialIcon href="https://wa.me/18094122468" label={t('socials.whatsapp')}>
+            <SocialIcon href={waLink} label={t('socials.whatsapp')}>
               <SiWhatsapp size={16} />
             </SocialIcon>
             <SocialIcon href="https://facebook.com" label={t('socials.facebook')}>

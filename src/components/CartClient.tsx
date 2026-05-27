@@ -8,7 +8,7 @@ import { CartLineItem } from '@/components/cart/CartLineItem'
 import { CartSummary } from '@/components/cart/CartSummary'
 import { CartEmpty } from '@/components/cart/CartEmpty'
 
-export default function CartClient() {
+export default function CartClient({ whatsappLink }: { whatsappLink?: string }) {
   const t = useTranslations('Cart')
   const router = useRouter()
   const { items, updateQuantity, removeFromCart, clearCart, totalPrice } = useCart()
@@ -36,7 +36,7 @@ export default function CartClient() {
 
   /* ─────────── Branche 1 : panier vide ─────────── */
   if (items.length === 0) {
-    return <CartEmpty />
+    return <CartEmpty whatsappLink={whatsappLink} />
   }
 
   /* ─────────── Branche 2 : panier rempli ─────────── */
