@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, tagPatch } from '@/lib/schemas'
 
 export async function PATCH(
   request: NextRequest,
@@ -15,12 +16,10 @@ export async function PATCH(
 
   try {
     const { id } = await params
-    const body = await request.json()
-    const { name, slug } = body
-
-    if (!name || !slug) {
-      return NextResponse.json({ error: 'Données manquantes' }, { status: 400 })
-    }
+    const raw = await request.json()
+    const parsed = parseBody(tagPatch, raw)
+    if (!parsed.ok) return parsed.response
+    const { name, slug } = parsed.data
 
     const { data, error } = await supabaseAdmin
       .from('tags')

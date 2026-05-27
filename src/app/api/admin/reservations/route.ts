@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, reservationPatch } from '@/lib/schemas'
 
 const VALID_STATUSES = [
   'pending',
@@ -82,25 +83,16 @@ export async function PATCH(request: NextRequest) {
     )
   }
 
-  let body: { id?: string; status?: string; admin_notes?: string }
+  let raw: unknown
   try {
-    body = await request.json()
+    raw = await request.json()
   } catch {
     return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
   }
 
-  const { id, status, admin_notes } = body
-
-  if (!id) {
-    return NextResponse.json(
-      { error: 'id de réservation requis' },
-      { status: 400 },
-    )
-  }
-
-  if (status && !VALID_STATUSES.includes(status as ReservationStatus)) {
-    return NextResponse.json({ error: 'status invalide' }, { status: 400 })
-  }
+  const parsed = parseBody(reservationPatch, raw)
+  if (!parsed.ok) return parsed.response
+  const { id, status, admin_notes } = parsed.data
 
   type ReservationStatusEnum = 'pending' | 'confirmed' | 'collected' | 'expired' | 'cancelled'
   const updateData: {

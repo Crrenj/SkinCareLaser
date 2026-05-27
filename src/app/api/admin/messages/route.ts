@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, messagePatch } from '@/lib/schemas'
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin()
@@ -60,8 +61,10 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
-    const { id, status, priority, admin_notes, replied_at } = body
+    const raw = await request.json()
+    const parsed = parseBody(messagePatch, raw)
+    if (!parsed.ok) return parsed.response
+    const { id, status, priority, admin_notes, replied_at } = parsed.data
 
     const updateData: {
       updated_at: string

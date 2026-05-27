@@ -2,23 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-
-// 3 nouveaux types (sprint 2 livrable 4) + 6 anciens conserves pour
-// retrocompat des lignes DB existantes. Le composant Banner les
-// normalise vers les 3 nouveaux a l affichage.
-const VALID_BANNER_TYPES = [
-  'editorial',
-  'hero',
-  'quote',
-  'image_left',
-  'image_right',
-  'image_full',
-  'card_style',
-  'minimal',
-  'gradient_overlay',
-]
-
-const VALID_DIRECTIONS = ['left', 'right']
+import { parseBody, bannerCreate, bannerUpdate } from '@/lib/schemas'
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin()
@@ -65,42 +49,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
+    const raw = await request.json()
+    const parsed = parseBody(bannerCreate, raw)
+    if (!parsed.ok) return parsed.response
     const {
       title, description, image_url, link_url, link_text,
       banner_type, position, is_active, start_date, end_date,
       direction, attribution_name, attribution_title, attribution_photo_url,
-    } = body
+    } = parsed.data
 
-    // Quote n'a pas besoin de description ni d'image (juste le titre = citation)
     const requiresImage = banner_type !== 'quote'
     const requiresDescription = banner_type !== 'quote'
-
-    if (!title || !banner_type) {
-      return NextResponse.json(
-        { error: 'Titre et type de bannière sont requis' },
-        { status: 400 },
-      )
-    }
     if (requiresDescription && !description) {
-      return NextResponse.json(
-        { error: 'Description requise pour ce type' },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: 'Description requise pour ce type' }, { status: 400 })
     }
     if (requiresImage && !image_url) {
-      return NextResponse.json(
-        { error: 'Image requise pour ce type' },
-        { status: 400 },
-      )
-    }
-
-    if (!VALID_BANNER_TYPES.includes(banner_type)) {
-      return NextResponse.json({ error: 'Type de bannière invalide' }, { status: 400 })
-    }
-
-    if (direction && !VALID_DIRECTIONS.includes(direction)) {
-      return NextResponse.json({ error: 'Direction invalide (left|right)' }, { status: 400 })
+      return NextResponse.json({ error: 'Image requise pour ce type' }, { status: 400 })
     }
 
     let finalPosition = position
@@ -148,24 +112,14 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
+    const raw = await request.json()
+    const parsed = parseBody(bannerUpdate, raw)
+    if (!parsed.ok) return parsed.response
     const {
       id, title, description, image_url, link_url, link_text,
       banner_type, position, is_active, start_date, end_date,
       direction, attribution_name, attribution_title, attribution_photo_url,
-    } = body
-
-    if (!id) {
-      return NextResponse.json({ error: 'ID de la bannière requis' }, { status: 400 })
-    }
-
-    if (banner_type && !VALID_BANNER_TYPES.includes(banner_type)) {
-      return NextResponse.json({ error: 'Type de bannière invalide' }, { status: 400 })
-    }
-
-    if (direction && !VALID_DIRECTIONS.includes(direction)) {
-      return NextResponse.json({ error: 'Direction invalide (left|right)' }, { status: 400 })
-    }
+    } = parsed.data
 
     if (position !== undefined) {
       const { data: currentBanner } = await supabaseAdmin

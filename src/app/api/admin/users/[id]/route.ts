@@ -2,6 +2,10 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { z } from 'zod'
+import { parseBody } from '@/lib/schemas'
+
+const userAdminPatch = z.object({ isAdmin: z.boolean() })
 
 /**
  * PATCH /api/admin/users/[id]
@@ -26,18 +30,17 @@ export async function PATCH(
     return NextResponse.json({ error: 'missing_id' }, { status: 400 })
   }
 
-  let body: { isAdmin?: boolean } = {}
+  let raw: unknown
   try {
-    body = await request.json()
+    raw = await request.json()
   } catch {
     return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
   }
 
-  if (typeof body.isAdmin !== 'boolean') {
-    return NextResponse.json({ error: 'invalid_body' }, { status: 400 })
-  }
+  const parsed = parseBody(userAdminPatch, raw)
+  if (!parsed.ok) return parsed.response
+  const body = parsed.data
 
-  // Garde-fou : empêcher la rétrogradation auto
   if (!body.isAdmin && id === auth.userId) {
     return NextResponse.json({ error: 'cannot_demote_self' }, { status: 400 })
   }

@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, stockBody } from '@/lib/schemas'
 
 function getStockStatus(currentStock: number, minStock = 10): 'ok' | 'low' | 'out' {
   if (currentStock === 0) return 'out'
@@ -102,16 +103,10 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const body = await req.json()
-    const { product_id, stock } = body
-
-    if (!product_id || stock === undefined) {
-      return NextResponse.json({ error: 'product_id et stock sont requis' }, { status: 400 })
-    }
-
-    if (stock < 0) {
-      return NextResponse.json({ error: 'Le stock ne peut pas être négatif' }, { status: 400 })
-    }
+    const raw = await req.json()
+    const parsed = parseBody(stockBody, raw)
+    if (!parsed.ok) return parsed.response
+    const { product_id, stock } = parsed.data
 
     const { data, error } = await supabaseAdmin
       .from('products')

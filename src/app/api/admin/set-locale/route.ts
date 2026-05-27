@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
-import { routing } from '@/i18n/routing'
 import { ADMIN_LOCALE_COOKIE } from '@/i18n/request'
+import { parseBody, setLocaleBody } from '@/lib/schemas'
 
 /**
  * POST /api/admin/set-locale
@@ -14,11 +14,10 @@ export async function POST(request: Request) {
   const auth = await requireAdmin()
   if (!auth.ok) return auth.response
 
-  const body = (await request.json().catch(() => null)) as { locale?: string } | null
-  const locale = body?.locale ?? ''
-  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
-    return NextResponse.json({ error: 'invalid_locale' }, { status: 400 })
-  }
+  const raw = await request.json().catch(() => null)
+  const parsed = parseBody(setLocaleBody, raw)
+  if (!parsed.ok) return parsed.response
+  const { locale } = parsed.data
 
   const response = NextResponse.json({ ok: true, locale })
   response.cookies.set({

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, uploadBody } from '@/lib/schemas'
 
 /**
  * POST /api/admin/upload - Upload une image produit
@@ -14,7 +15,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { file, fileName, contentType } = await req.json()
+    const raw = await req.json()
+    const parsed = parseBody(uploadBody, raw)
+    if (!parsed.ok) return parsed.response
+    const { file, fileName, contentType } = parsed.data
     const fileBuffer = Buffer.from(file, 'base64')
 
     const { data, error } = await supabaseAdmin.storage

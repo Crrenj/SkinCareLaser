@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, bannerStatsBody } from '@/lib/schemas'
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin()
@@ -11,19 +12,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
-    const { bannerId, type } = body
-
-    if (!bannerId || !type) {
-      return NextResponse.json(
-        { error: 'ID de bannière et type requis' },
-        { status: 400 },
-      )
-    }
-
-    if (!['view', 'click'].includes(type)) {
-      return NextResponse.json({ error: 'Type doit être "view" ou "click"' }, { status: 400 })
-    }
+    const raw = await request.json()
+    const parsed = parseBody(bannerStatsBody, raw)
+    if (!parsed.ok) return parsed.response
+    const { bannerId, type } = parsed.data
 
     const column = type === 'view' ? 'view_count' : 'click_count'
 

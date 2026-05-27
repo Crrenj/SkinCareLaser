@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, brandBody } from '@/lib/schemas'
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -31,12 +32,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json()
-    const { name, slug } = body
-
-    if (!name || !slug) {
-      return NextResponse.json({ error: 'Le nom et le slug sont requis' }, { status: 400 })
-    }
+    const raw = await req.json()
+    const parsed = parseBody(brandBody, raw)
+    if (!parsed.ok) return parsed.response
+    const { name, slug } = parsed.data
 
     const { data: brand, error } = await supabaseAdmin
       .from('brands')

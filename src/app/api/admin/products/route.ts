@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { parseBody, productCreate } from '@/lib/schemas'
 
 // GET /api/admin/products -> liste des produits avec pagination
 export async function GET(req: NextRequest) {
@@ -76,6 +77,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
+    const parsed = parseBody(productCreate, body)
+    if (!parsed.ok) return parsed.response
+     
     const { brand_id, range_id, selectedTags, imageFile, ...productData } = body
 
     let imageUrl: string | null = null

@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, tagBody } from '@/lib/schemas'
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -37,15 +38,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json()
-    const { name, slug, tag_type_id } = body
-
-    if (!name || !slug || !tag_type_id) {
-      return NextResponse.json(
-        { error: 'Données manquantes (nom, slug, et type requis)' },
-        { status: 400 },
-      )
-    }
+    const raw = await request.json()
+    const parsed = parseBody(tagBody, raw)
+    if (!parsed.ok) return parsed.response
+    const { name, slug, tag_type_id } = parsed.data
 
     const { data, error } = await supabaseAdmin
       .from('tags')

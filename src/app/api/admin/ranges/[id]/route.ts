@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, rangeBody } from '@/lib/schemas'
 
 export async function PATCH(
   req: NextRequest,
@@ -14,15 +15,10 @@ export async function PATCH(
 
   try {
     const { id } = await params
-    const body = await req.json()
-    const { name, slug, brand_id } = body
-
-    if (!name || !slug || !brand_id) {
-      return NextResponse.json(
-        { error: 'Le nom, le slug et la marque sont requis' },
-        { status: 400 },
-      )
-    }
+    const raw = await req.json()
+    const parsed = parseBody(rangeBody, raw)
+    if (!parsed.ok) return parsed.response
+    const { name, slug, brand_id } = parsed.data
 
     const { data: existingRange, error: checkError } = await supabaseAdmin
       .from('ranges')
