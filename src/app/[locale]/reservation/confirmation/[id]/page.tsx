@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { getShopSettings } from '@/lib/getShopSettings'
 import ConfirmationClient from './ConfirmationClient'
 
 export async function generateMetadata({
@@ -67,6 +68,15 @@ export default async function ConfirmationPage({
     .eq('reservation_id', reservation.id)
     .order('created_at', { ascending: true })
 
+  const settings = await getShopSettings()
+  const pickup = {
+    id: 'santiago' as const,
+    name: settings.pickup_name ?? 'Farmacia FARMAU',
+    address: settings.pickup_address ?? '',
+    hours: settings.pickup_hours ?? '',
+    phone: settings.pickup_phone ?? settings.contact_phone ?? '',
+  }
+
   const enrichedItems = (items ?? []).map((row) => {
     const item = row as unknown as {
       id: string
@@ -103,6 +113,7 @@ export default async function ConfirmationPage({
           totalPrice={Number(reservation.total_price ?? 0)}
           createdAt={reservation.created_at ?? null}
           items={enrichedItems}
+          pickupLocation={pickup}
         />
       </main>
       <Footer />

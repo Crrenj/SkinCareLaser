@@ -9,7 +9,7 @@ import {
   buildReservationWhatsappLink,
   type ReservationPayload,
 } from '@/lib/whatsapp'
-import { PICKUP_LOCATION } from '@/lib/shipping'
+import type { PickupLocation } from '@/lib/shipping'
 import { buildReservationReference } from '@/lib/reservation'
 import { ConfirmationHeader } from '@/components/confirmation/ConfirmationHeader'
 import { WhatsappHero } from '@/components/confirmation/WhatsappHero'
@@ -28,6 +28,7 @@ type Props = {
   contactPhone: string
   totalPrice: number
   createdAt: string | null
+  pickupLocation: PickupLocation
   items: ConfirmationItem[]
 }
 
@@ -49,6 +50,7 @@ export default function ConfirmationClient({
   totalPrice,
   createdAt,
   items,
+  pickupLocation,
 }: Props) {
   const t = useTranslations('Reservation.confirmation')
   const reference = useMemo(
@@ -92,7 +94,7 @@ export default function ConfirmationClient({
 
     const shipping: ReservationPayload['shipping'] =
       sh?.kind === 'pickup'
-        ? { kind: 'pickup', pickup: PICKUP_LOCATION }
+        ? { kind: 'pickup', pickup: pickupLocation }
         : sh?.kind === 'delivery' && draft?.address
           ? {
               kind: 'delivery',
@@ -104,7 +106,7 @@ export default function ConfirmationClient({
               },
             }
           : // Sans draft : on coordonne par référence + retrait à l'unique pharmacie
-            { kind: 'pickup', pickup: PICKUP_LOCATION }
+            { kind: 'pickup', pickup: pickupLocation }
 
     return {
       reference,
