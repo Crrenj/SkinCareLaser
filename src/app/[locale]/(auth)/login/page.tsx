@@ -144,6 +144,8 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('emailPlaceholder')}
             disabled={redirecting}
+            aria-invalid={!!error}
+            aria-describedby={error ? 'login-error' : undefined}
             className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                        text-[14.5px] text-ink-900 placeholder:text-ink-500
                        focus-visible:outline-none focus-visible:border-clay-700
@@ -162,9 +164,11 @@ function LoginForm() {
           placeholder={t('passwordPlaceholder')}
           label={t('passwordLabel')}
           disabled={redirecting}
+          aria-invalid={!!error}
+          aria-describedby={error ? 'login-error' : undefined}
         />
 
-        {error && <AuthNotice variant="error">{t(`errors.${error}`)}</AuthNotice>}
+        {error && <AuthNotice variant="error" id="login-error">{t(`errors.${error}`)}</AuthNotice>}
 
         {redirecting && (
           <AuthNotice variant="ok">{t('successMessage')}</AuthNotice>

@@ -170,6 +170,8 @@ export default function SignupPage() {
               value={formData.firstName}
               onChange={handleChange}
               placeholder={t('firstNamePlaceholder')}
+              aria-invalid={error === 'missingFields' && !formData.firstName}
+              aria-describedby={error ? 'signup-error' : undefined}
               className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                          text-[14.5px] text-ink-900 placeholder:text-ink-500
                          focus-visible:outline-none focus-visible:border-clay-700
@@ -188,6 +190,8 @@ export default function SignupPage() {
               value={formData.lastName}
               onChange={handleChange}
               placeholder={t('lastNamePlaceholder')}
+              aria-invalid={error === 'missingFields' && !formData.lastName}
+              aria-describedby={error ? 'signup-error' : undefined}
               className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                          text-[14.5px] text-ink-900 placeholder:text-ink-500
                          focus-visible:outline-none focus-visible:border-clay-700
@@ -209,6 +213,8 @@ export default function SignupPage() {
             value={formData.email}
             onChange={handleChange}
             placeholder={t('emailPlaceholder')}
+            aria-invalid={error === 'emailAlreadyUsed' || error === 'invalidEmail' || error === 'disposableEmail'}
+            aria-describedby={error ? 'signup-error' : undefined}
             className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                        text-[14.5px] text-ink-900 placeholder:text-ink-500
                        focus-visible:outline-none focus-visible:border-clay-700
@@ -229,6 +235,8 @@ export default function SignupPage() {
             value={formData.phone}
             onChange={handleChange}
             placeholder={t('phonePlaceholder')}
+            aria-invalid={error === 'phoneRequired'}
+            aria-describedby={error ? 'signup-error' : undefined}
             className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50
                        text-[14.5px] text-ink-900 placeholder:text-ink-500
                        focus-visible:outline-none focus-visible:border-clay-700
@@ -265,6 +273,8 @@ export default function SignupPage() {
             placeholder={t('passwordPlaceholder')}
             label={t('passwordLabel')}
             hint={t('passwordHintInline')}
+            aria-invalid={error === 'passwordTooShort' || error === 'passwordsMismatch'}
+            aria-describedby={error ? 'signup-error' : undefined}
           />
           <PasswordStrength password={formData.password} />
         </div>
@@ -278,9 +288,11 @@ export default function SignupPage() {
           onChange={handleChange}
           placeholder={t('passwordPlaceholder')}
           label={t('confirmPasswordLabel')}
+          aria-invalid={error === 'passwordsMismatch'}
+          aria-describedby={error ? 'signup-error' : undefined}
         />
 
-        {error && <AuthNotice variant="error">{t(`errors.${error}`)}</AuthNotice>}
+        {error && <AuthNotice variant="error" id="signup-error">{t(`errors.${error}`)}</AuthNotice>}
         {success && <AuthNotice variant="ok">{t('successMessage')}</AuthNotice>}
 
         <button

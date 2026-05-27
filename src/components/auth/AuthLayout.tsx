@@ -73,9 +73,11 @@ export function AuthDivider({ label }: { label: string }) {
 export function AuthNotice({
   variant,
   children,
+  id,
 }: {
   variant: 'ok' | 'error'
   children: React.ReactNode
+  id?: string
 }) {
   const styles =
     variant === 'ok'
@@ -83,6 +85,7 @@ export function AuthNotice({
       : 'bg-brick-600/10 border-brick-600/25 text-brick-600'
   return (
     <div
+      id={id}
       role={variant === 'error' ? 'alert' : 'status'}
       className={`rounded-lg border px-4 py-3 text-[13.5px] leading-snug ${styles}`}
     >

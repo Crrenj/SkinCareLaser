@@ -63,6 +63,8 @@ export function FooterNewsletter() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t('placeholder')}
           aria-label={t('placeholder')}
+          aria-invalid={status === 'error'}
+          aria-describedby={status === 'error' || status === 'success' ? 'newsletter-feedback' : undefined}
           disabled={status === 'submitting' || status === 'success'}
           className="bg-ink-800 border border-ink-700 text-sand-50 placeholder:text-ink-500 rounded-sm px-4 py-3.5 text-sm outline-none focus:border-clay-600 transition-colors disabled:opacity-60"
         />
@@ -73,12 +75,14 @@ export function FooterNewsletter() {
         >
           {status === 'submitting' ? t('submitting') : t('submit')}
         </button>
-        {status === 'success' && (
-          <p className="col-span-2 mt-2 text-[13px] text-clay-400">{t('success')}</p>
-        )}
-        {status === 'error' && errorMsg && (
-          <p className="col-span-2 mt-2 text-[13px] text-brick-600">{errorMsg}</p>
-        )}
+        <div id="newsletter-feedback" aria-live="polite" className="col-span-2">
+          {status === 'success' && (
+            <p className="mt-2 text-[13px] text-clay-400">{t('success')}</p>
+          )}
+          {status === 'error' && errorMsg && (
+            <p className="mt-2 text-[13px] text-brick-600">{errorMsg}</p>
+          )}
+        </div>
       </form>
     </div>
   )
