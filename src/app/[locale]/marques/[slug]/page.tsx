@@ -71,6 +71,14 @@ export async function generateMetadata({
     return { title: t('titleTemplate', { name: '' }) }
   }
 
+  const { data: imgRow } = await supabase
+    .from('product_images')
+    .select('url, products!inner(range_id, ranges!inner(brand_id))')
+    .eq('products.ranges.brand_id', brand.id)
+    .limit(1)
+    .maybeSingle()
+  const ogImage = (imgRow as { url?: string } | null)?.url ?? undefined
+
   return {
     title: t('titleTemplate', { name: brand.name }),
     description: t('description', { name: brand.name }),
@@ -83,6 +91,7 @@ export async function generateMetadata({
       description: t('description', { name: brand.name }),
       locale,
       type: 'website',
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
     },
   }
 }
