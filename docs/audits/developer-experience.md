@@ -99,9 +99,9 @@ typescript 5, tailwindcss 4, @playwright/test 1.53, vitest 3.2, @testing-library
 
 ## Recommandations
 
-1. **(High)** Ajouter Playwright au CI (chromium-only pour la rapidité)
-2. **(High)** Ajouter `npm run build` au CI
-3. **(Medium)** Mettre à jour Supabase SDKs (supabase-js 2.50→2.106, ssr 0.6→0.10)
-4. **(Low)** Centraliser le logging (remplacer 126 console.error par un logger)
-5. **(Low)** Ajouter script `"typecheck": "tsc --noEmit"` dans package.json
-6. **(Low)** Ajouter des tests unitaires pour les hooks (useCart, useWishlist) et les API routes
+1. ~~**(High)** Playwright au CI~~ ✅
+2. ~~**(High)** Build au CI~~ ✅
+3. ~~**(Medium)** Supabase SDKs~~ ✅
+4. **(Low)** Centraliser le logging (126 console.error → logger)
+5. ~~**(Low)** Script typecheck~~ ✅
+6. **(Low)** Tests unitaires hooks + API routes
