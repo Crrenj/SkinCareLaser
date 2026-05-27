@@ -789,6 +789,8 @@
     }
   },
   "Catalogue": {
+    "jsonLdName": "Catalogue — FARMAU",
+    "jsonLdDescription": "Découvrez notre sélection de produits dermatologiques certifiés",
     "loadError": "Erreur de chargement",
     "searchPlaceholder": "Rechercher un produit...",
     "searchAriaLabel": "Rechercher un produit",

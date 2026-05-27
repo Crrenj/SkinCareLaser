@@ -164,10 +164,23 @@ export default async function Catalogue({
 
   const counts = computeFacetedCounts(allProducts, filters, allBrands, rangesByBrand, itemsByType)
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: t('jsonLdName'),
+    description: t('jsonLdDescription'),
+    url: localizedPath(locale, '/catalogue'),
+    numberOfItems: allProducts.length,
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
       <NavBar />
       <main id="main-content" className="flex-grow">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <CatalogueClient
           products={pageProducts}
           visibleCount={filtered.length}

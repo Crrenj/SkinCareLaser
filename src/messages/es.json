@@ -789,6 +789,8 @@
     }
   },
   "Catalogue": {
+    "jsonLdName": "Catálogo — FARMAU",
+    "jsonLdDescription": "Descubre nuestra selección de productos dermatológicos certificados",
     "breadcrumbAriaLabel": "Migas de pan",
     "breadcrumbHome": "Inicio",
     "breadcrumbCurrent": "Catálogo",

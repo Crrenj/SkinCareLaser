@@ -789,6 +789,8 @@
     }
   },
   "Catalogue": {
+    "jsonLdName": "Catalogue — FARMAU",
+    "jsonLdDescription": "Discover our selection of certified dermatological products",
     "breadcrumbAriaLabel": "Breadcrumb",
     "breadcrumbHome": "Home",
     "breadcrumbCurrent": "Catalogue",

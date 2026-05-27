@@ -140,11 +140,23 @@ export default async function MarquesIndexPage({
 
   const totalProducts = cards.reduce((sum, c) => sum + c.productCount, 0)
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: t('title').replace(/<[^>]+>/g, ''),
+    url: localizedPath(locale, '/marques'),
+    numberOfItems: cards.length,
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
       <NavBar />
 
       <main id="main-content" className="flex-grow px-6 lg:px-14 py-12 max-w-7xl mx-auto w-full">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <header className="mb-12 pb-8 border-b border-sand-300">
           <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-clay-700 font-semibold mb-3">
             {t('eyebrow')}
