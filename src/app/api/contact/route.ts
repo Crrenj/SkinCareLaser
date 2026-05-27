@@ -2,13 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { checkOrigin } from '@/lib/csrf'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 
 // POST /api/contact - Envoyer un message de contact
 export async function POST(request: NextRequest) {
+  const originError = checkOrigin(request)
+  if (originError) return originError
+
   try {
-    // Rate limit : 5 requêtes / minute / IP (anti-spam + anti-énumération)
     const ip = getClientIp(request)
     const rl = await checkRateLimit(`contact:${ip}`, 5, 60)
     if (!rl.allowed) {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
+import { checkOrigin } from '@/lib/csrf'
 
 /**
  * /api/newsletter — gestion newsletter.
@@ -14,6 +15,9 @@ import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: NextRequest) {
+  const originError = checkOrigin(request)
+  if (originError) return originError
+
   if (!supabaseAdmin) {
     return NextResponse.json({ error: 'service_unavailable' }, { status: 503 })
   }
