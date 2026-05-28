@@ -2,6 +2,7 @@
 
 import { logger } from '@/lib/logger'
 import { useEffect, useRef } from 'react'
+import { mutate } from 'swr'
 import { supabase } from '@/lib/supabaseClient'
 import { useCart } from './useCart'
 
@@ -19,6 +20,9 @@ export function useAuth() {
           logger.error('Erreur fusion panier:', res.status)
         }
         await refreshCart()
+        // Recharge les favoris pour la nouvelle identité (sinon le cache SWR
+        // garde ceux de l'utilisateur précédent sur un navigateur partagé).
+        await mutate('/api/wishlist', undefined, { revalidate: true })
       } catch (error) {
         logger.error('Erreur lors de la fusion du panier:', error)
       }
@@ -27,6 +31,8 @@ export function useAuth() {
     const handleUserLogout = async () => {
       try {
         await refreshCart()
+        // Purge les favoris du cache SWR (le fetch renverra [] en anonyme).
+        await mutate('/api/wishlist', undefined, { revalidate: true })
       } catch (error) {
         logger.error('Erreur lors de la déconnexion:', error)
       }
