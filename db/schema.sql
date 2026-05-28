@@ -11,14 +11,12 @@
 -- remote : `supabase link` puis `supabase db dump --schema public`.
 -- Idempotent : CREATE IF NOT EXISTS / CREATE OR REPLACE partout.
 --
--- ⚠️ ÉTAT DE SYNCHRONISATION (2026-05-28) — ce snapshot a divergé du remote.
--- À jour ci-dessous : profiles (sans is_admin), posts, banners (enums slot/status).
--- GAPS connus (présents dans les migrations, PAS encore dans ce snapshot) :
---   • Tables manquantes : newsletter_subscribers (+ confirmation_token,
---     token_expires_at), wishlists, shop_settings.
---   • Tables droppées encore listées plus bas : orders + order_items
---     (migration 20260527110000), product_ranges (migration 20260522205544).
--- => Pour ces objets, se référer aux migrations (source de vérité).
+-- État de synchronisation (2026-05-28) : snapshot reconstruit pour matcher le
+-- remote via introspection MCP (colonnes/contraintes/indexes/policies/triggers).
+-- Inclut newsletter_subscribers, wishlists, shop_settings, posts, enums banner
+-- (slot/status). orders + order_items + product_ranges retirés (droppés en
+-- migration). Vestigial conservé : enum order_status (encore en DB, sans table).
+-- Source de vérité = supabase/migrations/.
 --
 -- Contenu :
 --   0. Extensions
@@ -26,9 +24,9 @@
 --   2. Catalogue (brands, ranges, products, tags, tag_types, images)
 --   3. Vue tags_with_types
 --   4. Panier (carts, cart_items)
---   5. Commandes (orders, order_items)
+--   5. Commandes — DROPPÉES (enum order_status vestigial conservé)
 --   6. Bannières (+ enums banner_slot / banner_status)
---   7. Messages de contact · 7b. Rate limiting · 7c. Réservations · 7d. Blog (posts)
+--   7. Messages de contact · 7b. Rate limiting · 7c. Réservations · 7d. Blog · 7e. Newsletter/Wishlists/Shop_settings
 --   8. Storage policies (bucket product-image)
 --   9. Helpers, triggers, RPC
 --  10. RLS policies
@@ -99,12 +97,8 @@ CREATE TABLE IF NOT EXISTS public.ranges (
 );
 ALTER TABLE public.ranges ENABLE ROW LEVEL SECURITY;
 
-CREATE TABLE IF NOT EXISTS public.product_ranges (
-  product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
-  range_id   UUID REFERENCES public.ranges(id) ON DELETE CASCADE,
-  PRIMARY KEY (product_id, range_id)
-);
-ALTER TABLE public.product_ranges ENABLE ROW LEVEL SECURITY;
+-- product_ranges (n-n) DROPPÉE (migration 20260522205544) : remplacée par
+-- products.range_id (FK directe 1-n, cf. table products). Ne pas recréer.
 
 CREATE TABLE IF NOT EXISTS public.tag_types (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -142,9 +136,7 @@ CREATE TABLE IF NOT EXISTS public.product_images (
 ALTER TABLE public.product_images ENABLE ROW LEVEL SECURITY;
 
 -- Indexes FK manquants (perf RLS + jointures catalogue)
--- product_ranges(product_id) et product_tags(product_id) sont déjà couverts
--- par leurs PKs composites (leading column = product_id).
-CREATE INDEX IF NOT EXISTS idx_product_ranges_range_id   ON public.product_ranges(range_id);
+-- product_tags(product_id) est déjà couvert par sa PK composite.
 CREATE INDEX IF NOT EXISTS idx_product_tags_tag_id       ON public.product_tags(tag_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_product_id ON public.product_images(product_id);
 
@@ -193,32 +185,17 @@ ALTER TABLE public.cart_items ENABLE ROW LEVEL SECURITY;
 CREATE INDEX IF NOT EXISTS idx_cart_items_product_id ON public.cart_items(product_id);
 
 -- ======================================================================
--- 5. COMMANDES
+-- 5. COMMANDES — tables DROPPÉES
 -- ======================================================================
+-- orders + order_items DROPPÉES (migration 20260527110000, 0 ligne, jamais
+-- branchées). L'enum order_status subsiste en DB (vestigial) — conservé ici
+-- pour fidélité au remote ; ne pas recréer les tables.
 DO $$
 BEGIN
   CREATE TYPE order_status AS ENUM ('pending','paid','shipped','completed','cancelled');
 EXCEPTION
   WHEN duplicate_object THEN NULL;
 END $$;
-
-CREATE TABLE IF NOT EXISTS public.orders (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id    UUID REFERENCES public.profiles(id),
-  status     order_status DEFAULT 'pending',
-  total      NUMERIC(10,2),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
-
-CREATE TABLE IF NOT EXISTS public.order_items (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id   UUID REFERENCES public.orders(id) ON DELETE CASCADE,
-  product_id UUID REFERENCES public.products(id),
-  unit_price NUMERIC(10,2),
-  quantity   INT NOT NULL CHECK (quantity > 0)
-);
-ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
 -- ======================================================================
 -- 6. BANNIÈRES
@@ -608,6 +585,79 @@ CREATE POLICY "Admins can manage posts" ON public.posts
   WITH CHECK (public.is_user_admin((SELECT auth.uid())));
 
 -- ======================================================================
+-- 7e. NEWSLETTER · WISHLISTS · SHOP_SETTINGS
+-- ======================================================================
+-- Newsletter (double opt-in). RLS activé SANS policy = service_role only
+-- (toutes les écritures passent par /api/newsletter* en service-role).
+CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email              TEXT NOT NULL UNIQUE,
+  lang               TEXT NOT NULL DEFAULT 'fr' CHECK (lang IN ('fr','es','en')),
+  ip                 TEXT,
+  user_agent         TEXT,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  confirmed_at       TIMESTAMPTZ,
+  confirmation_token TEXT UNIQUE,
+  token_expires_at   TIMESTAMPTZ
+);
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS newsletter_subscribers_created_at_idx
+  ON public.newsletter_subscribers (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_newsletter_confirmation_token
+  ON public.newsletter_subscribers (confirmation_token) WHERE confirmation_token IS NOT NULL;
+
+-- Wishlists (favoris user) — PK composite, RLS "users manage own".
+CREATE TABLE IF NOT EXISTS public.wishlists (
+  user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, product_id)
+);
+ALTER TABLE public.wishlists ENABLE ROW LEVEL SECURITY;
+CREATE INDEX IF NOT EXISTS idx_wishlists_user    ON public.wishlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlists_product ON public.wishlists(product_id);
+DROP POLICY IF EXISTS "Users manage own wishlists" ON public.wishlists;
+CREATE POLICY "Users manage own wishlists" ON public.wishlists
+  FOR ALL
+  USING ((SELECT auth.uid()) = user_id)
+  WITH CHECK ((SELECT auth.uid()) = user_id);
+
+-- Shop settings (single-row id=1) — public SELECT + admin UPDATE.
+CREATE TABLE IF NOT EXISTS public.shop_settings (
+  id                     INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  shop_name              TEXT NOT NULL DEFAULT 'FARMAU',
+  shop_tagline           TEXT,
+  contact_email          TEXT,
+  contact_phone          TEXT,
+  whatsapp_number        TEXT,
+  pickup_name            TEXT,
+  pickup_address         TEXT,
+  pickup_hours           TEXT,
+  pickup_phone           TEXT,
+  shipping_santo_domingo INTEGER NOT NULL DEFAULT 300,
+  shipping_interior      INTEGER NOT NULL DEFAULT 600,
+  theme                  TEXT NOT NULL DEFAULT 'terra'
+                           CHECK (theme IN ('terra','noir','botanico','coral','marino','ambar')),
+  default_mode           TEXT NOT NULL DEFAULT 'light'
+                           CHECK (default_mode IN ('light','dark','system')),
+  allow_visitor_mode     BOOLEAN NOT NULL DEFAULT TRUE,
+  updated_at             TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_by             UUID REFERENCES auth.users(id) ON DELETE SET NULL
+);
+ALTER TABLE public.shop_settings ENABLE ROW LEVEL SECURITY;
+DROP TRIGGER IF EXISTS shop_settings_updated_at ON public.shop_settings;
+CREATE TRIGGER shop_settings_updated_at
+  BEFORE UPDATE ON public.shop_settings
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+DROP POLICY IF EXISTS "Public read shop_settings"  ON public.shop_settings;
+CREATE POLICY "Public read shop_settings"  ON public.shop_settings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Admin update shop_settings" ON public.shop_settings;
+CREATE POLICY "Admin update shop_settings" ON public.shop_settings
+  FOR UPDATE
+  USING (public.is_user_admin((SELECT auth.uid())))
+  WITH CHECK (public.is_user_admin((SELECT auth.uid())));
+
+-- ======================================================================
 -- 8. STORAGE — buckets et policies
 -- ======================================================================
 -- Bucket des images produits
@@ -876,8 +926,6 @@ DROP POLICY IF EXISTS "Public read brands"          ON public.brands;
 DROP POLICY IF EXISTS "Admin manage brands"         ON public.brands;
 DROP POLICY IF EXISTS "Public read ranges"          ON public.ranges;
 DROP POLICY IF EXISTS "Admin manage ranges"         ON public.ranges;
-DROP POLICY IF EXISTS "Public read product_ranges"  ON public.product_ranges;
-DROP POLICY IF EXISTS "Admin manage product_ranges" ON public.product_ranges;
 DROP POLICY IF EXISTS "Public read tag_types"       ON public.tag_types;
 DROP POLICY IF EXISTS "Admin manage tag_types"      ON public.tag_types;
 DROP POLICY IF EXISTS "Public read tags"            ON public.tags;
@@ -893,8 +941,6 @@ CREATE POLICY "Public read brands"          ON public.brands          FOR SELECT
 CREATE POLICY "Admin manage brands"         ON public.brands          FOR ALL    USING (public.is_user_admin(auth.uid()));
 CREATE POLICY "Public read ranges"          ON public.ranges          FOR SELECT USING (true);
 CREATE POLICY "Admin manage ranges"         ON public.ranges          FOR ALL    USING (public.is_user_admin(auth.uid()));
-CREATE POLICY "Public read product_ranges"  ON public.product_ranges  FOR SELECT USING (true);
-CREATE POLICY "Admin manage product_ranges" ON public.product_ranges  FOR ALL    USING (public.is_user_admin(auth.uid()));
 CREATE POLICY "Public read tag_types"       ON public.tag_types       FOR SELECT USING (true);
 CREATE POLICY "Admin manage tag_types"      ON public.tag_types       FOR ALL    USING (public.is_user_admin(auth.uid()));
 CREATE POLICY "Public read tags"            ON public.tags            FOR SELECT USING (true);
@@ -930,16 +976,6 @@ CREATE POLICY "Manage own cart items" ON public.cart_items FOR ALL USING (
   EXISTS (SELECT 1 FROM public.carts
     WHERE carts.id = cart_items.cart_id
       AND (carts.user_id = auth.uid() OR carts.anonymous_id::text = auth.jwt()->>'anonymous_id'))
-);
-
--- ----- commandes -----
-DROP POLICY IF EXISTS "Order owner"       ON public.orders;
-DROP POLICY IF EXISTS "Order items owner" ON public.order_items;
-
-CREATE POLICY "Order owner"       ON public.orders      FOR ALL USING (user_id = auth.uid() OR public.is_user_admin(auth.uid()));
-CREATE POLICY "Order items owner" ON public.order_items FOR ALL USING (
-  order_id IN (SELECT id FROM public.orders WHERE user_id = auth.uid())
-  OR public.is_user_admin(auth.uid())
 );
 
 -- ----- bannières -----

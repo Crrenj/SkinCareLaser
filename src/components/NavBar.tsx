@@ -11,7 +11,7 @@ import { useCart } from '@/hooks/useCart'
 import { CartDrawer } from './CartDrawer'
 import { MobileDrawer } from './MobileDrawer'
 import { NavSearch, type NavSearchHandle } from './NavSearch'
-import Logo from './Logo'
+import { FarmauLockup } from './brand/FarmauLogo'
 import { LocaleSwitcher } from './LocaleSwitcher'
 
 const NAV_LINKS = [
@@ -101,7 +101,7 @@ export default function NavBar() {
 
         {/* Centre : Logo */}
         <div className="flex justify-center">
-          <Logo size={64} />
+          <FarmauLockup birdSize={46} wordWidth={78} />
         </div>
 
         {/* Droite : WhatsApp (≥ md) + admin + panier */}

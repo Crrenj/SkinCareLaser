@@ -179,3 +179,11 @@ export const postUpdate = z.object({
 export const postDelete = z.object({
   id: z.string().uuid('id invalide'),
 })
+
+// Apparence du site public (thème + mode + override visiteur). Les valeurs
+// possibles sont aussi listées dans src/lib/themes.ts (garder en phase).
+export const appearanceBody = z.object({
+  theme: z.enum(['terra', 'noir', 'botanico', 'coral', 'marino', 'ambar']),
+  default_mode: z.enum(['light', 'dark', 'system']),
+  allow_visitor_mode: z.boolean(),
+})

@@ -217,7 +217,9 @@
       "privacy": "Privacidad",
       "cookies": "Cookies",
       "legal": "Aviso legal"
-    }
+    },
+    "themeToLight": "Cambiar a modo claro",
+    "themeToDark": "Cambiar a modo oscuro"
   },
   "AddToCart": {
     "quickAddAriaLabel": "Añadir rápido al carrito",
@@ -1378,7 +1380,9 @@
       "navUsers": "Usuarios",
       "navNewsletter": "Newsletter",
       "navSettings": "Configuración",
-      "navBlog": "Blog"
+      "navBlog": "Blog",
+      "sectionPersonalization": "Personalización",
+      "navAppearance": "Apariencia"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1840,6 +1844,28 @@
       "deleted": "Artículo eliminado",
       "deleteError": "Error al eliminar",
       "errorTitleSlug": "El título y el slug son obligatorios"
+    },
+    "appearance": {
+      "crumbPersonalization": "Personalización",
+      "crumbAppearance": "Apariencia",
+      "title": "Tema de la página",
+      "subtitle": "Selecciona la paleta de colores aplicada al sitio público. El colibrí se adapta automáticamente al tema elegido.",
+      "defaultModeLabel": "Modo por defecto",
+      "modeLight": "Claro",
+      "modeDark": "Oscuro",
+      "modeSystem": "Sistema",
+      "visitorLabel": "Visitante puede cambiar",
+      "visitorYes": "Sí",
+      "visitorNo": "No",
+      "themeCardAria": "Tema {name}",
+      "save": "Guardar tema",
+      "cancel": "Cancelar",
+      "saveSuccess": "Tema guardado",
+      "saveError": "Error al guardar",
+      "networkError": "Error de red",
+      "loadError": "No se pudo cargar la apariencia",
+      "updatedAt": "Último cambio · {date}",
+      "publicNote": "el sitio público se actualiza en la próxima carga"
     }
   },
   "Error": {

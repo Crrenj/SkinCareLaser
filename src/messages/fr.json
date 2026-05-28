@@ -217,7 +217,9 @@
       "privacy": "Confidentialité",
       "cookies": "Cookies",
       "legal": "Mentions légales"
-    }
+    },
+    "themeToLight": "Passer en mode clair",
+    "themeToDark": "Passer en mode sombre"
   },
   "AddToCart": {
     "quickAddAriaLabel": "Ajout rapide au panier",
@@ -1378,7 +1380,9 @@
       "navUsers": "Utilisateurs",
       "navNewsletter": "Newsletter",
       "navSettings": "Configuration",
-      "navBlog": "Blog"
+      "navBlog": "Blog",
+      "sectionPersonalization": "Personnalisation",
+      "navAppearance": "Apparence"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1840,6 +1844,28 @@
       "deleted": "Article supprimé",
       "deleteError": "Erreur lors de la suppression",
       "errorTitleSlug": "Le titre et le slug sont requis"
+    },
+    "appearance": {
+      "crumbPersonalization": "Personnalisation",
+      "crumbAppearance": "Apparence",
+      "title": "Thème du site",
+      "subtitle": "Choisis la palette de couleurs appliquée au site public. Le colibri s'adapte automatiquement au thème choisi.",
+      "defaultModeLabel": "Mode par défaut",
+      "modeLight": "Clair",
+      "modeDark": "Sombre",
+      "modeSystem": "Système",
+      "visitorLabel": "Le visiteur peut changer",
+      "visitorYes": "Oui",
+      "visitorNo": "Non",
+      "themeCardAria": "Thème {name}",
+      "save": "Enregistrer le thème",
+      "cancel": "Annuler",
+      "saveSuccess": "Thème enregistré",
+      "saveError": "Échec de l'enregistrement",
+      "networkError": "Erreur réseau",
+      "loadError": "Impossible de charger l'apparence",
+      "updatedAt": "Dernière modification · {date}",
+      "publicNote": "le site public se met à jour au prochain chargement"
     }
   },
   "Error": {

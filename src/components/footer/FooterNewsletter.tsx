@@ -44,13 +44,13 @@ export function FooterNewsletter() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-8 lg:gap-12 items-end pb-14 mb-14 border-b border-ink-800">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-8 lg:gap-12 items-end pb-14 mb-14 border-b border-[var(--c-ink-panel-border)]">
       <div>
         <h3
-          className="font-serif text-[32px] md:text-[40px] leading-[1.05] -tracking-[0.02em] text-sand-50 mb-2 [&_em]:not-italic [&_em]:italic [&_em]:text-clay-400"
+          className="font-serif text-[32px] md:text-[40px] leading-[1.05] -tracking-[0.02em] text-[var(--c-ink-panel-fg)] mb-2 [&_em]:not-italic [&_em]:italic [&_em]:text-[var(--c-ink-panel-accent)]"
           dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
         />
-        <p className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-500 max-w-[440px]">
+        <p className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-[var(--c-ink-panel-muted)] max-w-[440px]">
           {t('description')}
         </p>
       </div>
@@ -66,7 +66,7 @@ export function FooterNewsletter() {
           aria-invalid={status === 'error'}
           aria-describedby={status === 'error' || status === 'success' ? 'newsletter-feedback' : undefined}
           disabled={status === 'submitting' || status === 'success'}
-          className="bg-ink-800 border border-ink-700 text-sand-50 placeholder:text-ink-500 rounded-sm px-4 py-3.5 text-sm outline-none focus:border-clay-600 transition-colors disabled:opacity-60"
+          className="bg-[var(--c-ink-panel-2)] border border-[var(--c-ink-panel-border)] text-[var(--c-ink-panel-fg)] placeholder:text-[var(--c-ink-panel-muted)] rounded-sm px-4 py-3.5 text-sm outline-none focus-visible:border-[var(--c-ink-panel-accent)] transition-colors disabled:opacity-60"
         />
         <button
           type="submit"
@@ -77,7 +77,7 @@ export function FooterNewsletter() {
         </button>
         <div id="newsletter-feedback" aria-live="polite" className="col-span-2">
           {status === 'success' && (
-            <p className="mt-2 text-[13px] text-clay-400">{t('success')}</p>
+            <p className="mt-2 text-[13px] text-[var(--c-ink-panel-accent)]">{t('success')}</p>
           )}
           {status === 'error' && errorMsg && (
             <p className="mt-2 text-[13px] text-brick-600">{errorMsg}</p>

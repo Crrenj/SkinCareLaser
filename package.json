@@ -21,6 +21,7 @@
     "prices:default": "node scripts/prices-set-default.cjs",
     "seed-import": "node scripts/seed-import.cjs",
     "create-admin": "node scripts/create-admin-user.js",
+    "favicons:build": "node scripts/build-favicons.cjs",
     "prepare": "husky"
   },
   "dependencies": {

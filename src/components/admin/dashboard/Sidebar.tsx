@@ -15,6 +15,7 @@ import {
   Mail,
   Mailbox,
   Megaphone,
+  Palette,
   Tag,
   Users,
 } from 'lucide-react'
@@ -43,6 +44,7 @@ type NavItem = {
     | 'navBlog'
     | 'navUsers'
     | 'navNewsletter'
+    | 'navAppearance'
     | 'navSettings'
   icon: React.ComponentType<{ className?: string }>
   badgeKey?: 'products' | 'low_stock' | 'reservations' | 'messages'
@@ -56,6 +58,7 @@ type Section = {
     | 'sectionCatalog'
     | 'sectionOps'
     | 'sectionCustomers'
+    | 'sectionPersonalization'
     | 'sectionAccount'
   items: NavItem[]
 }
@@ -95,6 +98,10 @@ const SECTIONS: Section[] = [
       { href: '/admin/users', labelKey: 'navUsers', icon: Users },
       { href: '/admin/newsletter', labelKey: 'navNewsletter', icon: Mailbox },
     ],
+  },
+  {
+    titleKey: 'sectionPersonalization',
+    items: [{ href: '/admin/apariencia', labelKey: 'navAppearance', icon: Palette }],
   },
   {
     titleKey: 'sectionAccount',

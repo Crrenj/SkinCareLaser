@@ -3,6 +3,8 @@ import { SiWhatsapp } from 'react-icons/si'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { FooterNewsletter } from './footer/FooterNewsletter'
+import { FarmauBird, FarmauWord } from './brand/FarmauLogo'
+import { ThemeModeToggle } from './ThemeModeToggle'
 import { getShopSettings, whatsappHref } from '@/lib/getShopSettings'
 
 // `categories` tag_type est vide en DB (taxonomie à créer) ; en attendant on
@@ -57,24 +59,19 @@ export default async function Footer() {
   const waLink = whatsappHref(settings.whatsapp_number) ?? '#'
 
   return (
-    <footer className="bg-ink-900 text-sand-200 px-6 lg:px-16 pt-16 lg:pt-20">
+    <footer className="bg-[var(--c-ink-panel)] text-[var(--c-ink-panel-fg)] px-6 lg:px-16 pt-16 lg:pt-20">
       <FooterNewsletter />
 
       {/* Grid 5 colonnes (2fr + 4×1fr) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-12 mb-14">
         {/* Brand column */}
         <div className="flex flex-col gap-5 max-w-[320px]">
-          <span
-            className="inline-flex flex-col items-center justify-center w-14 h-14 rounded-full border-[1.5px] border-clay-400"
-            aria-label="FARMAU"
-          >
-            <span className="font-serif italic text-[24px] text-clay-400 leading-none">F</span>
-            <span className="font-sans text-[6.5px] uppercase tracking-[0.18em] text-clay-400 mt-px">
-              FARMAU
-            </span>
+          <span className="inline-flex items-center gap-3" aria-label="FARMAU">
+            <FarmauBird size={48} color="var(--c-ink-panel-accent)" />
+            <FarmauWord width={92} color="var(--c-ink-panel-fg)" />
           </span>
           <p
-            className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-ink-500"
+            className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-[var(--c-ink-panel-muted)]"
             dangerouslySetInnerHTML={{ __html: t.raw('tagline') as string }}
           />
           <div className="flex gap-2.5 mt-1">
@@ -120,7 +117,7 @@ export default async function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="py-6 border-t border-ink-800 flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11.5px] text-ink-500">
+      <div className="py-6 border-t border-[var(--c-ink-panel-border)] flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11.5px] text-[var(--c-ink-panel-muted)]">
         <div>{t('bottom.copyright')}</div>
         <div className="flex flex-wrap gap-5">
           <FooterLegalLink href="/legal/cgv" label={t('bottom.terms')} />
@@ -128,15 +125,18 @@ export default async function Footer() {
           <FooterLegalLink href="/legal/cookies" label={t('bottom.cookies')} />
           <FooterLegalLink href="/legal/mentions-legales" label={t('bottom.legal')} />
         </div>
-        <div className="flex gap-2">
-          {['Visa', 'Mastercard', 'PayPal', 'Azul'].map((label) => (
-            <span
-              key={label}
-              className="font-mono text-[10px] px-2 py-1 border border-ink-700 rounded-sm text-ink-500"
-            >
-              {label}
-            </span>
-          ))}
+        <div className="flex items-center gap-3">
+          <div className="flex gap-2">
+            {['Visa', 'Mastercard', 'PayPal', 'Azul'].map((label) => (
+              <span
+                key={label}
+                className="font-mono text-[10px] px-2 py-1 border border-[var(--c-ink-panel-border)] rounded-sm text-[var(--c-ink-panel-muted)]"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <ThemeModeToggle />
         </div>
       </div>
     </footer>
@@ -152,7 +152,7 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-clay-400 font-semibold mb-4">
+      <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-[var(--c-ink-panel-accent)] font-semibold mb-4">
         {heading}
       </div>
       <ul className="list-none p-0 m-0 grid gap-2.5">{children}</ul>
@@ -165,7 +165,7 @@ function FooterLink({ href, label }: { href: string; label: string }) {
     <li>
       <Link
         href={href}
-        className="text-[13px] text-ink-500 hover:text-sand-50 transition-colors"
+        className="text-[13px] text-[var(--c-ink-panel-muted)] hover:text-[var(--c-ink-panel-fg)] transition-colors"
       >
         {label}
       </Link>
@@ -175,7 +175,10 @@ function FooterLink({ href, label }: { href: string; label: string }) {
 
 function FooterLegalLink({ href, label }: { href: string; label: string }) {
   return (
-    <Link href={href} className="text-ink-500 hover:text-sand-200 transition-colors">
+    <Link
+      href={href}
+      className="text-[var(--c-ink-panel-muted)] hover:text-[var(--c-ink-panel-fg)] transition-colors"
+    >
       {label}
     </Link>
   )
@@ -196,7 +199,7 @@ function SocialIcon({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="w-9 h-9 rounded-full border border-ink-700 flex items-center justify-center text-sand-200 hover:bg-ink-800 hover:border-clay-600 hover:text-clay-400 transition-colors"
+      className="w-9 h-9 rounded-full border border-[var(--c-ink-panel-border)] flex items-center justify-center text-[var(--c-ink-panel-fg)] hover:border-[var(--c-ink-panel-accent)] hover:text-[var(--c-ink-panel-accent)] transition-colors"
     >
       {children}
     </a>

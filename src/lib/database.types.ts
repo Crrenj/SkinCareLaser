@@ -681,8 +681,10 @@ export type Database = {
       }
       shop_settings: {
         Row: {
+          allow_visitor_mode: boolean
           contact_email: string | null
           contact_phone: string | null
+          default_mode: string
           id: number
           pickup_address: string | null
           pickup_hours: string | null
@@ -692,13 +694,16 @@ export type Database = {
           shipping_santo_domingo: number
           shop_name: string
           shop_tagline: string | null
+          theme: string
           updated_at: string
           updated_by: string | null
           whatsapp_number: string | null
         }
         Insert: {
+          allow_visitor_mode?: boolean
           contact_email?: string | null
           contact_phone?: string | null
+          default_mode?: string
           id?: number
           pickup_address?: string | null
           pickup_hours?: string | null
@@ -708,13 +713,16 @@ export type Database = {
           shipping_santo_domingo?: number
           shop_name?: string
           shop_tagline?: string | null
+          theme?: string
           updated_at?: string
           updated_by?: string | null
           whatsapp_number?: string | null
         }
         Update: {
+          allow_visitor_mode?: boolean
           contact_email?: string | null
           contact_phone?: string | null
+          default_mode?: string
           id?: number
           pickup_address?: string | null
           pickup_hours?: string | null
@@ -724,6 +732,7 @@ export type Database = {
           shipping_santo_domingo?: number
           shop_name?: string
           shop_tagline?: string | null
+          theme?: string
           updated_at?: string
           updated_by?: string | null
           whatsapp_number?: string | null

@@ -24,6 +24,9 @@ const FALLBACK: ShopSettings = {
   pickup_phone: null,
   shipping_santo_domingo: 300,
   shipping_interior: 600,
+  theme: 'terra',
+  default_mode: 'light',
+  allow_visitor_mode: true,
   updated_at: new Date(0).toISOString(),
   updated_by: null,
 }

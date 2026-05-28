@@ -37,7 +37,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   // le flash spinner à chaque retour de tab).
   if (loading && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-sand-100">
+      <div
+        data-theme="terra"
+        data-mode="light"
+        className="min-h-screen flex items-center justify-center bg-sand-100"
+      >
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-sand-300 border-t-clay-700" />
       </div>
     )
@@ -46,7 +50,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (!user || !isAdmin) return null
 
   return (
-    <div className="flex min-h-screen bg-sand-50">
+    // L'admin reste neutre (Terra clair) quel que soit le thème public choisi.
+    <div data-theme="terra" data-mode="light" className="flex min-h-screen bg-sand-50">
       <Sidebar
         mobileOpen={drawerOpen}
         onCloseMobile={() => setDrawerOpen(false)}

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { User } from '@supabase/supabase-js'
 import { Link, usePathname } from '@/i18n/navigation'
 import { useModalA11y } from '@/hooks/useModalA11y'
-import Logo from './Logo'
+import { FarmauLockup } from './brand/FarmauLogo'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { PopClose } from '@/components/ui/PopClose'
 
@@ -56,16 +56,9 @@ export function MobileDrawer({
         aria-label={t('drawer.menuHeading')}
         tabIndex={-1}
       >
-        {/* Header — eyebrow + logo clay-700 */}
-        <div className="flex items-start justify-between px-5 py-[18px]">
-          <div>
-            <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium">
-              FARMAU
-            </span>
-            <div className="mt-2">
-              <Logo size={48} onClick={onClose} variant="clay" />
-            </div>
-          </div>
+        {/* Header — lockup monochrome */}
+        <div className="flex items-center justify-between px-5 py-[18px]">
+          <FarmauLockup onClick={onClose} birdSize={40} wordWidth={66} />
           <PopClose onClick={onClose} label={t('closeMenuAriaLabel')} />
         </div>
 

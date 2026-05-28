@@ -1,40 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  /* ─── Couleurs ─── */
-  --color-sand-50:  #FBF8F4;
-  --color-sand-100: #F4EFE7;
-  --color-sand-200: #EDEAE5;
-  --color-sand-300: #D8D1C6;
-  --color-sand-400: #CCC5BD;
-  --color-sand-500: #B8B1A8;
-  --color-sand-600: #9A9388;
+  /* ─── Couleurs neutres & accent ─── */
+  /* Pilotées par le THÈME actif via les variables --c-* (cf. plus bas).
+     Les utilitaires Tailwind (bg-sand-50, text-ink-900, bg-clay-700…)
+     restent inchangés dans le code ; seules leurs valeurs basculent selon
+     html[data-theme][data-mode]. Les défauts (Terra clair) vivent dans
+     :root et le bloc [data-theme]. */
+  --color-sand-50:  var(--c-bg);
+  --color-sand-100: var(--c-surface);
+  --color-sand-200: var(--c-bg-2);
+  --color-sand-300: var(--c-border);
+  --color-sand-400: var(--c-border-2);
+  --color-sand-500: var(--c-neutral-500);
+  --color-sand-600: var(--c-neutral-600);
 
-  --color-clay-50:  #FBF2EC;
-  --color-clay-200: #F0D7C5;
-  --color-clay-400: #D89A75;
-  --color-clay-600: #B86F4A;
-  --color-clay-700: #8E5232;   /* CTA principal */
-  --color-clay-800: #5F381F;
+  --color-clay-50:  var(--c-accent-50);
+  --color-clay-100: var(--c-accent-100);
+  --color-clay-200: var(--c-accent-200);
+  --color-clay-400: var(--c-accent-400);
+  --color-clay-600: var(--c-accent);
+  --color-clay-700: var(--c-accent-strong);   /* CTA principal */
+  --color-clay-800: var(--c-accent-deep);
 
-  --color-ink-50:  #F5F4F2;
-  --color-ink-200: #D5D2CB;
-  --color-ink-400: #A8A293;
-  --color-ink-500: #807969;
-  --color-ink-700: #5A5448;
-  --color-ink-800: #3C3830;
-  --color-ink-900: #1F1B16;
+  --color-ink-50:  var(--c-ink-50);
+  --color-ink-200: var(--c-ink-200);
+  --color-ink-400: var(--c-ink-400);
+  --color-ink-500: var(--c-ink-500);
+  --color-ink-700: var(--c-ink-700);
+  --color-ink-800: var(--c-ink-800);
+  --color-ink-900: var(--c-text);
 
+  /* ─── Statut : constantes, NON thémées (success / warn / error) ─── */
   --color-olive-600: #5B6B3F;
   --color-brick-600: #8B3A2E;
-
-  /* ─── Typographie ─── */
-  --font-serif: var(--font-instrument), Georgia, serif;
-  --font-sans:  var(--font-bevn), ui-sans-serif, system-ui, sans-serif;
-  --font-mono:  ui-monospace, "JetBrains Mono", "SF Mono", monospace;
-
-  /* ─── Couleurs additionnelles (popups/overlays) ─── */
-  --color-clay-100: #F8E5D6;
   --color-olive-50:  #EEF0E8;
   --color-olive-200: #C9D1B0;
   --color-olive-800: #3B4528;
@@ -44,11 +43,142 @@
   --color-ochre-200: #EBD9A8;
   --color-ochre-600: #B5852B;
 
+  /* ─── Typographie ─── */
+  --font-serif: var(--font-instrument), Georgia, serif;
+  --font-sans:  var(--font-bevn), ui-sans-serif, system-ui, sans-serif;
+  --font-mono:  ui-monospace, "JetBrains Mono", "SF Mono", monospace;
+
   /* ─── Radii ─── */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1.25rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SYSTÈME DE THÈMES (6 palettes × clair/sombre)
+   ─────────────────────────────────────────────────────────
+   Chaque combinaison ne définit que 6 ANCRES :
+     --c-bg --c-surface --c-text --c-accent --c-accent-strong --c-bird
+   Le reste de la rampe (bordures, gris, teintes accent) est DÉRIVÉ via
+   color-mix dans le bloc [data-theme] — recalculé sur l'élément thémé
+   (donc avec les bonnes ancres). Voir handoff design_handoff_themes_system.
+   ═══════════════════════════════════════════════════════ */
+
+/* Défauts (= Terra clair) si aucun [data-theme] ne s'applique. */
+:root {
+  --c-bg:            #FBF8F4;
+  --c-surface:       #F4EFE7;
+  --c-text:          #1F1B16;
+  --c-accent:        #B86F4A;
+  --c-accent-strong: #8E5232;
+  --c-bird:          #1F1B16;
+}
+
+/* Rampe dérivée — déclarée sur tout élément thémé pour recalculer les
+   color-mix avec les ancres de CE thème (les custom props var() sont
+   résolues au niveau de l'élément où elles sont déclarées). */
+[data-theme] {
+  --c-bg-2:        color-mix(in srgb, var(--c-text)  8%, var(--c-bg));
+  --c-border:      color-mix(in srgb, var(--c-text) 16%, var(--c-bg));
+  --c-border-2:    color-mix(in srgb, var(--c-text) 28%, var(--c-bg));
+  --c-neutral-500: color-mix(in srgb, var(--c-text) 42%, var(--c-bg));
+  --c-neutral-600: color-mix(in srgb, var(--c-text) 56%, var(--c-bg));
+
+  --c-ink-50:  color-mix(in srgb, var(--c-text)  5%, var(--c-bg));
+  --c-ink-200: color-mix(in srgb, var(--c-text) 18%, var(--c-bg));
+  --c-ink-400: color-mix(in srgb, var(--c-text) 40%, var(--c-bg));
+  --c-ink-500: color-mix(in srgb, var(--c-text) 54%, var(--c-bg));
+  --c-ink-700: color-mix(in srgb, var(--c-text) 72%, var(--c-bg));
+  --c-ink-800: color-mix(in srgb, var(--c-text) 88%, var(--c-bg));
+
+  --c-accent-50:  color-mix(in srgb, var(--c-accent)  8%, var(--c-bg));
+  --c-accent-100: color-mix(in srgb, var(--c-accent) 14%, var(--c-bg));
+  --c-accent-200: color-mix(in srgb, var(--c-accent) 24%, var(--c-bg));
+  --c-accent-400: color-mix(in srgb, var(--c-accent) 55%, var(--c-bg));
+  --c-accent-deep: color-mix(in srgb, var(--c-accent-strong) 72%, #000);
+}
+
+/* ── TERRA ──────────────────────────────────────────── */
+[data-theme="terra"][data-mode="light"] {
+  --c-bg: #FBF8F4; --c-surface: #F4EFE7; --c-text: #1F1B16;
+  --c-accent: #B86F4A; --c-accent-strong: #8E5232; --c-bird: #1F1B16;
+}
+[data-theme="terra"][data-mode="dark"] {
+  --c-bg: #1F1B16; --c-surface: #3C3830; --c-text: #F4EFE7;
+  --c-accent: #D89A75; --c-accent-strong: #B86F4A; --c-bird: #FBF8F4;
+}
+
+/* ── NOIR ───────────────────────────────────────────── */
+[data-theme="noir"][data-mode="light"] {
+  --c-bg: #FFFFFF; --c-surface: #F5F5F5; --c-text: #0A0A0A;
+  --c-accent: #1F1B16; --c-accent-strong: #0A0A0A; --c-bird: #0A0A0A;
+}
+[data-theme="noir"][data-mode="dark"] {
+  --c-bg: #0A0A0A; --c-surface: #1C1C1C; --c-text: #F5F5F5;
+  --c-accent: #FFFFFF; --c-accent-strong: #E5E5E5; --c-bird: #FFFFFF;
+}
+
+/* ── BOTÁNICO ───────────────────────────────────────── */
+[data-theme="botanico"][data-mode="light"] {
+  --c-bg: #F5F2EA; --c-surface: #EBE6D5; --c-text: #2A3520;
+  --c-accent: #5B6B3F; --c-accent-strong: #45522F; --c-bird: #2A3520;
+}
+[data-theme="botanico"][data-mode="dark"] {
+  --c-bg: #1E2418; --c-surface: #2D3624; --c-text: #DBE0CC;
+  --c-accent: #8B9A66; --c-accent-strong: #5B6B3F; --c-bird: #DBE0CC;
+}
+
+/* ── CORAL ──────────────────────────────────────────── */
+[data-theme="coral"][data-mode="light"] {
+  --c-bg: #FBF2EC; --c-surface: #F4E2D2; --c-text: #5F381F;
+  --c-accent: #B86F4A; --c-accent-strong: #8E5232; --c-bird: #5F381F;
+}
+[data-theme="coral"][data-mode="dark"] {
+  --c-bg: #2E1810; --c-surface: #4A2820; --c-text: #F0D7C5;
+  --c-accent: #D89A75; --c-accent-strong: #B86F4A; --c-bird: #F0D7C5;
+}
+
+/* ── MARINO ─────────────────────────────────────────── */
+[data-theme="marino"][data-mode="light"] {
+  --c-bg: #F0F4F5; --c-surface: #DDE6E8; --c-text: #1A2A33;
+  --c-accent: #3D6B7A; --c-accent-strong: #2E5260; --c-bird: #1A2A33;
+}
+[data-theme="marino"][data-mode="dark"] {
+  --c-bg: #0F1B22; --c-surface: #1E2E37; --c-text: #C5D6DC;
+  --c-accent: #7AA5B5; --c-accent-strong: #3D6B7A; --c-bird: #C5D6DC;
+}
+
+/* ── ÁMBAR ──────────────────────────────────────────── */
+[data-theme="ambar"][data-mode="light"] {
+  --c-bg: #FAF4E6; --c-surface: #F0E5C8; --c-text: #3D2E12;
+  --c-accent: #B5852B; --c-accent-strong: #8E6820; --c-bird: #3D2E12;
+}
+[data-theme="ambar"][data-mode="dark"] {
+  --c-bg: #2A2014; --c-surface: #3D3020; --c-text: #EBD9A8;
+  --c-accent: #D5A84A; --c-accent-strong: #B5852B; --c-bird: #EBD9A8;
+}
+
+/* ── Panneau « ink » (footer & zones volontairement sombres) ──────────
+   La rampe sand/ink bascule entièrement entre modes : une zone codée
+   bg-ink-900 deviendrait CLAIRE en mode sombre. Ces tokens gardent le
+   panneau sombre dans LES DEUX modes (encre du thème en clair, surface
+   élevée en sombre). En mode clair ils reproduisent le footer actuel. */
+[data-mode="light"] {
+  --c-ink-panel:        var(--c-text);
+  --c-ink-panel-2:      color-mix(in srgb, var(--c-bg) 14%, var(--c-text));
+  --c-ink-panel-fg:     var(--c-bg);
+  --c-ink-panel-muted:  color-mix(in srgb, var(--c-bg) 60%, var(--c-text));
+  --c-ink-panel-border: color-mix(in srgb, var(--c-bg) 22%, var(--c-text));
+  --c-ink-panel-accent: var(--c-accent-400);
+}
+[data-mode="dark"] {
+  --c-ink-panel:        var(--c-surface);
+  --c-ink-panel-2:      color-mix(in srgb, var(--c-text) 10%, var(--c-surface));
+  --c-ink-panel-fg:     var(--c-text);
+  --c-ink-panel-muted:  var(--c-ink-500);
+  --c-ink-panel-border: var(--c-border);
+  --c-ink-panel-accent: var(--c-accent);
 }
 
 /* ─── Base ─── */
@@ -67,6 +197,34 @@ body {
 }
 
 img { max-width: 100%; height: auto; display: block; }
+
+/* ═══════ LOGO MONOCHROME (web uniquement) ═══════
+   Le colibri seul (sans disque), recoloré via --c-bird (couleur du thème).
+   Le PNG source est le logo officiel disque+oiseau ; mask-mode:luminance ne
+   garde que l'oiseau (zone claire) et masque le disque (zone sombre).
+   Le favicon, lui, garde le disque (PNG pré-générés, cf. /favicons/). */
+.farmau-bird {
+  display: inline-block;
+  width: var(--logo-size, 80px);
+  height: var(--logo-size, 80px);
+  background: var(--bird-color, var(--c-bird));
+  -webkit-mask-image: url("/brand/farmau-mark.png");
+          mask-image: url("/brand/farmau-mark.png");
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-mode: luminance; mask-mode: luminance;
+}
+.farmau-word {
+  display: inline-block;
+  width: var(--word-size, 120px);
+  height: calc(var(--word-size, 120px) * 286 / 374); /* ratio natif du PNG */
+  background: var(--word-color, var(--c-text));
+  -webkit-mask-image: url("/brand/farmau-wordmark.png");
+          mask-image: url("/brand/farmau-wordmark.png");
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
 
 ::selection { background: var(--color-clay-200); color: var(--color-ink-900); }
 ::placeholder { color: var(--color-ink-400); opacity: 1; }

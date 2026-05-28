@@ -103,10 +103,10 @@ La table `admin_users` est la **source de vérité unifiée** : middleware, `req
 - `src/app/[locale]/blog/[slug]/page.tsx` — post individuel (metadata, hreflang)
 
 **Admin (localisé FR/ES/EN via cookie)** sidebar 6 sections (General/Catálogo/Operaciones/Clientes/Contenido/Cuenta) :
-- `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, **`blog`**, `setup` (diag), `settings`
+- `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, **`blog`**, **`apariencia`** (thème du site), `setup` (diag), `settings`
 
 **API** :
-- `src/app/api/admin/*` — **21 routes** service-role (toutes `requireAdmin()`, toutes validées Zod via `src/lib/schemas.ts`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export), `posts` (GET/POST/PATCH/DELETE)
+- `src/app/api/admin/*` — **22 routes** service-role (toutes `requireAdmin()`, toutes validées Zod via `src/lib/schemas.ts`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export), `posts` (GET/POST/PATCH/DELETE), `appearance` (GET/PATCH thème + `revalidateTag`)
 - `src/app/api/account/preferences` — PATCH auth-only (preferred_locale)
 - `src/app/api/cart/{,reserve,merge}` — public (rate-limited pour reserve, merge = httpOnly cookie server-side)
 - `src/app/api/contact` — public + rate limit (5/min/IP) + CSRF origin check
@@ -146,7 +146,7 @@ Modèle (résumé) :
 - `posts` (blog : `title`, `slug` UNIQUE, `body` HTML, `excerpt`, `cover_image_url`, `locale`, `is_published`, `published_at`, RLS public SELECT published + admin ALL, indexes slug/published/locale)
 - `newsletter_subscribers` (email UNIQUE, lang CHECK, `confirmation_token` UNIQUE partiel + `confirmed_at` pour double opt-in, RLS service-role only)
 - `rate_limit_buckets` (fixed-window pour /api/contact + /api/newsletter)
-- `shop_settings` (single-row `id = 1 CHECK`, RLS public SELECT + admin UPDATE via `is_user_admin`) — nom, contact, pickup, tarifs livraison, édité via `/admin/settings`
+- `shop_settings` (single-row `id = 1 CHECK`, RLS public SELECT + admin UPDATE via `is_user_admin`) — nom, contact, pickup, tarifs livraison (édité via `/admin/settings`) + **apparence** : `theme` (6 valeurs CHECK), `default_mode` (light/dark/system), `allow_visitor_mode` (édité via `/admin/apariencia`, migration `20260528120000`)
 - ~~`orders` + `order_items`~~ — supprimées (migration `20260527110000`, 0 ligne, jamais branchées)
 - `banners` (Sprint 3 refonte : enum `banner_slot` (hero/banner/card/modal) + enum `banner_status` (draft/scheduled/active/paused/expired) + colonnes `direction`, `attribution_name/title/photo_url`, `start_date`, `end_date`, `view_count`, `click_count`), `contact_messages`
 - Vue `v_bestsellers` : tri produits par `sold_30d desc` + `is_featured desc` + `created_at desc`, consommée par home + nav-search fallback
@@ -181,8 +181,21 @@ Namespaces principaux dans `src/messages/*.json` :
 - `Admin.{modals.product,modals.brand,modals.range,modals.tag,modals.tagType,modals.banner}` — 6 modaux d'édition (2026-05-27, ~120 clés)
 - `Admin.{reservations,users,newsletter,settings,setup}` — 5 pages admin restantes (2026-05-27, ~150 clés). **Admin entièrement localisé FR/ES/EN (~400 clés).**
 - `Admin.blog` — admin blog CRUD (2026-05-27)
+- `Admin.appearance` — écran thème `/admin/apariencia` (2026-05-28) ; `Footer.themeTo{Light,Dark}` pour le toggle visiteur
 - `Blog` — pages publiques blog (heading, subtitle, empty, meta)
 - `Error` — error boundary (title, body, retry, home)
+
+### Système de thèmes (palette admin + logo monochrome)
+
+6 palettes (**Terra** défaut · Noir · Botánico · Coral · Marino · Ámbar) × clair/sombre, choisies par l'admin et appliquées au site public. Handoff design : `design_handoff_themes_system/`. Source unique des métadonnées : `src/lib/themes.ts`.
+
+- **Tokens** (`globals.css`) : les utilitaires Tailwind `sand-*`/`ink-*`/`clay-*` pointent vers des variables d'ancrage `--c-*`. Chaque combinaison `[data-theme][data-mode]` ne définit que **6 ancres** (bg/surface/text/accent/accent-strong/bird) ; le reste de la rampe (bordures, gris, teintes) est **dérivé via `color-mix`** dans le bloc `[data-theme]`. → tout le markup existant (`bg-sand-50`, `text-ink-900`, `bg-clay-700`…) se re-thématise sans changement. Statuts (olive/brick/ochre) **non thémés**. Footer & zones volontairement sombres = tokens `--c-ink-panel*` (restent sombres dans les 2 modes ; en mode clair ils reproduisent l'ancien look).
+- **Injection serveur** : `getThemeConfig()` (`src/lib/getThemeConfig.ts`) lit `shop_settings` via un client anon **sans cookies** + `unstable_cache` (tag `shop-theme-config`, invalidé par `revalidateTag` au save admin) → **ne force pas le rendu dynamic**, les pages `[locale]` restent SSG. Le root layout pose `<html data-theme data-mode>` + script anti-flash (résout `system`/override visiteur avant le 1er paint) + `<link rel=icon>` par thème. `_AdminShell` force `data-theme="terra" data-mode="light"` → **l'admin reste neutre** quel que soit le thème public.
+- **Logo monochrome** : `src/components/brand/FarmauLogo.tsx` (`FarmauBird`/`FarmauWord`/`FarmauLockup`) via `mask-image` + `--c-bird` (masques dans `public/brand/`). Remplace l'ancien `Logo` (supprimé). Utilisé NavBar + MobileDrawer + Footer.
+- **Favicons** : `npm run favicons:build` (`scripts/build-favicons.cjs`, sharp) → 24 PNG `public/favicons/{theme}-{16,32,64,180}.png` (logo officiel disque+oiseau recomposé par luminance). Le `<head>` injecte le set du thème actif.
+- **Toggle visiteur** : `ThemeModeToggle` (footer, monté si `allow_visitor_mode`) → bascule `data-mode` + persiste `localStorage['farmau:mode']`.
+- **Écran admin** : `/admin/apariencia` (sidebar → *Personalización*) — grille 6 cartes + toggles mode/visiteur. API `/api/admin/appearance` GET/PATCH (Zod `appearanceBody`). i18n `Admin.appearance` FR/ES/EN.
+- **Limite connue** : le mode **sombre** est neuf. Des bandes décoratives volontairement sombres (AboutStats, AboutCriteria, BannerQuote, manifeste, WhatsappHero) s'inversent en clair en mode sombre (lisible mais inversé) — à convertir aux tokens `--c-ink-panel*` pour un sombre 100 % cohérent.
 
 ### Système de réservation (catalogue + click & collect)
 
@@ -239,6 +252,19 @@ Découpage par scope/page :
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest + build + e2e sur PR et push main.
 
 ## État du projet (2026-05-28)
+
+### Fait ✅ (session 2026-05-28 — système de thèmes complet)
+
+Implémentation du handoff `design_handoff_themes_system/` (« Themes - Palette Admin ») : 6 palettes × clair/sombre, écran admin, logo colibri monochrome, favicons par thème. Détail archi : section « Système de thèmes » plus haut.
+
+- **DB** : migration `20260528120000` → `shop_settings` + `theme`/`default_mode`/`allow_visitor_mode`. Types regénérés. `db/schema.sql` reconstruit (full regen : + newsletter/wishlists/shop_settings, − orders/order_items/product_ranges, enum `order_status` vestigial conservé).
+- **CSS** (`globals.css`) : `@theme` mappe les tokens Tailwind vers des ancres `--c-*` ; 12 blocs `[data-theme][data-mode]` (6 ancres chacun) + rampe dérivée `color-mix`. Tout le site public se re-thématise sans toucher au markup. Tokens `--c-ink-panel*` pour footer/zones sombres.
+- **Composants** : `src/components/brand/FarmauLogo.tsx` (`FarmauBird`/`FarmauWord`/`FarmauLockup`), `ThemeModeToggle` (footer), `_AdminShell` neutralisé Terra clair. Ancien `Logo.tsx` supprimé (0 import).
+- **Serveur** : `getThemeConfig()` (anon sans cookies + `unstable_cache` + `revalidateTag`), root layout pose `<html data-theme data-mode>` + script anti-flash + `<link rel=icon>`. Pages `[locale]` restent **SSG** (pas de bascule dynamic).
+- **Admin** : `/admin/apariencia` (`AppearancePage`), API `/api/admin/appearance` GET/PATCH (Zod `appearanceBody`), sidebar section *Personalización*, i18n `Admin.appearance` + `Footer.themeTo*` FR/ES/EN (~24 clés/locale, parité 1 466).
+- **Favicons** : `scripts/build-favicons.cjs` (`npm run favicons:build`, sharp) → 24 PNG `public/favicons/`. Masques source `public/brand/`.
+- **Vérif** : `tsc` 0 erreur · `lint` 0 warning · `next build` passe · injection thème confirmée sur `/fr` servi (data-theme + favicons + anti-flash). **Aucune nouvelle dépendance** (sharp déjà présent).
+- **Limite connue** : mode sombre neuf — quelques bandes décoratives volontairement sombres s'inversent en clair en mode sombre (lisibles).
 
 ### Fait ✅ (commit `5359b2e` 2026-05-27 — blog, double opt-in, code splitting, banner slots)
 

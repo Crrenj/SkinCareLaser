@@ -217,7 +217,9 @@
       "privacy": "Privacy",
       "cookies": "Cookies",
       "legal": "Legal notice"
-    }
+    },
+    "themeToLight": "Switch to light mode",
+    "themeToDark": "Switch to dark mode"
   },
   "AddToCart": {
     "quickAddAriaLabel": "Quick add to cart",
@@ -1378,7 +1380,9 @@
       "navUsers": "Users",
       "navNewsletter": "Newsletter",
       "navSettings": "Settings",
-      "navBlog": "Blog"
+      "navBlog": "Blog",
+      "sectionPersonalization": "Personalization",
+      "navAppearance": "Appearance"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1840,6 +1844,28 @@
       "deleted": "Article deleted",
       "deleteError": "Error deleting article",
       "errorTitleSlug": "Title and slug are required"
+    },
+    "appearance": {
+      "crumbPersonalization": "Personalization",
+      "crumbAppearance": "Appearance",
+      "title": "Site theme",
+      "subtitle": "Choose the color palette applied to the public site. The hummingbird adapts automatically to the chosen theme.",
+      "defaultModeLabel": "Default mode",
+      "modeLight": "Light",
+      "modeDark": "Dark",
+      "modeSystem": "System",
+      "visitorLabel": "Visitor can switch",
+      "visitorYes": "Yes",
+      "visitorNo": "No",
+      "themeCardAria": "{name} theme",
+      "save": "Save theme",
+      "cancel": "Cancel",
+      "saveSuccess": "Theme saved",
+      "saveError": "Save failed",
+      "networkError": "Network error",
+      "loadError": "Could not load appearance",
+      "updatedAt": "Last change · {date}",
+      "publicNote": "the public site updates on next load"
     }
   },
   "Error": {
