@@ -84,9 +84,18 @@ test.describe('Panier invité', () => {
 
     await page.locator('[data-testid="cart-icon"]').click()
     await expect(page.locator('[data-testid="cart-drawer"]')).toBeVisible()
+    // Attendre que l'item soit rendu/hydraté dans le drawer avant le remove
+    // (évite un clic dans le vide en run unifié cold-compile).
+    await expect(
+      page.locator('[data-testid="cart-drawer"] [data-testid="cart-item"]').first(),
+    ).toBeVisible({ timeout: 10_000 })
 
     await page.locator('[data-testid="cart-drawer"] [data-testid="remove-item"]').first().click()
 
+    // Signal direct : l'item disparaît du drawer, puis le badge tombe à 0.
+    await expect(
+      page.locator('[data-testid="cart-drawer"] [data-testid="cart-item"]'),
+    ).toHaveCount(0, { timeout: 10_000 })
     await expect(page.locator('[data-testid="cart-badge"]')).toHaveCount(0, { timeout: 10_000 })
   })
 })

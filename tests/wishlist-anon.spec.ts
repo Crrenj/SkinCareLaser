@@ -12,10 +12,15 @@ test('Heart non connecté redirige vers /login', async ({ page }) => {
   const heart = page.locator('[data-testid="product-card"]').first().locator('button[aria-label]').first()
   await heart.waitFor({ state: 'visible', timeout: 30_000 })
 
-  await Promise.all([
-    page.waitForURL(/\/login(\?|$)/, { timeout: 30_000 }),
-    heart.click(),
-  ])
+  // Retry click→navigation : en run unifié (cold-compile Turbopack) le clic
+  // peut précéder l'hydratation React du handler → aucun effet. toPass réessaie
+  // le clic jusqu'à ce que la navigation vers /login se produise.
+  await expect(async () => {
+    if (!/\/login(\?|$)/.test(page.url())) {
+      await heart.click({ timeout: 5_000 })
+      await page.waitForURL(/\/login(\?|$)/, { timeout: 10_000 })
+    }
+  }).toPass({ timeout: 60_000 })
 
   const url = new URL(page.url())
   expect(url.searchParams.get('redirectedFrom')).toBe('/favoris')
