@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { parseBody, postCreate, postUpdate } from '@/lib/schemas'
+import { parseBody, postCreate, postUpdate, postDelete } from '@/lib/schemas'
 import { logger } from '@/lib/logger'
 
 export async function GET(req: NextRequest) {
@@ -112,10 +112,9 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Configuration serveur manquante' }, { status: 500 })
   }
 
-  const { id } = await req.json()
-  if (!id) {
-    return NextResponse.json({ error: 'id requis' }, { status: 400 })
-  }
+  const parsed = parseBody(postDelete, await req.json())
+  if (!parsed.ok) return parsed.response
+  const { id } = parsed.data
 
   const { error } = await supabaseAdmin.from('posts').delete().eq('id', id)
   if (error) {

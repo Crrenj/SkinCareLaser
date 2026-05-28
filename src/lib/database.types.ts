@@ -249,6 +249,7 @@ export type Database = {
           id: string
           ip: string | null
           lang: string
+          token_expires_at: string | null
           user_agent: string | null
         }
         Insert: {
@@ -259,6 +260,7 @@ export type Database = {
           id?: string
           ip?: string | null
           lang?: string
+          token_expires_at?: string | null
           user_agent?: string | null
         }
         Update: {
@@ -269,6 +271,7 @@ export type Database = {
           id?: string
           ip?: string | null
           lang?: string
+          token_expires_at?: string | null
           user_agent?: string | null
         }
         Relationships: []

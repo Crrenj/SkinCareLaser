@@ -1418,7 +1418,8 @@
       "unsaved": "Sin guardar",
       "create": "Crear",
       "required": "*",
-      "saving": "Guardando…"
+      "saving": "Guardando…",
+      "active": "Activo"
     },
     "modals": {
       "product": {

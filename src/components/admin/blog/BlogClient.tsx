@@ -163,7 +163,7 @@ export function BlogClient() {
         </div>
       ) : posts.length === 0 ? (
         <div className="rounded-xl bg-sand-50 border border-sand-200 p-12 text-center">
-          <p className="text-ink-400 text-sm">{t('empty')}</p>
+          <p className="text-ink-500 text-sm">{t('empty')}</p>
         </div>
       ) : (
         <div className="rounded-xl bg-sand-50 border border-sand-200 divide-y divide-sand-200">
@@ -188,7 +188,7 @@ export function BlogClient() {
                     {post.locale}
                   </span>
                 </div>
-                <p className="text-sm text-ink-400 font-mono mt-0.5">
+                <p className="text-sm text-ink-500 font-mono mt-0.5">
                   /{post.slug}
                   {post.published_at && ` · ${new Date(post.published_at).toLocaleDateString()}`}
                 </p>
@@ -224,7 +224,7 @@ export function BlogClient() {
               <h2 className="font-serif text-xl text-ink-900">
                 {editingPost ? t('editTitle') : t('createTitle')}
               </h2>
-              <button onClick={closeModal} className="text-ink-400 hover:text-ink-700">
+              <button onClick={closeModal} className="text-ink-500 hover:text-ink-700">
                 &times;
               </button>
             </div>

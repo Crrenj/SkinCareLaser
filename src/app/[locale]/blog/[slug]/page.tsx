@@ -7,6 +7,8 @@ import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import Image from 'next/image'
+import DOMPurify from 'isomorphic-dompurify'
+import { BlogPostJsonLd } from '@/components/blog/BlogPostJsonLd'
 
 export const revalidate = 60
 
@@ -59,9 +61,18 @@ export default async function BlogPostPage({
       <NavBar />
       <main id="main-content" className="flex-grow">
         <article className="mx-auto max-w-3xl px-4 sm:px-6 py-16 lg:py-24">
+          <BlogPostJsonLd
+            locale={locale}
+            slug={slug}
+            title={post.title}
+            description={post.excerpt}
+            image={post.cover_image_url}
+            datePublished={post.published_at}
+            authorName={post.author_name}
+          />
           <Link
             href="/blog"
-            className="inline-flex items-center gap-1 text-sm font-mono text-ink-400 hover:text-ink-700 mb-8"
+            className="inline-flex items-center gap-1 text-sm font-mono text-ink-500 hover:text-ink-700 mb-8"
           >
             &larr; Blog
           </Link>
@@ -83,7 +94,7 @@ export default async function BlogPostPage({
             <h1 className="font-serif text-4xl sm:text-5xl text-ink-900 mb-4">
               {post.title}
             </h1>
-            <div className="flex items-center gap-3 text-sm text-ink-400 font-mono">
+            <div className="flex items-center gap-3 text-sm text-ink-500 font-mono">
               {post.published_at && (
                 <time>
                   {new Date(post.published_at).toLocaleDateString(locale, {
@@ -99,7 +110,7 @@ export default async function BlogPostPage({
 
           <div
             className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink-900 prose-p:text-ink-600 prose-a:text-clay-700"
-            dangerouslySetInnerHTML={{ __html: post.body }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.body) }}
           />
         </article>
       </main>

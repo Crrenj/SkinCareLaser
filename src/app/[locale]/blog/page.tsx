@@ -59,7 +59,7 @@ export default async function BlogPage({
 
           {filtered.length === 0 ? (
             <div className="rounded-xl border border-sand-200 bg-white p-12 text-center">
-              <p className="text-ink-400">{t('empty')}</p>
+              <p className="text-ink-500">{t('empty')}</p>
             </div>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -87,7 +87,7 @@ export default async function BlogPage({
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-2">
                       {post.published_at && (
-                        <time className="text-xs font-mono text-ink-400">
+                        <time className="text-xs font-mono text-ink-500">
                           {new Date(post.published_at).toLocaleDateString(locale, {
                             year: 'numeric',
                             month: 'long',
@@ -96,7 +96,7 @@ export default async function BlogPage({
                         </time>
                       )}
                       {post.author_name && (
-                        <span className="text-xs text-ink-400">· {post.author_name}</span>
+                        <span className="text-xs text-ink-500">· {post.author_name}</span>
                       )}
                     </div>
                     <h2 className="font-serif text-xl text-ink-900 group-hover:text-clay-700 transition-colors mb-2">

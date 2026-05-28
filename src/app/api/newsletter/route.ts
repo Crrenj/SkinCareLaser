@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
-import { checkOrigin } from '@/lib/csrf'
+import { checkOrigin, getSiteUrl } from '@/lib/csrf'
 import { resend, FROM_EMAIL } from '@/lib/resend'
 import { randomBytes } from 'crypto'
 
@@ -79,6 +79,9 @@ export async function POST(request: NextRequest) {
     user_agent: userAgent,
     confirmed_at: useDoubleOptIn ? null : new Date().toISOString(),
     confirmation_token: confirmationToken,
+    token_expires_at: useDoubleOptIn
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      : null,
   })
 
   if (error && error.code !== '23505') {
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (useDoubleOptIn && resend && confirmationToken && error?.code !== '23505') {
-    const baseUrl = request.headers.get('origin') ?? 'https://farmau.do'
+    const baseUrl = getSiteUrl()
     const confirmUrl = `${baseUrl}/api/newsletter/confirm?token=${confirmationToken}`
     try {
       await resend.emails.send({

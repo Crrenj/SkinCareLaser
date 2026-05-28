@@ -38,6 +38,7 @@ npm run seed-import -- --brands isdin,acm  # re-jouer marques spécifiques
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...    # ou SUPABASE_SERVICE_KEY (les 2 noms acceptés)
+RESEND_API_KEY=...               # optionnel — sans elle, newsletter = single opt-in direct
 ```
 
 Template versionné : `.env.local.example` (copier en `.env.local` et remplir).
@@ -97,21 +98,26 @@ La table `admin_users` est la **source de vérité unifiée** : middleware, `req
 - `src/app/[locale]/account/layout.tsx` — check session SSR + `AccountSidebar` (Client, usePathname)
 - `src/app/[locale]/account/{profile,reservations,security,preferences}/page.tsx`
 
-**Admin (non localisé, ES/FR mélangé)** sidebar 5 sections (General/Catálogo/Operaciones/Clientes/Cuenta) :
-- `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, `setup` (diag), `settings` (démo)
+*Blog*
+- `src/app/[locale]/blog/page.tsx` — index des posts publiés (SSR, `revalidate=60`)
+- `src/app/[locale]/blog/[slug]/page.tsx` — post individuel (metadata, hreflang)
+
+**Admin (localisé FR/ES/EN via cookie)** sidebar 6 sections (General/Catálogo/Operaciones/Clientes/Contenido/Cuenta) :
+- `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, **`blog`**, `setup` (diag), `settings`
 
 **API** :
-- `src/app/api/admin/*` — **20 routes** service-role (toutes `requireAdmin()`, toutes validées Zod via `src/lib/schemas.ts`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export)
+- `src/app/api/admin/*` — **21 routes** service-role (toutes `requireAdmin()`, toutes validées Zod via `src/lib/schemas.ts`) : `products`, `brands`, `ranges`, `tags`, `tag-types`, `banners`, `messages`, `reservations`, `stock`, `upload`, `sidebar-stats`, `users` (GET/PATCH), `newsletter` (GET/DELETE/CSV export), `posts` (GET/POST/PATCH/DELETE)
 - `src/app/api/account/preferences` — PATCH auth-only (preferred_locale)
 - `src/app/api/cart/{,reserve,merge}` — public (rate-limited pour reserve, merge = httpOnly cookie server-side)
 - `src/app/api/contact` — public + rate limit (5/min/IP) + CSRF origin check
 - `src/app/api/search` — public ilike + mode `?bestsellers=1`
-- `src/app/api/newsletter` — POST publique (rate-limited + CSRF) OU auth (re-sub depuis preferences) + GET/DELETE auth-only
+- `src/app/api/newsletter` — POST publique (rate-limited + CSRF, double opt-in via Resend) OU auth (re-sub depuis preferences) + GET/DELETE auth-only
+- `src/app/api/newsletter/confirm` — GET public (valide `confirmation_token`, marque `confirmed_at`)
 - `src/app/api/wishlist` — auth required
 - `src/app/auth/callback` — OAuth Supabase
 
 **SEO** :
-- `src/app/sitemap.ts` — dynamique : routes statiques (catalogue/marques/legal/livraison/faq/…) + produits + brands + needs × 3 locales avec hreflang
+- `src/app/sitemap.ts` — dynamique : routes statiques (catalogue/marques/blog/legal/livraison/faq/…) + produits + brands + needs + blog posts × 3 locales avec hreflang
 - `src/app/robots.ts` — disallow admin/api/account/auth/cart
 - `generateMetadata` + hreflang `x-default` sur toutes les pages publiques
 
@@ -137,14 +143,15 @@ Modèle (résumé) :
 - `carts` + `cart_items` (guest via `anonymous_id` cookie, authenticated via `user_id`). Merge anon→user au login : RPC `merge_anon_cart_to_user` SECURITY DEFINER (la policy UPDATE de `carts` empêche le UPDATE direct quand `user_id IS NULL`). Routes `/api/cart` utilisent `supabaseAdmin` pour les SELECT `cart_items` (la policy lit `auth.jwt() ->> 'anonymous_id'` qui n'est jamais émis par Supabase Auth).
 - `reservations` + `reservation_items` (système de réservation, snapshot pattern, partial unique 1 active par user, pg_cron expire après 24h)
 - `wishlists` (favoris user, PK composite `(user_id, product_id)`, RLS "users manage own")
-- `newsletter_subscribers` (email UNIQUE, lang CHECK, RLS service-role only)
+- `posts` (blog : `title`, `slug` UNIQUE, `body` HTML, `excerpt`, `cover_image_url`, `locale`, `is_published`, `published_at`, RLS public SELECT published + admin ALL, indexes slug/published/locale)
+- `newsletter_subscribers` (email UNIQUE, lang CHECK, `confirmation_token` UNIQUE partiel + `confirmed_at` pour double opt-in, RLS service-role only)
 - `rate_limit_buckets` (fixed-window pour /api/contact + /api/newsletter)
 - `shop_settings` (single-row `id = 1 CHECK`, RLS public SELECT + admin UPDATE via `is_user_admin`) — nom, contact, pickup, tarifs livraison, édité via `/admin/settings`
 - ~~`orders` + `order_items`~~ — supprimées (migration `20260527110000`, 0 ligne, jamais branchées)
-- `banners` (sprint 2 : 3 variantes `editorial`/`hero`/`quote` + colonnes `direction`, `attribution_name/title/photo_url` ; legacy 6 types tolérés dans la colonne `text`), `contact_messages`
+- `banners` (Sprint 3 refonte : enum `banner_slot` (hero/banner/card/modal) + enum `banner_status` (draft/scheduled/active/paused/expired) + colonnes `direction`, `attribution_name/title/photo_url`, `start_date`, `end_date`, `view_count`, `click_count`), `contact_messages`
 - Vue `v_bestsellers` : tri produits par `sold_30d desc` + `is_featured desc` + `created_at desc`, consommée par home + nav-search fallback
 
-État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à stock=50, 100 DOP placeholder** (tous ont un `range_id`), 299 product_images, 36 tags, 844 product_tags, 1 admin, 1 row dans shop_settings. Tables `orders`/`order_items` supprimées (migration `20260527110000`). 28 RLS policies optimisées avec `(SELECT auth.uid())` + `is_user_admin` STABLE (migration `20260527100000`).
+État BDD actuel (projet `adxpoxcynrpnbbxnncsk`) : 13 brands, 52 ranges, **353 produits actifs à stock=50, 100 DOP placeholder** (tous ont un `range_id`), 299 product_images, 36 tags, 844 product_tags, 1 admin, 1 row dans shop_settings, 0 posts (table prête). Tables `orders`/`order_items` supprimées (migration `20260527110000`). 28 RLS policies optimisées avec `(SELECT auth.uid())` + `is_user_admin` STABLE (migration `20260527100000`). Enums `banner_slot` (4 valeurs) + `banner_status` (5 valeurs) ajoutés (migration `20260527212633`).
 
 ### i18n (next-intl)
 
@@ -173,6 +180,8 @@ Namespaces principaux dans `src/messages/*.json` :
 - `Admin.{chrome,sidebar,crumbs,common,stockState,product,marques,stock,tags,messages,annonce}` — admin localisé (2026-05-26, ~130 clés)
 - `Admin.{modals.product,modals.brand,modals.range,modals.tag,modals.tagType,modals.banner}` — 6 modaux d'édition (2026-05-27, ~120 clés)
 - `Admin.{reservations,users,newsletter,settings,setup}` — 5 pages admin restantes (2026-05-27, ~150 clés). **Admin entièrement localisé FR/ES/EN (~400 clés).**
+- `Admin.blog` — admin blog CRUD (2026-05-27)
+- `Blog` — pages publiques blog (heading, subtitle, empty, meta)
 - `Error` — error boundary (title, body, retry, home)
 
 ### Système de réservation (catalogue + click & collect)
@@ -223,13 +232,29 @@ Découpage par scope/page :
 
 - **i18n** : tout texte UI passe par `useTranslations`/`getTranslations`. Pas de string FR dur dans le code. Le contenu BDD (noms produits, marques) reste tel quel.
 - Path alias `@/*` → `src/*`.
-- TypeScript `strict: true`, **0 erreur tsc**. Lint : **0 warning** depuis 2026-05-22 (eslint config honore `^_` pattern).
+- TypeScript `strict: true`, **0 erreur tsc**. Lint : **1 warning** (`admin/setup/page.tsx:22` useEffect dep, régression à corriger). ESLint config honore `^_` pattern.
 - ESLint warnings non bloquants au build (cf `eslint.config.mjs`). Le fichier `database.types.ts` est ignoré (généré).
 - **Ne jamais commit sans demande explicite** (règle Cursor `alwaysApply`).
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
-- **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest sur PR et push main.
+- **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest + build + e2e sur PR et push main.
 
-## État du projet (2026-05-26)
+## État du projet (2026-05-28)
+
+### Fait ✅ (commit `5359b2e` 2026-05-27 — blog, double opt-in, code splitting, banner slots)
+
+4 features majeures + nettoyage (33 fichiers, +1 531 / -262 LOC) :
+
+**Blog complet** : table `posts` (migration `20260527210629`) + admin CRUD `/admin/blog` (`BlogClient.tsx`) + pages publiques `/blog` + `/blog/[slug]` (SSR, metadata, hreflang) + sitemap dynamique + Footer link corrigé. API `/api/admin/posts` (GET/POST/PATCH/DELETE) avec `requireAdmin()` + Zod. i18n `Blog` + `Admin.blog` namespaces FR/ES/EN. Blog dans sidebar admin section "Operaciones".
+
+**Newsletter double opt-in** : colonne `confirmation_token` (migration `20260527211720`, index partiel UNIQUE), endpoint `/api/newsletter/confirm` (GET, valide token → `confirmed_at`), intégration Resend (`src/lib/resend.ts`). Fallback gracieux : sans `RESEND_API_KEY`, `confirmed_at` posé directement (single opt-in). Email de confirmation localisé FR/ES/EN.
+
+**Code splitting** : `next/dynamic` avec skeletons `animate-pulse` sur `CatalogueClient`, `ProductClient`, `CartClient`, `ReservationClient`.
+
+**Banner slots Sprint 3** : enums `banner_slot` (hero/banner/card/modal) + `banner_status` (draft/scheduled/active/paused/expired) via migration `20260527212633`. Admin UI avec 4 KPI cards par slot (actifs/vues/clics/CTR), onglets de filtre slot, status pills 5 couleurs. Data migration des banners existants.
+
+**Nettoyage** : 6 scripts audit/check untracked supprimés de la racine. CI e2e utilise `npm start` au lieu du dev server.
+
+**Nouvelle dépendance** : `resend`.
 
 ### Fait ✅ (session 2026-05-26 — refontes design Sprint 4 + Sprint 3 admin + i18n admin + UX fixes)
 
@@ -404,36 +429,54 @@ Sprint 2 design (commits `677622c` → `c37a915`) :
 
 **Nouvelle dépendance** : `zod` (validation API).
 
+### Fait ✅ (session 2026-05-28 — correctifs review multi-agent + blocker build)
+
+Correction des 9 findings de la review du commit `5359b2e` + 1 régression WCAG + 1 blocker build préexistant.
+
+**Sécurité** : XSS blog fermé (`isomorphic-dompurify` → `DOMPurify.sanitize(post.body)`) · token newsletter TTL (`token_expires_at`, migration `20260528100000`, check `.gt()` au confirm) · rate limit `/api/newsletter/confirm` (10/min/IP) · Zod `postDelete` sur DELETE posts · URL de confirmation via `getSiteUrl()` (helper csrf.ts, plus de header `Origin`).
+
+**Qualité** : ESLint 0 warning (`setup/page.tsx` useCallback + 2 préexistants `ConfirmationClient`/`BannerStatsCards`) · clé i18n `Admin.common.active` EN/ES (parité 1442×3) · 20 `text-ink-400`→`ink-500` (régression WCAG, 5 fichiers).
+
+**DB** : migration posts replay-safe (`DROP TRIGGER/POLICY IF EXISTS`) · `db/schema.sql` partiellement régénéré (posts, enums banner, refs `is_admin` corrigées) + en-tête de staleness documentant les gaps (newsletter/wishlists/shop_settings absents, orders/product_ranges droppés encore listés — full regen via `supabase db dump` à faire).
+
+**SEO** : JSON-LD `Article` sur les posts (`src/components/blog/BlogPostJsonLd.tsx`).
+
+**Blocker build (hors plan)** : `not-found.tsx` (client) importait le `Footer` devenu async Server Component → `next build` cassé depuis `5c81dcb`. Converti `not-found.tsx` en Server Component (`getTranslations`). Build repasse.
+
+**Nouvelle dépendance** : `isomorphic-dompurify`. **Non testé e2e** : flux email double opt-in (nécessite `RESEND_API_KEY` + post publié).
+
 ### Reste à faire
 
-**Sprint 3 Admin Anuncios — refonte architecturale séparée** :
-Le design Sprint 3 propose une grille à 4 slots fixes (Hero / Banner / Card / Modal) avec previews CSS réelles + 5 status sémantiques + KPIs par slot (Impresiones / Clics / CTR). Notre schéma actuel `banners` (text type, position int) ne supporte pas cette structure. À envisager : enum strict `banner_slot_type` + tracking d'impressions/clics + dashboard analytics par slot.
-
 **Quick wins** :
-- Migration `banner_type_enum` strict : la colonne reste `text` pour compat legacy
-- AggregateRating sur `ProductJsonLd` si système de reviews un jour
-- Investiguer la flakiness des tests Playwright `wishlist-anon` + `cart Suppression` en run unifié (passent isolés — probable cold-compile race)
+- `db/schema.sql` full regen via `supabase db dump` (snapshot partiel : newsletter/wishlists/shop_settings absents, orders/product_ranges droppés encore listés)
 - `metadata.openGraph.siteName` pourrait lire `shop_name` depuis `shop_settings`
-- **Lazy load des messages JSON par locale** : `request.ts` charge `import('../messages/${locale}.json')` à chaque requête — déjà côté Next.js `import()` dynamic donc OK, mais à vérifier sur la bande passante client (~1 616 clés/locale)
+- AggregateRating sur `ProductJsonLd` si système de reviews un jour
+- Investiguer la flakiness des tests Playwright `wishlist-anon` + `cart Suppression` en run unifié
+- Test e2e du flux newsletter double opt-in (nécessite `RESEND_API_KEY` + post publié)
+
+**Banner slots — compléments** :
+- Wirer le tracking impressions/clics côté client (`view_count`/`click_count` existent en DB)
+- Scheduling auto : pg_cron ou middleware pour transitions `scheduled→active→expired` basées sur `start_date`/`end_date`
+
+**Blog — compléments** :
+- Intégrer l'upload image blog avec `/api/admin/upload` existant (actuellement URL manuelle)
+- Rich text editor (ou markdown) pour le body au lieu du textarea brut
 
 **Contenu éditorial / About** :
 - Photos d'équipe réelles dans `AboutTeam.tsx` (silhouettes SVG génériques actuellement)
-- Vrais noms/numéros de l'équipe (`Dra. María Pérez`, `Andrés Reyes`, `Yarisa Tavárez` sont des placeholders du design Sprint 4)
+- Vrais noms/numéros de l'équipe (`Dra. María Pérez`, `Andrés Reyes`, `Yarisa Tavárez` sont des placeholders)
 - Stat "60+ marques · 353 références · 7 farmacéuticos · 12 ans" — à confirmer vs DB
 - "Reg. Sanitario DGM-42-2014" — placeholder, mettre le vrai numéro
-- Avis Google réels dans `AboutLeaveReview` (placeholder « pharmacie neuve, laisse ton avis » actuellement — passer en mosaïque si historique d'avis se constitue)
-- Adresse exacte Skin Laser Center dans `AboutPartner` (actuellement `Même bâtiment · entrée Calle 3`)
+- Avis Google réels dans `AboutLeaveReview`
+- Adresse exacte Skin Laser Center dans `AboutPartner`
 
 **Contenu éditorial — autres** :
-- Blog : table `posts` + admin CRUD + `/blog` + `/blog/[slug]` + sitemap (Footer "blog" pointe encore vers `/a-propos`)
 - Saisie INCI / benefits / pharmacist_advice sur les 353 produits (colonnes prêtes, contenu à fournir)
 - Traductions ES/EN du contenu juridique `/legal/*` (FR uniquement actuellement)
 
 **Hygiène long terme** :
-- Double opt-in newsletter (provider d'envoi : Resend/Postmark)
 - Audit Storage policies (2 buckets publics avec policy `select` large — flag Supabase advisor)
-- Code splitting client components (`next/dynamic`) pour CatalogueClient, ReservationClient
-- 4 fichiers untracked à la racine (`_audit-reservation.mjs`, `_audit-screenshots.mjs`, `_check-chips.mjs`, `_check-pagination.mjs`) — soit déplacer dans `scripts/`, soit gitignore, soit supprimer si plus utiles.
+- Playwright CI secrets (configurer pour les tests E2E en CI)
 
 Voir `docs/audits/INDEX.md` pour l'audit complet et `docs/HANDOFF.md` pour le résumé courant à reprendre.
 

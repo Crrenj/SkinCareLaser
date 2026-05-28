@@ -18,6 +18,7 @@ CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts (slug);
 CREATE INDEX IF NOT EXISTS idx_posts_published ON posts (is_published, published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_posts_locale ON posts (locale);
 
+DROP TRIGGER IF EXISTS set_posts_updated_at ON posts;
 CREATE TRIGGER set_posts_updated_at
   BEFORE UPDATE ON posts
   FOR EACH ROW
@@ -26,10 +27,12 @@ CREATE TRIGGER set_posts_updated_at
 -- RLS
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can read published posts" ON posts;
 CREATE POLICY "Public can read published posts"
   ON posts FOR SELECT
   USING (is_published = true);
 
+DROP POLICY IF EXISTS "Admins can manage posts" ON posts;
 CREATE POLICY "Admins can manage posts"
   ON posts FOR ALL
   USING (is_user_admin((SELECT auth.uid())))

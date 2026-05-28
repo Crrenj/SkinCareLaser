@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { logger } from '@/lib/logger'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('token')
@@ -12,6 +13,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'service_unavailable' }, { status: 503 })
   }
 
+  const ip = getClientIp(request)
+  const { allowed, retryAfter } = await checkRateLimit(`newsletter-confirm:${ip}`, 10, 60)
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'rate_limited', retryAfter },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } },
+    )
+  }
+
   const { data, error } = await supabaseAdmin
     .from('newsletter_subscribers')
     .update({
@@ -20,6 +30,7 @@ export async function GET(request: NextRequest) {
     })
     .eq('confirmation_token', token)
     .is('confirmed_at', null)
+    .gt('token_expires_at', new Date().toISOString())
     .select('id, email')
     .maybeSingle()
 

@@ -12,6 +12,11 @@ function getAllowedOrigins(): string[] {
   return origins
 }
 
+/** URL de base de confiance (côté serveur) — ne jamais dériver d'un header client. */
+export function getSiteUrl(): string {
+  return SITE_URL ?? VERCEL_URL ?? 'https://farmau.do'
+}
+
 export function checkOrigin(request: NextRequest): NextResponse | null {
   const origin = request.headers.get('origin')
   if (!origin) return null

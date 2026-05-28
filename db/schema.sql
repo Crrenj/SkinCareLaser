@@ -6,10 +6,19 @@
 -- visualiser tout le schéma en une fois. Toute modification ici doit
 -- aussi exister dans une migration sous supabase/migrations/.
 --
--- Pour un projet vierge, on peut soit :
---   a) Appliquer les migrations dans l'ordre (supabase/migrations/*.sql)
---   b) Exécuter ce fichier dans Supabase SQL Editor (équivalent, plus rapide).
+-- Pour un projet vierge, préférer (a) : appliquer les migrations dans
+-- l'ordre (supabase/migrations/*.sql). Pour un dump fidèle à 100 % du
+-- remote : `supabase link` puis `supabase db dump --schema public`.
 -- Idempotent : CREATE IF NOT EXISTS / CREATE OR REPLACE partout.
+--
+-- ⚠️ ÉTAT DE SYNCHRONISATION (2026-05-28) — ce snapshot a divergé du remote.
+-- À jour ci-dessous : profiles (sans is_admin), posts, banners (enums slot/status).
+-- GAPS connus (présents dans les migrations, PAS encore dans ce snapshot) :
+--   • Tables manquantes : newsletter_subscribers (+ confirmation_token,
+--     token_expires_at), wishlists, shop_settings.
+--   • Tables droppées encore listées plus bas : orders + order_items
+--     (migration 20260527110000), product_ranges (migration 20260522205544).
+-- => Pour ces objets, se référer aux migrations (source de vérité).
 --
 -- Contenu :
 --   0. Extensions
@@ -18,8 +27,8 @@
 --   3. Vue tags_with_types
 --   4. Panier (carts, cart_items)
 --   5. Commandes (orders, order_items)
---   6. Bannières
---   7. Messages de contact
+--   6. Bannières (+ enums banner_slot / banner_status)
+--   7. Messages de contact · 7b. Rate limiting · 7c. Réservations · 7d. Blog (posts)
 --   8. Storage policies (bucket product-image)
 --   9. Helpers, triggers, RPC
 --  10. RLS policies
@@ -42,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   last_name     TEXT,
   phone         TEXT,
   birth_date    DATE,
-  is_admin      BOOLEAN DEFAULT false,
+  preferred_locale TEXT CHECK (preferred_locale IN ('fr','en','es')),
   role          TEXT DEFAULT 'user' CHECK (role IN ('user','admin','customer')),
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
@@ -214,6 +223,14 @@ ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 -- ======================================================================
 -- 6. BANNIÈRES
 -- ======================================================================
+-- Sprint 3 : slots fixes + cycle de vie sémantique (migration 20260527212633).
+DO $$ BEGIN
+  CREATE TYPE public.banner_slot AS ENUM ('hero','banner','card','modal');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE TYPE public.banner_status AS ENUM ('draft','scheduled','active','paused','expired');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 CREATE TABLE IF NOT EXISTS public.banners (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title       VARCHAR(255) NOT NULL,
@@ -223,6 +240,12 @@ CREATE TABLE IF NOT EXISTS public.banners (
   link_text   VARCHAR(100),
   banner_type VARCHAR(20) NOT NULL DEFAULT 'image_left'
     CHECK (banner_type IN ('image_left','image_right','image_full','card_style','minimal','gradient_overlay')),
+  slot        public.banner_slot   NOT NULL DEFAULT 'banner',
+  status      public.banner_status NOT NULL DEFAULT 'draft',
+  direction   TEXT,
+  attribution_name      TEXT,
+  attribution_title     TEXT,
+  attribution_photo_url TEXT,
   position    INTEGER NOT NULL DEFAULT 0,
   is_active   BOOLEAN DEFAULT true,
   start_date  DATE,
@@ -232,6 +255,13 @@ CREATE TABLE IF NOT EXISTS public.banners (
   created_at  TIMESTAMPTZ DEFAULT NOW(),
   updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
+-- Idempotent pour les snapshots déjà créés sans les colonnes Sprint 2/3 :
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS slot        public.banner_slot   NOT NULL DEFAULT 'banner';
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS status      public.banner_status NOT NULL DEFAULT 'draft';
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS direction   TEXT;
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS attribution_name      TEXT;
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS attribution_title     TEXT;
+ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS attribution_photo_url TEXT;
 ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
 
 CREATE INDEX IF NOT EXISTS idx_banners_position        ON public.banners(position);
@@ -540,6 +570,44 @@ SELECT cron.schedule(
 );
 
 -- ======================================================================
+-- 7d. BLOG (posts) — migration 20260527210629
+-- ======================================================================
+CREATE TABLE IF NOT EXISTS public.posts (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug            TEXT UNIQUE NOT NULL,
+  title           TEXT NOT NULL,
+  excerpt         TEXT,
+  body            TEXT NOT NULL DEFAULT '',
+  cover_image_url TEXT,
+  author_name     TEXT,
+  locale          TEXT NOT NULL DEFAULT 'fr' CHECK (locale IN ('fr','es','en')),
+  is_published    BOOLEAN NOT NULL DEFAULT false,
+  published_at    TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_posts_slug      ON public.posts(slug);
+CREATE INDEX IF NOT EXISTS idx_posts_published ON public.posts(is_published, published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_locale    ON public.posts(locale);
+
+DROP TRIGGER IF EXISTS set_posts_updated_at ON public.posts;
+CREATE TRIGGER set_posts_updated_at
+  BEFORE UPDATE ON public.posts
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+DROP POLICY IF EXISTS "Public can read published posts" ON public.posts;
+CREATE POLICY "Public can read published posts" ON public.posts
+  FOR SELECT USING (is_published = true);
+
+DROP POLICY IF EXISTS "Admins can manage posts" ON public.posts;
+CREATE POLICY "Admins can manage posts" ON public.posts
+  FOR ALL
+  USING (public.is_user_admin((SELECT auth.uid())))
+  WITH CHECK (public.is_user_admin((SELECT auth.uid())));
+
+-- ======================================================================
 -- 8. STORAGE — buckets et policies
 -- ======================================================================
 -- Bucket des images produits
@@ -591,11 +659,11 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO public.profiles (
-    id, is_admin, role,
+    id, role,
     display_name, first_name, last_name, phone, birth_date
   )
   VALUES (
-    NEW.id, false, 'user',
+    NEW.id, 'user',
     COALESCE(
       NULLIF(TRIM(NEW.raw_user_meta_data->>'display_name'), ''),
       split_part(NEW.email, '@', 1)
@@ -927,9 +995,9 @@ GRANT SELECT ON public.tags_with_types TO anon, authenticated;
 -- L'UUID admin n'est PAS hardcodé ici. Pour créer un admin :
 --   1. Créer l'utilisateur (via signup, ou scripts/create-admin-user.js)
 --   2. Récupérer son UUID dans Supabase Auth
---   3. Exécuter :
+--   3. Exécuter (admin_users est la source de vérité ; is_admin a été droppé) :
 --        INSERT INTO public.admin_users (user_id) VALUES ('<uuid>');
---        UPDATE public.profiles SET is_admin = true, role = 'admin' WHERE id = '<uuid>';
+--        UPDATE public.profiles SET role = 'admin' WHERE id = '<uuid>';
 
 -- ======================================================================
 -- VÉRIFICATIONS

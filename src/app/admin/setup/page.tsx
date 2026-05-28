@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -17,11 +17,7 @@ export default function AdminSetupPage() {
   const [configStatus, setConfigStatus] = useState<ConfigStatus | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    checkConfiguration()
-  }, [])
-
-  const checkConfiguration = async () => {
+  const checkConfiguration = useCallback(async () => {
     try {
       // Vérifier la configuration via une API simple
       const res = await fetch('/api/admin/products?page=1&limit=1')
@@ -58,7 +54,11 @@ export default function AdminSetupPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    checkConfiguration()
+  }, [checkConfiguration])
 
   const StatusIcon = ({ status }: { status: boolean }) => {
     return status ? (

@@ -1,6 +1,6 @@
 'use client'
 
-import { Eye, MousePointerClick, BarChart3, Layers } from 'lucide-react'
+import { Eye, MousePointerClick, BarChart3 } from 'lucide-react'
 import { SLOT_LABELS, type BannerData, type BannerSlot } from '../_lib/types'
 
 type BannerStatsCardsProps = {
@@ -29,26 +29,26 @@ export function BannerStatsCards({ banners }: BannerStatsCardsProps) {
                 {SLOT_LABELS[slot]}
               </h3>
               <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                active > 0 ? 'bg-olive-100 text-olive-700' : 'bg-sand-200 text-ink-400'
+                active > 0 ? 'bg-olive-100 text-olive-700' : 'bg-sand-200 text-ink-500'
               }`}>
                 {active}/{slotBanners.length}
               </span>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <Eye className="mx-auto h-4 w-4 text-ink-400 mb-1" />
+                <Eye className="mx-auto h-4 w-4 text-ink-500 mb-1" />
                 <p className="font-mono text-sm text-ink-900">{views.toLocaleString()}</p>
-                <p className="text-[10px] text-ink-400 font-mono uppercase">Vues</p>
+                <p className="text-[10px] text-ink-500 font-mono uppercase">Vues</p>
               </div>
               <div>
-                <MousePointerClick className="mx-auto h-4 w-4 text-ink-400 mb-1" />
+                <MousePointerClick className="mx-auto h-4 w-4 text-ink-500 mb-1" />
                 <p className="font-mono text-sm text-ink-900">{clicks.toLocaleString()}</p>
-                <p className="text-[10px] text-ink-400 font-mono uppercase">Clics</p>
+                <p className="text-[10px] text-ink-500 font-mono uppercase">Clics</p>
               </div>
               <div>
-                <BarChart3 className="mx-auto h-4 w-4 text-ink-400 mb-1" />
+                <BarChart3 className="mx-auto h-4 w-4 text-ink-500 mb-1" />
                 <p className="font-mono text-sm text-ink-900">{ctr}%</p>
-                <p className="text-[10px] text-ink-400 font-mono uppercase">CTR</p>
+                <p className="text-[10px] text-ink-500 font-mono uppercase">CTR</p>
               </div>
             </div>
           </article>

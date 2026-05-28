@@ -1418,7 +1418,8 @@
       "unsaved": "Unsaved",
       "create": "Create",
       "required": "*",
-      "saving": "Saving…"
+      "saving": "Saving…",
+      "active": "Active"
     },
     "modals": {
       "product": {

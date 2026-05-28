@@ -128,7 +128,7 @@ export default function ConfirmationClient({
       subtotal,
       customerNote: draft?.note,
     }
-  }, [reference, draft, items, subtotal, firstName, contactName, contactPhone])
+  }, [reference, draft, items, subtotal, firstName, contactName, contactPhone, pickupLocation])
 
   const whatsappUrl = useMemo(() => buildReservationWhatsappLink(payload), [payload])
   const messagePreview = useMemo(() => buildReservationMessage(payload), [payload])

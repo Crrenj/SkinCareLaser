@@ -61,7 +61,7 @@ export function BannersList({
   if (filtered.length === 0) {
     return (
       <div className="rounded-xl bg-sand-50 border border-sand-200 p-12 text-center">
-        <p className="text-ink-400 text-sm">Aucune annonce dans ce slot.</p>
+        <p className="text-ink-500 text-sm">Aucune annonce dans ce slot.</p>
       </div>
     )
   }
@@ -100,7 +100,7 @@ export function BannersList({
                 {SLOT_LABELS[banner.slot]}
               </span>
             </div>
-            <p className="text-sm text-ink-400 mt-0.5 truncate">
+            <p className="text-sm text-ink-500 mt-0.5 truncate">
               {banner.description || '—'}
               <span className="ml-3 font-mono text-xs">
                 {banner.view_count ?? 0} vues · {banner.click_count ?? 0} clics
@@ -114,7 +114,7 @@ export function BannersList({
                 onClick={() => onMove(banner.id, 'up')}
                 disabled={index === 0}
                 aria-label="Monter"
-                className="p-1 text-ink-400 hover:text-ink-700 disabled:opacity-30"
+                className="p-1 text-ink-500 hover:text-ink-700 disabled:opacity-30"
               >
                 <ArrowUp className="h-3.5 w-3.5" />
               </button>
@@ -122,7 +122,7 @@ export function BannersList({
                 onClick={() => onMove(banner.id, 'down')}
                 disabled={index === filtered.length - 1}
                 aria-label="Descendre"
-                className="p-1 text-ink-400 hover:text-ink-700 disabled:opacity-30"
+                className="p-1 text-ink-500 hover:text-ink-700 disabled:opacity-30"
               >
                 <ArrowDown className="h-3.5 w-3.5" />
               </button>
@@ -132,7 +132,7 @@ export function BannersList({
               onClick={() => onToggleActive(banner.id)}
               aria-label={banner.is_active ? 'Désactiver' : 'Activer'}
               className={`p-1.5 rounded-lg transition-colors ${
-                banner.is_active ? 'text-olive-600 hover:bg-olive-50' : 'text-ink-400 hover:bg-sand-200'
+                banner.is_active ? 'text-olive-600 hover:bg-olive-50' : 'text-ink-500 hover:bg-sand-200'
               }`}
             >
               {banner.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}

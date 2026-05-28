@@ -175,3 +175,7 @@ export const postUpdate = z.object({
   is_published: z.boolean().optional(),
   published_at: z.string().nullish(),
 })
+
+export const postDelete = z.object({
+  id: z.string().uuid('id invalide'),
+})

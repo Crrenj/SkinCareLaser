@@ -1,13 +1,11 @@
-'use client'
-
 import { Compass, Search } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 
-export default function LocaleNotFound() {
-  const t = useTranslations('NotFound')
+export default async function LocaleNotFound() {
+  const t = await getTranslations('NotFound')
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
