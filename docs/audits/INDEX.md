@@ -5,7 +5,7 @@ Date mise à jour : 2026-05-28 (review multi-agent + correctifs — 9 findings f
 Branche : `main`
 
 > **État** : voir `docs/HANDOFF.md` pour la punch list courante.
-> **145 findings totaux → 145 fermés.** Les 9 findings de la review du 2026-05-28 ont été corrigés (sécurité, WCAG, i18n, DB, SEO) + 1 blocker build préexistant levé. Restent des tâches de contenu/feature, 0 finding d'audit ouvert.
+> **145 findings historiques fermés — MAIS 10 nouveaux findings OUVERTS** suite à la re-vérification ciblée authz RPC/route du 2026-05-28 (WS03) : 2 P1 + 4 P2 + 4 P3, tous sur des RPC `SECURITY DEFINER` (panier + messages) exposées à `anon` qui font confiance à un ID fourni par le client. Voir [`rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md`](./rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md). **La sécurité n'est plus « 0 ouvert ».**
 
 ---
 
@@ -45,7 +45,7 @@ Branche : `main`
 
 | Dimension | Note initiale | Note actuelle | Findings ouverts | Rapport |
 |---|---|---|---|---|
-| Sécurité | Critique | **A-** | 0 (XSS ✅, TTL ✅, rate limit ✅, Zod ✅) | [security.md](./security.md) |
+| Sécurité | Critique | **B− (révisé 2026-05-28)** | **10** (IDOR RPC panier P1×2 — voir WS03) | [security.md](./security.md) · [WS03](./rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md) |
 | Performance | C+ (5/10) | **A- (9/10)** | 0 (code splitting ✅) | [performance.md](./performance.md) |
 | Architecture | B- | **A (9/10)** | 0 | [architecture.md](./architecture.md) |
 | Base de données | B- | **A- (9/10)** | 0 (schema.sql partiel, gaps documentés) | [database.md](./database.md) |
@@ -54,7 +54,7 @@ Branche : `main`
 | Developer Experience | 6/10 | **A (9/10)** | 1 (Playwright CI secrets) | [developer-experience.md](./developer-experience.md) |
 | UX / Product | 4/10 | **B+ (7.5/10)** | 0 | [ux.md](./ux.md) |
 | Qualité de code | C+ (6.5/10) | **A+ (10/10)** | 0 | [code-quality.md](./code-quality.md) |
-| **TOTAL** | | | **0 finding ouvert** (145 fermés) | |
+| **TOTAL** | | | **10 findings ouverts** (145 historiques fermés + 10 nouveaux WS03) | |
 
 ---
 
@@ -89,6 +89,7 @@ API admin sécurisées, réservation click & collect, bug add_to_cart, accessibi
 - ✅ Token newsletter TTL — colonne `token_expires_at` (migration `20260528100000`) + check au confirm
 - ✅ Rate limit `/api/newsletter/confirm` (10/min/IP)
 - ✅ Zod sur DELETE posts + URL confirm via `getSiteUrl()` (plus de header `Origin`)
+- ❌ **OUVERT (WS03, 2026-05-28)** : le durcissement RLS/Zod n'atteint PAS les RPC `SECURITY DEFINER`. Le `GRANT EXECUTE … TO anon` du baseline n'a pas été walké-back pour les RPC panier/messages → elles sont appelables en direct (clé anon publique via PostgREST) en bypassant la RLS. 10 findings (voir section dédiée + WS03).
 
 ### i18n — état détaillé (2026-05-28)
 - ✅ Admin entièrement localisé FR/ES/EN (sidebar, chrome, toutes pages, tous modaux)
@@ -127,6 +128,31 @@ API admin sécurisées, réservation click & collect, bug add_to_cart, accessibi
 - **Feature** : banner tracking impressions/clics, banner scheduling auto, blog image upload
 - **DB** : `db/schema.sql` full regen via `supabase db dump` (gaps newsletter/wishlists/shop_settings, tables droppées encore listées)
 - **Contenu** : prix réels, About placeholders, juridique ES/EN, INCI/benefits produits
+
+---
+
+## Re-vérification authz RPC / route (WS03 — 2026-05-28)
+
+> Rapport complet : [`rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md`](./rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md)
+
+Re-vérification ciblée de la classe « RPC `SECURITY DEFINER` qui fait confiance à un ID fourni par le client ». **Les routes sont saines** (les 26 routes `/api/admin/*` gardées `requireAdmin()` ; les routes publiques dérivent l'identité côté serveur via `getUser()` / cookie httpOnly ; `/api/wishlist` + `/api/account/preferences` utilisent le client session + RLS). **Mais 10 findings ouverts sur les RPC** : le `GRANT EXECUTE ON ALL FUNCTIONS … TO anon` du baseline n'a pas été walké-back pour les RPC panier/messages, qui restent appelables directement via la clé anon publique (PostgREST `/rest/v1/rpc/*`) et **bypassent la RLS** (car `SECURITY DEFINER`).
+
+| ID | Sév | RPC / route | Problème | Statut |
+|---|---|---|---|---|
+| F-RPC-1 | **P1** | `remove_from_cart` | `COALESCE(p_user_id, auth.uid())` — un `p_user_id` client écrase l'identité de session → vider le panier d'autrui | confirmed |
+| F-RPC-2 | **P1** | `get_or_create_cart` | identité 100 % client → fuite/appropriation du `cart_id` d'autrui + carts junk | confirmed |
+| F-RPC-3 | P2 | `add_to_cart` | check de propriété sauté si `p_anon_id` NULL → écriture dans un cart arbitraire | confirmed |
+| F-RPC-4 | P2 | `create_contact_message` | appel direct contourne rate-limit/CSRF/regex → énumération de comptes + messages usurpés | confirmed |
+| F-RPC-5 | P2 | `mark_message_as_read` | RPC morte (0 call-site), anon, sans check admin → tamper du triage | confirmed |
+| F-RPC-6 | P3 | `get_messages_stats` | anon → fuite des compteurs de messages | confirmed |
+| F-RPC-7 | P3 | `is_user_admin` | anon → sonde « tel UUID est-il admin ? » (gating par ailleurs sain) | confirmed |
+| F-RPC-8 | P2 | `merge_anon_cart_to_user` | `p_anon_id` non lié au caller → vol d'un panier anon connu (UUID requis) | suspected |
+| F-ROUTE-1 | P3 | RLS `contact_messages` INSERT | `user_email IN (auth.users)` au lieu de « = own » → usurpation directe (authenticated) | confirmed |
+| F-ROUTE-2 | P3 | `/api/admin/upload` | `fileName`/`contentType` client + `upsert:true` (admin-only) | confirmed |
+
+**Correctif structurel** : `REVOKE EXECUTE … FROM PUBLIC, anon` + `GRANT … TO service_role` sur `get_or_create_cart`, `add_to_cart`, `remove_from_cart`, `create_contact_message`, `get_messages_stats`, `mark_message_as_read` (la route les appelle déjà en service-role) ; `is_user_admin` → `REVOKE anon` + `GRANT authenticated`. Aligner sur le pattern déjà appliqué à `create_reservation` / `check_rate_limit`. Effort ~S (1-2 migrations).
+
+**Précondition atténuante** (F-RPC-1/2/3) : nécessite l'UUID `auth.users.id` / `carts.id` de la victime, non énuméré par une surface publique (profiles RLS = own) → pas d'exploitation de masse, mais c'est une frontière d'autorisation reposant sur l'obscurité d'un UUID (à corriger malgré tout).
 
 ---
 

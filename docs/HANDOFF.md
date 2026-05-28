@@ -105,6 +105,21 @@ Les 9 findings de la review + 1 régression WCAG + 1 blocker build préexistant 
 
 ## Tâches autonomes restantes
 
+### Sécurité — findings RPC ouverts (WS03, 2026-05-28 — PRIORITAIRE)
+
+Re-vérification authz : `docs/audits/rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md`. Les routes sont saines (les 26 `/api/admin/*` gardées `requireAdmin()`, routes publiques dérivent l'identité serveur). Les RPC `SECURITY DEFINER` panier/messages restent exposées à `anon` (clé anon publique → PostgREST) et **bypassent la RLS**.
+
+- **F-RPC-1 (P1)** `remove_from_cart` — `COALESCE(p_user_id, auth.uid())` → un `p_user_id` client vide le panier d'autrui.
+- **F-RPC-2 (P1)** `get_or_create_cart` — identité 100 % client → fuite/appropriation du `cart_id` d'autrui.
+- **F-RPC-3 (P2)** `add_to_cart` — check de propriété sauté si `p_anon_id` NULL.
+- **F-RPC-4 (P2)** `create_contact_message` — appel direct contourne rate-limit/CSRF → énumération de comptes + messages usurpés.
+- **F-RPC-5 (P2)** `mark_message_as_read` — RPC morte (0 call-site), anon, sans check → `DROP` recommandé.
+- **F-RPC-6/7 (P3)** `get_messages_stats` / `is_user_admin` — anon → fuite compteurs / sonde « tel UUID est admin ? ».
+- **F-RPC-8 (P2)** `merge_anon_cart_to_user` — vol d'un panier anon connu (UUID requis).
+- **F-ROUTE-1/2 (P3)** — RLS INSERT `contact_messages` trop large (`user_email IN auth.users` au lieu de « own ») ; `/api/admin/upload` `fileName`/`contentType` client + `upsert:true` (admin-only).
+
+**Fix** (1 migration) : `REVOKE EXECUTE … FROM PUBLIC, anon` + `GRANT … TO service_role` sur `get_or_create_cart` / `add_to_cart` / `remove_from_cart` / `create_contact_message` / `get_messages_stats` / `mark_message_as_read` (la route les appelle déjà en service-role) ; `is_user_admin` → `REVOKE anon` + `GRANT authenticated`. **À confirmer en DB live** : le GRANT réel de l'overload `remove_from_cart(uuid,uuid,uuid)` (cf. section « À confirmer » de WS03). **Migration manuelle** (préférence projet — ne pas appliquer via MCP sans validation).
+
 ### Technique pur
 - **`metadata.openGraph.siteName`** — lire `shop_name` depuis `shop_settings`
 - **Banner tracking** — wirer `view_count`/`click_count` côté client (KPIs à 0 sinon)
@@ -130,7 +145,7 @@ Les 9 findings de la review + 1 régression WCAG + 1 blocker build préexistant 
 
 | Dimension | Note | Ouverts |
 |---|---|---|
-| Sécurité | **A-** | 0 (XSS ✅, TTL ✅, rate limit ✅, Zod ✅) |
+| Sécurité | **B− (révisé 2026-05-28)** | **10** (RPC panier/messages — WS03 : 2 P1, 4 P2, 4 P3) |
 | Performance | **A- (9/10)** | 0 (code splitting ✅) |
 | Architecture | **A (9/10)** | 0 |
 | Base de données | **A- (9/10)** | 0 (schema.sql partiel, gaps documentés) |
@@ -140,14 +155,14 @@ Les 9 findings de la review + 1 régression WCAG + 1 blocker build préexistant 
 | UX | **B+ (7.5/10)** | 0 |
 | Code Quality | **A+ (10/10)** | 0 |
 
-**145 findings → 145 fermés** + 1 blocker build préexistant levé. Restent des tâches de contenu/feature, **0 finding d'audit ouvert**.
+**145 findings historiques fermés** + 1 blocker build levé — **mais 10 nouveaux findings OUVERTS** depuis la re-vérification authz RPC/route (WS03, 2026-05-28 : 2 P1, 4 P2, 4 P3). Voir `docs/audits/rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md` + la section « Sécurité — findings RPC ouverts » dans la punch list ci-dessus.
 
 ---
 
 ## Workflow recommandé
 
 1. Lis `CLAUDE.md` + ce HANDOFF.
-2. Demande à l'utilisateur ce qu'il veut attaquer (findings d'audit tous fermés ; reste contenu/features).
+2. Demande à l'utilisateur ce qu'il veut attaquer. **Priorité sécurité : 10 findings RPC ouverts (WS03, dont 2 P1 IDOR panier)** — voir punch list. Sinon : contenu/features.
 3. Vérifie le MCP Supabase : `mcp__supabase__get_project_url` → `https://adxpoxcynrpnbbxnncsk.supabase.co`.
 4. Changements DB : via MCP `apply_migration`.
 5. Avant chaque commit : `npm run typecheck && npm run test:unit -- --run && npm run lint`.
