@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 import useSWR, { mutate } from 'swr'
-import { CartResponse, AddToCartRequest } from '@/types/cart'
+import { CartResponse, AddToCartRequest, UpdateCartRequest } from '@/types/cart'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 
 // Fetcher pour SWR avec gestion d'erreur améliorée
@@ -192,10 +192,11 @@ export function useCart() {
     mutate('/api/cart', optimisticData, false)
 
     try {
+      // PATCH = quantité absolue (POST incrémenterait via add_to_cart).
       const response = await fetch('/api/cart', {
-        method: 'POST',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, quantity } as AddToCartRequest)
+        body: JSON.stringify({ productId, quantity } as UpdateCartRequest)
       })
 
       if (!response.ok) {

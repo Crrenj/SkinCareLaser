@@ -75,6 +75,14 @@ test.describe('Panier invité', () => {
       page.locator('[data-testid="cart-drawer"] [data-testid="quantity-display"]').first(),
     ).toHaveText('2', { timeout: 10_000 })
     await expect(page.locator('[data-testid="cart-badge"]')).toHaveText('2', { timeout: 10_000 })
+
+    // Régression P0 : la quantité doit PERSISTER à 2 après reload. Le bug
+    // historique (stepper envoyait une valeur absolue à add_to_cart, qui
+    // incrémente) faisait monter la quantité serveur à 3 ; l'assertion
+    // optimiste ci-dessus passait par timing avant que refreshCart() ne révèle
+    // la divergence. On revalide donc l'état serveur après un reload.
+    await page.reload()
+    await expect(page.locator('[data-testid="cart-badge"]')).toHaveText('2', { timeout: 15_000 })
   })
 
   test('Suppression d\'un item du panier', async ({ page }) => {

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { CartResponse, AddToCartRequest } from '@/types/cart'
+import { CartResponse, AddToCartRequest, UpdateCartRequest } from '@/types/cart'
 
 /**
  * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
@@ -231,6 +231,84 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     logger.error('Erreur POST panier:', error)
+    return NextResponse.json(
+      { error: 'Erreur interne du serveur' },
+      { status: 500 }
+    )
+  }
+}
+
+// PATCH : Définir la quantité ABSOLUE d'un item (stepper +/- du panier).
+// À ne pas confondre avec POST/add_to_cart qui INCRÉMENTE : envoyer une
+// quantité cible ici écrit la valeur telle quelle.
+export async function PATCH(request: NextRequest) {
+  try {
+    const body: UpdateCartRequest = await request.json()
+    const { productId, quantity } = body
+
+    if (!productId || quantity <= 0) {
+      return NextResponse.json(
+        { error: 'Paramètres invalides' },
+        { status: 400 }
+      )
+    }
+
+    const { userId, anonId } = await resolveCartContext()
+    const supabase = getDb()
+
+    const { data: product, error: productError } = await supabase
+      .from('products')
+      .select('stock')
+      .eq('id', productId)
+      .single()
+
+    if (productError || !product) {
+      return NextResponse.json(
+        { error: 'Produit non trouvé' },
+        { status: 404 }
+      )
+    }
+
+    // Quantité absolue : on valide la cible (et non un delta) contre le stock.
+    if ((product.stock ?? 0) < quantity) {
+      return NextResponse.json(
+        { error: 'Stock insuffisant' },
+        { status: 400 }
+      )
+    }
+
+    const { data: cartId, error: cartError } = await supabase.rpc('get_or_create_cart', {
+      p_user_id: userId ?? undefined,
+      p_anonymous_id: anonId ?? undefined,
+    })
+
+    if (cartError || !cartId) {
+      return NextResponse.json(
+        { error: 'Erreur lors de la récupération du panier' },
+        { status: 500 }
+      )
+    }
+
+    // Écriture directe en service-role. Le cart_id est dérivé côté serveur
+    // (user authentifié ou cookie httpOnly), donc on ne touche que le panier
+    // de l'appelant — pas besoin d'une nouvelle RPC SECURITY DEFINER.
+    const { error: updateError } = await supabase
+      .from('cart_items')
+      .update({ quantity })
+      .eq('cart_id', cartId)
+      .eq('product_id', productId)
+
+    if (updateError) {
+      logger.error('Erreur PATCH cart_items:', updateError)
+      return NextResponse.json(
+        { error: 'Erreur lors de la mise à jour' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    logger.error('Erreur PATCH panier:', error)
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }

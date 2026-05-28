@@ -309,12 +309,12 @@ export default function SignupPage() {
         <p className="text-[12px] text-ink-500 leading-relaxed">
           {t.rich('termsAccept', {
             terms: (chunks) => (
-              <Link href="/cgv" className="text-clay-700 underline underline-offset-4 hover:text-clay-800">
+              <Link href="/legal/cgv" className="text-clay-700 underline underline-offset-4 hover:text-clay-800">
                 {chunks}
               </Link>
             ),
             privacy: (chunks) => (
-              <Link href="/confidentialite" className="text-clay-700 underline underline-offset-4 hover:text-clay-800">
+              <Link href="/legal/confidentialite" className="text-clay-700 underline underline-offset-4 hover:text-clay-800">
                 {chunks}
               </Link>
             ),
