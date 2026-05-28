@@ -5,7 +5,8 @@ Date mise à jour : 2026-05-28 (review multi-agent + correctifs — 9 findings f
 Branche : `main`
 
 > **État** : voir `docs/HANDOFF.md` pour la punch list courante.
-> **145 findings historiques fermés — MAIS 10 nouveaux findings OUVERTS** suite à la re-vérification ciblée authz RPC/route du 2026-05-28 (WS03) : 2 P1 + 4 P2 + 4 P3, tous sur des RPC `SECURITY DEFINER` (panier + messages) exposées à `anon` qui font confiance à un ID fourni par le client. Voir [`rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md`](./rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md). **La sécurité n'est plus « 0 ouvert ».**
+> **Audit pré-V1 complet du 2026-05-28** (18 workstreams) : [`pre-launch-v1-2026-05-28/`](./pre-launch-v1-2026-05-28/) → `00-VERDICT-V1.md` + `00-REGISTRE-CONSOLIDE.md`.
+> Les 10 findings authz RPC du WS03 (re-vérif 2026-05-28) sont **FERMÉS** : migration `20260528160000_harden_rpc_execute_grants.sql` appliquée (REVOKE anon/authenticated sur RPC panier/messages, DROP `mark_message_as_read`). `is_user_admin` laissée intacte volontairement (appelée par des policies RLS publiques). Advisor `anon_security_definer_function_executable` 11 → 2 (reliquats P2). Les 3 P0 de l'audit pré-V1 (bug panier, liens consentement signup, légal ES) sont aussi corrigés.
 
 ---
 
@@ -45,7 +46,7 @@ Branche : `main`
 
 | Dimension | Note initiale | Note actuelle | Findings ouverts | Rapport |
 |---|---|---|---|---|
-| Sécurité | Critique | **B− (révisé 2026-05-28)** | **10** (IDOR RPC panier P1×2 — voir WS03) | [security.md](./security.md) · [WS03](./rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md) |
+| Sécurité | Critique | **B (durcissement RPC 2026-05-28)** | RPC IDOR **fermés** ; reliquats P2 advisor | [security.md](./security.md) · [WS03](./rpc-route-authz-2026-05-28/WS03-rpc-route-authorization.md) · [pré-V1](./pre-launch-v1-2026-05-28/) |
 | Performance | C+ (5/10) | **A- (9/10)** | 0 (code splitting ✅) | [performance.md](./performance.md) |
 | Architecture | B- | **A (9/10)** | 0 | [architecture.md](./architecture.md) |
 | Base de données | B- | **A- (9/10)** | 0 (schema.sql partiel, gaps documentés) | [database.md](./database.md) |
