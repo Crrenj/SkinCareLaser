@@ -7,6 +7,8 @@ export type AdminGuardResult =
   | { ok: true; userId: string }
   | { ok: false; response: NextResponse }
 
+export type AdminRole = 'admin' | 'super_admin'
+
 /**
  * Vérifie que la requête est authentifiée ET que l'utilisateur est admin.
  *
@@ -74,6 +76,74 @@ export async function requireAdmin(): Promise<AdminGuardResult> {
     return {
       ok: false,
       response: NextResponse.json({ error: 'Accès admin requis' }, { status: 403 }),
+    }
+  }
+
+  return { ok: true, userId: user.id }
+}
+
+/**
+ * Lit le rôle admin d'un utilisateur (null s'il n'est pas admin).
+ * Service-role (bypass RLS). Utilisé pour enrichir les listes admin et
+ * piloter le gating super-admin.
+ */
+export async function getAdminRole(userId: string): Promise<AdminRole | null> {
+  if (!supabaseAdmin) return null
+  const { data, error } = await supabaseAdmin
+    .from('admin_users')
+    .select('role')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    logger.error('getAdminRole lookup error:', error)
+    return null
+  }
+  if (!data) return null
+  return data.role === 'super_admin' ? 'super_admin' : 'admin'
+}
+
+/**
+ * Comme {@link requireAdmin} mais exige le rôle `super_admin` (gestion de
+ * l'équipe admin : promouvoir/rétrograder/changer de rôle). Garde-fou serveur
+ * — ne jamais se fier au seul masquage UI.
+ *
+ *   - 401 si pas de session
+ *   - 403 { error: 'super_admin_required' } si admin simple ou non-admin
+ */
+export async function requireSuperAdmin(): Promise<AdminGuardResult> {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+
+  if (userError && userError.name !== 'AuthSessionMissingError') {
+    logger.error('requireSuperAdmin getUser error:', userError.message)
+  }
+
+  if (!user) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Non authentifié' }, { status: 401 }),
+    }
+  }
+
+  if (!supabaseAdmin) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        { error: 'Configuration serveur manquante' },
+        { status: 500 },
+      ),
+    }
+  }
+
+  const role = await getAdminRole(user.id)
+  if (role !== 'super_admin') {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'super_admin_required' }, { status: 403 }),
     }
   }
 

@@ -73,6 +73,8 @@ Types Supabase générés dans **`src/lib/database.types.ts`** (via MCP `generat
 
 La table `admin_users` est la **source de vérité unifiée** : middleware, `requireAdmin` helper, pages `/login` + `/auth/callback`, et hook `useIsAdmin` lisent tous la RPC `is_user_admin(check_user_id)`. La colonne legacy `profiles.is_admin` a été droppée (migration `20260523104708`) — plus aucun consommateur, plus de sync.
 
+**Hiérarchie de rôles** (migration `20260529120000`) : `admin_users.role` ∈ `{admin, super_admin}`. `is_user_admin` reste binaire (présence dans la table = accès panel) — **inchangée**. La gestion de l'équipe admin (promouvoir/révoquer/changer de rôle) est réservée aux **super_admin** via `requireSuperAdmin()` (`src/lib/requireAdmin.ts`, + `getAdminRole(userId)`). Garde-fous serveur : pas d'auto-modification, pas de modification d'un AUTRE super_admin (anti-coup / anti-orphelinage → retrait d'un super_admin = en base). UI : page `/admin/admins` (section *Acceso* sidebar) + `GET /api/admin/admins` ; la mutation passe par `PATCH /api/admin/users/[id]` (désormais super-admin only, body `{ isAdmin?, role? }`). L'owner fondateur (`j@gmail.com`) est seedé super_admin.
+
 ### Route map
 
 **Pages publiques sous `[locale]/`** (FR/EN/ES) — `not-found.tsx` design FARMAU au niveau locale :

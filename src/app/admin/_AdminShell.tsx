@@ -1,12 +1,17 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { Sidebar } from '@/components/admin/dashboard/Sidebar'
+import { AdminModeToggle } from '@/components/admin/dashboard/AdminModeToggle'
+
+// Préférence clair/sombre PROPRE à l'admin, indépendante du mode visiteur
+// du site public (`farmau:mode`). L'admin reste toujours sur le thème Terra.
+const ADMIN_MODE_KEY = 'farmau:admin-mode'
 
 /**
  * Shell client qui héberge auth-gate + sidebar + barre mobile.
@@ -16,7 +21,30 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { user, isAdmin, loading } = useIsAdmin()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [mode, setMode] = useState<'light' | 'dark'>('light')
   const tChrome = useTranslations('Admin.chrome')
+
+  // Lit la préférence persistée après le mount (évite le mismatch
+  // d'hydratation : le SSR rend toujours 'light').
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(ADMIN_MODE_KEY) === 'dark') setMode('dark')
+    } catch {
+      // localStorage indisponible → on reste en clair.
+    }
+  }, [])
+
+  const toggleMode = useCallback(() => {
+    setMode((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark'
+      try {
+        localStorage.setItem(ADMIN_MODE_KEY, next)
+      } catch {
+        // persistance best-effort
+      }
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     if (loading) return
@@ -39,7 +67,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     return (
       <div
         data-theme="terra"
-        data-mode="light"
+        data-mode={mode}
         className="min-h-screen flex items-center justify-center bg-sand-100"
       >
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-sand-300 border-t-clay-700" />
@@ -50,12 +78,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (!user || !isAdmin) return null
 
   return (
-    // L'admin reste neutre (Terra clair) quel que soit le thème public choisi.
-    <div data-theme="terra" data-mode="light" className="flex min-h-screen bg-sand-50">
+    // L'admin reste neutre (Terra) quel que soit le thème public choisi ; seul
+    // le mode clair/sombre est basculable via le toggle (préférence dédiée).
+    <div data-theme="terra" data-mode={mode} className="flex min-h-screen bg-sand-50">
       <Sidebar
         mobileOpen={drawerOpen}
         onCloseMobile={() => setDrawerOpen(false)}
         email={user.email ?? undefined}
+        mode={mode}
+        onToggleMode={toggleMode}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -69,9 +100,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <Menu className="w-5 h-5" />
           </button>
           <span className="font-serif text-[20px] text-ink-900">FARMAU</span>
-          <span className="ml-auto text-[11px] tracking-[0.12em] uppercase text-ink-500">
-            {tChrome('adminBadge')}
-          </span>
+          <div className="ml-auto flex items-center gap-2.5">
+            <AdminModeToggle mode={mode} onToggle={toggleMode} className="h-8 w-8" />
+            <span className="text-[11px] tracking-[0.12em] uppercase text-ink-500">
+              {tChrome('adminBadge')}
+            </span>
+          </div>
         </div>
 
         <main className="flex-1 min-w-0">{children}</main>

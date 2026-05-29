@@ -16,12 +16,14 @@ import {
   Mailbox,
   Megaphone,
   Palette,
+  ShieldCheck,
   Tag,
   Users,
 } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
 import { useLocale, useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
+import { AdminModeToggle } from './AdminModeToggle'
 
 const ADMIN_LOCALES = [
   { code: 'fr', label: 'FR' },
@@ -45,6 +47,7 @@ type NavItem = {
     | 'navUsers'
     | 'navNewsletter'
     | 'navAppearance'
+    | 'navAdmins'
     | 'navSettings'
   icon: React.ComponentType<{ className?: string }>
   badgeKey?: 'products' | 'low_stock' | 'reservations' | 'messages'
@@ -59,6 +62,7 @@ type Section = {
     | 'sectionOps'
     | 'sectionCustomers'
     | 'sectionPersonalization'
+    | 'sectionAccess'
     | 'sectionAccount'
   items: NavItem[]
 }
@@ -104,6 +108,10 @@ const SECTIONS: Section[] = [
     items: [{ href: '/admin/apariencia', labelKey: 'navAppearance', icon: Palette }],
   },
   {
+    titleKey: 'sectionAccess',
+    items: [{ href: '/admin/admins', labelKey: 'navAdmins', icon: ShieldCheck }],
+  },
+  {
     titleKey: 'sectionAccount',
     items: [{ href: '/admin/settings', labelKey: 'navSettings', icon: Cog }],
   },
@@ -120,9 +128,11 @@ type SidebarProps = {
   mobileOpen: boolean
   onCloseMobile: () => void
   email?: string
+  mode: 'light' | 'dark'
+  onToggleMode: () => void
 }
 
-export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
+export function Sidebar({ mobileOpen, onCloseMobile, email, mode, onToggleMode }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const dialogId = useId()
@@ -282,6 +292,12 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
               </button>
             )
           })}
+        </div>
+        <div className="px-3 pt-2 flex items-center justify-between gap-2">
+          <span className="text-[11px] tracking-[0.14em] uppercase text-ink-500 font-semibold">
+            {tChrome('themeGroupLabel')}
+          </span>
+          <AdminModeToggle mode={mode} onToggle={onToggleMode} />
         </div>
         {email && (
           <p className="px-3 pt-1.5 text-[11px] text-ink-500 truncate" title={email}>

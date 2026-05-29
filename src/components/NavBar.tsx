@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import NextLink from 'next/link'
 import { ShoppingBag, User as UserIcon, Heart, Menu, Shield } from 'lucide-react'
 import { SiWhatsapp } from 'react-icons/si'
 import { useTranslations } from 'next-intl'
@@ -13,11 +14,13 @@ import { MobileDrawer } from './MobileDrawer'
 import { NavSearch, type NavSearchHandle } from './NavSearch'
 import { FarmauLockup } from './brand/FarmauLogo'
 import { LocaleSwitcher } from './LocaleSwitcher'
+import { ThemeModeToggle } from './ThemeModeToggle'
 
 const NAV_LINKS = [
   { href: '/', labelKey: 'home' as const },
   { href: '/catalogue', labelKey: 'catalogue' as const },
   { href: '/marques', labelKey: 'brands' as const },
+  { href: '/blog', labelKey: 'blog' as const },
   { href: '/a-propos', labelKey: 'about' as const },
 ]
 
@@ -104,8 +107,9 @@ export default function NavBar() {
           <FarmauLockup birdSize={46} wordWidth={78} />
         </div>
 
-        {/* Droite : WhatsApp (≥ md) + admin + panier */}
+        {/* Droite : thème + WhatsApp (≥ md) + admin + panier */}
         <div className="flex items-center justify-end gap-1.5">
+          <ThemeModeToggle variant="nav" />
           <a
             href="https://wa.me/18094122468"
             target="_blank"
@@ -121,6 +125,7 @@ export default function NavBar() {
               icon={<Shield size={22} strokeWidth={1.6} />}
               label={t('adminDashboardAriaLabel')}
               className="hidden md:inline-flex"
+              localized={false}
             />
           )}
           <button
@@ -208,18 +213,27 @@ function IconLinkButton({
   icon,
   label,
   className = '',
+  localized = true,
 }: {
   href: string
   icon: React.ReactNode
   label: string
   className?: string
+  /** false → lien NON préfixé par la locale (routes /admin/* hors [locale]). */
+  localized?: boolean
 }) {
+  const cls = `h-10 w-10 inline-flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors ${className}`
+  // Les routes /admin/* ne vivent pas sous [locale] : le Link next-intl les
+  // préfixerait (`/fr/admin/...` → 404). On utilise next/link brut pour elles.
+  if (!localized) {
+    return (
+      <NextLink href={href} aria-label={label} className={cls}>
+        {icon}
+      </NextLink>
+    )
+  }
   return (
-    <Link
-      href={href}
-      aria-label={label}
-      className={`h-10 w-10 inline-flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors ${className}`}
-    >
+    <Link href={href} aria-label={label} className={cls}>
       {icon}
     </Link>
   )

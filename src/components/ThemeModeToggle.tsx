@@ -11,10 +11,25 @@ import { useTranslations } from 'next-intl'
  *
  * Rend `null` côté serveur et au 1er render client (pas d'info DOM encore) :
  * pas de mismatch d'hydratation, l'icône apparaît après le mount.
+ *
+ * Un MutationObserver sur `<html data-mode>` resynchronise l'icône quand une
+ * AUTRE instance bascule le mode (ex. toggle navbar + toggle footer montés en
+ * même temps) ou quand le script anti-flash le réécrit.
+ *
+ * `variant` : `panel` (défaut, footer sombre via tokens --c-ink-panel-*) ou
+ * `nav` (navbar claire, aligné sur les autres boutons icône de la barre).
  */
 const STORAGE_KEY = 'farmau:mode'
 
-export function ThemeModeToggle({ className = '' }: { className?: string }) {
+type Variant = 'panel' | 'nav'
+
+export function ThemeModeToggle({
+  className = '',
+  variant = 'panel',
+}: {
+  className?: string
+  variant?: Variant
+}) {
   const t = useTranslations('Footer')
   const [mounted, setMounted] = useState(false)
   const [allowed, setAllowed] = useState(false)
@@ -23,8 +38,12 @@ export function ThemeModeToggle({ className = '' }: { className?: string }) {
   useEffect(() => {
     const el = document.documentElement
     setAllowed(el.getAttribute('data-allow-mode') === '1')
-    setMode(el.getAttribute('data-mode') === 'dark' ? 'dark' : 'light')
+    const sync = () => setMode(el.getAttribute('data-mode') === 'dark' ? 'dark' : 'light')
+    sync()
     setMounted(true)
+    const observer = new MutationObserver(sync)
+    observer.observe(el, { attributes: true, attributeFilter: ['data-mode'] })
+    return () => observer.disconnect()
   }, [])
 
   if (!mounted || !allowed) return null
@@ -42,15 +61,21 @@ export function ThemeModeToggle({ className = '' }: { className?: string }) {
   }
 
   const isDark = mode === 'dark'
+  const iconSize = variant === 'nav' ? 22 : 16
+  const variantClasses =
+    variant === 'nav'
+      ? 'h-10 w-10 rounded text-ink-800 hover:bg-sand-300'
+      : 'w-9 h-9 rounded-full border border-[var(--c-ink-panel-border)] text-[var(--c-ink-panel-fg)] hover:border-[var(--c-ink-panel-accent)] hover:text-[var(--c-ink-panel-accent)]'
+
   return (
     <button
       type="button"
       onClick={toggle}
       aria-label={isDark ? t('themeToLight') : t('themeToDark')}
       title={isDark ? t('themeToLight') : t('themeToDark')}
-      className={`inline-flex items-center justify-center w-9 h-9 rounded-full border border-[var(--c-ink-panel-border)] text-[var(--c-ink-panel-fg)] hover:border-[var(--c-ink-panel-accent)] hover:text-[var(--c-ink-panel-accent)] transition-colors ${className}`}
+      className={`inline-flex items-center justify-center transition-colors ${variantClasses} ${className}`}
     >
-      {isDark ? <Sun size={16} strokeWidth={1.6} /> : <Moon size={16} strokeWidth={1.6} />}
+      {isDark ? <Sun size={iconSize} strokeWidth={1.6} /> : <Moon size={iconSize} strokeWidth={1.6} />}
     </button>
   )
 }

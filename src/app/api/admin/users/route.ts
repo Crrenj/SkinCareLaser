@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/requireAdmin'
+import { requireAdmin, getAdminRole } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 /**
@@ -47,11 +47,13 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('id, first_name, last_name, display_name, phone, preferred_locale, created_at')
       .in('id', ids),
-    supabaseAdmin.from('admin_users').select('user_id').in('user_id', ids),
+    supabaseAdmin.from('admin_users').select('user_id, role').in('user_id', ids),
   ])
 
   const profileById = new Map((profiles ?? []).map((p) => [p.id, p]))
-  const adminSet = new Set((admins ?? []).map((a) => a.user_id))
+  const roleById = new Map(
+    (admins ?? []).map((a) => [a.user_id, a.role === 'super_admin' ? 'super_admin' : 'admin'] as const),
+  )
 
   const rows = allUsers.map((u) => {
     const p = profileById.get(u.id) ?? null
@@ -63,7 +65,8 @@ export async function GET(request: NextRequest) {
       displayName: p?.display_name ?? null,
       phone: p?.phone ?? null,
       preferredLocale: p?.preferred_locale ?? null,
-      isAdmin: adminSet.has(u.id),
+      isAdmin: roleById.has(u.id),
+      role: roleById.get(u.id) ?? null,
       createdAt: u.created_at,
       lastSignInAt: u.last_sign_in_at ?? null,
     }
@@ -85,10 +88,13 @@ export async function GET(request: NextRequest) {
       })
     : rows
 
+  const currentUserRole = await getAdminRole(auth.userId)
+
   return NextResponse.json({
     users: filtered,
     page,
     perPage,
     totalForPage: filtered.length,
+    currentUser: { id: auth.userId, role: currentUserRole },
   })
 }

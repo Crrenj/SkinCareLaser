@@ -1,5 +1,6 @@
 'use client'
 
+import NextLink from 'next/link'
 import { ChevronRight, User as UserIcon, Shield } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { User } from '@supabase/supabase-js'
@@ -12,6 +13,7 @@ import { PopClose } from '@/components/ui/PopClose'
 const NAV_LINKS = [
   { href: '/', labelKey: 'home' as const },
   { href: '/catalogue', labelKey: 'catalogue' as const },
+  { href: '/blog', labelKey: 'blog' as const },
   { href: '/a-propos', labelKey: 'about' as const },
 ]
 
@@ -125,14 +127,16 @@ export function MobileDrawer({
           {user ? (
             <>
               {isAdmin && (
-                <Link
+                // next/link brut : /admin/* hors [locale] (le Link next-intl
+                // préfixerait → /fr/admin/product → 404).
+                <NextLink
                   href="/admin/product"
                   onClick={onClose}
                   className="flex items-center gap-3 px-3.5 py-2.5 bg-sand-50 border border-sand-200 rounded-[10px] text-sm font-medium text-ink-900"
                 >
                   <Shield size={18} strokeWidth={1.5} className="text-ink-700" />
                   {t('adminDashboardAriaLabel')}
-                </Link>
+                </NextLink>
               )}
               <Link
                 href="/account/profile"

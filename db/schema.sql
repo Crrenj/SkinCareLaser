@@ -59,6 +59,9 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 -- Table dédiée pour éviter la récursion dans les policies RLS sur profiles
 CREATE TABLE IF NOT EXISTS public.admin_users (
   user_id    UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  -- role : 'admin' (accès panel) ou 'super_admin' (gère l'équipe admin).
+  -- Migration 20260529120000. Seul un super_admin peut promouvoir/révoquer.
+  role       TEXT NOT NULL DEFAULT 'admin' CHECK (role IN ('admin', 'super_admin')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

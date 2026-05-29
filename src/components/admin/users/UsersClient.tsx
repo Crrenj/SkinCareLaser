@@ -1,9 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Search, Shield, ShieldOff, Mail, Phone, Globe, Loader2 } from 'lucide-react'
+import { Search, Shield, ShieldCheck, ShieldOff, Mail, Phone, Globe, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
+
+type AdminRole = 'admin' | 'super_admin'
 
 type Row = {
   id: string
@@ -14,9 +16,12 @@ type Row = {
   phone: string | null
   preferredLocale: string | null
   isAdmin: boolean
+  role: AdminRole | null
   createdAt: string
   lastSignInAt: string | null
 }
+
+type CurrentUser = { id: string; role: AdminRole | null }
 
 const PER_PAGE = 50
 
@@ -24,11 +29,14 @@ export function UsersClient() {
   const t = useTranslations('Admin.users')
   const tc = useTranslations('Admin.common')
   const [rows, setRows] = useState<Row[]>([])
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+
+  const isSuper = currentUser?.role === 'super_admin'
 
   const load = useCallback(async (p: number, q: string) => {
     setLoading(true)
@@ -38,8 +46,9 @@ export function UsersClient() {
       if (q.trim()) params.set('search', q.trim())
       const res = await fetch(`/api/admin/users?${params.toString()}`)
       if (!res.ok) throw new Error('fetch_failed')
-      const data = (await res.json()) as { users: Row[] }
+      const data = (await res.json()) as { users: Row[]; currentUser?: CurrentUser }
       setRows(data.users ?? [])
+      setCurrentUser(data.currentUser ?? null)
     } catch {
       setError(t('loadError'))
     } finally {
@@ -67,15 +76,23 @@ export function UsersClient() {
         })
         if (!res.ok) {
           const json = (await res.json().catch(() => null)) as { error?: string } | null
-          if (json?.error === 'cannot_demote_self') {
+          if (json?.error === 'cannot_modify_self' || json?.error === 'cannot_demote_self') {
             toast.error(t('errorCannotDemoteSelf'))
+          } else if (json?.error === 'cannot_modify_super_admin') {
+            toast.error(t('errorCannotModifySuper'))
+          } else if (json?.error === 'super_admin_required') {
+            toast.error(t('errorSuperAdminRequired'))
           } else {
             toast.error(t('errorUpdateFailed'))
           }
           return
         }
         setRows((prev) =>
-          prev.map((r) => (r.id === row.id ? { ...r, isAdmin: !row.isAdmin } : r)),
+          prev.map((r) =>
+            r.id === row.id
+              ? { ...r, isAdmin: !row.isAdmin, role: !row.isAdmin ? 'admin' : null }
+              : r,
+          ),
         )
       } finally {
         setUpdatingId(null)
@@ -193,25 +210,31 @@ export function UsersClient() {
                       {r.lastSignInAt ? formatDate(r.lastSignInAt) : <span className="text-ink-500 italic">{t('never')}</span>}
                     </td>
                     <td className="px-4 py-3 align-top text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleAdmin(r)}
-                        disabled={updatingId === r.id}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                          r.isAdmin
-                            ? 'bg-clay-700 hover:bg-clay-800 text-sand-50'
-                            : 'bg-transparent border border-sand-400 text-ink-700 hover:border-ink-700 hover:text-ink-900'
-                        }`}
-                      >
-                        {updatingId === r.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : r.isAdmin ? (
-                          <Shield className="w-3 h-3" />
-                        ) : (
-                          <ShieldOff className="w-3 h-3" />
-                        )}
-                        {r.isAdmin ? t('admin') : t('promote')}
-                      </button>
+                      {isSuper && r.role !== 'super_admin' ? (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleAdmin(r)}
+                          disabled={updatingId === r.id}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                            r.isAdmin
+                              ? 'bg-clay-700 hover:bg-clay-800 text-sand-50'
+                              : 'bg-transparent border border-sand-400 text-ink-700 hover:border-ink-700 hover:text-ink-900'
+                          }`}
+                        >
+                          {updatingId === r.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : r.isAdmin ? (
+                            <Shield className="w-3 h-3" />
+                          ) : (
+                            <ShieldOff className="w-3 h-3" />
+                          )}
+                          {r.isAdmin ? t('admin') : t('promote')}
+                        </button>
+                      ) : r.role ? (
+                        <RoleBadge role={r.role} t={t} />
+                      ) : (
+                        <span className="text-ink-400">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -265,6 +288,26 @@ function formatDate(iso: string): string {
   } catch {
     return iso
   }
+}
+
+function RoleBadge({
+  role,
+  t,
+}: {
+  role: AdminRole
+  t: ReturnType<typeof useTranslations>
+}) {
+  const isSuper = role === 'super_admin'
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+        isSuper ? 'bg-clay-700 text-sand-50' : 'bg-sand-200 text-ink-700'
+      }`}
+    >
+      {isSuper ? <ShieldCheck className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
+      {isSuper ? t('roleSuperAdmin') : t('roleAdmin')}
+    </span>
+  )
 }
 
 function StatCard({ label, value }: { label: string; value: number }) {
