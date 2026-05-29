@@ -23,7 +23,9 @@ export async function AboutCta() {
             dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
           />
           <p className="font-serif text-[19px] lg:text-[21px] leading-[1.45] text-sand-300 my-7 max-w-[560px]">
-            {t('body')}
+            {t.rich('body', {
+              strong: (chunks) => <strong className="font-semibold text-sand-50">{chunks}</strong>,
+            })}
           </p>
           <div className="flex flex-wrap gap-3">
             {waHref && (

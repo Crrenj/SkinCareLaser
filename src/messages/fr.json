@@ -379,7 +379,7 @@
     },
     "successTitle": "Réservation enregistrée !",
     "referenceLabel": "Référence :",
-    "successDescription": "Nous vous contacterons via <strong>WhatsApp</strong> dans les prochaines 24h pour fixer l'heure de collecte en pharmacie. Passé ce délai, la réservation est automatiquement annulée.",
+    "successDescription": "Nous vous contacterons via WhatsApp dans les prochaines 24h pour fixer l'heure de collecte en pharmacie. Passé ce délai, la réservation est automatiquement annulée.",
     "backToCatalogue": "Retour au catalogue",
     "openWhatsapp": "Ouvrir WhatsApp",
     "confirmationLede": "Cliquez sur le bouton ci-dessous : nous avons préparé un message avec tous les détails de votre réservation.",

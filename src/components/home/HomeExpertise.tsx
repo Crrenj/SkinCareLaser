@@ -56,7 +56,9 @@ export async function HomeExpertise() {
           {t('p1')}
         </p>
         <p className="text-[15.5px] leading-[1.65] text-ink-800 mb-7 max-w-[440px]">
-          {t('p2')}
+          {t.rich('p2', {
+            strong: (chunks) => <strong className="font-semibold text-ink-900">{chunks}</strong>,
+          })}
         </p>
         <Link
           href="/a-propos"

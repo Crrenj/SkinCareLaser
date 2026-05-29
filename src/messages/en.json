@@ -379,7 +379,7 @@
     },
     "successTitle": "Reservation confirmed!",
     "referenceLabel": "Reference:",
-    "successDescription": "We'll contact you via <strong>WhatsApp</strong> within the next 24h to schedule pickup at the pharmacy. After this delay, the reservation is automatically cancelled.",
+    "successDescription": "We'll contact you via WhatsApp within the next 24h to schedule pickup at the pharmacy. After this delay, the reservation is automatically cancelled.",
     "backToCatalogue": "Back to catalogue",
     "openWhatsapp": "Open WhatsApp",
     "confirmationLede": "Click the button below: we've prepared a message with every detail of your reservation.",
