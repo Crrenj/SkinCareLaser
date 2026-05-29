@@ -109,7 +109,7 @@ export default async function BlogPostPage({
           </header>
 
           <div
-            className="prose prose-lg max-w-none prose-headings:font-serif prose-headings:text-ink-900 prose-p:text-ink-600 prose-a:text-clay-700"
+            className="article-content max-w-none text-[1.05rem]"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.body) }}
           />
         </article>

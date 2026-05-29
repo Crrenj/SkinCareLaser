@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl'
 import { generateSlug } from '@/lib/slug'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { toast } from 'sonner'
+import { RichTextEditor } from '@/components/admin/RichTextEditor'
+import { ImageUploadField } from '@/components/admin/ImageUploadField'
 
 type Post = {
   id: string
@@ -281,21 +283,17 @@ export function BlogClient() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-ink-700 mb-1">{t('fieldBody')}</label>
-                <textarea
+                <RichTextEditor
                   value={form.body}
-                  onChange={e => setForm(f => ({ ...f, body: e.target.value }))}
-                  rows={12}
-                  className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm font-mono focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                  onChange={body => setForm(f => ({ ...f, body }))}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-ink-700 mb-1">{t('fieldCover')}</label>
-                <input
-                  type="text"
+                <ImageUploadField
                   value={form.cover_image_url}
-                  onChange={e => setForm(f => ({ ...f, cover_image_url: e.target.value }))}
-                  placeholder="https://..."
-                  className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                  onChange={url => setForm(f => ({ ...f, cover_image_url: url }))}
+                  folder="blog"
                 />
               </div>
               <div className="flex items-center gap-2">

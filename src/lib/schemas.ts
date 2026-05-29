@@ -149,6 +149,7 @@ export const uploadBody = z.object({
   file: z.string().min(1, 'file requis'),
   fileName: z.string().min(1, 'fileName requis'),
   contentType: z.string().min(1, 'contentType requis'),
+  folder: z.enum(['products', 'blog', 'banners']).default('products'),
 })
 
 export const postCreate = z.object({

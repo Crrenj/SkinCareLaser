@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
+import { ImageUploadField } from '@/components/admin/ImageUploadField'
 import type { BannerData, BannerFormState, BannerSlot, BannerStatus, BannerType } from '../_lib/types'
 import { SLOT_LABELS, STATUS_LABELS } from '../_lib/types'
 
@@ -220,9 +221,12 @@ export function BannerFormModal({
                   </div>
                   <div className="flex flex-col gap-[6px]">
                     <label htmlFor="banner-attribution-photo" className="text-[11.5px] text-ink-700">{t('attrPhotoLabel')}</label>
-                    <input id="banner-attribution-photo" type="url" value={form.attribution_photo_url}
-                      onChange={(e) => onFormChange({ ...form, attribution_photo_url: e.target.value })}
-                      className={inputCls} placeholder="https://…" />
+                    <ImageUploadField
+                      value={form.attribution_photo_url}
+                      onChange={(url) => onFormChange({ ...form, attribution_photo_url: url })}
+                      folder="banners"
+                      aspectClassName="aspect-square max-w-[160px]"
+                    />
                   </div>
                 </div>
               )}
@@ -237,11 +241,11 @@ export function BannerFormModal({
                   {t('imageUrlLabel')}
                   {form.banner_type === 'quote' && <span className="font-sans text-ink-500 text-[10px] normal-case tracking-normal ml-2">({t('optionalForQuote')})</span>}
                 </label>
-                <input id="banner-image" type="url"
-                  required={form.banner_type !== 'quote'}
+                <ImageUploadField
                   value={form.image_url}
-                  onChange={(e) => onFormChange({ ...form, image_url: e.target.value })}
-                  className={inputCls} placeholder="https://example.com/image.jpg" />
+                  onChange={(url) => onFormChange({ ...form, image_url: url })}
+                  folder="banners"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-[14px]">

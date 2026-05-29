@@ -1356,6 +1356,30 @@
     }
   },
   "Admin": {
+    "editor": {
+      "bold": "Gras",
+      "italic": "Italique",
+      "h2": "Titre",
+      "h3": "Sous-titre",
+      "bulletList": "Liste à puces",
+      "orderedList": "Liste numérotée",
+      "quote": "Citation",
+      "link": "Lien",
+      "linkPrompt": "Adresse du lien (https://…)",
+      "image": "Insérer une image",
+      "undo": "Annuler",
+      "redo": "Rétablir"
+    },
+    "upload": {
+      "choose": "Choisir une image",
+      "replace": "Remplacer",
+      "remove": "Retirer",
+      "uploading": "Envoi…",
+      "hint": "PNG, JPG ou WebP · 5 Mo max",
+      "errorType": "Format non supporté (PNG, JPG ou WebP).",
+      "errorSize": "Image trop lourde (5 Mo maximum).",
+      "errorGeneric": "Échec de l'envoi de l'image."
+    },
     "chrome": {
       "openMenu": "Ouvrir le menu",
       "adminBadge": "Admin",

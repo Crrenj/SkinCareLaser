@@ -1356,6 +1356,30 @@
     }
   },
   "Admin": {
+    "editor": {
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "h2": "Título",
+      "h3": "Subtítulo",
+      "bulletList": "Lista con viñetas",
+      "orderedList": "Lista numerada",
+      "quote": "Cita",
+      "link": "Enlace",
+      "linkPrompt": "Dirección del enlace (https://…)",
+      "image": "Insertar imagen",
+      "undo": "Deshacer",
+      "redo": "Rehacer"
+    },
+    "upload": {
+      "choose": "Elegir imagen",
+      "replace": "Reemplazar",
+      "remove": "Quitar",
+      "uploading": "Subiendo…",
+      "hint": "PNG, JPG o WebP · máx. 5 MB",
+      "errorType": "Formato no admitido (PNG, JPG o WebP).",
+      "errorSize": "Imagen demasiado pesada (máx. 5 MB).",
+      "errorGeneric": "No se pudo subir la imagen."
+    },
     "chrome": {
       "openMenu": "Abrir menú",
       "adminBadge": "Admin",

@@ -1356,6 +1356,30 @@
     }
   },
   "Admin": {
+    "editor": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "h2": "Heading",
+      "h3": "Subheading",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "quote": "Quote",
+      "link": "Link",
+      "linkPrompt": "Link address (https://…)",
+      "image": "Insert image",
+      "undo": "Undo",
+      "redo": "Redo"
+    },
+    "upload": {
+      "choose": "Choose an image",
+      "replace": "Replace",
+      "remove": "Remove",
+      "uploading": "Uploading…",
+      "hint": "PNG, JPG or WebP · 5 MB max",
+      "errorType": "Unsupported format (PNG, JPG or WebP).",
+      "errorSize": "Image too large (5 MB max).",
+      "errorGeneric": "Image upload failed."
+    },
     "chrome": {
       "openMenu": "Open menu",
       "adminBadge": "Admin",
