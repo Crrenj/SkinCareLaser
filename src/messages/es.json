@@ -1380,6 +1380,31 @@
       "errorSize": "Imagen demasiado pesada (máx. 5 MB).",
       "errorGeneric": "No se pudo subir la imagen."
     },
+    "homeLayout": {
+      "title": "Composición de la portada",
+      "hint": "Reordena y muestra/oculta las secciones de la portada. No se pueden eliminar.",
+      "save": "Guardar orden",
+      "saving": "Guardando…",
+      "saved": "Orden guardado",
+      "loadError": "No se pudo cargar la composición.",
+      "saveError": "No se pudo guardar.",
+      "visible": "Visible",
+      "hidden": "Oculta",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "sections": {
+        "hero": "Portada (héroe)",
+        "bestsellers": "Los más vendidos",
+        "byNeed": "Por necesidad",
+        "quote": "Cita del farmacéutico",
+        "brands": "Marcas",
+        "expertise": "Experiencia",
+        "routine": "Rutina",
+        "banners": "Banners promo"
+      }
+    },
     "chrome": {
       "openMenu": "Abrir menú",
       "adminBadge": "Admin",

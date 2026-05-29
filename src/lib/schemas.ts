@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { NextResponse } from 'next/server'
+import { HOME_SECTION_KEYS } from '@/lib/homeSections'
 
 export function parseBody<T>(schema: z.ZodType<T>, body: unknown):
   | { ok: true; data: T }
@@ -187,4 +188,16 @@ export const appearanceBody = z.object({
   theme: z.enum(['terra', 'noir', 'botanico', 'coral', 'marino', 'ambar']),
   default_mode: z.enum(['light', 'dark', 'system']),
   allow_visitor_mode: z.boolean(),
+})
+
+// Ordre + visibilité des sections de la home (cf. src/lib/homeSections.ts).
+export const homeLayoutBody = z.object({
+  layout: z
+    .array(
+      z.object({
+        key: z.enum(HOME_SECTION_KEYS),
+        enabled: z.boolean(),
+      }),
+    )
+    .min(1),
 })

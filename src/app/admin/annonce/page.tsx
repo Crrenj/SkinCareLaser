@@ -20,6 +20,7 @@ import { BannersList } from './_components/BannersList'
 import { BannersPreview } from './_components/BannersPreview'
 import { BannerFormModal } from './_components/BannerFormModal'
 import { BannerDeleteModal } from './_components/BannerDeleteModal'
+import { HomeLayoutPanel } from '@/components/admin/HomeLayoutPanel'
 
 const SLOT_TABS: Array<{ key: BannerSlot | 'all'; label: string }> = [
   { key: 'all', label: 'Tous' },
@@ -162,6 +163,7 @@ export default function AnnoncePage() {
       />
 
       <div className="px-5 lg:px-8 py-6 flex flex-col gap-6">
+        <HomeLayoutPanel />
         <BannerStatsCards banners={banners} />
 
         {/* Slot filter tabs */}

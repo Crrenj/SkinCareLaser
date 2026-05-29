@@ -1380,6 +1380,31 @@
       "errorSize": "Image trop lourde (5 Mo maximum).",
       "errorGeneric": "Échec de l'envoi de l'image."
     },
+    "homeLayout": {
+      "title": "Composition de la page d'accueil",
+      "hint": "Réordonnez et affichez/masquez les sections de l'accueil. Non supprimables.",
+      "save": "Enregistrer l'ordre",
+      "saving": "Enregistrement…",
+      "saved": "Ordre enregistré",
+      "loadError": "Impossible de charger l'agencement.",
+      "saveError": "Échec de l'enregistrement.",
+      "visible": "Visible",
+      "hidden": "Masquée",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "sections": {
+        "hero": "Accueil (héro)",
+        "bestsellers": "Meilleures ventes",
+        "byNeed": "Par besoin",
+        "quote": "Citation pharmacien",
+        "brands": "Marques",
+        "expertise": "Expertise",
+        "routine": "Routine",
+        "banners": "Bannières promo"
+      }
+    },
     "chrome": {
       "openMenu": "Ouvrir le menu",
       "adminBadge": "Admin",

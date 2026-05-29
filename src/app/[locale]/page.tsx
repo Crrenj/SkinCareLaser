@@ -12,6 +12,9 @@ import { HomeBrands } from '@/components/home/HomeBrands'
 import { HomeExpertise } from '@/components/home/HomeExpertise'
 import { HomeRoutine } from '@/components/home/HomeRoutine'
 import { BannerQuote } from '@/components/banners/BannerQuote'
+import { getShopSettings } from '@/lib/getShopSettings'
+import { resolveHomeLayout, type HomeSectionKey } from '@/lib/homeSections'
+import { Fragment, type ReactNode } from 'react'
 
 export const revalidate = 60
 
@@ -118,7 +121,7 @@ export default async function LocaleHome({
   const supabase = await createSupabaseServerClient()
 
   // Fetch en parallèle : bannières CMS + bestsellers + marques + quote + featured needs.
-  const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds] = await Promise.all([
+  const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds, settings] = await Promise.all([
     supabase
       .from('banners')
       .select('id, title, description, image_url, link_url, link_text, banner_type, position, direction, attribution_name, attribution_title, attribution_photo_url')
@@ -128,64 +131,71 @@ export default async function LocaleHome({
     supabase.from('brands').select('id, name, slug').order('name', { ascending: true }),
     fetchHomeQuote(supabase),
     fetchFeaturedNeeds(supabase),
+    getShopSettings(),
   ])
 
   const activeBanners = (bannersRes.data ?? []) as BannerRow[]
   const brands = (brandsRes.data ?? []) as BrandRow[]
+
+  // Ordre + visibilité des sections piloté par l'admin (shop_settings.home_layout,
+  // colonne JSONB lue via cast — résolveur tolérant aux valeurs partielles/nulles).
+  const layout = resolveHomeLayout((settings as { home_layout?: unknown }).home_layout)
+
+  // Chaque section → son rendu (null = rien à afficher, ex. pas de citation).
+  const sections: Record<HomeSectionKey, ReactNode> = {
+    hero: <HomeHero />,
+    bestsellers: <HomeBestsellers products={bestsellers} />,
+    byNeed: <HomeByNeed featured={featuredNeeds} />,
+    quote: quoteRes ? (
+      <section className="px-6 lg:px-14 py-12 bg-sand-50">
+        <BannerQuote
+          id="home-pharmacist-quote"
+          title={quoteRes.quote}
+          attribution={{ name: quoteRes.name }}
+        />
+      </section>
+    ) : null,
+    brands: <HomeBrands brands={brands} />,
+    expertise: <HomeExpertise />,
+    routine: <HomeRoutine />,
+    banners: activeBanners.length > 0 ? (
+      <section className="px-6 lg:px-14 py-12 bg-sand-50 space-y-8">
+        {activeBanners.map((banner) => (
+          <Banner
+            key={banner.id}
+            id={banner.id}
+            type={banner.banner_type}
+            title={banner.title}
+            description={banner.description || undefined}
+            imageUrl={banner.image_url || undefined}
+            ctaLabel={banner.link_text || undefined}
+            ctaHref={banner.link_url || undefined}
+            direction={banner.direction || undefined}
+            attribution={
+              banner.attribution_name
+                ? {
+                    name: banner.attribution_name,
+                    title: banner.attribution_title || undefined,
+                    photoUrl: banner.attribution_photo_url || undefined,
+                  }
+                : undefined
+            }
+          />
+        ))}
+      </section>
+    ) : null,
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-200" lang={locale}>
       <NavBar />
 
       <main id="main-content" className="flex-1">
-        <HomeHero />
-        <HomeBestsellers products={bestsellers} />
-        <HomeByNeed featured={featuredNeeds} />
-
-        {/* Pharmacist quote — si un produit a une advice */}
-        {quoteRes && (
-          <section className="px-6 lg:px-14 py-12 bg-sand-50">
-            <BannerQuote
-              id="home-pharmacist-quote"
-              title={quoteRes.quote}
-              attribution={{
-                name: quoteRes.name,
-              }}
-            />
-          </section>
-        )}
-
-        <HomeBrands brands={brands} />
-        <HomeExpertise />
-        <HomeRoutine />
-
-        {/* Bannières CMS optionnelles — en complément, jamais en remplacement du hero */}
-        {activeBanners.length > 0 && (
-          <section className="px-6 lg:px-14 py-12 bg-sand-50 space-y-8">
-            {activeBanners.map((banner) => (
-              <Banner
-                key={banner.id}
-                id={banner.id}
-                type={banner.banner_type}
-                title={banner.title}
-                description={banner.description || undefined}
-                imageUrl={banner.image_url || undefined}
-                ctaLabel={banner.link_text || undefined}
-                ctaHref={banner.link_url || undefined}
-                direction={banner.direction || undefined}
-                attribution={
-                  banner.attribution_name
-                    ? {
-                        name: banner.attribution_name,
-                        title: banner.attribution_title || undefined,
-                        photoUrl: banner.attribution_photo_url || undefined,
-                      }
-                    : undefined
-                }
-              />
-            ))}
-          </section>
-        )}
+        {layout
+          .filter((s) => s.enabled)
+          .map((s) => (
+            <Fragment key={s.key}>{sections[s.key]}</Fragment>
+          ))}
       </main>
 
       <Footer />

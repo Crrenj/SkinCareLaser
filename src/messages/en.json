@@ -1380,6 +1380,31 @@
       "errorSize": "Image too large (5 MB max).",
       "errorGeneric": "Image upload failed."
     },
+    "homeLayout": {
+      "title": "Home page layout",
+      "hint": "Reorder and show/hide the home sections. They can't be deleted.",
+      "save": "Save order",
+      "saving": "Saving…",
+      "saved": "Order saved",
+      "loadError": "Couldn't load the layout.",
+      "saveError": "Couldn't save.",
+      "visible": "Visible",
+      "hidden": "Hidden",
+      "show": "Show",
+      "hide": "Hide",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "sections": {
+        "hero": "Hero",
+        "bestsellers": "Best sellers",
+        "byNeed": "By need",
+        "quote": "Pharmacist quote",
+        "brands": "Brands",
+        "expertise": "Expertise",
+        "routine": "Routine",
+        "banners": "Promo banners"
+      }
+    },
     "chrome": {
       "openMenu": "Open menu",
       "adminBadge": "Admin",
