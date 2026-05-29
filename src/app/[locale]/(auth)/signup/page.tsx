@@ -6,8 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { AuthLayout, AuthDivider, AuthNotice } from '@/components/auth/AuthLayout'
-import { OAuthButtons } from '@/components/auth/OAuthButtons'
+import { AuthLayout, AuthNotice } from '@/components/auth/AuthLayout'
 import { PasswordInput } from '@/components/auth/PasswordInput'
 import { PasswordStrength } from '@/components/auth/PasswordStrength'
 
@@ -25,7 +24,6 @@ const MIN_PASSWORD_LENGTH = 8
 
 export default function SignupPage() {
   const t = useTranslations('Signup')
-  const tOAuth = useTranslations('OAuth')
   const router = useRouter()
 
   const [formData, setFormData] = useState({
@@ -152,10 +150,6 @@ export default function SignupPage() {
           {t('lede')}
         </p>
       </div>
-
-      <OAuthButtons intent="signup" />
-
-      <AuthDivider label={tOAuth('dividerLabel')} />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
