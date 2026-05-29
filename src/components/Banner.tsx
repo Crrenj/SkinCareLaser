@@ -83,11 +83,13 @@ export default function Banner(props: BannerData) {
         />
       )
     case 'quote':
+      // L'admin range la citation dans `description` (champ « Cita ») et garde
+      // `title` comme intitulé court → on l'utilise en eyebrow au-dessus de la cita.
       return (
         <BannerQuote
           id={props.id}
-          eyebrow={props.eyebrow}
-          title={props.title}
+          eyebrow={props.eyebrow ?? props.title}
+          title={props.description || props.title}
           attribution={props.attribution}
         />
       )

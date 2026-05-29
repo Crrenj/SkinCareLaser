@@ -56,6 +56,10 @@ interface BannerRow {
     | 'hero'
     | 'quote'
   position: number
+  direction: 'left' | 'right' | null
+  attribution_name: string | null
+  attribution_title: string | null
+  attribution_photo_url: string | null
 }
 
 interface BestsellerIdRow {
@@ -117,7 +121,7 @@ export default async function LocaleHome({
   const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds] = await Promise.all([
     supabase
       .from('banners')
-      .select('id, title, description, image_url, link_url, link_text, banner_type, position')
+      .select('id, title, description, image_url, link_url, link_text, banner_type, position, direction, attribution_name, attribution_title, attribution_photo_url')
       .eq('is_active', true)
       .order('position', { ascending: true }),
     fetchBestsellers(supabase),
@@ -168,6 +172,16 @@ export default async function LocaleHome({
                 imageUrl={banner.image_url || undefined}
                 ctaLabel={banner.link_text || undefined}
                 ctaHref={banner.link_url || undefined}
+                direction={banner.direction || undefined}
+                attribution={
+                  banner.attribution_name
+                    ? {
+                        name: banner.attribution_name,
+                        title: banner.attribution_title || undefined,
+                        photoUrl: banner.attribution_photo_url || undefined,
+                      }
+                    : undefined
+                }
               />
             ))}
           </section>

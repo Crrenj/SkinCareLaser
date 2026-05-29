@@ -216,7 +216,7 @@ CREATE TABLE IF NOT EXISTS public.banners (
   link_url    TEXT,
   link_text   VARCHAR(100),
   banner_type VARCHAR(20) NOT NULL DEFAULT 'image_left'
-    CHECK (banner_type IN ('image_left','image_right','image_full','card_style','minimal','gradient_overlay')),
+    CHECK (banner_type IN ('editorial','hero','quote','image_left','image_right','image_full','card_style','minimal','gradient_overlay')),
   slot        public.banner_slot   NOT NULL DEFAULT 'banner',
   status      public.banner_status NOT NULL DEFAULT 'draft',
   direction   TEXT,

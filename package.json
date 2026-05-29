@@ -20,6 +20,7 @@
     "prices:import": "node scripts/prices-import.cjs",
     "prices:default": "node scripts/prices-set-default.cjs",
     "seed-import": "node scripts/seed-import.cjs",
+    "seed:example-content": "node scripts/seed-example-content.cjs",
     "create-admin": "node scripts/create-admin-user.js",
     "favicons:build": "node scripts/build-favicons.cjs",
     "prepare": "husky"
