@@ -6,6 +6,13 @@ Guide pour les futures instances de Claude Code sur ce repo.
 
 Next.js 15.5.18 (App Router) + React 19 + Supabase (Auth, Postgres + RLS, Storage) + Tailwind 4 + **next-intl 4.12** (FR/EN/ES). Tout le texte UI passe par les fichiers de traduction. Marché cible : République Dominicaine (devise `DOP`, locale par défaut `fr`).
 
+## Modèle & orchestration agents
+
+- **Modèle** : toujours **Opus 4.8** (`claude-opus-4-8`) en **effort max**. Pinné dans `.claude/settings.json`, `.claude/settings.local.json` et `~/.claude/settings.json` (clés `model` + `effortLevel: "max"`). Ne jamais redescendre en 4.7.
+- **Agents indépendants** : tout sous-agent tourne aussi en Opus 4.8 max effort — passer `model: "opus"` au tool Agent (résout vers la dernière Opus = 4.8 ; l'effort est hérité du parent).
+- **Pas de restriction** : aucune limite sur les tokens consommés ni sur le nombre d'agents parallèles. Privilégier le fan-out massif (un agent par workstream) plutôt que le sériel quand la tâche s'y prête.
+- Préférences détaillées d'orchestration d'audit : voir la mémoire `audit-orchestration-prefs`.
+
 ## Commandes courantes
 
 ```bash
