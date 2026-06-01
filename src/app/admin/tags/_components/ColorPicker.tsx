@@ -21,7 +21,7 @@ export function ColorPicker({ value, onChange }: ColorPickerProps) {
             aria-label={`Choisir la couleur ${color}`}
             className={`w-full h-10 rounded-lg border-2 transition-all ${
               selected
-                ? 'border-gray-900 scale-110'
+                ? 'border-ink-900 scale-110'
                 : 'border-transparent hover:scale-105'
             }`}
             style={{ backgroundColor: color }}

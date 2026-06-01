@@ -101,13 +101,13 @@ export function NewsletterClient() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('searchPlaceholder')}
-            className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
+            className="w-full h-10 pl-9 pr-3 rounded-md border border-sand-300 bg-sand-50 text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
           />
         </div>
         <select
           value={lang}
           onChange={(e) => setLang(e.target.value as typeof lang)}
-          className="h-10 px-3 rounded-md border border-sand-300 bg-white text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
+          className="h-10 px-3 rounded-md border border-sand-300 bg-sand-50 text-[14px] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/15 transition-colors"
         >
           <option value="all">{t('allLangs')}</option>
           <option value="fr">Français</option>
@@ -125,7 +125,7 @@ export function NewsletterClient() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-sand-300 rounded-md overflow-hidden">
+      <div className="bg-sand-50 border border-sand-300 rounded-md overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16 text-ink-500">
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -224,7 +224,7 @@ function formatDate(iso: string): string {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-white border border-sand-300 rounded-md px-4 py-3">
+    <div className="bg-sand-50 border border-sand-300 rounded-md px-4 py-3">
       <div className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-ink-500 font-semibold mb-1">
         {label}
       </div>

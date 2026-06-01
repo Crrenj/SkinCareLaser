@@ -70,17 +70,17 @@ export default function AdminSetupPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('title')}</h1>
+      <h1 className="text-3xl font-bold text-ink-900 mb-8">{t('title')}</h1>
       
       {loading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">{t('checking')}</p>
+          <p className="mt-4 text-ink-700">{t('checking')}</p>
         </div>
       ) : (
         <>
           {/* État de la configuration */}
-          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div className="bg-sand-50 rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4">{t('configTitle')}</h2>
             
             <div className="space-y-3">
@@ -112,7 +112,7 @@ export default function AdminSetupPage() {
 
           {/* Instructions de configuration */}
           {!configStatus?.supabaseServiceKey && (
-            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div className="bg-sand-50 rounded-lg shadow-md p-6 mb-8">
               <h2 className="text-xl font-semibold mb-4 text-red-600">
                 {t('actionTitle')}
               </h2>
@@ -128,12 +128,12 @@ export default function AdminSetupPage() {
                   </ol>
                 </div>
                 
-                <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                  <h3 className="font-semibold text-gray-900 mb-2">{t('step2Title')}</h3>
-                  <p className="text-sm text-gray-700 mb-2">
+                <div className="bg-sand-100 border border-sand-200 rounded-md p-4">
+                  <h3 className="font-semibold text-ink-900 mb-2">{t('step2Title')}</h3>
+                  <p className="text-sm text-ink-700 mb-2">
                     {t('step2Body')}
                   </p>
-                  <pre className="bg-gray-900 text-gray-100 p-3 rounded-md text-sm overflow-x-auto">
+                  <pre className="bg-gray-900 text-ink-200 p-3 rounded-md text-sm overflow-x-auto">
 {t('step2Code')}
                   </pre>
                 </div>
@@ -143,7 +143,7 @@ export default function AdminSetupPage() {
                   <p className="text-sm text-yellow-800">
                     {t('step3Body')}
                   </p>
-                  <pre className="bg-gray-900 text-gray-100 p-2 rounded-md text-sm mt-2">
+                  <pre className="bg-gray-900 text-ink-200 p-2 rounded-md text-sm mt-2">
 npm run dev
                   </pre>
                 </div>
@@ -182,8 +182,8 @@ npm run dev
           )}
 
           {/* Ressources supplémentaires */}
-          <div className="mt-8 bg-gray-50 rounded-lg p-6">
-            <h3 className="font-semibold text-gray-900 mb-3">{t('resourcesTitle')}</h3>
+          <div className="mt-8 bg-sand-100 rounded-lg p-6">
+            <h3 className="font-semibold text-ink-900 mb-3">{t('resourcesTitle')}</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/GUIDE_ADMIN_PRODUCTS.md" className="text-blue-600 hover:underline">
@@ -200,7 +200,7 @@ npm run dev
                   {t('resourceDocs')}
                 </a>
               </li>
-              <li className="text-gray-600">
+              <li className="text-ink-700">
                 {t('resourceTip')}
               </li>
             </ul>

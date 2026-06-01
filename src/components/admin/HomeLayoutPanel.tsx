@@ -94,7 +94,7 @@ export function HomeLayoutPanel() {
           {layout.map((entry, i) => (
             <li
               key={entry.key}
-              className={`flex items-center gap-3 rounded-lg border border-sand-200 bg-white px-3 py-2.5 ${entry.enabled ? '' : 'opacity-60'}`}
+              className={`flex items-center gap-3 rounded-lg border border-sand-200 bg-sand-50 px-3 py-2.5 ${entry.enabled ? '' : 'opacity-60'}`}
             >
               <span className="w-5 text-center font-mono text-[11px] text-ink-500">{i + 1}</span>
               <span className="flex-1 text-[14px] text-ink-900">{ts(entry.key)}</span>

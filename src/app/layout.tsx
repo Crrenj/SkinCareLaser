@@ -5,6 +5,7 @@ import "./globals.css";
 import { SWRProvider } from '@/components/SWRProvider'
 import { AuthProvider } from '@/components/AuthProvider'
 import { getThemeConfig, resolveInitialMode } from '@/lib/getThemeConfig'
+import { ThemeFavicon } from '@/components/ThemeFavicon'
 
 const serif = Instrument_Serif({
   variable: "--font-instrument",
@@ -82,6 +83,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Aller au contenu principal
         </a>
+        <ThemeFavicon />
         <SWRProvider>
           <AuthProvider>
             <div className="flex-1 bg-sand-200">{children}</div>

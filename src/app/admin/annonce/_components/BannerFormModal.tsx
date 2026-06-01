@@ -306,7 +306,7 @@ export function BannerFormModal({
                     form.is_active ? 'bg-clay-700' : 'bg-sand-300'
                   }`}
                 >
-                  <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                  <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] bg-sand-50 rounded-full shadow-sm transition-transform ${
                     form.is_active ? 'translate-x-[14px]' : ''
                   }`} />
                 </button>

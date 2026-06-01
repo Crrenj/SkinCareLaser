@@ -106,8 +106,8 @@ export default function SettingsPage() {
     <form onSubmit={handleSave} className="p-8 max-w-4xl">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-3xl font-bold text-ink-900">{t('title')}</h1>
+          <p className="text-sm text-ink-500 mt-1">
             {t('updatedAt', { date: new Date(form.updated_at).toLocaleDateString() })}
           </p>
         </div>
@@ -134,7 +134,7 @@ export default function SettingsPage() {
 
         {/* Contenu */}
         <div className="flex-1">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-sand-50 rounded-lg shadow-sm border border-sand-200 p-6">
             {tab === 'shop' && (
               <ShopTab form={form} update={update} t={t} />
             )}
@@ -152,7 +152,7 @@ export default function SettingsPage() {
                   type="button"
                   onClick={handleReset}
                   disabled={saving}
-                  className="px-4 py-2 text-sm font-medium bg-white/10 hover:bg-white/20 rounded-md disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-medium bg-sand-50/10 hover:bg-sand-50/20 rounded-md disabled:opacity-50"
                 >
                   {t('resetBtn')}
                 </button>
@@ -192,7 +192,7 @@ function TabButton({
       className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
         active
           ? 'bg-clay-50 text-clay-900'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+          : 'text-ink-700 hover:bg-sand-100 hover:text-ink-900'
       }`}
     >
       <Icon className="h-5 w-5 mr-3" />
@@ -214,11 +214,11 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-ink-700 mb-1">
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-ink-500 mt-1">{hint}</p>}
     </div>
   )
 }
@@ -232,8 +232,8 @@ type TabProps = {
 function ShopTab({ form, update, t }: TabProps) {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('shopTitle')}</h2>
-      <p className="text-sm text-gray-500 mb-6">
+      <h2 className="text-xl font-semibold text-ink-900 mb-2">{t('shopTitle')}</h2>
+      <p className="text-sm text-ink-500 mb-6">
         {t('shopHint')}
       </p>
 
@@ -245,7 +245,7 @@ function ShopTab({ form, update, t }: TabProps) {
             required
             value={form.shop_name}
             onChange={(e) => update('shop_name', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
           />
         </Field>
 
@@ -255,7 +255,7 @@ function ShopTab({ form, update, t }: TabProps) {
             type="text"
             value={form.shop_tagline ?? ''}
             onChange={(e) => update('shop_tagline', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
           />
         </Field>
 
@@ -266,7 +266,7 @@ function ShopTab({ form, update, t }: TabProps) {
               type="email"
               value={form.contact_email ?? ''}
               onChange={(e) => update('contact_email', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
           <Field id="contact_phone" label={t('contactPhone')}>
@@ -275,7 +275,7 @@ function ShopTab({ form, update, t }: TabProps) {
               type="tel"
               value={form.contact_phone ?? ''}
               onChange={(e) => update('contact_phone', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
         </div>
@@ -291,7 +291,7 @@ function ShopTab({ form, update, t }: TabProps) {
             value={form.whatsapp_number ?? ''}
             onChange={(e) => update('whatsapp_number', e.target.value)}
             placeholder="+18094122468"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
           />
         </Field>
       </div>
@@ -303,8 +303,8 @@ function ShippingTab({ form, update, t }: TabProps) {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('shippingTitle')}</h2>
-        <p className="text-sm text-gray-500 mb-6">
+        <h2 className="text-xl font-semibold text-ink-900 mb-2">{t('shippingTitle')}</h2>
+        <p className="text-sm text-ink-500 mb-6">
           {t('shippingHint')}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -323,7 +323,7 @@ function ShippingTab({ form, update, t }: TabProps) {
               onChange={(e) =>
                 update('shipping_santo_domingo', Number(e.target.value) || 0)
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
           <Field
@@ -341,15 +341,15 @@ function ShippingTab({ form, update, t }: TabProps) {
               onChange={(e) =>
                 update('shipping_interior', Number(e.target.value) || 0)
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
         </div>
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('pickupTitle')}</h2>
-        <p className="text-sm text-gray-500 mb-6">
+        <h2 className="text-xl font-semibold text-ink-900 mb-2">{t('pickupTitle')}</h2>
+        <p className="text-sm text-ink-500 mb-6">
           {t('pickupHint')}
         </p>
         <div className="space-y-5">
@@ -359,7 +359,7 @@ function ShippingTab({ form, update, t }: TabProps) {
               type="text"
               value={form.pickup_name ?? ''}
               onChange={(e) => update('pickup_name', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
           <Field id="pickup_address" label={t('pickupAddress')}>
@@ -368,7 +368,7 @@ function ShippingTab({ form, update, t }: TabProps) {
               rows={2}
               value={form.pickup_address ?? ''}
               onChange={(e) => update('pickup_address', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+              className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
             />
           </Field>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -379,7 +379,7 @@ function ShippingTab({ form, update, t }: TabProps) {
                 value={form.pickup_hours ?? ''}
                 onChange={(e) => update('pickup_hours', e.target.value)}
                 placeholder="Lun-Vie 6h30-17h · Sab 8h-16h"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+                className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
               />
             </Field>
             <Field id="pickup_phone" label={t('pickupPhone')}>
@@ -388,7 +388,7 @@ function ShippingTab({ form, update, t }: TabProps) {
                 type="tel"
                 value={form.pickup_phone ?? ''}
                 onChange={(e) => update('pickup_phone', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+                className="w-full px-3 py-2 border border-sand-300 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
               />
             </Field>
           </div>

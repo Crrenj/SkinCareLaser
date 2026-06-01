@@ -237,7 +237,7 @@ export function BlogClient() {
                   type="text"
                   value={form.title}
                   onChange={e => onTitleChange(e.target.value)}
-                  className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                  className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
                 />
               </div>
               <div>
@@ -246,7 +246,7 @@ export function BlogClient() {
                   type="text"
                   value={form.slug}
                   onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
-                  className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm font-mono focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                  className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm font-mono focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -255,7 +255,7 @@ export function BlogClient() {
                   <select
                     value={form.locale}
                     onChange={e => setForm(f => ({ ...f, locale: e.target.value as 'fr' | 'es' | 'en' }))}
-                    className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                    className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
                   >
                     <option value="fr">Fran&ccedil;ais</option>
                     <option value="es">Espa&ntilde;ol</option>
@@ -268,7 +268,7 @@ export function BlogClient() {
                     type="text"
                     value={form.author_name}
                     onChange={e => setForm(f => ({ ...f, author_name: e.target.value }))}
-                    className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                    className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
                   />
                 </div>
               </div>
@@ -278,7 +278,7 @@ export function BlogClient() {
                   value={form.excerpt}
                   onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))}
                   rows={2}
-                  className="w-full rounded-lg border border-sand-300 bg-white px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
+                  className="w-full rounded-lg border border-sand-300 bg-sand-50 px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:outline-none"
                 />
               </div>
               <div>

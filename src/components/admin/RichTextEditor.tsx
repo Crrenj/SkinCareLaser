@@ -101,7 +101,7 @@ export function RichTextEditor({ value, onChange }: Props) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-sand-300 bg-white">
+    <div className="overflow-hidden rounded-lg border border-sand-300 bg-sand-50">
       <div className="flex flex-wrap items-center gap-0.5 border-b border-sand-200 bg-sand-50 px-2 py-1.5">
         <ToolBtn title={t('bold')} active={state.bold} onClick={() => editor.chain().focus().toggleBold().run()}>
           <Bold className="h-4 w-4" />

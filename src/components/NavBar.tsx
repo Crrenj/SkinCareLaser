@@ -55,9 +55,9 @@ export default function NavBar() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-40 bg-sand-400">
+    <header className="sticky top-0 z-40 bg-sand-50/85 backdrop-blur-md border-b border-sand-300">
       {/* ── Utility row (≥ lg uniquement) ── */}
-      <div className="hidden lg:flex items-center justify-between bg-sand-300 border-b border-sand-400 px-6 py-1.5 text-[11px] text-ink-700">
+      <div className="hidden lg:flex items-center justify-between bg-sand-100/50 border-b border-sand-200 px-6 py-1.5 text-[11px] text-ink-700">
         <div className="flex items-center gap-3">
           <Link href="/contact" className="hover:text-ink-900 transition-colors">
             {t('utility.delivery')}
@@ -84,7 +84,7 @@ export default function NavBar() {
             type="button"
             onClick={() => setDrawerOpen(true)}
             aria-label={t('menuAriaLabel')}
-            className="lg:hidden h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+            className="lg:hidden h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-100 transition-colors"
           >
             <Menu size={22} strokeWidth={1.6} />
           </button>
@@ -115,7 +115,7 @@ export default function NavBar() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={t('whatsappAriaLabel')}
-            className="hidden md:inline-flex h-10 w-10 items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+            className="hidden md:inline-flex h-10 w-10 items-center justify-center text-ink-800 rounded hover:bg-sand-100 transition-colors"
           >
             <SiWhatsapp size={22} />
           </a>
@@ -132,7 +132,7 @@ export default function NavBar() {
             type="button"
             onClick={() => setCartOpen(true)}
             aria-label={t('cartAriaLabel')}
-            className="relative h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors"
+            className="relative h-10 w-10 flex items-center justify-center text-ink-800 rounded hover:bg-sand-100 transition-colors"
             data-testid="cart-icon"
           >
             <ShoppingBag size={22} strokeWidth={1.6} />
@@ -149,7 +149,7 @@ export default function NavBar() {
       </div>
 
       {/* ── Nav + Search row (≥ lg) ── */}
-      <div className="hidden lg:flex items-center gap-8 px-6 py-3 border-t border-sand-500">
+      <div className="hidden lg:flex items-center gap-8 px-6 py-3 border-t border-sand-200">
         <nav className="flex items-center gap-1" aria-label={t('mainNavAriaLabel')}>
           {NAV_LINKS.map((link) => (
             <NavLink
@@ -222,7 +222,7 @@ function IconLinkButton({
   /** false → lien NON préfixé par la locale (routes /admin/* hors [locale]). */
   localized?: boolean
 }) {
-  const cls = `h-10 w-10 inline-flex items-center justify-center text-ink-800 rounded hover:bg-sand-300 transition-colors ${className}`
+  const cls = `h-10 w-10 inline-flex items-center justify-center text-ink-800 rounded hover:bg-sand-100 transition-colors ${className}`
   // Les routes /admin/* ne vivent pas sous [locale] : le Link next-intl les
   // préfixerait (`/fr/admin/...` → 404). On utilise next/link brut pour elles.
   if (!localized) {

@@ -22,11 +22,11 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
             className={`p-3 rounded-lg border-2 transition-all ${
               selected
                 ? 'border-purple-500 bg-purple-50'
-                : 'border-gray-200 hover:border-gray-300'
+                : 'border-sand-200 hover:border-sand-300'
             }`}
             title={option.label}
           >
-            <Icon className="h-5 w-5 mx-auto text-gray-700" />
+            <Icon className="h-5 w-5 mx-auto text-ink-700" />
           </button>
         )
       })}

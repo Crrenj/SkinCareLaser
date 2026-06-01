@@ -12,8 +12,8 @@ type TagSelectorProps = {
 
 export function TagSelector({ tagTypes, tags, selectedIds, onToggle }: TagSelectorProps) {
   return (
-    <div className="bg-gray-50 p-4 rounded-lg">
-      <h4 className="text-md font-semibold text-gray-900 mb-4 flex items-center">
+    <div className="bg-sand-100 p-4 rounded-lg">
+      <h4 className="text-md font-semibold text-ink-900 mb-4 flex items-center">
         <TagIcon className="h-5 w-5 mr-2" />
         Tags du produit
       </h4>
@@ -22,8 +22,8 @@ export function TagSelector({ tagTypes, tags, selectedIds, onToggle }: TagSelect
           const typeTags = tags.filter((tag) => tag.tag_type_id === type.id)
           if (typeTags.length === 0) return null
           return (
-            <div key={type.id} className="border border-gray-200 rounded-lg p-3">
-              <h5 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+            <div key={type.id} className="border border-sand-200 rounded-lg p-3">
+              <h5 className="text-sm font-medium text-ink-700 mb-2 flex items-center">
                 <div
                   className="w-3 h-3 rounded-full mr-2"
                   style={{ backgroundColor: type.color }}
@@ -42,7 +42,7 @@ export function TagSelector({ tagTypes, tags, selectedIds, onToggle }: TagSelect
                       className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
                         selected
                           ? 'text-white border-transparent'
-                          : 'text-gray-700 border-gray-300 bg-white hover:bg-gray-50'
+                          : 'text-ink-700 border-sand-300 bg-sand-50 hover:bg-sand-100'
                       }`}
                       style={{ backgroundColor: selected ? type.color : undefined }}
                     >
