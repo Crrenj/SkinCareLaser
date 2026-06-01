@@ -2,14 +2,13 @@
 
 import { useEffect, useId, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
   Boxes,
   Building2,
   ClipboardList,
   Cog,
   FileText,
-  Globe,
   Home,
   LogOut,
   Mail,
@@ -21,15 +20,17 @@ import {
   Users,
 } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
-import { AdminModeToggle } from './AdminModeToggle'
 
-const ADMIN_LOCALES = [
-  { code: 'fr', label: 'FR' },
-  { code: 'es', label: 'ES' },
-  { code: 'en', label: 'EN' },
-] as const
+/** Initiales pour l'avatar du compte, dérivées de l'email (local-part). */
+function initialsFromEmail(email?: string): string {
+  if (!email) return 'FA'
+  const local = email.split('@')[0]
+  const parts = local.split(/[._-]+/).filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+  return local.slice(0, 2).toUpperCase()
+}
 
 type NavItem = {
   href: string
@@ -128,17 +129,12 @@ type SidebarProps = {
   mobileOpen: boolean
   onCloseMobile: () => void
   email?: string
-  mode: 'light' | 'dark'
-  onToggleMode: () => void
 }
 
-export function Sidebar({ mobileOpen, onCloseMobile, email, mode, onToggleMode }: SidebarProps) {
+export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
   const pathname = usePathname()
-  const router = useRouter()
   const dialogId = useId()
   const [stats, setStats] = useState<Stats>({})
-  const [localeSwitching, setLocaleSwitching] = useState(false)
-  const currentLocale = useLocale()
   const tNav = useTranslations('Admin.sidebar')
   const tChrome = useTranslations('Admin.chrome')
 
@@ -162,23 +158,6 @@ export function Sidebar({ mobileOpen, onCloseMobile, email, mode, onToggleMode }
     window.location.href = '/login'
   }
 
-  const switchLocale = async (locale: string) => {
-    if (locale === currentLocale || localeSwitching) return
-    setLocaleSwitching(true)
-    try {
-      const res = await fetch('/api/admin/set-locale', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locale }),
-      })
-      if (res.ok) {
-        router.refresh()
-      }
-    } finally {
-      setLocaleSwitching(false)
-    }
-  }
-
   // Esc ferme le drawer mobile
   useEffect(() => {
     if (!mobileOpen) return
@@ -195,19 +174,17 @@ export function Sidebar({ mobileOpen, onCloseMobile, email, mode, onToggleMode }
 
   const content = (
     <nav className="flex flex-col gap-2 h-full">
-      <div className="flex items-start justify-between px-3 pb-4 mb-1 border-b border-sand-300">
-        <div>
-          <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium">
-            Admin
-          </span>
-          <Link
-            href="/admin"
-            className="block font-serif text-[22px] tracking-[-.01em] text-ink-900 mt-1.5"
-            onClick={onCloseMobile}
-          >
-            FARMAU
-          </Link>
-        </div>
+      <div className="flex items-center gap-2 px-3 pt-1 pb-4 mb-1.5 border-b border-sand-300">
+        <Link
+          href="/admin"
+          onClick={onCloseMobile}
+          className="mr-auto font-serif text-[24px] leading-none tracking-[0.01em] text-ink-900"
+        >
+          FARMAU
+        </Link>
+        <span className="font-mono text-[9px] tracking-[0.18em] uppercase text-clay-700 border border-clay-700/45 px-[7px] py-[3px] rounded-[5px] font-medium">
+          {tChrome('adminBadge')}
+        </span>
         <PopClose onClick={onCloseMobile} className="lg:hidden" label={tChrome('openMenu')} />
       </div>
 
@@ -261,57 +238,30 @@ export function Sidebar({ mobileOpen, onCloseMobile, email, mode, onToggleMode }
         ))}
       </div>
 
-      <div className="border-t border-sand-300 pt-3 mt-2 flex flex-col gap-1.5 shrink-0">
-        <div className="px-3 flex items-center gap-2 text-[11px] text-ink-500">
-          <Globe className="w-3 h-3 shrink-0" aria-hidden />
-          <span className="tracking-[0.14em] uppercase font-semibold">
-            {tChrome('localeGroupLabel')}
+      <div className="border-t border-sand-300 pt-4 mt-2 shrink-0">
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] hover:bg-sand-200 transition-colors">
+          <span
+            aria-hidden
+            className="w-[34px] h-[34px] shrink-0 rounded-full bg-clay-700 text-sand-50 text-[12.5px] font-semibold tracking-[0.02em] inline-flex items-center justify-center"
+          >
+            {initialsFromEmail(email)}
           </span>
-        </div>
-        <div
-          className="px-3 flex gap-1.5"
-          role="group"
-          aria-label={tChrome('localeSwitcherAria')}
-        >
-          {ADMIN_LOCALES.map((loc) => {
-            const isCurrent = loc.code === currentLocale
-            return (
-              <button
-                key={loc.code}
-                type="button"
-                onClick={() => switchLocale(loc.code)}
-                disabled={localeSwitching || isCurrent}
-                aria-pressed={isCurrent}
-                className={`flex-1 inline-flex items-center justify-center px-2 py-1.5 text-[12px] font-mono font-medium border rounded-md transition-colors disabled:cursor-default ${
-                  isCurrent
-                    ? 'bg-ink-900 text-sand-50 border-ink-900'
-                    : 'bg-sand-50 text-ink-700 border-sand-300 hover:border-ink-900 hover:text-ink-900 hover:bg-sand-200'
-                } ${localeSwitching && !isCurrent ? 'opacity-50' : ''}`}
-              >
-                {loc.label}
-              </button>
-            )
-          })}
-        </div>
-        <div className="px-3 pt-2 flex items-center justify-between gap-2">
-          <span className="text-[11px] tracking-[0.14em] uppercase text-ink-500 font-semibold">
-            {tChrome('themeGroupLabel')}
+          <span className="flex flex-col min-w-0 leading-[1.35]">
+            <b className="text-[13px] text-ink-900 font-semibold truncate" title={email}>
+              {email ? email.split('@')[0] : 'FARMAU'}
+            </b>
+            <small className="text-[11px] text-ink-500">{tChrome('adminBadge')}</small>
           </span>
-          <AdminModeToggle mode={mode} onToggle={onToggleMode} />
+          <button
+            type="button"
+            onClick={handleLogout}
+            title={tChrome('logout')}
+            aria-label={tChrome('logout')}
+            className="ml-auto w-[30px] h-[30px] shrink-0 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-sand-300 hover:text-brick-600 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
-        {email && (
-          <p className="px-3 pt-1.5 text-[11px] text-ink-500 truncate" title={email}>
-            {email}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-[13.5px] text-brick-600 hover:bg-brick-600/10 transition-colors text-left"
-        >
-          <LogOut className="w-4 h-4 shrink-0" />
-          {tChrome('logout')}
-        </button>
       </div>
     </nav>
   )
