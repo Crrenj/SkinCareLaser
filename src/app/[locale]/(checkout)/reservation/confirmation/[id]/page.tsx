@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import NavBar from '@/components/NavBar'
-import Footer from '@/components/Footer'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getShopSettings } from '@/lib/getShopSettings'
 import ConfirmationClient from './ConfirmationClient'
@@ -103,20 +101,14 @@ export default async function ConfirmationPage({
   })
 
   return (
-    <div className="flex flex-col min-h-screen bg-sand-100">
-      <NavBar />
-      <main id="main-content" className="flex-grow">
-        <ConfirmationClient
-          reservationId={reservation.id}
-          contactName={reservation.contact_name ?? ''}
-          contactPhone={reservation.contact_phone ?? ''}
-          totalPrice={Number(reservation.total_price ?? 0)}
-          createdAt={reservation.created_at ?? null}
-          items={enrichedItems}
-          pickupLocation={pickup}
-        />
-      </main>
-      <Footer />
-    </div>
+    <ConfirmationClient
+      reservationId={reservation.id}
+      contactName={reservation.contact_name ?? ''}
+      contactPhone={reservation.contact_phone ?? ''}
+      totalPrice={Number(reservation.total_price ?? 0)}
+      createdAt={reservation.created_at ?? null}
+      items={enrichedItems}
+      pickupLocation={pickup}
+    />
   )
 }

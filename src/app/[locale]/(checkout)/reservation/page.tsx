@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import NavBar from '@/components/NavBar'
-import Footer from '@/components/Footer'
 import nextDynamic from 'next/dynamic'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
@@ -58,19 +56,13 @@ export default async function ReservationPage({
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-sand-100">
-      <NavBar />
-      <main id="main-content" className="flex-grow">
-        <ReservationClient
-          initialProfile={{
-            firstName: profile?.first_name ?? '',
-            lastName: profile?.last_name ?? '',
-            phone: profile?.phone ?? '',
-            email: session.user.email ?? '',
-          }}
-        />
-      </main>
-      <Footer />
-    </div>
+    <ReservationClient
+      initialProfile={{
+        firstName: profile?.first_name ?? '',
+        lastName: profile?.last_name ?? '',
+        phone: profile?.phone ?? '',
+        email: session.user.email ?? '',
+      }}
+    />
   )
 }
