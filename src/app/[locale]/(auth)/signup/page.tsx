@@ -37,7 +37,7 @@ export default function SignupPage() {
   })
   const [error, setError] = useState<SignupErrorKey | null>(null)
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess] = useState<null | 'autologin' | 'verify'>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -125,8 +125,24 @@ export default function SignupPage() {
           logger.error('Erreur mise à jour profil:', profileError)
         }
 
-        setSuccess(true)
-        setTimeout(() => router.push('/login'), 2200)
+        if (data.session) {
+          // Confirmation email désactivée (Supabase Auth) → l'utilisateur est
+          // déjà connecté. On l'envoie directement dans l'app, sans détour /login.
+          setSuccess('autologin')
+          // Laisser un instant aux cookies de session SSR de se poser
+          await new Promise((resolve) => setTimeout(resolve, 400))
+          const nextParam = new URLSearchParams(window.location.search).get('next')
+          const dest =
+            nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
+              ? nextParam
+              : '/'
+          router.push(dest)
+        } else {
+          // Fallback : si « Confirm email » est encore actif côté Supabase,
+          // aucune session n'est renvoyée → l'utilisateur doit vérifier son email.
+          setSuccess('verify')
+          setTimeout(() => router.push('/login'), 2200)
+        }
       }
     } catch (err) {
       setError('generic')
@@ -288,7 +304,11 @@ export default function SignupPage() {
         />
 
         {error && <AuthNotice variant="error" id="signup-error">{t(`errors.${error}`)}</AuthNotice>}
-        {success && <AuthNotice variant="ok">{t('successMessage')}</AuthNotice>}
+        {success && (
+          <AuthNotice variant="ok">
+            {success === 'verify' ? t('successCheckEmail') : t('successMessage')}
+          </AuthNotice>
+        )}
 
         <button
           type="submit"

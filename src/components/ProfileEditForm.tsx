@@ -29,6 +29,7 @@ export default function ProfileEditForm({
   const t = useTranslations('Profile')
   const router = useRouter()
   const [form, setForm] = useState({
+    email: userEmail,
     first_name: profile.first_name ?? '',
     last_name: profile.last_name ?? '',
     display_name: profile.display_name ?? '',
@@ -54,6 +55,13 @@ export default function ProfileEditForm({
       return
     }
 
+    const emailChanged =
+      form.email.trim().toLowerCase() !== userEmail.trim().toLowerCase()
+    if (emailChanged && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError(t('emailInvalid'))
+      return
+    }
+
     setSaving(true)
 
     const { error: updateError } = await supabase
@@ -67,13 +75,26 @@ export default function ProfileEditForm({
       })
       .eq('id', profile.id)
 
-    setSaving(false)
-
     if (updateError) {
+      setSaving(false)
       setError(updateError.message)
       return
     }
 
+    // L'email vit dans Supabase Auth (pas la table profiles). Avec la
+    // confirmation désactivée, le changement s'applique immédiatement.
+    if (emailChanged) {
+      const { error: emailError } = await supabase.auth.updateUser({
+        email: form.email.trim(),
+      })
+      if (emailError) {
+        setSaving(false)
+        setError(emailError.message)
+        return
+      }
+    }
+
+    setSaving(false)
     setSuccess(true)
 
     // Si on vient d'une page précédente (ex: /cart pour réserver), y revenir
@@ -105,22 +126,25 @@ export default function ProfileEditForm({
         </div>
       )}
 
-      {/* Email (read-only, géré par auth) */}
+      {/* Email — vit dans Supabase Auth, modifiable */}
       <div>
-        <label className="block text-sm font-medium text-ink-800 mb-1">
+        <label htmlFor="email" className="block text-sm font-medium text-ink-800 mb-1">
           {t('emailLabel')}
         </label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-ink-500" />
           <input
+            id="email"
+            name="email"
             type="email"
-            value={userEmail}
-            disabled
-            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg bg-sand-100 text-ink-700 cursor-not-allowed"
+            autoComplete="email"
+            value={form.email}
+            onChange={handleChange}
+            className="w-full pl-10 pr-3 py-2 border border-sand-300 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sand-400 text-ink-900"
           />
         </div>
         <p className="mt-1 text-xs text-ink-500">
-          {t('emailReadOnly')}
+          {t('emailHint')}
         </p>
       </div>
 
