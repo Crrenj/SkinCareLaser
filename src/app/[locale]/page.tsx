@@ -76,6 +76,7 @@ interface RawBestseller {
   description: string | null
   price: string | number
   currency: string
+  is_new: boolean | null
   product_images: { url: string; alt: string | null }[] | null
   range: { name: string; brand: { name: string } | null } | null
 }
@@ -90,6 +91,7 @@ interface MappedBestseller {
   images: { url: string; alt: string | null }[]
   brand?: string
   range?: string
+  isNew?: boolean
 }
 
 interface FeaturedNeedTag {
@@ -121,7 +123,7 @@ export default async function LocaleHome({
   const supabase = await createSupabaseServerClient()
 
   // Fetch en parallèle : bannières CMS + bestsellers + marques + quote + featured needs.
-  const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds, settings] = await Promise.all([
+  const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds, settings, productCountRes] = await Promise.all([
     supabase
       .from('banners')
       .select('id, title, description, image_url, link_url, link_text, banner_type, position, direction, attribution_name, attribution_title, attribution_photo_url')
@@ -132,10 +134,12 @@ export default async function LocaleHome({
     fetchHomeQuote(supabase),
     fetchFeaturedNeeds(supabase),
     getShopSettings(),
+    supabase.from('products').select('id', { count: 'exact', head: true }).eq('is_active', true),
   ])
 
   const activeBanners = (bannersRes.data ?? []) as BannerRow[]
   const brands = (brandsRes.data ?? []) as BrandRow[]
+  const productCount = productCountRes.count ?? undefined
 
   // Ordre + visibilité des sections piloté par l'admin (shop_settings.home_layout,
   // colonne JSONB lue via cast — résolveur tolérant aux valeurs partielles/nulles).
@@ -143,23 +147,21 @@ export default async function LocaleHome({
 
   // Chaque section → son rendu (null = rien à afficher, ex. pas de citation).
   const sections: Record<HomeSectionKey, ReactNode> = {
-    hero: <HomeHero />,
+    hero: <HomeHero productCount={productCount} brandCount={brands.length} />,
     bestsellers: <HomeBestsellers products={bestsellers} />,
     byNeed: <HomeByNeed featured={featuredNeeds} />,
     quote: quoteRes ? (
-      <section className="px-6 lg:px-14 py-12 bg-sand-50">
-        <BannerQuote
-          id="home-pharmacist-quote"
-          title={quoteRes.quote}
-          attribution={{ name: quoteRes.name }}
-        />
-      </section>
+      <BannerQuote
+        id="home-pharmacist-quote"
+        title={quoteRes.quote}
+        attribution={{ name: quoteRes.name }}
+      />
     ) : null,
     brands: <HomeBrands brands={brands} />,
     expertise: <HomeExpertise />,
     routine: <HomeRoutine />,
     banners: activeBanners.length > 0 ? (
-      <section className="px-6 lg:px-14 py-12 bg-sand-50 space-y-8">
+      <>
         {activeBanners.map((banner) => (
           <Banner
             key={banner.id}
@@ -182,12 +184,12 @@ export default async function LocaleHome({
             }
           />
         ))}
-      </section>
+      </>
     ) : null,
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-sand-200" lang={locale}>
+    <div className="flex flex-col min-h-screen bg-sand-50" lang={locale}>
       <NavBar />
 
       <main id="main-content" className="flex-1">
@@ -214,6 +216,7 @@ function mapBestseller(p: RawBestseller): MappedBestseller {
     images: p.product_images ?? [],
     brand: p.range?.brand?.name ?? undefined,
     range: p.range?.name ?? undefined,
+    isNew: p.is_new ?? undefined,
   }
 }
 
@@ -235,7 +238,7 @@ async function fetchBestsellers(
     const { data } = await supabase
       .from('products')
       .select(`
-        id, slug, name, description, price, currency,
+        id, slug, name, description, price, currency, is_new,
         product_images ( url, alt ),
         range:ranges ( name, brand:brands ( name ) )
       `)

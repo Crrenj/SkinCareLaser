@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
+import { Plate } from '@/components/ui/Plate'
 
 export interface BannerHeroProps {
   id: string
@@ -15,10 +15,12 @@ export interface BannerHeroProps {
   onClick?: (id: string) => void
 }
 
+const OVERLAY =
+  'linear-gradient(90deg, rgba(31,27,22,0.72) 0%, rgba(31,27,22,0.4) 48%, rgba(31,27,22,0.05) 100%)'
+
 /**
- * Hero plein-bleed avec overlay dégradé sombre et texte gauche.
- * Hauteur canonique 480px (560 sur md+). Image en object-cover.
- * Si pas d'imageUrl, fallback gradient sand → clay → ink + formes botaniques SVG.
+ * Bannière « Hero » — campagne pleine largeur. Image full-bleed (ou plaque
+ * sombre) + overlay directionnel gauche→droite pour la lisibilité. Zéro blob.
  */
 export function BannerHero({
   id,
@@ -31,82 +33,46 @@ export function BannerHero({
   onClick,
 }: BannerHeroProps) {
   return (
-    <div className="relative min-h-[480px] md:min-h-[560px] rounded overflow-hidden flex items-center mb-8 bg-gradient-to-br from-[#C7B299] via-[#8E6D4F] to-[#4A3A2C]">
+    <section
+      data-banner-id={id}
+      className="relative min-h-[clamp(380px,46vw,520px)] border-y border-ink-700 flex items-center overflow-hidden"
+    >
       {imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-        />
+        <Image src={imageUrl} alt="" fill priority sizes="100vw" className="object-cover" />
       ) : (
-        <BotanicalDeco />
+        <Plate dark mark className="absolute inset-0 border-0" />
       )}
 
-      {/* Overlay : noir gauche → transparent droite pour la lisibilité du texte */}
-      <div className="absolute inset-0 bg-gradient-to-r from-ink-900/55 via-ink-900/35 to-transparent" />
+      <div className="absolute inset-0" style={{ background: OVERLAY }} />
 
-      <div className="relative z-10 px-8 md:px-16 py-12 md:py-16 max-w-[60%] text-white">
-        {eyebrow && (
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-clay-200 mb-4">
-            {eyebrow}
-          </div>
-        )}
-        <h2
-          className="font-serif text-[44px] md:text-[64px] leading-none -tracking-[0.025em] text-white mb-4 text-balance [&_em]:not-italic [&_em]:font-serif [&_em]:italic [&_em]:text-clay-200"
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
-        {description && (
-          <p className="font-serif italic text-[17px] md:text-[19px] leading-[1.4] text-sand-50/90 mb-7 max-w-[520px]">
-            {description}
-          </p>
-        )}
-        {ctaLabel && ctaHref && (
-          <Link
-            href={ctaHref}
-            onClick={() => onClick?.(id)}
-            className="group inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-wider px-6 py-3.5 rounded-sm bg-sand-50 text-ink-900 hover:bg-white transition-colors"
-          >
-            {ctaLabel}
-            <ArrowRight
-              size={16}
-              strokeWidth={1.8}
-              className="transition-transform group-hover:translate-x-1"
-            />
-          </Link>
-        )}
+      <div className="relative z-10 w-full mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)]">
+        <div className="max-w-[54%] max-md:max-w-[82%] text-sand-50">
+          {eyebrow && (
+            <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-clay-200 mb-5">
+              {eyebrow}
+            </div>
+          )}
+          <h2
+            className="font-serif font-normal text-[clamp(40px,5.4vw,76px)] leading-[0.98] -tracking-[0.025em] text-sand-50 text-balance mb-5 [&_em]:italic [&_em]:text-clay-200"
+            dangerouslySetInnerHTML={{ __html: title }}
+          />
+          {description && (
+            <p className="text-[17px] leading-[1.5] text-sand-50/[0.86] max-w-[44ch] mb-7">
+              {description}
+            </p>
+          )}
+          {ctaLabel && ctaHref && (
+            <Link
+              href={ctaHref}
+              onClick={() => onClick?.(id)}
+              className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-[2px] bg-sand-50 text-ink-900 text-[12.5px] font-semibold uppercase tracking-[0.06em] hover:bg-white transition-colors"
+            >
+              {ctaLabel}
+              <span className="transition-transform group-hover:translate-x-1">→</span>
+            </Link>
+          )}
+        </div>
       </div>
-    </div>
-  )
-}
-
-/** Décorations botaniques SVG quand pas d'image (fallback éditorial). */
-function BotanicalDeco() {
-  return (
-    <div className="absolute -right-24 top-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-60 pointer-events-none">
-      <svg viewBox="0 0 600 600" className="w-full h-full">
-        <defs>
-          <radialGradient id="leaf-grad" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="#F4EFE7" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#8E6D4F" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <ellipse cx="300" cy="300" rx="240" ry="180" fill="url(#leaf-grad)" />
-        <path
-          d="M 380 200 Q 420 280 380 360 Q 320 380 280 320 Q 240 240 280 180 Q 340 160 380 200 Z"
-          fill="#CCC5BD"
-          opacity="0.4"
-        />
-        <path
-          d="M 200 380 Q 240 460 200 540 Q 140 560 100 500 Q 60 420 100 360 Q 160 340 200 380 Z"
-          fill="#D89A75"
-          opacity="0.3"
-        />
-        <circle cx="450" cy="450" r="80" fill="#F0D7C5" opacity="0.4" />
-        <circle cx="150" cy="200" r="50" fill="#CCC5BD" opacity="0.3" />
-      </svg>
-    </div>
+    </section>
   )
 }

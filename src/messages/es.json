@@ -12,20 +12,34 @@
       "consultationDescription": "Reserva tus productos por WhatsApp"
     },
     "hero": {
-      "eyebrow": "Selección de farmacéuticos",
-      "title": "El cuidado de tu piel,<br><em>certificado.</em>",
-      "description": "Una farmacia dermo-cosmética curada por especialistas. ISDIN, La Roche-Posay, Filorga y 10 marcas más.",
-      "primaryCta": "Explorar el catálogo",
-      "ghostCta": "Nuestros farmacéuticos"
+      "kicker": "Farmacia & dermocosmética · Santiago, RD",
+      "title": "Dermocosmética<br>aconsejada,<br>no <em>vendida</em>.",
+      "description": "Una selección curada por farmacéuticos en Cerros de Gurabo. Reserva en línea y recoge en la farmacia, con el acompañamiento de nuestro equipo en cada paso.",
+      "primaryCta": "Ver el catálogo",
+      "ghostCta": "Conoce a los farmacéuticos",
+      "meta": {
+        "referencesK": "Referencias",
+        "referencesSub": "productos activos",
+        "housesK": "Casas",
+        "housesSub": "marcas seleccionadas",
+        "modelK": "Modelo",
+        "modelV": "Reserva",
+        "modelSub": "& recogida",
+        "whereK": "Dónde",
+        "whereV": "Cerros de Gurabo"
+      }
     },
     "bestsellers": {
-      "eyebrow": "Vendidos esta semana",
-      "title": "Los <em>best-sellers</em>",
-      "seeAll": "Ver todo el catálogo →"
+      "eyebrow": "Reservado esta semana",
+      "title": "Lo más buscado",
+      "seeAll": "Ver todo el catálogo →",
+      "tagHot": "Más reservado",
+      "tagNew": "Novedad",
+      "seeProduct": "Ver ficha"
     },
     "byNeed": {
-      "eyebrow": "Por preocupación",
-      "title": "Encontrar una <em>respuesta</em>",
+      "eyebrow": "Empieza por lo que buscas",
+      "title": "Por <em>necesidad</em>",
       "seeAll": "Ver todas las necesidades →",
       "cards": {
         "sun": {
@@ -47,24 +61,26 @@
           "cta": "Explorar →"
         }
       },
-      "productCountSuffix": "productos"
+      "productCountSuffix": "productos",
+      "explore": "Explorar"
     },
     "brands": {
       "eyebrowSuffix": "marcas seleccionadas",
       "title": "Nuestras <em>marcas</em>",
-      "seeAll": "Ver todas las marcas →"
+      "seeAll": "Ver todas las marcas →",
+      "lead": "Marcas seleccionadas"
     },
     "expertise": {
-      "eyebrow": "Nuestro enfoque",
-      "title": "Una <em>farmacia,</em><br>no un comercio.",
+      "eyebrow": "Nuestra forma de trabajar",
+      "title": "Una farmacia,<br>no un <em>comercio</em>.",
       "p1": "Cada producto de nuestro catálogo es seleccionado y probado por nuestros farmacéuticos antes de llegar a la estantería. No referenciamos lo que nos ofrecen — referenciamos lo que recomendamos.",
       "p2": "Para una consulta dermatológica, agenda una cita con nuestra clínica asociada <strong>Skin Laser Center</strong>, en el mismo edificio.",
       "cta": "Conocer más sobre FARMAU",
       "signature": "— Una iniciativa dirigida por un colectivo de farmacéuticos dominicanos."
     },
     "routine": {
-      "eyebrow": "Construir tu rutina",
-      "title": "Tres <em>momentos,</em> tres gestos",
+      "eyebrow": "Construir una rutina",
+      "title": "Tres gestos, tres <em>momentos</em>",
       "seeAll": "La guía completa →",
       "steps": {
         "morning": {
@@ -174,7 +190,8 @@
       "success": "¡Gracias! Te escribiremos pronto.",
       "errorEmail": "Correo electrónico no válido.",
       "errorGeneric": "Se produjo un error, inténtalo de nuevo.",
-      "errorRateLimit": "Demasiados intentos, inténtalo en un momento."
+      "errorRateLimit": "Demasiados intentos, inténtalo en un momento.",
+      "fine": "Sin spam · baja cuando quieras."
     },
     "needs": {
       "hydratation": "Hidratación",
@@ -1594,7 +1611,9 @@
         "ctaLabelLabel": "CTA label",
         "positionLabel": "Posición",
         "positionHint": "Orden de visualización (1 = primero)",
-        "submitCreate": "Crear anuncio"
+        "submitCreate": "Crear anuncio",
+        "slotLabel": "Ubicación",
+        "statusLabel": "Estado"
       }
     },
     "stockState": {
@@ -1738,7 +1757,24 @@
       "title": "Anuncios",
       "addButton": "Crear anuncio",
       "previewShow": "Vista previa",
-      "previewHide": "Cerrar vista previa"
+      "previewHide": "Cerrar vista previa",
+      "filterAll": "Todos",
+      "previewTitle": "Vista previa — página de inicio",
+      "empty": "Ningún anuncio en este slot.",
+      "views": "Vistas",
+      "clicks": "Clics",
+      "metrics": "{v} vistas · {c} clics",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "activate": "Activar",
+      "deactivate": "Desactivar",
+      "status": {
+        "draft": "Borrador",
+        "scheduled": "Programado",
+        "active": "Activo",
+        "paused": "En pausa",
+        "expired": "Expirado"
+      }
     },
     "reservations": {
       "title": "Reservas",

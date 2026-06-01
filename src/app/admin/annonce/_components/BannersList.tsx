@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 import {
   Eye,
   EyeOff,
@@ -10,7 +11,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
-import { SLOT_LABELS, STATUS_LABELS, type BannerData, type BannerSlot } from '../_lib/types'
+import { SLOT_LABELS, type BannerData, type BannerSlot } from '../_lib/types'
 
 type BannersListProps = {
   banners: BannerData[]
@@ -46,22 +47,26 @@ export function BannersList({
   onEdit,
   onDelete,
 }: BannersListProps) {
+  const t = useTranslations('Admin.annonce')
+  const tc = useTranslations('Admin.common')
+  const tStatus = useTranslations('Admin.annonce.status')
+
   if (loading) {
     return (
       <div className="space-y-3">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <div key={i} className="h-20 rounded-lg bg-sand-200 animate-pulse" />
         ))}
       </div>
     )
   }
 
-  const filtered = activeSlot === 'all' ? banners : banners.filter(b => b.slot === activeSlot)
+  const filtered = activeSlot === 'all' ? banners : banners.filter((b) => b.slot === activeSlot)
 
   if (filtered.length === 0) {
     return (
       <div className="rounded-xl bg-sand-50 border border-sand-200 p-12 text-center">
-        <p className="text-ink-500 text-sm">Aucune annonce dans ce slot.</p>
+        <p className="text-ink-500 text-sm">{t('empty')}</p>
       </div>
     )
   }
@@ -86,14 +91,19 @@ export function BannersList({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3
-                className="font-serif text-base text-ink-900 truncate cursor-pointer hover:underline"
+              <button
+                type="button"
+                className="font-serif text-base text-ink-900 truncate hover:underline text-left"
                 onClick={() => onEdit(banner)}
               >
                 {banner.title}
-              </h3>
-              <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[banner.status] ?? STATUS_COLORS.draft}`}>
-                {STATUS_LABELS[banner.status] ?? banner.status}
+              </button>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                  STATUS_COLORS[banner.status] ?? STATUS_COLORS.draft
+                }`}
+              >
+                {tStatus(banner.status)}
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-mono text-ink-500">
                 <span className={`w-1.5 h-1.5 rounded-full ${SLOT_DOT[banner.slot]}`} />
@@ -103,7 +113,7 @@ export function BannersList({
             <p className="text-sm text-ink-500 mt-0.5 truncate">
               {banner.description || '—'}
               <span className="ml-3 font-mono text-xs">
-                {banner.view_count ?? 0} vues · {banner.click_count ?? 0} clics
+                {t('metrics', { v: banner.view_count ?? 0, c: banner.click_count ?? 0 })}
               </span>
             </p>
           </div>
@@ -113,7 +123,7 @@ export function BannersList({
               <button
                 onClick={() => onMove(banner.id, 'up')}
                 disabled={index === 0}
-                aria-label="Monter"
+                aria-label={t('moveUp')}
                 className="p-1 text-ink-500 hover:text-ink-700 disabled:opacity-30"
               >
                 <ArrowUp className="h-3.5 w-3.5" />
@@ -121,7 +131,7 @@ export function BannersList({
               <button
                 onClick={() => onMove(banner.id, 'down')}
                 disabled={index === filtered.length - 1}
-                aria-label="Descendre"
+                aria-label={t('moveDown')}
                 className="p-1 text-ink-500 hover:text-ink-700 disabled:opacity-30"
               >
                 <ArrowDown className="h-3.5 w-3.5" />
@@ -130,7 +140,7 @@ export function BannersList({
 
             <button
               onClick={() => onToggleActive(banner.id)}
-              aria-label={banner.is_active ? 'Désactiver' : 'Activer'}
+              aria-label={banner.is_active ? t('deactivate') : t('activate')}
               className={`p-1.5 rounded-lg transition-colors ${
                 banner.is_active ? 'text-olive-600 hover:bg-olive-50' : 'text-ink-500 hover:bg-sand-200'
               }`}
@@ -140,7 +150,7 @@ export function BannersList({
 
             <button
               onClick={() => onEdit(banner)}
-              aria-label="Modifier"
+              aria-label={tc('edit')}
               className="p-1.5 rounded-lg text-ink-500 hover:bg-sand-200 transition-colors"
             >
               <Pencil className="h-4 w-4" />
@@ -148,7 +158,7 @@ export function BannersList({
 
             <button
               onClick={() => onDelete(banner.id)}
-              aria-label="Supprimer"
+              aria-label={tc('delete')}
               className="p-1.5 rounded-lg text-brick-600 hover:bg-brick-50 transition-colors"
             >
               <Trash2 className="h-4 w-4" />

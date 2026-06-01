@@ -59,11 +59,12 @@ export default async function Footer() {
   const waLink = whatsappHref(settings.whatsapp_number) ?? '#'
 
   return (
-    <footer className="bg-[var(--c-ink-panel)] text-[var(--c-ink-panel-fg)] px-6 lg:px-16 pt-16 lg:pt-20">
+    <>
       <FooterNewsletter />
-
-      {/* Grid 5 colonnes (2fr + 4×1fr) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-12 mb-14">
+      <footer className="bg-[var(--c-ink-panel)] text-[var(--c-ink-panel-fg)]">
+        <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] pt-[clamp(56px,7vw,96px)] pb-8">
+      {/* Grid 5 colonnes */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-12 pb-[clamp(40px,5vw,64px)] border-b border-[var(--c-ink-panel-border)]">
         {/* Brand column */}
         <div className="flex flex-col gap-5 max-w-[320px]">
           <span className="inline-flex items-center gap-3" aria-label="FARMAU">
@@ -117,7 +118,7 @@ export default async function Footer() {
       </div>
 
       {/* Bottom bar */}
-      <div className="py-6 border-t border-[var(--c-ink-panel-border)] flex flex-col gap-3 md:flex-row md:items-center md:justify-between text-[11.5px] text-[var(--c-ink-panel-muted)]">
+      <div className="pt-7 flex flex-col gap-3 md:flex-row md:items-center md:justify-between font-mono text-[11px] text-[var(--c-ink-panel-muted)]">
         <div>{t('bottom.copyright')}</div>
         <div className="flex flex-wrap gap-5">
           <FooterLegalLink href="/legal/cgv" label={t('bottom.terms')} />
@@ -139,7 +140,9 @@ export default async function Footer() {
           <ThemeModeToggle />
         </div>
       </div>
-    </footer>
+        </div>
+      </footer>
+    </>
   )
 }
 

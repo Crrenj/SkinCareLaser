@@ -12,20 +12,34 @@
       "consultationDescription": "Reserve your products via WhatsApp"
     },
     "hero": {
-      "eyebrow": "Pharmacist selection",
-      "title": "Your skincare,<br><em>certified.</em>",
-      "description": "A dermo-cosmetic pharmacy curated by specialists. ISDIN, La Roche-Posay, Filorga and 10 more brands.",
+      "kicker": "Pharmacy & dermo-cosmetics · Santiago, DR",
+      "title": "Dermo-cosmetics<br>advised,<br>not <em>sold</em>.",
+      "description": "A selection curated by pharmacists in Cerros de Gurabo. Reserve online and pick up at the pharmacy, with our team alongside you at every step.",
       "primaryCta": "Browse the catalogue",
-      "ghostCta": "Our pharmacists"
+      "ghostCta": "Meet the pharmacists",
+      "meta": {
+        "referencesK": "References",
+        "referencesSub": "active products",
+        "housesK": "Houses",
+        "housesSub": "brands selected",
+        "modelK": "Model",
+        "modelV": "Reserve",
+        "modelSub": "& pickup",
+        "whereK": "Where",
+        "whereV": "Cerros de Gurabo"
+      }
     },
     "bestsellers": {
-      "eyebrow": "Sold this week",
-      "title": "The <em>best-sellers</em>",
-      "seeAll": "See the full catalogue →"
+      "eyebrow": "Reserved this week",
+      "title": "Most sought-after",
+      "seeAll": "See the full catalogue →",
+      "tagHot": "Most reserved",
+      "tagNew": "New",
+      "seeProduct": "View product"
     },
     "byNeed": {
-      "eyebrow": "By concern",
-      "title": "Find an <em>answer</em>",
+      "eyebrow": "Start with what you're looking for",
+      "title": "By <em>need</em>",
       "seeAll": "See all concerns →",
       "cards": {
         "sun": {
@@ -47,24 +61,26 @@
           "cta": "Explore →"
         }
       },
-      "productCountSuffix": "products"
+      "productCountSuffix": "products",
+      "explore": "Explore"
     },
     "brands": {
       "eyebrowSuffix": "houses selected",
       "title": "Our <em>brands</em>",
-      "seeAll": "See all brands →"
+      "seeAll": "See all brands →",
+      "lead": "Brands selected"
     },
     "expertise": {
-      "eyebrow": "Our approach",
-      "title": "A <em>pharmacy,</em><br>not a store.",
+      "eyebrow": "How we work",
+      "title": "A pharmacy,<br>not a <em>store</em>.",
       "p1": "Every product in our catalogue is selected and tested by our pharmacists before reaching the shelf. We don't list what's pitched to us — we list what we recommend.",
       "p2": "For a dermatology consultation, book an appointment with our partner clinic <strong>Skin Laser Center</strong>, in the same building.",
       "cta": "Learn more about FARMAU",
       "signature": "— An initiative led by a collective of Dominican pharmacists."
     },
     "routine": {
-      "eyebrow": "Build your routine",
-      "title": "Three <em>moments,</em> three gestures",
+      "eyebrow": "Build a routine",
+      "title": "Three gestures, three <em>moments</em>",
       "seeAll": "The full guide →",
       "steps": {
         "morning": {
@@ -174,7 +190,8 @@
       "success": "Thanks! We'll write soon.",
       "errorEmail": "Invalid email address.",
       "errorGeneric": "Something went wrong, try again.",
-      "errorRateLimit": "Too many attempts, try again in a moment."
+      "errorRateLimit": "Too many attempts, try again in a moment.",
+      "fine": "No spam · unsubscribe anytime."
     },
     "needs": {
       "hydratation": "Hydration",
@@ -1594,7 +1611,9 @@
         "ctaLabelLabel": "CTA label",
         "positionLabel": "Position",
         "positionHint": "Display order (1 = first)",
-        "submitCreate": "Create banner"
+        "submitCreate": "Create banner",
+        "slotLabel": "Slot",
+        "statusLabel": "Status"
       }
     },
     "stockState": {
@@ -1738,7 +1757,24 @@
       "title": "Announcements",
       "addButton": "Create announcement",
       "previewShow": "Preview",
-      "previewHide": "Close preview"
+      "previewHide": "Close preview",
+      "filterAll": "All",
+      "previewTitle": "Preview — homepage",
+      "empty": "No banners in this slot.",
+      "views": "Views",
+      "clicks": "Clicks",
+      "metrics": "{v} views · {c} clicks",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "status": {
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "active": "Active",
+        "paused": "Paused",
+        "expired": "Expired"
+      }
     },
     "reservations": {
       "title": "Reservations",

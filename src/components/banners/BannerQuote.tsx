@@ -1,13 +1,12 @@
 'use client'
 
 import Image from 'next/image'
-import { User as UserIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 export interface BannerQuoteProps {
   id: string
   eyebrow?: string
-  /** Le texte de la citation (sans guillemets — on les ajoute en CSS). */
+  /** Le texte de la citation (sans guillemets — ajoutés inline en clay). */
   title: string
   attribution?: {
     name: string
@@ -17,74 +16,59 @@ export interface BannerQuoteProps {
 }
 
 /**
- * Bannière éditoriale "Quote" — fond ink-900, citation serif italic.
- * Hauteur canonique 220px. Pas de CTA (volontaire — la quote installe, ne vend pas).
- * Avec photo : grid 200 + 1fr. Sans photo : grid-cols-1, citation centrée pleine largeur.
+ * Bannière « Quote » — interstitiel sombre pleine largeur. Citation serif (non
+ * italique), guillemets « » clay comme seul accent. Plus de guillemet géant de
+ * 280px (cliché). Avec photo : portrait rond à gauche ; sans : citation seule.
  */
 export function BannerQuote({ id, eyebrow, title, attribution }: BannerQuoteProps) {
   const t = useTranslations('Banner')
   const hasPhoto = !!attribution?.photoUrl
 
   return (
-    <div
-      data-banner-id={id}
-      className={`relative overflow-hidden mb-8 min-h-[220px] bg-ink-900 text-sand-200 rounded grid items-center px-8 md:px-14 py-10 gap-6 ${
-        hasPhoto ? 'md:grid-cols-[140px_1fr]' : 'grid-cols-1'
-      }`}
-    >
-      {/* Guillemet décoratif géant en haut-droite */}
-      <span
-        aria-hidden
-        className="absolute -top-10 right-8 font-serif text-[200px] md:text-[280px] leading-none text-clay-700/40 select-none pointer-events-none"
+    <section data-banner-id={id} className="bg-ink-900 text-sand-50">
+      <div
+        className={`mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] py-[clamp(56px,8vw,112px)] items-center ${
+          hasPhoto ? 'grid md:grid-cols-[auto_1fr] gap-[clamp(36px,5vw,72px)]' : ''
+        }`}
       >
-        &ldquo;
-      </span>
-
-      {hasPhoto && attribution && (
-        <div className="w-[120px] h-[120px] md:w-[140px] md:h-[140px] rounded-full bg-ink-800 border border-ink-700 overflow-hidden flex items-end justify-center mx-auto md:mx-0">
-          {attribution.photoUrl && (
+        {hasPhoto && attribution?.photoUrl && (
+          <div className="w-[clamp(120px,14vw,168px)] aspect-square rounded-full overflow-hidden shrink-0 mx-auto md:mx-0">
             <Image
               src={attribution.photoUrl}
               alt={t('quotePhotoAlt', { name: attribution.name })}
-              width={140}
-              height={140}
+              width={168}
+              height={168}
               className="w-full h-full object-cover"
             />
-          )}
-        </div>
-      )}
-
-      {!hasPhoto && attribution && (
-        <span className="sr-only">
-          {/* Pas de photo : on garde la photo zone vide visuellement, mais on n'a rien à afficher */}
-        </span>
-      )}
-
-      <div className="relative z-10">
-        {eyebrow && (
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-clay-400 mb-3">
-            {eyebrow}
           </div>
         )}
-        <p className="font-serif italic text-[22px] md:text-[28px] leading-snug text-sand-50 mb-4 -tracking-[0.005em] max-w-[720px]">
-          &ldquo;{title}&rdquo;
-        </p>
-        {attribution && (
-          <p className="text-[13px] text-ink-500">
-            <strong className="text-sand-200 font-semibold">{attribution.name}</strong>
-            {attribution.title && <> · {attribution.title}</>}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
 
-/** Fallback portrait quand photoUrl est absent mais qu'on veut quand même un avatar. */
-export function QuotePlaceholderAvatar() {
-  return (
-    <div className="w-full h-full flex items-center justify-center text-ink-700">
-      <UserIcon size={48} strokeWidth={1.4} />
-    </div>
+        <div>
+          {eyebrow && (
+            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-clay-400 mb-6">
+              {eyebrow}
+            </div>
+          )}
+          <blockquote className="font-serif text-[clamp(28px,3.6vw,46px)] leading-[1.18] -tracking-[0.015em] text-sand-50 max-w-[24ch] text-balance mb-[26px]">
+            <span className="text-clay-400 italic">«</span>
+            {' '}
+            {title}
+            {' '}
+            <span className="text-clay-400 italic">»</span>
+          </blockquote>
+          {attribution && (
+            <div className="text-[13.5px] text-ink-400 flex items-center gap-3">
+              <b className="text-sand-200 font-semibold">{attribution.name}</b>
+              {attribution.title && (
+                <>
+                  <span className="w-[18px] h-px bg-ink-700" />
+                  {attribution.title}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }

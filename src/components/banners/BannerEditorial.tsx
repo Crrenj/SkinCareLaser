@@ -1,8 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
 import { Link } from '@/i18n/navigation'
+import { Plate } from '@/components/ui/Plate'
 
 export interface BannerEditorialProps {
   id: string
@@ -19,9 +19,9 @@ export interface BannerEditorialProps {
 }
 
 /**
- * Bannière éditoriale 2 colonnes — image + texte.
- * Hauteur canonique 320px. Direction `left` (image gauche) ou `right` (mirror).
- * Sur mobile, image dessus / texte dessous, hauteur auto.
+ * Bannière « Editorial » — split généreux dans la mesure de contenu. Image
+ * cadrée 5:4 d'un côté, texte de l'autre (`direction` décide). Plus de carte
+ * blanche ombrée : on s'aligne sur le rythme éditorial de la home.
  */
 export function BannerEditorial({
   id,
@@ -31,64 +31,67 @@ export function BannerEditorial({
   imageUrl,
   ctaLabel,
   ctaHref,
-  ctaVariant = 'solid',
+  ctaVariant = 'outline',
   direction = 'left',
   onClick,
 }: BannerEditorialProps) {
-  const isReversed = direction === 'right'
+  const imageRight = direction === 'right'
 
   return (
-    <div className="grid md:grid-cols-2 min-h-[320px] bg-white rounded overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05)] mb-8">
-      <div
-        className={`bg-sand-100 flex items-center justify-center p-8 ${
-          isReversed ? 'md:order-2' : ''
-        }`}
-      >
-        {imageUrl && (
-          <Image
-            src={imageUrl}
-            alt={stripHtml(title)}
-            width={400}
-            height={400}
-            className="w-full max-h-[260px] object-contain"
-          />
-        )}
-      </div>
-      <div className="flex flex-col justify-center p-8 md:p-12">
-        {eyebrow && (
-          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-clay-700 mb-3.5">
-            {eyebrow}
+    <section className="bg-sand-50">
+      <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)]">
+        <div className="grid md:grid-cols-2 gap-[clamp(28px,4vw,64px)] items-center py-[clamp(36px,5vw,72px)]">
+          {/* Art */}
+          <div className={imageRight ? 'md:order-2' : 'md:order-1'}>
+            {imageUrl ? (
+              <div className="relative aspect-[5/4] rounded-[3px] overflow-hidden bg-sand-100 border border-sand-300">
+                <Image
+                  src={imageUrl}
+                  alt={stripHtml(title)}
+                  fill
+                  sizes="(max-width:768px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
+            ) : (
+              <Plate mark className="aspect-[5/4] rounded-[3px]" />
+            )}
           </div>
-        )}
-        <h2
-          className="font-serif text-[32px] md:text-[38px] leading-[1.05] -tracking-[0.02em] text-ink-900 mb-3.5 max-w-[320px] text-balance [&_em]:not-italic [&_em]:font-serif [&_em]:italic [&_em]:text-clay-700"
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
-        {description && (
-          <p className="text-[15px] leading-[1.55] text-ink-700 mb-6 max-w-[360px]">
-            {description}
-          </p>
-        )}
-        {ctaLabel && ctaHref && (
-          <Link
-            href={ctaHref}
-            onClick={() => onClick?.(id)}
-            className={`group inline-flex items-center gap-2.5 self-start text-[13px] font-semibold uppercase tracking-wider px-5 py-3 rounded-sm transition-colors ${
-              ctaVariant === 'solid'
-                ? 'bg-clay-700 text-sand-50 hover:bg-clay-800'
-                : 'border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-sand-50'
-            }`}
-          >
-            {ctaLabel}
-            <ArrowRight
-              size={16}
-              strokeWidth={1.8}
-              className="transition-transform group-hover:translate-x-1"
+
+          {/* Copy */}
+          <div className={imageRight ? 'md:order-1' : 'md:order-2'}>
+            {eyebrow && (
+              <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-clay-700 font-medium mb-[18px]">
+                {eyebrow}
+              </div>
+            )}
+            <h2
+              className="font-serif font-normal text-[clamp(32px,3.8vw,50px)] leading-[1.02] -tracking-[0.02em] text-ink-900 max-w-[14ch] text-balance mb-[18px] [&_em]:italic [&_em]:text-clay-700"
+              dangerouslySetInnerHTML={{ __html: title }}
             />
-          </Link>
-        )}
+            {description && (
+              <p className="text-[15.5px] leading-[1.6] text-ink-700 max-w-[42ch] mb-7">
+                {description}
+              </p>
+            )}
+            {ctaLabel && ctaHref && (
+              <Link
+                href={ctaHref}
+                onClick={() => onClick?.(id)}
+                className={`group inline-flex items-center gap-2.5 self-start px-5 py-3 rounded-[2px] text-[12.5px] font-semibold uppercase tracking-[0.06em] transition-colors ${
+                  ctaVariant === 'solid'
+                    ? 'bg-clay-700 text-sand-50 hover:bg-clay-800'
+                    : 'border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-sand-50'
+                }`}
+              >
+                {ctaLabel}
+                <span className="transition-transform group-hover:translate-x-1">→</span>
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
 

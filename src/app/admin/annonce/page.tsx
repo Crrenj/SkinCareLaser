@@ -22,13 +22,7 @@ import { BannerFormModal } from './_components/BannerFormModal'
 import { BannerDeleteModal } from './_components/BannerDeleteModal'
 import { HomeLayoutPanel } from '@/components/admin/HomeLayoutPanel'
 
-const SLOT_TABS: Array<{ key: BannerSlot | 'all'; label: string }> = [
-  { key: 'all', label: 'Tous' },
-  ...(['hero', 'banner', 'card', 'modal'] as BannerSlot[]).map(s => ({
-    key: s,
-    label: SLOT_LABELS[s],
-  })),
-]
+const SLOT_TABS: Array<BannerSlot | 'all'> = ['all', 'hero', 'banner', 'card', 'modal']
 
 export default function AnnoncePage() {
   const t = useTranslations('Admin.annonce')
@@ -168,21 +162,21 @@ export default function AnnoncePage() {
 
         {/* Slot filter tabs */}
         <div className="flex items-center gap-2">
-          {SLOT_TABS.map(tab => (
+          {SLOT_TABS.map((tab) => (
             <button
-              key={tab.key}
-              onClick={() => setActiveSlot(tab.key)}
+              key={tab}
+              onClick={() => setActiveSlot(tab)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                activeSlot === tab.key
+                activeSlot === tab
                   ? 'bg-ink-900 text-sand-50'
                   : 'bg-sand-50 text-ink-600 border border-sand-200 hover:bg-sand-100'
               }`}
             >
-              {tab.label}
+              {tab === 'all' ? t('filterAll') : SLOT_LABELS[tab]}
               <span className="ml-1.5 font-mono text-xs opacity-60">
-                {tab.key === 'all'
+                {tab === 'all'
                   ? banners.length
-                  : banners.filter(b => b.slot === tab.key).length}
+                  : banners.filter((b) => b.slot === tab).length}
               </span>
             </button>
           ))}

@@ -46,7 +46,7 @@
   /* ─── Typographie ─── */
   --font-serif: var(--font-instrument), Georgia, serif;
   --font-sans:  var(--font-bevn), ui-sans-serif, system-ui, sans-serif;
-  --font-mono:  ui-monospace, "JetBrains Mono", "SF Mono", monospace;
+  --font-mono:  var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
 
   /* ─── Radii ─── */
   --radius-sm: 0.25rem;

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, Be_Vietnam_Pro } from "next/font/google";
+import { Instrument_Serif, Be_Vietnam_Pro, JetBrains_Mono } from "next/font/google";
 import { getLocale } from 'next-intl/server'
 import "./globals.css";
 import { SWRProvider } from '@/components/SWRProvider'
@@ -18,6 +18,13 @@ const sans = Be_Vietnam_Pro({
   variable: "--font-bevn",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
@@ -60,7 +67,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-mode={initialMode}
       data-default-mode={defaultMode}
       data-allow-mode={allowVisitorMode ? '1' : '0'}
-      className={`${serif.variable} ${sans.variable}`}
+      className={`${serif.variable} ${sans.variable} ${mono.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_MODE_SCRIPT }} />

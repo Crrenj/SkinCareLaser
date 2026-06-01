@@ -5,7 +5,10 @@ import { useLocale, useTranslations } from 'next-intl'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
-/** Formulaire newsletter — POST /api/newsletter. Optimistic, idempotent. */
+/**
+ * Section newsletter (`.news`) — bande claire sand-100 juste avant le footer
+ * sombre. Titre serif + champ + bouton ink. POST /api/newsletter, optimistic.
+ */
 export function FooterNewsletter() {
   const t = useTranslations('Footer.newsletter')
   const locale = useLocale()
@@ -44,46 +47,51 @@ export function FooterNewsletter() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-8 lg:gap-12 items-end pb-14 mb-14 border-b border-[var(--c-ink-panel-border)]">
-      <div>
-        <h3
-          className="font-serif text-[32px] md:text-[40px] leading-[1.05] -tracking-[0.02em] text-[var(--c-ink-panel-fg)] mb-2 [&_em]:not-italic [&_em]:italic [&_em]:text-[var(--c-ink-panel-accent)]"
-          dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
-        />
-        <p className="font-serif italic text-[16px] md:text-[17px] leading-[1.5] text-[var(--c-ink-panel-muted)] max-w-[440px]">
-          {t('description')}
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-[1fr_auto] gap-2">
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={t('placeholder')}
-          aria-label={t('placeholder')}
-          aria-invalid={status === 'error'}
-          aria-describedby={status === 'error' || status === 'success' ? 'newsletter-feedback' : undefined}
-          disabled={status === 'submitting' || status === 'success'}
-          className="bg-[var(--c-ink-panel-2)] border border-[var(--c-ink-panel-border)] text-[var(--c-ink-panel-fg)] placeholder:text-[var(--c-ink-panel-muted)] rounded-sm px-4 py-3.5 text-sm outline-none focus-visible:border-[var(--c-ink-panel-accent)] transition-colors disabled:opacity-60"
-        />
-        <button
-          type="submit"
-          disabled={status === 'submitting' || status === 'success'}
-          className="bg-clay-700 hover:bg-clay-800 text-sand-50 rounded-sm px-6 py-3.5 text-[12px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {status === 'submitting' ? t('submitting') : t('submit')}
-        </button>
-        <div id="newsletter-feedback" aria-live="polite" className="col-span-2">
-          {status === 'success' && (
-            <p className="mt-2 text-[13px] text-[var(--c-ink-panel-accent)]">{t('success')}</p>
-          )}
-          {status === 'error' && errorMsg && (
-            <p className="mt-2 text-[13px] text-brick-600">{errorMsg}</p>
-          )}
+    <section className="bg-sand-100 border-t border-sand-300">
+      <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] py-[clamp(48px,7vw,96px)] grid lg:grid-cols-[1fr_auto] gap-[clamp(32px,5vw,72px)] items-end">
+        <div>
+          <h2
+            className="font-serif font-normal text-[clamp(32px,4vw,52px)] leading-none -tracking-[0.02em] text-ink-900 mb-3.5 [&_em]:italic [&_em]:text-clay-700"
+            dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
+          />
+          <p className="text-[15px] leading-relaxed text-ink-700 max-w-[44ch]">
+            {t('description')}
+          </p>
         </div>
-      </form>
-    </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 min-w-[min(420px,80vw)]">
+          <div className="flex gap-2">
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder={t('placeholder')}
+              aria-label={t('placeholder')}
+              aria-invalid={status === 'error'}
+              aria-describedby={status === 'error' || status === 'success' ? 'newsletter-feedback' : undefined}
+              disabled={status === 'submitting' || status === 'success'}
+              className="flex-1 bg-sand-50 border border-sand-400 rounded-[2px] px-4 py-3.5 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 transition-colors disabled:opacity-60"
+            />
+            <button
+              type="submit"
+              disabled={status === 'submitting' || status === 'success'}
+              className="bg-ink-900 hover:bg-clay-800 text-sand-50 rounded-[2px] px-6 py-3.5 text-[12.5px] font-semibold uppercase tracking-[0.06em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {status === 'submitting' ? t('submitting') : t('submit')}
+            </button>
+          </div>
+          <div id="newsletter-feedback" aria-live="polite">
+            {status === 'success' ? (
+              <p className="font-mono text-[10.5px] tracking-[0.04em] text-olive-600">{t('success')}</p>
+            ) : status === 'error' && errorMsg ? (
+              <p className="font-mono text-[10.5px] tracking-[0.04em] text-brick-600">{errorMsg}</p>
+            ) : (
+              <span className="font-mono text-[10.5px] tracking-[0.04em] text-ink-500">{t('fine')}</span>
+            )}
+          </div>
+        </form>
+      </div>
+    </section>
   )
 }

@@ -5,7 +5,7 @@ import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { ImageUploadField } from '@/components/admin/ImageUploadField'
 import type { BannerData, BannerFormState, BannerSlot, BannerStatus, BannerType } from '../_lib/types'
-import { SLOT_LABELS, STATUS_LABELS } from '../_lib/types'
+import { SLOT_LABELS } from '../_lib/types'
 
 type BannerFormModalProps = {
   open: boolean
@@ -41,6 +41,7 @@ export function BannerFormModal({
 }: BannerFormModalProps) {
   const t = useTranslations('Admin.modals.banner')
   const tc = useTranslations('Admin.common')
+  const tStatus = useTranslations('Admin.annonce.status')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -118,7 +119,7 @@ export function BannerFormModal({
             {/* Slot + Status */}
             <div className="grid grid-cols-2 gap-3 mb-[14px]">
               <div className="flex flex-col gap-[6px]">
-                <label htmlFor="banner-slot" className={labelCls}>Slot</label>
+                <label htmlFor="banner-slot" className={labelCls}>{t('slotLabel')}</label>
                 <select
                   id="banner-slot"
                   value={form.slot}
@@ -131,15 +132,15 @@ export function BannerFormModal({
                 </select>
               </div>
               <div className="flex flex-col gap-[6px]">
-                <label htmlFor="banner-status" className={labelCls}>Status</label>
+                <label htmlFor="banner-status" className={labelCls}>{t('statusLabel')}</label>
                 <select
                   id="banner-status"
                   value={form.status}
                   onChange={(e) => onFormChange({ ...form, status: e.target.value as BannerStatus })}
                   className={inputCls}
                 >
-                  {(Object.keys(STATUS_LABELS) as BannerStatus[]).map(s => (
-                    <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                  {(['draft', 'scheduled', 'active', 'paused', 'expired'] as BannerStatus[]).map((s) => (
+                    <option key={s} value={s}>{tStatus(s)}</option>
                   ))}
                 </select>
               </div>

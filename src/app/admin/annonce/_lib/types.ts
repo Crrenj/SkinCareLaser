@@ -83,14 +83,6 @@ export const SLOT_LABELS: Record<BannerSlot, string> = {
   modal: 'Modal',
 }
 
-export const STATUS_LABELS: Record<BannerStatus, string> = {
-  draft: 'Brouillon',
-  scheduled: 'Programmé',
-  active: 'Actif',
-  paused: 'Pausé',
-  expired: 'Expiré',
-}
-
 export const INITIAL_BANNER_FORM: BannerFormState = {
   title: '',
   description: '',
