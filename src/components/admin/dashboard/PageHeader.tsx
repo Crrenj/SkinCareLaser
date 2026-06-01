@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { HeaderTools } from './HeaderTools'
 
 type Crumb = { label: string; href?: string }
 
@@ -55,7 +56,15 @@ export function PageHeader({ crumbs, title, actions }: PageHeaderProps) {
           {title}
         </h1>
       </div>
-      {actions && <div className="flex flex-wrap gap-2.5 items-center">{actions}</div>}
+      <div className="flex flex-wrap gap-2.5 items-center">
+        <HeaderTools />
+        {actions && (
+          <>
+            <span aria-hidden className="hidden lg:block w-px h-[26px] bg-sand-300" />
+            {actions}
+          </>
+        )}
+      </div>
     </header>
   )
 }

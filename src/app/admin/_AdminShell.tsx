@@ -7,7 +7,7 @@ import { Toaster } from 'sonner'
 import { useTranslations } from 'next-intl'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { Sidebar } from '@/components/admin/dashboard/Sidebar'
-import { AdminModeToggle } from '@/components/admin/dashboard/AdminModeToggle'
+import { AdminModeProvider } from '@/components/admin/dashboard/AdminModeContext'
 
 // Préférence clair/sombre PROPRE à l'admin, indépendante du mode visiteur
 // du site public (`farmau:mode`). L'admin reste toujours sur le thème Terra.
@@ -79,39 +79,36 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     // L'admin reste neutre (Terra) quel que soit le thème public choisi ; seul
-    // le mode clair/sombre est basculable via le toggle (préférence dédiée).
-    <div data-theme="terra" data-mode={mode} className="flex min-h-screen bg-sand-50">
-      <Sidebar
-        mobileOpen={drawerOpen}
-        onCloseMobile={() => setDrawerOpen(false)}
-        email={user.email ?? undefined}
-        mode={mode}
-        onToggleMode={toggleMode}
-      />
+    // le mode clair/sombre est basculable via le toggle du PageHeader.
+    <AdminModeProvider value={{ mode, toggleMode }}>
+      <div data-theme="terra" data-mode={mode} className="flex min-h-screen bg-sand-50">
+        <Sidebar
+          mobileOpen={drawerOpen}
+          onCloseMobile={() => setDrawerOpen(false)}
+          email={user.email ?? undefined}
+        />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="lg:hidden sticky top-0 z-20 bg-sand-100 border-b border-sand-300 px-4 py-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setDrawerOpen(true)}
-            className="w-10 h-10 rounded-md flex items-center justify-center text-ink-900 hover:bg-sand-200 transition-colors"
-            aria-label={tChrome('openMenu')}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <span className="font-serif text-[20px] text-ink-900">FARMAU</span>
-          <div className="ml-auto flex items-center gap-2.5">
-            <AdminModeToggle mode={mode} onToggle={toggleMode} className="h-8 w-8" />
-            <span className="text-[11px] tracking-[0.12em] uppercase text-ink-500">
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="lg:hidden sticky top-0 z-20 bg-sand-100 border-b border-sand-300 px-4 py-3 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(true)}
+              className="w-10 h-10 rounded-md flex items-center justify-center text-ink-900 hover:bg-sand-200 transition-colors"
+              aria-label={tChrome('openMenu')}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <span className="font-serif text-[20px] text-ink-900">FARMAU</span>
+            <span className="ml-auto text-[11px] tracking-[0.12em] uppercase text-ink-500">
               {tChrome('adminBadge')}
             </span>
           </div>
+
+          <main className="flex-1 min-w-0">{children}</main>
         </div>
 
-        <main className="flex-1 min-w-0">{children}</main>
+        <Toaster richColors position="top-right" closeButton />
       </div>
-
-      <Toaster richColors position="top-right" closeButton />
-    </div>
+    </AdminModeProvider>
   )
 }
