@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import Banner from '@/components/Banner'
+import { IframeHeightReporter } from '@/components/IframeHeightReporter'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
@@ -191,6 +192,7 @@ export default async function LocaleHome({
   return (
     <div className="flex flex-col min-h-screen bg-sand-50" lang={locale}>
       <NavBar />
+      <IframeHeightReporter />
 
       <main id="main-content" className="flex-1">
         {layout

@@ -1774,7 +1774,9 @@
         "active": "Activo",
         "paused": "En pausa",
         "expired": "Expirado"
-      }
+      },
+      "refresh": "Actualizar vista previa",
+      "previewEmptyHint": "Ninguna bandera activa — la home se muestra sin banner CMS."
     },
     "reservations": {
       "title": "Reservas",

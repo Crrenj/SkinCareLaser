@@ -97,6 +97,33 @@
   --c-accent-200: color-mix(in srgb, var(--c-accent) 24%, var(--c-bg));
   --c-accent-400: color-mix(in srgb, var(--c-accent) 55%, var(--c-bg));
   --c-accent-deep: color-mix(in srgb, var(--c-accent-strong) 72%, #000);
+
+  /* Mappings tokens Tailwind redéclarés ICI (pas seulement dans @theme/:root)
+     pour qu'ils SE RÉSOLVENT sur l'élément thémé : var(--c-*) référencé depuis
+     @theme est figé sur :root (substitution au point de déclaration), donc un
+     [data-theme] imbriqué (ex. le shell admin) ne re-thématise rien sans cette
+     redéclaration. @theme garde les mêmes lignes → utilitaires Tailwind générés. */
+  --color-sand-50:  var(--c-bg);
+  --color-sand-100: var(--c-surface);
+  --color-sand-200: var(--c-bg-2);
+  --color-sand-300: var(--c-border);
+  --color-sand-400: var(--c-border-2);
+  --color-sand-500: var(--c-neutral-500);
+  --color-sand-600: var(--c-neutral-600);
+  --color-clay-50:  var(--c-accent-50);
+  --color-clay-100: var(--c-accent-100);
+  --color-clay-200: var(--c-accent-200);
+  --color-clay-400: var(--c-accent-400);
+  --color-clay-600: var(--c-accent);
+  --color-clay-700: var(--c-accent-strong);
+  --color-clay-800: var(--c-accent-deep);
+  --color-ink-50:  var(--c-ink-50);
+  --color-ink-200: var(--c-ink-200);
+  --color-ink-400: var(--c-ink-400);
+  --color-ink-500: var(--c-ink-500);
+  --color-ink-700: var(--c-ink-700);
+  --color-ink-800: var(--c-ink-800);
+  --color-ink-900: var(--c-text);
 }
 
 /* ── TERRA ──────────────────────────────────────────── */

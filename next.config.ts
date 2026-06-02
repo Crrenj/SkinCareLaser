@@ -16,8 +16,10 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: [
           {
+            // SAMEORIGIN (pas DENY) : permet l'aperçu iframe same-origin de la
+            // home dans /admin/annonce. Le cross-origin reste bloqué (anti-clickjacking).
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-Content-Type-Options',
@@ -45,7 +47,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https:",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com",
               "frame-src 'self' https://accounts.google.com https://maps.google.com",
-              "frame-ancestors 'none'",
+              "frame-ancestors 'self'",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
