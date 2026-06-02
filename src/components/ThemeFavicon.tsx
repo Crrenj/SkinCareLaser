@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import useSWR from 'swr'
 import { isThemeName } from '@/lib/themes'
 
@@ -8,13 +9,15 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<{ th
 
 /**
  * Garde le favicon synchronisé avec le thème défini dans `/admin/apariencia`,
- * sur TOUTES les routes. Le `<link rel="icon">` statique du root layout est
- * baké par page (et figé en navigation SPA), donc il pouvait afficher un thème
- * périmé/incohérent selon la section. On lit le thème LIVE via `/api/theme`
- * (SWR, dédupliqué) et on réécrit les liens ; fallback sur `<html data-theme>`
- * le temps du fetch (pas de flash).
+ * sur TOUTES les routes (public ET admin). On lit le thème LIVE via `/api/theme`
+ * (SWR, dédupliqué) et on réécrit les `<link rel="icon">` ; fallback sur
+ * `<html data-theme>` le temps du fetch. On RETIRE aussi tout favicon concurrent
+ * (ex. `/favicon.ico` auto-injecté) qui n'est pas une de nos icônes de thème —
+ * sinon le navigateur l'affichait à la place du colibri (constaté en admin).
+ * Réasserté à chaque navigation (`pathname`).
  */
 export function ThemeFavicon() {
+  const pathname = usePathname()
   const { data } = useSWR<{ theme: string }>('/api/theme', fetcher, {
     revalidateOnFocus: false,
     dedupingInterval: 60_000,
@@ -23,17 +26,23 @@ export function ThemeFavicon() {
   useEffect(() => {
     const live = data?.theme
     const htmlTheme = document.documentElement.getAttribute('data-theme')
-    const theme = isThemeName(live)
-      ? live
-      : isThemeName(htmlTheme)
-        ? htmlTheme
-        : 'terra'
+    const theme = isThemeName(live) ? live : isThemeName(htmlTheme) ? htmlTheme : 'terra'
 
-    const setIcon = (size: '16x16' | '32x32', px: string) => {
-      let link = document.querySelector<HTMLLinkElement>(`link[rel="icon"][sizes="${size}"]`)
+    // Retire les favicons concurrents (qui ne pointent pas vers /favicons/…).
+    document
+      .querySelectorAll(
+        'link[rel~="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"], link[rel="mask-icon"]',
+      )
+      .forEach((el) => {
+        const href = el.getAttribute('href') || ''
+        if (!href.startsWith('/favicons/')) el.remove()
+      })
+
+    const setIcon = (rel: string, size: string, px: string) => {
+      let link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"][sizes="${size}"]`)
       if (!link) {
         link = document.createElement('link')
-        link.rel = 'icon'
+        link.rel = rel
         link.type = 'image/png'
         link.setAttribute('sizes', size)
         document.head.appendChild(link)
@@ -41,12 +50,10 @@ export function ThemeFavicon() {
       link.href = `/favicons/${theme}-${px}.png`
     }
 
-    setIcon('32x32', '32')
-    setIcon('16x16', '16')
-
-    const apple = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]')
-    if (apple) apple.href = `/favicons/${theme}-180.png`
-  }, [data])
+    setIcon('icon', '32x32', '32')
+    setIcon('icon', '16x16', '16')
+    setIcon('apple-touch-icon', '180x180', '180')
+  }, [data, pathname])
 
   return null
 }
