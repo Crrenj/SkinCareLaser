@@ -208,6 +208,12 @@
   --c-ink-panel-accent: var(--c-accent);
 }
 
+/* Marquee brandline — défilement horizontal continu (pause au survol). */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 /* ─── Base ─── */
 * { box-sizing: border-box; }
 

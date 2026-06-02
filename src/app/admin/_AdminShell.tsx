@@ -37,13 +37,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     dedupingInterval: 60_000,
   })
   const [siteTheme, setSiteTheme] = useState<ThemeName>('terra')
+  // Au mount : `<html data-theme>` EST déjà le thème d'apparence frais (l'admin
+  // est rendu dynamiquement → valeur runtime de getThemeConfig). On le lit
+  // tout de suite (source la plus fraîche, jamais en cache CDN).
   useEffect(() => {
-    if (isThemeName(themeData?.theme)) {
-      setSiteTheme(themeData.theme)
-    } else {
-      const fromHtml = document.documentElement.getAttribute('data-theme')
-      if (isThemeName(fromHtml)) setSiteTheme(fromHtml)
-    }
+    const fromHtml = document.documentElement.getAttribute('data-theme')
+    if (isThemeName(fromHtml)) setSiteTheme(fromHtml)
+  }, [])
+  // Mise à jour LIVE après un save dans /apariencia (globalMutate('/api/theme')).
+  useEffect(() => {
+    if (isThemeName(themeData?.theme)) setSiteTheme(themeData.theme)
   }, [themeData])
 
   // Lit la préférence persistée après le mount (évite le mismatch
