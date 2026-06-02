@@ -5,13 +5,18 @@ import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { useTranslations } from 'next-intl'
+import useSWR from 'swr'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { Sidebar } from '@/components/admin/dashboard/Sidebar'
 import { AdminModeProvider } from '@/components/admin/dashboard/AdminModeContext'
+import { isThemeName, type ThemeName } from '@/lib/themes'
 
 // Préférence clair/sombre PROPRE à l'admin, indépendante du mode visiteur
-// du site public (`farmau:mode`). L'admin reste toujours sur le thème Terra.
+// du site public (`farmau:mode`). Le THÈME (palette), lui, suit l'apparence
+// choisie dans /admin/apariencia — comme le site public.
 const ADMIN_MODE_KEY = 'farmau:admin-mode'
+
+const themeFetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<{ theme: string }>)
 
 /**
  * Shell client qui héberge auth-gate + sidebar + barre mobile.
@@ -23,6 +28,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const tChrome = useTranslations('Admin.chrome')
+
+  // Thème d'apparence (choisi dans /admin/apariencia, live via /api/theme).
+  // L'admin reflète la même palette que le site public ; seul le mode
+  // clair/sombre reste propre à l'admin (toggle du PageHeader).
+  const { data: themeData } = useSWR<{ theme: string }>('/api/theme', themeFetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60_000,
+  })
+  const [siteTheme, setSiteTheme] = useState<ThemeName>('terra')
+  useEffect(() => {
+    if (isThemeName(themeData?.theme)) {
+      setSiteTheme(themeData.theme)
+    } else {
+      const fromHtml = document.documentElement.getAttribute('data-theme')
+      if (isThemeName(fromHtml)) setSiteTheme(fromHtml)
+    }
+  }, [themeData])
 
   // Lit la préférence persistée après le mount (évite le mismatch
   // d'hydratation : le SSR rend toujours 'light').
@@ -66,7 +88,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (loading && !user) {
     return (
       <div
-        data-theme="terra"
+        data-theme={siteTheme}
         data-mode={mode}
         className="min-h-screen flex items-center justify-center bg-sand-100"
       >
@@ -78,10 +100,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   if (!user || !isAdmin) return null
 
   return (
-    // L'admin reste neutre (Terra) quel que soit le thème public choisi ; seul
-    // le mode clair/sombre est basculable via le toggle du PageHeader.
+    // L'admin adopte le thème d'apparence choisi (comme le public) ; seul le
+    // mode clair/sombre est propre à l'admin (toggle du PageHeader).
     <AdminModeProvider value={{ mode, toggleMode }}>
-      <div data-theme="terra" data-mode={mode} className="flex min-h-screen bg-sand-50">
+      <div data-theme={siteTheme} data-mode={mode} className="flex min-h-screen bg-sand-50">
         <Sidebar
           mobileOpen={drawerOpen}
           onCloseMobile={() => setDrawerOpen(false)}

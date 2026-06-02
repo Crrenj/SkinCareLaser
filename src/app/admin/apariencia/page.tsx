@@ -2,7 +2,7 @@
 
 import { logger } from '@/lib/logger'
 import { useEffect, useState } from 'react'
-import useSWR from 'swr'
+import useSWR, { mutate as globalMutate } from 'swr'
 import { Check, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -70,6 +70,8 @@ export default function AppearancePage() {
       }
       toast.success(t('saveSuccess'))
       mutate(json, { revalidate: false })
+      // Rafraîchit le thème live partout (favicon + shell admin) sans reload.
+      globalMutate('/api/theme')
     } catch (err) {
       logger.error('PATCH /api/admin/appearance:', err)
       toast.error(t('networkError'))
