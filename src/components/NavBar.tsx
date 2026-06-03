@@ -159,7 +159,7 @@ export default function NavBar() {
     >
       <div className="mx-auto flex h-[70px] max-w-[1440px] items-center gap-2.5 px-[clamp(20px,5vw,72px)]">
         {/* Brand */}
-        <FarmauLockup birdSize={30} wordWidth={64} className="mr-3 shrink-0" />
+        <FarmauLockup birdSize={46} wordWidth={64} className="mr-3 shrink-0" />
 
         {/* Liens primaires (desktop) */}
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label={t('mainNavAriaLabel')}>
