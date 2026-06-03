@@ -106,7 +106,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     // L'admin adopte le thème d'apparence choisi (comme le public) ; seul le
     // mode clair/sombre est propre à l'admin (toggle du PageHeader).
     <AdminModeProvider value={{ mode, toggleMode }}>
-      <div data-theme={siteTheme} data-mode={mode} className="flex min-h-screen bg-sand-50">
+      <div data-theme={siteTheme} data-mode={mode} className="flex min-h-screen bg-sand-50 text-ink-900">
         <Sidebar
           mobileOpen={drawerOpen}
           onCloseMobile={() => setDrawerOpen(false)}
