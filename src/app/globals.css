@@ -19,14 +19,19 @@
   --color-clay-100: var(--c-accent-100);
   --color-clay-200: var(--c-accent-200);
   --color-clay-400: var(--c-accent-400);
+  --color-clay-500: var(--c-accent-500);
   --color-clay-600: var(--c-accent);
   --color-clay-700: var(--c-accent-strong);   /* CTA principal */
   --color-clay-800: var(--c-accent-deep);
+  --color-clay-900: var(--c-accent-900);
 
   --color-ink-50:  var(--c-ink-50);
+  --color-ink-100: var(--c-ink-100);
   --color-ink-200: var(--c-ink-200);
+  --color-ink-300: var(--c-ink-300);
   --color-ink-400: var(--c-ink-400);
   --color-ink-500: var(--c-ink-500);
+  --color-ink-600: var(--c-ink-600);
   --color-ink-700: var(--c-ink-700);
   --color-ink-800: var(--c-ink-800);
   --color-ink-900: var(--c-text);
@@ -35,10 +40,13 @@
   --color-olive-600: #5B6B3F;
   --color-brick-600: #8B3A2E;
   --color-olive-50:  #EEF0E8;
+  --color-olive-100: #E2E6D5;
   --color-olive-200: #C9D1B0;
+  --color-olive-700: #4B5833;
   --color-olive-800: #3B4528;
   --color-brick-50:  #F6E6E2;
   --color-brick-200: #E5BFB8;
+  --color-brick-700: #743025;
   --color-brick-800: #5E261D;
   --color-ochre-200: #EBD9A8;
   --color-ochre-600: #B5852B;
@@ -86,9 +94,12 @@
   --c-neutral-600: color-mix(in srgb, var(--c-text) 66%, var(--c-bg));
 
   --c-ink-50:  color-mix(in srgb, var(--c-text)  5%, var(--c-bg));
+  --c-ink-100: color-mix(in srgb, var(--c-text) 10%, var(--c-bg));
   --c-ink-200: color-mix(in srgb, var(--c-text) 18%, var(--c-bg));
+  --c-ink-300: color-mix(in srgb, var(--c-text) 36%, var(--c-bg));
   --c-ink-400: color-mix(in srgb, var(--c-text) 54%, var(--c-bg));
   --c-ink-500: color-mix(in srgb, var(--c-text) 66%, var(--c-bg));
+  --c-ink-600: color-mix(in srgb, var(--c-text) 73%, var(--c-bg));
   --c-ink-700: color-mix(in srgb, var(--c-text) 80%, var(--c-bg));
   --c-ink-800: color-mix(in srgb, var(--c-text) 88%, var(--c-bg));
 
@@ -96,7 +107,9 @@
   --c-accent-100: color-mix(in srgb, var(--c-accent) 14%, var(--c-bg));
   --c-accent-200: color-mix(in srgb, var(--c-accent) 24%, var(--c-bg));
   --c-accent-400: color-mix(in srgb, var(--c-accent) 55%, var(--c-bg));
+  --c-accent-500: color-mix(in srgb, var(--c-accent) 78%, var(--c-bg));
   --c-accent-deep: color-mix(in srgb, var(--c-accent-strong) 72%, #000);
+  --c-accent-900: color-mix(in srgb, var(--c-accent-strong) 50%, #000);
 
   /* Mappings tokens Tailwind redéclarés ICI (pas seulement dans @theme/:root)
      pour qu'ils SE RÉSOLVENT sur l'élément thémé : var(--c-*) référencé depuis
@@ -114,13 +127,18 @@
   --color-clay-100: var(--c-accent-100);
   --color-clay-200: var(--c-accent-200);
   --color-clay-400: var(--c-accent-400);
+  --color-clay-500: var(--c-accent-500);
   --color-clay-600: var(--c-accent);
   --color-clay-700: var(--c-accent-strong);
   --color-clay-800: var(--c-accent-deep);
+  --color-clay-900: var(--c-accent-900);
   --color-ink-50:  var(--c-ink-50);
+  --color-ink-100: var(--c-ink-100);
   --color-ink-200: var(--c-ink-200);
+  --color-ink-300: var(--c-ink-300);
   --color-ink-400: var(--c-ink-400);
   --color-ink-500: var(--c-ink-500);
+  --color-ink-600: var(--c-ink-600);
   --color-ink-700: var(--c-ink-700);
   --color-ink-800: var(--c-ink-800);
   --color-ink-900: var(--c-text);
