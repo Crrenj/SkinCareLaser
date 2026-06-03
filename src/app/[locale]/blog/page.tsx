@@ -71,8 +71,8 @@ export default async function BlogPage({
                   href={`/blog/${post.slug}`}
                   className="group rounded-xl border border-sand-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  {post.cover_image_url ? (
-                    <div className="relative aspect-[16/9] bg-sand-100">
+                  <div className="relative aspect-[16/9] bg-sand-100">
+                    {post.cover_image_url ? (
                       <Image
                         src={post.cover_image_url}
                         alt={post.title}
@@ -80,12 +80,16 @@ export default async function BlogPage({
                         className="object-cover"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
-                    </div>
-                  ) : (
-                    <div className="aspect-[16/9] bg-sand-100 flex items-center justify-center">
-                      <span className="font-serif text-4xl italic text-sand-300">F</span>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <span className="font-serif text-4xl italic text-sand-300">F</span>
+                      </div>
+                    )}
+                    {/* Langue de rédaction de l'article (FR/ES/EN) */}
+                    <span className="absolute left-3 top-3 rounded-full border border-sand-300/80 bg-sand-50/90 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-700 backdrop-blur-sm">
+                      {post.locale}
+                    </span>
+                  </div>
                   <div className="p-5">
                     <div className="flex items-center gap-2 mb-2">
                       {post.published_at && (
