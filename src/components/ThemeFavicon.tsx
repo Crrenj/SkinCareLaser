@@ -8,13 +8,19 @@ import { isThemeName } from '@/lib/themes'
 const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<{ theme: string }>)
 
 /**
- * Garde le favicon synchronisé avec le thème défini dans `/admin/apariencia`,
- * sur TOUTES les routes (public ET admin). On lit le thème LIVE via `/api/theme`
- * (SWR, dédupliqué) et on réécrit les `<link rel="icon">` ; fallback sur
- * `<html data-theme>` le temps du fetch. On RETIRE aussi tout favicon concurrent
- * (ex. `/favicon.ico` auto-injecté) qui n'est pas une de nos icônes de thème —
- * sinon le navigateur l'affichait à la place du colibri (constaté en admin).
- * Réasserté à chaque navigation (`pathname`).
+ * Garde le favicon — ET, sur le site public, l'attribut `<html data-theme>` —
+ * synchronisés avec le thème défini dans `/admin/apariencia`. On lit le thème
+ * LIVE via `/api/theme` (SWR, dédupliqué, partagé avec d'autres consommateurs
+ * donc sans appel réseau supplémentaire) :
+ *  - favicon réécrit sur TOUTES les routes ;
+ *  - `data-theme` appliqué en direct sur les routes PUBLIQUES (pas `/admin`,
+ *    géré par `_AdminShell`) pour que les couleurs suivent un changement
+ *    d'apparence admin SANS rechargement — le `<html data-theme>` est figé au
+ *    build sur les pages SSG et n'est jamais re-rendu en navigation interne.
+ * Fallback sur `<html data-theme>` le temps du fetch. On RETIRE aussi tout
+ * favicon concurrent (ex. `/favicon.ico` auto-injecté) qui n'est pas une de nos
+ * icônes de thème — sinon le navigateur l'affichait à la place du colibri
+ * (constaté en admin). Réasserté à chaque navigation (`pathname`).
  */
 export function ThemeFavicon() {
   const pathname = usePathname()
@@ -27,6 +33,13 @@ export function ThemeFavicon() {
     const live = data?.theme
     const htmlTheme = document.documentElement.getAttribute('data-theme')
     const theme = isThemeName(live) ? live : isThemeName(htmlTheme) ? htmlTheme : 'terra'
+
+    // Applique le thème LIVE sur <html data-theme> pour le site public, afin que
+    // les couleurs suivent un changement d'apparence admin sans rechargement.
+    // L'admin est exclu : _AdminShell pilote son propre data-theme (+ son mode).
+    if (isThemeName(live) && live !== htmlTheme && !pathname.startsWith('/admin')) {
+      document.documentElement.setAttribute('data-theme', live)
+    }
 
     // Retire les favicons concurrents (qui ne pointent pas vers /favicons/…).
     document
