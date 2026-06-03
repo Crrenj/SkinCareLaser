@@ -1637,7 +1637,27 @@
         "sectionImageLink": "Image et lien",
         "ctaDestLabel": "CTA destination",
         "ctaLabelLabel": "CTA label",
-        "submitCreate": "Créer la bannière"
+        "submitCreate": "Créer la bannière",
+        "guide": {
+          "heading": "Guide des types",
+          "zoneImage": "Image",
+          "zoneImageBg": "Image (fond)",
+          "zoneCta": "CTA",
+          "zoneAttribution": "Attribution",
+          "mappingHeading": "Quoi va où",
+          "fieldTitle": "Titre",
+          "mapTitle": "grand intitulé, sur les trois types.",
+          "fieldDescription": "Description / Cita",
+          "mapDescription": "texte sous le titre ; pour Quote, c'est la citation elle-même.",
+          "fieldImage": "Image",
+          "mapImage": "visuel : sur le côté (Editorial) ou en fond (Hero). Optionnelle pour Quote.",
+          "fieldCta": "CTA (destination + label)",
+          "mapCta": "le bouton cliquable, sur Editorial et Hero.",
+          "fieldDirection": "Direction",
+          "mapDirection": "image à gauche ou à droite (Editorial uniquement).",
+          "fieldAttribution": "Attribution",
+          "mapAttribution": "signature sous la citation : nom, titre, photo (Quote uniquement)."
+        }
       }
     },
     "stockState": {

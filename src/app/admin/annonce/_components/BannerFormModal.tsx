@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { ImageUploadField } from '@/components/admin/ImageUploadField'
+import { BannerTypeGuide } from './BannerTypeGuide'
 import type { BannerData, BannerFormState, BannerType } from '../_lib/types'
 
 type BannerFormModalProps = {
@@ -254,6 +255,8 @@ export function BannerFormModal({
                 </div>
               </div>
             </div>
+
+            <BannerTypeGuide selected={form.banner_type} />
           </div>
 
           {/* Footer */}

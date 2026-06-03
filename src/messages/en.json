@@ -1637,7 +1637,27 @@
         "sectionImageLink": "Image and link",
         "ctaDestLabel": "CTA destination",
         "ctaLabelLabel": "CTA label",
-        "submitCreate": "Create banner"
+        "submitCreate": "Create banner",
+        "guide": {
+          "heading": "Type guide",
+          "zoneImage": "Image",
+          "zoneImageBg": "Image (bg)",
+          "zoneCta": "CTA",
+          "zoneAttribution": "Attribution",
+          "mappingHeading": "What goes where",
+          "fieldTitle": "Title",
+          "mapTitle": "the large heading, on all three types.",
+          "fieldDescription": "Description / Quote",
+          "mapDescription": "text under the title; for Quote, it is the quote itself.",
+          "fieldImage": "Image",
+          "mapImage": "the visual: on the side (Editorial) or as background (Hero). Optional for Quote.",
+          "fieldCta": "CTA (destination + label)",
+          "mapCta": "the clickable button, on Editorial and Hero.",
+          "fieldDirection": "Direction",
+          "mapDirection": "image on the left or right (Editorial only).",
+          "fieldAttribution": "Attribution",
+          "mapAttribution": "signature under the quote: name, title, photo (Quote only)."
+        }
       }
     },
     "stockState": {
