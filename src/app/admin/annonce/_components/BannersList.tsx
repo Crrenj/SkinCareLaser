@@ -11,37 +11,20 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
-import { SLOT_LABELS, type BannerData, type BannerSlot } from '../_lib/types'
+import type { BannerData } from '../_lib/types'
 
 type BannersListProps = {
   banners: BannerData[]
   loading: boolean
-  activeSlot: BannerSlot | 'all'
   onMove: (id: string, direction: 'up' | 'down') => void
   onToggleActive: (id: string) => void
   onEdit: (banner: BannerData) => void
   onDelete: (id: string) => void
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-sand-200 text-ink-500',
-  scheduled: 'bg-clay-100 text-clay-700',
-  active: 'bg-olive-100 text-olive-700',
-  paused: 'bg-ochre-100 text-ochre-700',
-  expired: 'bg-brick-100 text-brick-600',
-}
-
-const SLOT_DOT: Record<BannerSlot, string> = {
-  hero: 'bg-clay-600',
-  banner: 'bg-olive-600',
-  card: 'bg-ochre-600',
-  modal: 'bg-brick-600',
-}
-
 export function BannersList({
   banners,
   loading,
-  activeSlot,
   onMove,
   onToggleActive,
   onEdit,
@@ -49,7 +32,6 @@ export function BannersList({
 }: BannersListProps) {
   const t = useTranslations('Admin.annonce')
   const tc = useTranslations('Admin.common')
-  const tStatus = useTranslations('Admin.annonce.status')
 
   if (loading) {
     return (
@@ -61,7 +43,7 @@ export function BannersList({
     )
   }
 
-  const filtered = activeSlot === 'all' ? banners : banners.filter((b) => b.slot === activeSlot)
+  const filtered = banners
 
   if (filtered.length === 0) {
     return (
@@ -100,21 +82,15 @@ export function BannersList({
               </button>
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                  STATUS_COLORS[banner.status] ?? STATUS_COLORS.draft
+                  banner.is_active ? 'bg-olive-100 text-olive-700' : 'bg-sand-200 text-ink-500'
                 }`}
               >
-                {tStatus(banner.status)}
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-sand-200 px-2 py-0.5 text-xs font-mono text-ink-500">
-                <span className={`w-1.5 h-1.5 rounded-full ${SLOT_DOT[banner.slot]}`} />
-                {SLOT_LABELS[banner.slot]}
+                <span className={`w-1.5 h-1.5 rounded-full ${banner.is_active ? 'bg-olive-600' : 'bg-ink-300'}`} />
+                {banner.is_active ? t('online') : t('offline')}
               </span>
             </div>
             <p className="text-sm text-ink-500 mt-0.5 truncate">
               {banner.description || '—'}
-              <span className="ml-3 font-mono text-xs">
-                {t('metrics', { v: banner.view_count ?? 0, c: banner.click_count ?? 0 })}
-              </span>
             </p>
           </div>
 

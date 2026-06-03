@@ -76,13 +76,6 @@ export const BANNER_TYPE_LABELS: Record<BannerType, string> = {
   gradient_overlay: 'Gradient',
 }
 
-export const SLOT_LABELS: Record<BannerSlot, string> = {
-  hero: 'Hero',
-  banner: 'Banner',
-  card: 'Card',
-  modal: 'Modal',
-}
-
 export const INITIAL_BANNER_FORM: BannerFormState = {
   title: '',
   description: '',

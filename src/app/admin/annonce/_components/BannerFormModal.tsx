@@ -4,8 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { ImageUploadField } from '@/components/admin/ImageUploadField'
-import type { BannerData, BannerFormState, BannerSlot, BannerStatus, BannerType } from '../_lib/types'
-import { SLOT_LABELS } from '../_lib/types'
+import type { BannerData, BannerFormState, BannerType } from '../_lib/types'
 
 type BannerFormModalProps = {
   open: boolean
@@ -41,7 +40,6 @@ export function BannerFormModal({
 }: BannerFormModalProps) {
   const t = useTranslations('Admin.modals.banner')
   const tc = useTranslations('Admin.common')
-  const tStatus = useTranslations('Admin.annonce.status')
   const dialogRef = useModalA11y(open, onClose)
   if (!open) return null
 
@@ -116,34 +114,26 @@ export function BannerFormModal({
               )}
             </div>
 
-            {/* Slot + Status */}
-            <div className="grid grid-cols-2 gap-3 mb-[14px]">
-              <div className="flex flex-col gap-[6px]">
-                <label htmlFor="banner-slot" className={labelCls}>{t('slotLabel')}</label>
-                <select
-                  id="banner-slot"
-                  value={form.slot}
-                  onChange={(e) => onFormChange({ ...form, slot: e.target.value as BannerSlot })}
-                  className={inputCls}
-                >
-                  {(Object.keys(SLOT_LABELS) as BannerSlot[]).map(s => (
-                    <option key={s} value={s}>{SLOT_LABELS[s]}</option>
-                  ))}
-                </select>
+            {/* Visibilité */}
+            <div className="flex items-center justify-between p-3 bg-sand-50 border border-sand-200 rounded-[10px] mb-[14px]">
+              <div className="text-[13.5px] text-ink-900">
+                {t('activeLabel')}
+                <small className="block text-[11.5px] text-ink-500 font-serif italic mt-0.5">
+                  {t('activeHint')}
+                </small>
               </div>
-              <div className="flex flex-col gap-[6px]">
-                <label htmlFor="banner-status" className={labelCls}>{t('statusLabel')}</label>
-                <select
-                  id="banner-status"
-                  value={form.status}
-                  onChange={(e) => onFormChange({ ...form, status: e.target.value as BannerStatus })}
-                  className={inputCls}
-                >
-                  {(['draft', 'scheduled', 'active', 'paused', 'expired'] as BannerStatus[]).map((s) => (
-                    <option key={s} value={s}>{tStatus(s)}</option>
-                  ))}
-                </select>
-              </div>
+              <button
+                type="button"
+                onClick={() => onFormChange({ ...form, is_active: !form.is_active })}
+                aria-pressed={form.is_active}
+                className={`w-9 h-[22px] rounded-full relative cursor-pointer shrink-0 transition-colors ${
+                  form.is_active ? 'bg-clay-700' : 'bg-sand-300'
+                }`}
+              >
+                <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] bg-sand-50 rounded-full shadow-sm transition-transform ${
+                  form.is_active ? 'translate-x-[14px]' : ''
+                }`} />
+              </button>
             </div>
 
             {/* Content fields */}
@@ -262,54 +252,6 @@ export function BannerFormModal({
                     onChange={(e) => onFormChange({ ...form, link_text: e.target.value })}
                     className={inputCls} placeholder="Descubrir" />
                 </div>
-              </div>
-
-              <div className="flex flex-col gap-[6px] mb-[14px]">
-                <label htmlFor="banner-position" className={labelCls}>{t('positionLabel')}</label>
-                <input id="banner-position" type="number" min="1" value={form.position}
-                  onChange={(e) => onFormChange({ ...form, position: parseInt(e.target.value, 10) || 1 })}
-                  className={inputCls} />
-                <span className="text-[11.5px] text-ink-500 font-serif italic">{t('positionHint')}</span>
-              </div>
-            </div>
-
-            {/* Programación */}
-            <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionSchedule')}</div>
-
-              <div className="grid grid-cols-2 gap-3 mb-[14px]">
-                <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="banner-start" className={labelCls}>{t('startDateLabel')}</label>
-                  <input id="banner-start" type="date" value={form.start_date}
-                    onChange={(e) => onFormChange({ ...form, start_date: e.target.value })}
-                    className={inputCls} />
-                </div>
-                <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="banner-end" className={labelCls}>{t('endDateLabel')}</label>
-                  <input id="banner-end" type="date" value={form.end_date}
-                    onChange={(e) => onFormChange({ ...form, end_date: e.target.value })}
-                    className={inputCls} />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-3 bg-sand-50 border border-sand-200 rounded-[10px] mb-[14px]">
-                <div className="text-[13.5px] text-ink-900">
-                  {t('activeLabel')}
-                  <small className="block text-[11.5px] text-ink-500 font-serif italic mt-0.5">
-                    {t('activeHint')}
-                  </small>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onFormChange({ ...form, is_active: !form.is_active })}
-                  className={`w-9 h-[22px] rounded-full relative cursor-pointer shrink-0 transition-colors ${
-                    form.is_active ? 'bg-clay-700' : 'bg-sand-300'
-                  }`}
-                >
-                  <span className={`absolute top-[2px] left-[2px] w-[18px] h-[18px] bg-sand-50 rounded-full shadow-sm transition-transform ${
-                    form.is_active ? 'translate-x-[14px]' : ''
-                  }`} />
-                </button>
               </div>
             </div>
           </div>

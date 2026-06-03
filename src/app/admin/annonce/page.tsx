@@ -10,19 +10,14 @@ import { useBannersData } from './_hooks/useBannersData'
 import {
   INITIAL_BANNER_FORM,
   LEGACY_TO_NEW,
-  SLOT_LABELS,
   type BannerData,
   type BannerFormState,
-  type BannerSlot,
 } from './_lib/types'
-import { BannerStatsCards } from './_components/BannerStatsCards'
 import { BannersList } from './_components/BannersList'
 import { BannersPreview } from './_components/BannersPreview'
 import { BannerFormModal } from './_components/BannerFormModal'
 import { BannerDeleteModal } from './_components/BannerDeleteModal'
 import { HomeLayoutPanel } from '@/components/admin/HomeLayoutPanel'
-
-const SLOT_TABS: Array<BannerSlot | 'all'> = ['all', 'hero', 'banner', 'card', 'modal']
 
 export default function AnnoncePage() {
   const t = useTranslations('Admin.annonce')
@@ -35,7 +30,6 @@ export default function AnnoncePage() {
   const [deleteBannerId, setDeleteBannerId] = useState<string | null>(null)
   const [formData, setFormData] = useState<BannerFormState>(INITIAL_BANNER_FORM)
   const [saving, setSaving] = useState(false)
-  const [activeSlot, setActiveSlot] = useState<BannerSlot | 'all'>('all')
 
   const openModal = (banner?: BannerData) => {
     if (banner) {
@@ -66,7 +60,6 @@ export default function AnnoncePage() {
       setFormData({
         ...INITIAL_BANNER_FORM,
         position: banners.length + 1,
-        slot: activeSlot === 'all' ? 'banner' : activeSlot,
       })
     }
     setShowModal(true)
@@ -157,41 +150,26 @@ export default function AnnoncePage() {
       />
 
       <div className="px-5 lg:px-8 py-6 flex flex-col gap-6">
-        <HomeLayoutPanel />
-        <BannerStatsCards banners={banners} />
-
-        {/* Slot filter tabs */}
-        <div className="flex items-center gap-2">
-          {SLOT_TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveSlot(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                activeSlot === tab
-                  ? 'bg-ink-900 text-sand-50'
-                  : 'bg-sand-50 text-ink-600 border border-sand-200 hover:bg-sand-100'
-              }`}
-            >
-              {tab === 'all' ? t('filterAll') : SLOT_LABELS[tab]}
-              <span className="ml-1.5 font-mono text-xs opacity-60">
-                {tab === 'all'
-                  ? banners.length
-                  : banners.filter((b) => b.slot === tab).length}
-              </span>
-            </button>
-          ))}
-        </div>
+        <p className="-mt-1 max-w-2xl text-[13.5px] text-ink-500">{t('intro')}</p>
 
         {previewMode && <BannersPreview banners={activeBanners} />}
-        <BannersList
-          banners={banners}
-          loading={loading}
-          activeSlot={activeSlot}
-          onMove={swapPositions}
-          onToggleActive={toggleActive}
-          onEdit={openModal}
-          onDelete={setDeleteBannerId}
-        />
+
+        <HomeLayoutPanel />
+
+        <section className="flex flex-col gap-3">
+          <div>
+            <h2 className="font-serif text-[19px] text-ink-900">{t('bannersHeading')}</h2>
+            <p className="mt-0.5 max-w-2xl text-[12.5px] text-ink-500">{t('bannersHint')}</p>
+          </div>
+          <BannersList
+            banners={banners}
+            loading={loading}
+            onMove={swapPositions}
+            onToggleActive={toggleActive}
+            onEdit={openModal}
+            onDelete={setDeleteBannerId}
+          />
+        </section>
       </div>
 
       <BannerFormModal

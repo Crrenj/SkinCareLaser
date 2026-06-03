@@ -128,6 +128,37 @@
       "pharmacists": "Nuestros farmacéuticos",
       "help": "Ayuda"
     },
+    "needs": "Necesidades",
+    "reserve": "Reservar",
+    "search": "Buscar",
+    "mega": {
+      "skinTypeHeading": "Tipo de piel",
+      "brandsHeading": "Marcas destacadas",
+      "allBrands": "Ver todas las marcas",
+      "skinTypes": {
+        "sensitive": "Sensible",
+        "oily": "Grasa",
+        "dry": "Seca",
+        "atopic": "Atópica"
+      },
+      "featuredTag": "Selección",
+      "featuredTitle": "Protección solar para el trópico",
+      "featuredCta": "Descubrir"
+    },
+    "needsMenu": {
+      "hydration": "Hidratación",
+      "antiAge": "Antiedad",
+      "sun": "Protección solar",
+      "acne": "Acné e imperfecciones",
+      "spots": "Manchas"
+    },
+    "account": {
+      "signedOutTitle": "Tu cuenta",
+      "signedOutSubtitle": "Inicia sesión para tus reservas y favoritos",
+      "reservations": "Mis reservas",
+      "favorites": "Mis favoritos",
+      "help": "Ayuda y farmacéuticos"
+    },
     "drawer": {
       "menuHeading": "Menú",
       "serviceHeading": "Servicio",
@@ -1401,7 +1432,7 @@
       "errorGeneric": "No se pudo subir la imagen."
     },
     "homeLayout": {
-      "title": "Composición de la portada",
+      "title": "Secciones de la página de inicio",
       "hint": "Reordena y muestra/oculta las secciones de la portada. No se pueden eliminar.",
       "save": "Guardar orden",
       "saving": "Guardando…",
@@ -1448,7 +1479,7 @@
       "navTags": "Etiquetas",
       "navReservations": "Reservas",
       "navMessages": "Mensajes",
-      "navAnnounce": "Anuncios",
+      "navAnnounce": "Página de inicio",
       "navUsers": "Usuarios",
       "navNewsletter": "Newsletter",
       "navSettings": "Configuración",
@@ -1470,7 +1501,7 @@
       "tags": "Etiquetas",
       "reservations": "Reservas",
       "messages": "Mensajes",
-      "announce": "Anuncios",
+      "announce": "Página de inicio",
       "users": "Usuarios",
       "newsletter": "Newsletter",
       "settings": "Configuración",
@@ -1574,10 +1605,10 @@
         "submitCreate": "Crear tipo"
       },
       "banner": {
-        "eyebrowNew": "Anuncios · nuevo",
-        "eyebrowEdit": "Anuncios · {slug}",
-        "titleNew": "Nuevo anuncio",
-        "titleEdit": "Editar anuncio",
+        "eyebrowNew": "Banner · nuevo",
+        "eyebrowEdit": "Banner · {slug}",
+        "titleNew": "Nuevo banner",
+        "titleEdit": "Editar banner",
         "sectionContent": "Contenido",
         "titleLabel": "Título",
         "titlePlaceholder": "Título del banner",
@@ -1594,11 +1625,8 @@
         "attrNameLabel": "Nombre",
         "attrTitleLabel": "Título",
         "attrPhotoLabel": "URL foto",
-        "sectionSchedule": "Programación",
-        "startDateLabel": "Fecha de inicio",
-        "endDateLabel": "Fecha de fin",
-        "activeLabel": "Anuncio activo",
-        "activeHint": "Visible en el sitio público.",
+        "activeLabel": "Visible en el sitio",
+        "activeHint": "Muestra u oculta este banner en la página de inicio.",
         "typeHintEditorial": "Imagen + texto 2 columnas, 320px. Para destacar un producto o gama.",
         "typeHintHero": "Full-bleed con overlay oscuro, 480px. Para el hero de la home o una campaña.",
         "typeHintQuote": "Cita farmacéutico sobre fondo ink-900, 220px. Sin CTA, sin imagen requerida.",
@@ -1609,11 +1637,7 @@
         "sectionImageLink": "Imagen y enlace",
         "ctaDestLabel": "CTA destino",
         "ctaLabelLabel": "CTA label",
-        "positionLabel": "Posición",
-        "positionHint": "Orden de visualización (1 = primero)",
-        "submitCreate": "Crear anuncio",
-        "slotLabel": "Ubicación",
-        "statusLabel": "Estado"
+        "submitCreate": "Crear banner"
       }
     },
     "stockState": {
@@ -1754,27 +1778,21 @@
       "deleteConfirmLabel": "Eliminar"
     },
     "annonce": {
-      "title": "Anuncios",
-      "addButton": "Crear anuncio",
+      "title": "Página de inicio",
+      "intro": "Todo lo que se muestra en la página de inicio: el orden de las grandes secciones y los banners promocionales.",
+      "addButton": "Crear banner",
       "previewShow": "Vista previa",
       "previewHide": "Cerrar vista previa",
-      "filterAll": "Todos",
       "previewTitle": "Vista previa — página de inicio",
-      "empty": "Ningún anuncio en este slot.",
-      "views": "Vistas",
-      "clicks": "Clics",
-      "metrics": "{v} vistas · {c} clics",
+      "bannersHeading": "Banners promo",
+      "bannersHint": "Recuadros mostrados en la página de inicio, en el orden de abajo. El ojo indica si un banner está en línea. Solo aparecen si la sección « Banners promo » está activada más arriba.",
+      "empty": "Aún no hay banners.",
+      "online": "En línea",
+      "offline": "Fuera de línea",
       "moveUp": "Subir",
       "moveDown": "Bajar",
       "activate": "Activar",
       "deactivate": "Desactivar",
-      "status": {
-        "draft": "Borrador",
-        "scheduled": "Programado",
-        "active": "Activo",
-        "paused": "En pausa",
-        "expired": "Expirado"
-      },
       "refresh": "Actualizar vista previa",
       "previewEmptyHint": "Ninguna bandera activa — la home se muestra sin banner CMS."
     },

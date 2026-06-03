@@ -128,6 +128,37 @@
       "pharmacists": "Our pharmacists",
       "help": "Help"
     },
+    "needs": "Needs",
+    "reserve": "Reserve",
+    "search": "Search",
+    "mega": {
+      "skinTypeHeading": "Skin type",
+      "brandsHeading": "Featured brands",
+      "allBrands": "View all brands",
+      "skinTypes": {
+        "sensitive": "Sensitive",
+        "oily": "Oily",
+        "dry": "Dry",
+        "atopic": "Atopic"
+      },
+      "featuredTag": "Selection",
+      "featuredTitle": "Sun care for the tropics",
+      "featuredCta": "Discover"
+    },
+    "needsMenu": {
+      "hydration": "Hydration",
+      "antiAge": "Anti-aging",
+      "sun": "Sun protection",
+      "acne": "Acne & blemishes",
+      "spots": "Dark spots"
+    },
+    "account": {
+      "signedOutTitle": "Your account",
+      "signedOutSubtitle": "Sign in for your reservations and favorites",
+      "reservations": "My reservations",
+      "favorites": "My favorites",
+      "help": "Help & pharmacists"
+    },
     "drawer": {
       "menuHeading": "Menu",
       "serviceHeading": "Service",
@@ -1401,7 +1432,7 @@
       "errorGeneric": "Image upload failed."
     },
     "homeLayout": {
-      "title": "Home page layout",
+      "title": "Homepage sections",
       "hint": "Reorder and show/hide the home sections. They can't be deleted.",
       "save": "Save order",
       "saving": "Saving…",
@@ -1448,7 +1479,7 @@
       "navTags": "Tags",
       "navReservations": "Reservations",
       "navMessages": "Messages",
-      "navAnnounce": "Announcements",
+      "navAnnounce": "Homepage",
       "navUsers": "Users",
       "navNewsletter": "Newsletter",
       "navSettings": "Settings",
@@ -1470,7 +1501,7 @@
       "tags": "Tags",
       "reservations": "Reservations",
       "messages": "Messages",
-      "announce": "Announcements",
+      "announce": "Homepage",
       "users": "Users",
       "newsletter": "Newsletter",
       "settings": "Settings",
@@ -1574,8 +1605,8 @@
         "submitCreate": "Create type"
       },
       "banner": {
-        "eyebrowNew": "Banners · new",
-        "eyebrowEdit": "Banners · {slug}",
+        "eyebrowNew": "Banner · new",
+        "eyebrowEdit": "Banner · {slug}",
         "titleNew": "New banner",
         "titleEdit": "Edit banner",
         "sectionContent": "Content",
@@ -1594,11 +1625,8 @@
         "attrNameLabel": "Name",
         "attrTitleLabel": "Title",
         "attrPhotoLabel": "Photo URL",
-        "sectionSchedule": "Schedule",
-        "startDateLabel": "Start date",
-        "endDateLabel": "End date",
-        "activeLabel": "Banner active",
-        "activeHint": "Visible on the public site.",
+        "activeLabel": "Visible on the site",
+        "activeHint": "Shows or hides this banner on the homepage.",
         "typeHintEditorial": "Image + text 2 columns, 320px. To highlight a product or range.",
         "typeHintHero": "Full-bleed with dark overlay, 480px. For the home hero or a campaign.",
         "typeHintQuote": "Pharmacist quote on ink-900 background, 220px. No CTA, no image required.",
@@ -1609,11 +1637,7 @@
         "sectionImageLink": "Image and link",
         "ctaDestLabel": "CTA destination",
         "ctaLabelLabel": "CTA label",
-        "positionLabel": "Position",
-        "positionHint": "Display order (1 = first)",
-        "submitCreate": "Create banner",
-        "slotLabel": "Slot",
-        "statusLabel": "Status"
+        "submitCreate": "Create banner"
       }
     },
     "stockState": {
@@ -1754,27 +1778,21 @@
       "deleteConfirmLabel": "Delete"
     },
     "annonce": {
-      "title": "Announcements",
-      "addButton": "Create announcement",
+      "title": "Homepage",
+      "intro": "Everything shown on the homepage: the order of the main sections and the promo banners.",
+      "addButton": "Create banner",
       "previewShow": "Preview",
       "previewHide": "Close preview",
-      "filterAll": "All",
       "previewTitle": "Preview — homepage",
-      "empty": "No banners in this slot.",
-      "views": "Views",
-      "clicks": "Clicks",
-      "metrics": "{v} views · {c} clicks",
+      "bannersHeading": "Promo banners",
+      "bannersHint": "Cards shown on the homepage, in the order below. The eye shows whether a banner is online. They only appear if the 'Promo banners' section is enabled above.",
+      "empty": "No banners yet.",
+      "online": "Online",
+      "offline": "Offline",
       "moveUp": "Move up",
       "moveDown": "Move down",
       "activate": "Activate",
       "deactivate": "Deactivate",
-      "status": {
-        "draft": "Draft",
-        "scheduled": "Scheduled",
-        "active": "Active",
-        "paused": "Paused",
-        "expired": "Expired"
-      },
       "refresh": "Refresh preview",
       "previewEmptyHint": "No active banner — the home shows without a CMS banner."
     },

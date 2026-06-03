@@ -128,6 +128,37 @@
       "pharmacists": "Nos pharmaciens",
       "help": "Aide"
     },
+    "needs": "Besoins",
+    "reserve": "Réserver",
+    "search": "Rechercher",
+    "mega": {
+      "skinTypeHeading": "Type de peau",
+      "brandsHeading": "Marques en vedette",
+      "allBrands": "Voir toutes les marques",
+      "skinTypes": {
+        "sensitive": "Sensible",
+        "oily": "Grasse",
+        "dry": "Sèche",
+        "atopic": "Atopique"
+      },
+      "featuredTag": "Sélection",
+      "featuredTitle": "Protection solaire sous les tropiques",
+      "featuredCta": "Découvrir"
+    },
+    "needsMenu": {
+      "hydration": "Hydratation",
+      "antiAge": "Anti-âge",
+      "sun": "Protection solaire",
+      "acne": "Acné & imperfections",
+      "spots": "Taches"
+    },
+    "account": {
+      "signedOutTitle": "Votre compte",
+      "signedOutSubtitle": "Connectez-vous pour vos réservations et favoris",
+      "reservations": "Mes réservations",
+      "favorites": "Mes favoris",
+      "help": "Aide & pharmaciens"
+    },
     "drawer": {
       "menuHeading": "Menu",
       "serviceHeading": "Service",
@@ -1401,7 +1432,7 @@
       "errorGeneric": "Échec de l'envoi de l'image."
     },
     "homeLayout": {
-      "title": "Composition de la page d'accueil",
+      "title": "Sections de l'accueil",
       "hint": "Réordonnez et affichez/masquez les sections de l'accueil. Non supprimables.",
       "save": "Enregistrer l'ordre",
       "saving": "Enregistrement…",
@@ -1448,7 +1479,7 @@
       "navTags": "Étiquettes",
       "navReservations": "Réservations",
       "navMessages": "Messages",
-      "navAnnounce": "Annonces",
+      "navAnnounce": "Page d'accueil",
       "navUsers": "Utilisateurs",
       "navNewsletter": "Newsletter",
       "navSettings": "Configuration",
@@ -1470,7 +1501,7 @@
       "tags": "Étiquettes",
       "reservations": "Réservations",
       "messages": "Messages",
-      "announce": "Annonces",
+      "announce": "Page d'accueil",
       "users": "Utilisateurs",
       "newsletter": "Newsletter",
       "settings": "Configuration",
@@ -1574,10 +1605,10 @@
         "submitCreate": "Créer le type"
       },
       "banner": {
-        "eyebrowNew": "Annonces · nouvelle",
-        "eyebrowEdit": "Annonces · {slug}",
-        "titleNew": "Nouvelle annonce",
-        "titleEdit": "Modifier l'annonce",
+        "eyebrowNew": "Bannière · nouvelle",
+        "eyebrowEdit": "Bannière · {slug}",
+        "titleNew": "Nouvelle bannière",
+        "titleEdit": "Modifier la bannière",
         "sectionContent": "Contenu",
         "titleLabel": "Titre",
         "titlePlaceholder": "Titre de la bannière",
@@ -1594,11 +1625,8 @@
         "attrNameLabel": "Nom",
         "attrTitleLabel": "Titre",
         "attrPhotoLabel": "URL photo",
-        "sectionSchedule": "Planification",
-        "startDateLabel": "Date de début",
-        "endDateLabel": "Date de fin",
-        "activeLabel": "Annonce active",
-        "activeHint": "Visible sur le site public.",
+        "activeLabel": "Visible sur le site",
+        "activeHint": "Affiche ou masque cette bannière sur l'accueil.",
         "typeHintEditorial": "Image + texte 2 colonnes, 320px. Pour mettre en avant un produit ou une gamme.",
         "typeHintHero": "Plein-bleed avec overlay sombre, 480px. Pour le hero de la home ou une campagne.",
         "typeHintQuote": "Citation pharmacien sur fond ink-900, 220px. Pas de CTA, pas d'image requise.",
@@ -1609,11 +1637,7 @@
         "sectionImageLink": "Image et lien",
         "ctaDestLabel": "CTA destination",
         "ctaLabelLabel": "CTA label",
-        "positionLabel": "Position",
-        "positionHint": "Ordre d'affichage (1 = premier)",
-        "submitCreate": "Créer l'annonce",
-        "slotLabel": "Emplacement",
-        "statusLabel": "Statut"
+        "submitCreate": "Créer la bannière"
       }
     },
     "stockState": {
@@ -1754,27 +1778,21 @@
       "deleteConfirmLabel": "Supprimer"
     },
     "annonce": {
-      "title": "Annonces",
-      "addButton": "Créer une annonce",
+      "title": "Page d'accueil",
+      "intro": "Tout ce qui s'affiche sur la page d'accueil : l'ordre des grandes sections et les bannières promotionnelles.",
+      "addButton": "Créer une bannière",
       "previewShow": "Aperçu",
       "previewHide": "Fermer l'aperçu",
-      "filterAll": "Tous",
       "previewTitle": "Aperçu — page d'accueil",
-      "empty": "Aucune annonce dans ce slot.",
-      "views": "Vues",
-      "clicks": "Clics",
-      "metrics": "{v} vues · {c} clics",
+      "bannersHeading": "Bannières promo",
+      "bannersHint": "Encarts affichés sur l'accueil, dans l'ordre ci-dessous. L'œil indique si une bannière est en ligne. Elles n'apparaissent que si la section « Bannières promo » est activée plus haut.",
+      "empty": "Aucune bannière pour le moment.",
+      "online": "En ligne",
+      "offline": "Hors ligne",
       "moveUp": "Monter",
       "moveDown": "Descendre",
       "activate": "Activer",
       "deactivate": "Désactiver",
-      "status": {
-        "draft": "Brouillon",
-        "scheduled": "Programmé",
-        "active": "Actif",
-        "paused": "En pause",
-        "expired": "Expiré"
-      },
       "refresh": "Rafraîchir l'aperçu",
       "previewEmptyHint": "Aucune bannière active — la home s'affiche sans bannière CMS."
     },
