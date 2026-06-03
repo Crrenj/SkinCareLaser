@@ -1,6 +1,6 @@
-# FARMAU — E-commerce dermo-cosmétique
+# FARMAU — Catalogue & réservation dermo-cosmétique
 
-Next.js 15 + TypeScript + Supabase + Tailwind. Catalogue produits + dashboard admin pour pharmaciens-dermatologues.
+Next.js 15 + TypeScript + Supabase + Tailwind. Catalogue produits + réservation (click & collect) + dashboard admin, pour une pharmacie. Marché : République Dominicaine. (Pas de vente en ligne — le checkout est volontairement un placeholder.)
 
 Voir **`CLAUDE.md`** pour l'architecture détaillée et **`db/README.md`** pour la base.
 
@@ -28,10 +28,9 @@ SUPABASE_SERVICE_ROLE_KEY=...      # ou SUPABASE_SERVICE_KEY (les deux noms acce
    ```bash
    npm run create-admin -- admin@example.com motdepasse
    ```
-   Puis dans SQL Editor :
+   Puis dans SQL Editor (`admin_users` est la source de vérité ; la colonne `profiles.is_admin` a été supprimée) :
    ```sql
-   INSERT INTO public.admin_users (user_id) VALUES ('<uuid>');
-   UPDATE public.profiles SET is_admin = true, role = 'admin' WHERE id = '<uuid>';
+   INSERT INTO public.admin_users (user_id, role) VALUES ('<uuid>', 'super_admin');
    ```
 4. Seed du catalogue depuis `contenu_bd/` :
    ```bash
@@ -55,5 +54,5 @@ npm run check-products        # diagnostic Supabase
 
 - **Next.js 15** App Router, React 19, TypeScript strict, Turbopack
 - **Supabase** : Auth, Postgres + RLS, Storage (buckets `product-image` + `brand-fiche`)
-- **Tailwind 4** + Heroicons + Lucide React + Framer Motion
-- **SWR** pour le panier client, **Vitest** + **Playwright** pour les tests
+- **Tailwind 4** + Lucide React + react-icons · polices `next/font` : Instrument Serif + Be Vietnam Pro + JetBrains Mono
+- **next-intl** (FR/EN/ES) · **SWR** (panier, thème) · **Vitest** + **Playwright** pour les tests
