@@ -82,14 +82,14 @@
   --c-bg-2:        color-mix(in srgb, var(--c-text)  8%, var(--c-bg));
   --c-border:      color-mix(in srgb, var(--c-text) 16%, var(--c-bg));
   --c-border-2:    color-mix(in srgb, var(--c-text) 28%, var(--c-bg));
-  --c-neutral-500: color-mix(in srgb, var(--c-text) 42%, var(--c-bg));
-  --c-neutral-600: color-mix(in srgb, var(--c-text) 56%, var(--c-bg));
+  --c-neutral-500: color-mix(in srgb, var(--c-text) 54%, var(--c-bg));
+  --c-neutral-600: color-mix(in srgb, var(--c-text) 66%, var(--c-bg));
 
   --c-ink-50:  color-mix(in srgb, var(--c-text)  5%, var(--c-bg));
   --c-ink-200: color-mix(in srgb, var(--c-text) 18%, var(--c-bg));
-  --c-ink-400: color-mix(in srgb, var(--c-text) 40%, var(--c-bg));
-  --c-ink-500: color-mix(in srgb, var(--c-text) 54%, var(--c-bg));
-  --c-ink-700: color-mix(in srgb, var(--c-text) 72%, var(--c-bg));
+  --c-ink-400: color-mix(in srgb, var(--c-text) 54%, var(--c-bg));
+  --c-ink-500: color-mix(in srgb, var(--c-text) 66%, var(--c-bg));
+  --c-ink-700: color-mix(in srgb, var(--c-text) 80%, var(--c-bg));
   --c-ink-800: color-mix(in srgb, var(--c-text) 88%, var(--c-bg));
 
   --c-accent-50:  color-mix(in srgb, var(--c-accent)  8%, var(--c-bg));
