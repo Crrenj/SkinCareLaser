@@ -27,6 +27,7 @@ import { useCart } from '@/hooks/useCart'
 import { CartDrawer } from './CartDrawer'
 import { MobileDrawer } from './MobileDrawer'
 import { SearchOverlay } from './nav/SearchOverlay'
+import { ScrollToTop } from './nav/ScrollToTop'
 import { FarmauLockup } from './brand/FarmauLogo'
 import { ThemeModeToggle } from './ThemeModeToggle'
 
@@ -153,9 +154,10 @@ export default function NavBar() {
   const needsActive = pathname.startsWith('/besoins')
 
   return (
+    <>
     <header
       ref={headerRef}
-      className="sticky top-0 z-40 border-b border-sand-300 bg-sand-50/[0.88] backdrop-blur-[14px] backdrop-saturate-[1.4]"
+      className="relative z-40 border-b border-sand-300 bg-sand-50/[0.88] backdrop-blur-[14px] backdrop-saturate-[1.4]"
     >
       <div className="mx-auto flex h-[70px] max-w-[1440px] items-center gap-2.5 px-[clamp(20px,5vw,72px)]">
         {/* Brand */}
@@ -397,7 +399,7 @@ export default function NavBar() {
           {/* Panier */}
           <button
             type="button"
-            onClick={() => setCartOpen(true)}
+            onClick={() => setCartOpen((o) => !o)}
             aria-label={t('cartAriaLabel')}
             data-testid="cart-icon"
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-[9px] text-ink-700 transition-colors hover:bg-sand-100 hover:text-ink-900"
@@ -433,8 +435,13 @@ export default function NavBar() {
           </button>
         </div>
       </div>
+    </header>
 
-      {/* Overlays / drawers */}
+      {/* Overlays / drawers — rendus HORS du <header> : son backdrop-filter
+          en fait un bloc conteneur pour les position:fixed, ce qui débordait
+          le drawer panier à droite (scroll horizontal) et limitait le scrim
+          aux 70px du header (clic-pour-fermer mort). En frères du header, ils
+          se positionnent enfin par rapport au viewport. */}
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
       <MobileDrawer
@@ -444,7 +451,8 @@ export default function NavBar() {
         isAdmin={isAdmin}
         onSignOut={handleSignOut}
       />
-    </header>
+      <ScrollToTop headerRef={headerRef} />
+    </>
   )
 }
 
