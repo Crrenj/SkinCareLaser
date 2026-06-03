@@ -43,7 +43,9 @@ export default async function BlogPage({
     .order('published_at', { ascending: false })
     .limit(50)
 
-  const filtered = (posts ?? []).filter(p => p.locale === locale || p.locale === 'fr')
+  // Affiche tous les articles publiés, toutes langues confondues : le contenu
+  // du blog est en espagnol (marché RD) et doit rester visible sur /fr et /en.
+  const filtered = posts ?? []
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">
