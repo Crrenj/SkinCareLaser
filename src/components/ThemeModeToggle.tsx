@@ -61,10 +61,10 @@ export function ThemeModeToggle({
   }
 
   const isDark = mode === 'dark'
-  const iconSize = variant === 'nav' ? 22 : 16
+  const iconSize = variant === 'nav' ? 19 : 16
   const variantClasses =
     variant === 'nav'
-      ? 'h-10 w-10 rounded text-ink-800 hover:bg-sand-300'
+      ? 'h-10 w-10 rounded-[9px] text-ink-700 hover:bg-sand-100 hover:text-ink-900'
       : 'w-9 h-9 rounded-full border border-[var(--c-ink-panel-border)] text-[var(--c-ink-panel-fg)] hover:border-[var(--c-ink-panel-accent)] hover:text-[var(--c-ink-panel-accent)]'
 
   return (

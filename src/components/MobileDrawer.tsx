@@ -8,13 +8,22 @@ import { Link, usePathname } from '@/i18n/navigation'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { FarmauLockup } from './brand/FarmauLogo'
 import { LocaleSwitcher } from './LocaleSwitcher'
+import { ThemeModeToggle } from './ThemeModeToggle'
 import { PopClose } from '@/components/ui/PopClose'
 
 const NAV_LINKS = [
-  { href: '/', labelKey: 'home' as const },
   { href: '/catalogue', labelKey: 'catalogue' as const },
+  { href: '/marques', labelKey: 'brands' as const },
   { href: '/blog', labelKey: 'blog' as const },
-  { href: '/a-propos', labelKey: 'about' as const },
+]
+
+// Besoins (mêmes slugs réels que le méga-menu desktop).
+const NEEDS = [
+  { slug: 'hydratation', key: 'hydration' as const },
+  { slug: 'anti-age', key: 'antiAge' as const },
+  { slug: 'protection-solaire', key: 'sun' as const },
+  { slug: 'acne', key: 'acne' as const },
+  { slug: 'taches', key: 'spots' as const },
 ]
 
 interface MobileDrawerProps {
@@ -84,6 +93,23 @@ export function MobileDrawer({
               </Link>
             )
           })}
+
+          {/* Necesidades — besoins (landing /besoins/[slug]) */}
+          <div className="mt-2">
+            <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-500 font-semibold px-[14px] py-[14px] pb-[6px]">
+              {t('needs')}
+            </div>
+            {NEEDS.map((n) => (
+              <Link
+                key={n.slug}
+                href={`/besoins/${n.slug}`}
+                onClick={onClose}
+                className="block px-[14px] py-2 text-[13.5px] text-ink-700 rounded-lg hover:bg-sand-100 hover:text-ink-900"
+              >
+                {t(`needsMenu.${n.key}`)}
+              </Link>
+            ))}
+          </div>
 
           {/* Service section */}
           <div className="mt-2">
@@ -167,6 +193,8 @@ export function MobileDrawer({
               {t('drawer.loginCta')}
             </Link>
           )}
+          {/* Bascule clair/sombre (visible si l'admin autorise le mode visiteur) */}
+          <ThemeModeToggle variant="nav" className="self-start border border-sand-300" />
         </div>
       </aside>
     </div>

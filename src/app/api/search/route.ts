@@ -11,7 +11,7 @@ import { DEFAULT_CURRENCY } from '@/lib/constants'
  * pour fallback "aucun résultat" → on retourne les meilleurs vendeurs
  * via la vue v_bestsellers (sold_30d desc + is_featured fallback).
  *
- * Usage : appelé par NavSearch en client component, debounced 200ms.
+ * Usage : appelé par SearchOverlay en client component, debounced 200ms.
  */
 type SearchHit = {
   id: string
