@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Tag,
   Users,
+  Warehouse,
 } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
 import { useLocale, useTranslations } from 'next-intl'
@@ -79,7 +80,7 @@ const SECTIONS: Section[] = [
     items: [
       { href: '/admin/product', labelKey: 'navProducts', icon: Boxes, badgeKey: 'products', badgeVariant: 'count' },
       { href: '/admin/marques', labelKey: 'navBrands', icon: Building2 },
-      { href: '/admin/stock', labelKey: 'navStock', icon: Boxes, badgeKey: 'low_stock', badgeVariant: 'alert' },
+      { href: '/admin/stock', labelKey: 'navStock', icon: Warehouse, badgeKey: 'low_stock', badgeVariant: 'alert' },
       { href: '/admin/tags', labelKey: 'navTags', icon: Tag },
     ],
   },
