@@ -3,15 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { checkOrigin } from '@/lib/csrf'
+import { guardMutation } from '@/lib/csrf'
 import { ticketCreate } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 
 // POST /api/contact - Envoyer un message de contact (= ticket de support)
 export async function POST(request: NextRequest) {
-  const originError = checkOrigin(request)
-  if (originError) return originError
+  const guard = guardMutation(request, { json: true })
+  if (guard) return guard
 
   try {
     const ip = getClientIp(request)
@@ -99,8 +100,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      logger.error('Erreur récupération messages utilisateur:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json({ messages })
