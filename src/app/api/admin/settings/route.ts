@@ -18,6 +18,8 @@ type SettingsUpdate = Database['public']['Tables']['shop_settings']['Update']
  *         updated_by est stamped automatiquement depuis la session admin.
  */
 
+// Click & Collect : aucun tarif de livraison n'est édité ici (les colonnes
+// shipping_* restent en DB, inertes — le tunnel de réservation est gratuit).
 const TEXT_FIELDS = [
   'shop_name',
   'shop_tagline',
@@ -29,8 +31,6 @@ const TEXT_FIELDS = [
   'pickup_hours',
   'pickup_phone',
 ] as const
-
-const NUMBER_FIELDS = ['shipping_santo_domingo', 'shipping_interior'] as const
 
 
 export async function GET() {
@@ -84,18 +84,6 @@ export async function PATCH(req: NextRequest) {
         } else {
           patch[field] = value
         }
-      }
-    }
-    for (const field of NUMBER_FIELDS) {
-      if (Object.prototype.hasOwnProperty.call(body, field)) {
-        const n = Number(body[field])
-        if (!Number.isFinite(n) || n < 0) {
-          return NextResponse.json(
-            { error: `Valeur invalide pour ${field}` },
-            { status: 400 },
-          )
-        }
-        patch[field] = Math.round(n)
       }
     }
 
