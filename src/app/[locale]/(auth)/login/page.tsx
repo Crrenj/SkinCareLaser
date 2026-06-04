@@ -1,6 +1,7 @@
 'use client'
 
 import { logger } from '@/lib/logger'
+import { ADMIN_HOME_PATH } from '@/lib/constants'
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -98,7 +99,7 @@ function LoginForm() {
         const savedRedirect =
           typeof window !== 'undefined' ? sessionStorage.getItem('redirect_to') : null
         const wanted = savedRedirect ?? next ?? null
-        const redirectPath = wanted ?? (isAdmin ? '/admin/product' : '/')
+        const redirectPath = wanted ?? (isAdmin ? ADMIN_HOME_PATH : '/')
 
         // Laisser un instant aux cookies de session de se poser
         await new Promise((resolve) => setTimeout(resolve, 400))

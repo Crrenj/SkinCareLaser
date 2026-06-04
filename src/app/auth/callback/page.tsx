@@ -1,6 +1,7 @@
 'use client'
 
 import { logger } from '@/lib/logger'
+import { ADMIN_HOME_PATH } from '@/lib/constants'
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -13,7 +14,7 @@ import { routing } from '@/i18n/routing'
  *   3. Erreur provider                                                : `?error=…`
  *
  * Une fois la session posée, on redirige :
- *   - admin → /admin/product
+ *   - admin → /admin
  *   - sinon → `next` (querystring) → sessionStorage `redirect_to` → `/`
  *
  * Le query param `locale` (passé par `OAuthButtons`) est utilisé pour préfixer
@@ -74,7 +75,7 @@ function AuthCallbackInner() {
 
         let destination: string
         if (isAdmin) {
-          destination = '/admin/product'
+          destination = ADMIN_HOME_PATH
         } else {
           const nextParam = searchParams.get('next')
           const localeParam = searchParams.get('locale')

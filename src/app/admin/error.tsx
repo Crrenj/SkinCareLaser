@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { ADMIN_HOME_PATH } from '@/lib/constants'
 
 export default function AdminError({ reset }: { error: Error; reset: () => void }) {
   return (
@@ -19,7 +20,7 @@ export default function AdminError({ reset }: { error: Error; reset: () => void 
           Reintentar
         </button>
         <Link
-          href="/admin/product"
+          href={ADMIN_HOME_PATH}
           className="h-11 px-6 rounded-lg border border-sand-300 text-ink-900 text-[14px] font-medium flex items-center hover:bg-sand-200 transition-colors"
         >
           Inicio admin

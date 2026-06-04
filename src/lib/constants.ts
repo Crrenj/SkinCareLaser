@@ -14,8 +14,8 @@ export const LOW_STOCK_THRESHOLD = 10
 /** Quantité maximale autorisée par ligne panier. */
 export const MAX_CART_QUANTITY = 99
 
-/** Page d'accueil admin (post-login). */
-export const ADMIN_HOME_PATH = '/admin/product'
+/** Tableau de bord admin (landing post-login, avec les stats). */
+export const ADMIN_HOME_PATH = '/admin'
 
 /** Mapping locale next-intl (`fr`|`es`|`en`) → tag BCP-47 pour Intl. */
 export const LOCALE_TAG_MAP: Record<string, string> = {

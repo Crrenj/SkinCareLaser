@@ -22,6 +22,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
+import { ADMIN_HOME_PATH } from '@/lib/constants'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useCart } from '@/hooks/useCart'
 import { CartDrawer } from './CartDrawer'
@@ -356,7 +357,7 @@ export default function NavBar() {
                   <AccountLink href="/account/reservations" icon={<CalendarCheck size={16} strokeWidth={1.7} />} label={t('account.reservations')} />
                   <AccountLink href="/favoris" icon={<Heart size={16} strokeWidth={1.7} />} label={t('account.favorites')} />
                   {isAdmin && (
-                    <AccountLink href="/admin/product" localized={false} icon={<Shield size={16} strokeWidth={1.7} />} label={t('adminDashboardAriaLabel')} />
+                    <AccountLink href={ADMIN_HOME_PATH} localized={false} icon={<Shield size={16} strokeWidth={1.7} />} label={t('adminDashboardAriaLabel')} />
                   )}
                   <div className="mx-2 my-1.5 h-px bg-sand-200" />
                   <AccountLink href="/livraison" icon={<Truck size={16} strokeWidth={1.7} />} label={t('utility.delivery')} />

@@ -129,7 +129,7 @@ describe('Authentication Tests', () => {
       })
     })
 
-    it('redirige vers /admin/product pour un utilisateur admin (app_metadata)', async () => {
+    it('redirige vers /admin pour un utilisateur admin (app_metadata)', async () => {
       mockSignInWithPassword.mockResolvedValueOnce({
         data: {
           user: { id: '123', email: 'admin@example.com', app_metadata: { role: 'admin' } },
@@ -148,11 +148,11 @@ describe('Authentication Tests', () => {
       await userEvent.click(submitLogin())
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/admin/product')
+        expect(mockPush).toHaveBeenCalledWith('/admin')
       }, { timeout: 2000 })
     })
 
-    it('redirige vers /admin/product pour un utilisateur admin (table profiles)', async () => {
+    it('redirige vers /admin pour un utilisateur admin (table profiles)', async () => {
       mockSignInWithPassword.mockResolvedValueOnce({
         data: {
           user: { id: '123', email: 'admin@example.com', app_metadata: {} },
@@ -173,7 +173,7 @@ describe('Authentication Tests', () => {
       await userEvent.click(submitLogin())
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/admin/product')
+        expect(mockPush).toHaveBeenCalledWith('/admin')
       }, { timeout: 2000 })
     })
 

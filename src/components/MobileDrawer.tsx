@@ -10,6 +10,7 @@ import { FarmauLockup } from './brand/FarmauLogo'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { ThemeModeToggle } from './ThemeModeToggle'
 import { PopClose } from '@/components/ui/PopClose'
+import { ADMIN_HOME_PATH } from '@/lib/constants'
 
 const NAV_LINKS = [
   { href: '/catalogue', labelKey: 'catalogue' as const },
@@ -154,9 +155,9 @@ export function MobileDrawer({
             <>
               {isAdmin && (
                 // next/link brut : /admin/* hors [locale] (le Link next-intl
-                // préfixerait → /fr/admin/product → 404).
+                // préfixerait → /fr/admin → 404).
                 <NextLink
-                  href="/admin/product"
+                  href={ADMIN_HOME_PATH}
                   onClick={onClose}
                   className="flex items-center gap-3 px-3.5 py-2.5 bg-sand-50 border border-sand-200 rounded-[10px] text-sm font-medium text-ink-900"
                 >
