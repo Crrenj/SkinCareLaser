@@ -127,7 +127,11 @@ export function ReservationDrawer({
             <CardBlock>
               <Row label="Nombre" value={r.contact_name || '—'} />
               <Row label="Tel" value={r.contact_phone} isLink={`tel:${r.contact_phone}`} />
-              <Row label="Email" value={r.contact_email} isLink={`mailto:${r.contact_email}`} />
+              <Row
+                label="Email"
+                value={r.contact_email || '—'}
+                isLink={r.contact_email ? `mailto:${r.contact_email}` : undefined}
+              />
             </CardBlock>
           </Section>
 

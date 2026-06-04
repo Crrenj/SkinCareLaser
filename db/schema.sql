@@ -352,11 +352,11 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS public.reservations (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id         UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id         UUID REFERENCES auth.users(id) ON DELETE CASCADE,  -- NULL = réservation manuelle (admin, client sans compte)
   status          public.reservation_status NOT NULL DEFAULT 'pending',
   expires_at      TIMESTAMPTZ NOT NULL,
   contact_phone   TEXT NOT NULL,
-  contact_email   TEXT NOT NULL,
+  contact_email   TEXT,  -- NULL possible pour une réservation manuelle walk-in
   contact_name    TEXT,
   total_items     INT  NOT NULL CHECK (total_items > 0),
   total_price     NUMERIC(10,2) NOT NULL CHECK (total_price >= 0),

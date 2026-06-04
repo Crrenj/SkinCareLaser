@@ -32,7 +32,7 @@ export type Reservation = {
   confirmed_at: string | null
   collected_at: string | null
   contact_phone: string
-  contact_email: string
+  contact_email: string | null
   contact_name: string | null
   total_items: number
   total_price: number

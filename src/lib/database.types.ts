@@ -633,7 +633,7 @@ export type Database = {
           admin_notes: string | null
           collected_at: string | null
           confirmed_at: string | null
-          contact_email: string
+          contact_email: string | null
           contact_name: string | null
           contact_phone: string
           created_at: string
@@ -644,13 +644,13 @@ export type Database = {
           total_items: number
           total_price: number
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           admin_notes?: string | null
           collected_at?: string | null
           confirmed_at?: string | null
-          contact_email: string
+          contact_email?: string | null
           contact_name?: string | null
           contact_phone: string
           created_at?: string
@@ -661,13 +661,13 @@ export type Database = {
           total_items: number
           total_price: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           admin_notes?: string | null
           collected_at?: string | null
           confirmed_at?: string | null
-          contact_email?: string
+          contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string
           created_at?: string
@@ -678,7 +678,7 @@ export type Database = {
           total_items?: number
           total_price?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }

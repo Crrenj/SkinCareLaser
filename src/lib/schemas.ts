@@ -124,6 +124,27 @@ export const reservationPatch = z.object({
   admin_notes: z.string().optional(),
 })
 
+// Création manuelle d'une réservation par l'admin (client walk-in / téléphone
+// sans compte). Le téléphone est requis (WhatsApp), l'email est optionnel.
+export const reservationCreate = z.object({
+  contact_name: z.string().trim().max(160).optional(),
+  contact_phone: z.string().trim().min(5, 'Téléphone requis').max(40),
+  // accepte une chaîne vide ('') depuis le formulaire → traitée comme absente côté route
+  contact_email: z.union([z.string().trim().email('Email invalide').max(200), z.literal('')]).optional(),
+  admin_notes: z.string().trim().max(2000).optional(),
+  items: z
+    .array(
+      z.object({
+        product_id: z.string().uuid().nullable().optional(),
+        product_name: z.string().trim().min(1, 'Nom produit requis').max(300),
+        unit_price: z.number().nonnegative('Prix invalide'),
+        quantity: z.number().int().positive('Quantité invalide').max(999),
+      }),
+    )
+    .min(1, 'Ajoutez au moins un produit')
+    .max(100),
+})
+
 export const productCreate = z.object({
   name: z.string().min(1, 'name requis'),
   slug: z.string().min(1, 'slug requis'),

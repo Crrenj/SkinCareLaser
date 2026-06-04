@@ -12,6 +12,10 @@ import { BulkActionBar } from '@/components/admin/reservations/BulkActionBar'
 import { ReservationsTable } from '@/components/admin/reservations/ReservationsTable'
 import { ReservationDrawer } from '@/components/admin/reservations/ReservationDrawer'
 import {
+  NewReservationDrawer,
+  type NewReservationPayload,
+} from '@/components/admin/reservations/NewReservationDrawer'
+import {
   buildReservationRef,
   type DbReservationStatus,
   type Reservation,
@@ -37,6 +41,7 @@ export default function ReservationsAdminPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [showNew, setShowNew] = useState(false)
 
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
@@ -179,6 +184,27 @@ export default function ReservationsAdminPage() {
     )
   }, [t])
 
+  const createReservation = useCallback(
+    async (payload: NewReservationPayload) => {
+      const res = await fetch('/api/admin/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(json.error || t('create.errorCreate'))
+        throw new Error(json.error || 'create failed')
+      }
+      toast.success(t('create.successToast'))
+      setShowNew(false)
+      // Bascule sur "à contacter" pour voir la nouvelle réservation tout de suite
+      setFilter('pending')
+      await fetchData()
+    },
+    [fetchData, t],
+  )
+
   const buildWhatsappLink = useCallback((r: Reservation) => {
     const phone = r.contact_phone.replace(/\D/g, '')
     const ref = buildReservationRef(r.id, r.created_at)
@@ -281,10 +307,7 @@ export default function ReservationsAdminPage() {
             <button
               type="button"
               className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-clay-800 text-sand-50 inline-flex items-center gap-1.5 transition-colors"
-              onClick={() => {
-                if (typeof window === 'undefined') return
-                toast.info(t('newManualSoon'))
-              }}
+              onClick={() => setShowNew(true)}
             >
               <Plus className="w-3.5 h-3.5" />
               {t('newManual')}
@@ -375,6 +398,12 @@ export default function ReservationsAdminPage() {
           busy={busyId === expandedReservation.id}
         />
       )}
+
+      <NewReservationDrawer
+        open={showNew}
+        onClose={() => setShowNew(false)}
+        onCreate={createReservation}
+      />
       {confirmDialog}
     </>
   )

@@ -2,7 +2,12 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { parseBody, reservationPatch } from '@/lib/schemas'
+import { parseBody, reservationCreate, reservationPatch } from '@/lib/schemas'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
+
+// TTL généreux pour une réservation manuelle (l'admin la gère activement,
+// elle ne doit pas s'auto-expirer dès le lendemain comme le flux client 24h).
+const MANUAL_RESERVATION_TTL_DAYS = 30
 
 const VALID_STATUSES = [
   'pending',
@@ -71,6 +76,91 @@ export async function GET(request: NextRequest) {
   })
 
   return NextResponse.json({ reservations: data ?? [], counts })
+}
+
+/**
+ * POST — création manuelle d'une réservation par l'admin.
+ * Pour un client walk-in / téléphone sans compte : user_id = NULL (invisible
+ * côté compte client, gérée uniquement par l'admin). Status 'pending', TTL 30j.
+ * Snapshot des items (product_name + unit_price figés, comme le flux client).
+ */
+export async function POST(request: NextRequest) {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth.response
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      { error: 'Configuration serveur manquante' },
+      { status: 500 },
+    )
+  }
+
+  let raw: unknown
+  try {
+    raw = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Body JSON invalide' }, { status: 400 })
+  }
+
+  const parsed = parseBody(reservationCreate, raw)
+  if (!parsed.ok) return parsed.response
+  const { contact_name, contact_phone, contact_email, admin_notes, items } = parsed.data
+
+  const round2 = (n: number) => Math.round(n * 100) / 100
+  const totalItems = items.reduce((sum, it) => sum + it.quantity, 0)
+  const totalPrice = round2(
+    items.reduce((sum, it) => sum + it.unit_price * it.quantity, 0),
+  )
+
+  const expiresAt = new Date(
+    Date.now() + MANUAL_RESERVATION_TTL_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString()
+
+  const { data: reservation, error: insertError } = await supabaseAdmin
+    .from('reservations')
+    .insert({
+      user_id: null,
+      status: 'pending',
+      expires_at: expiresAt,
+      contact_phone: contact_phone.trim(),
+      contact_email: contact_email?.trim() ? contact_email.trim() : null,
+      contact_name: contact_name?.trim() ? contact_name.trim() : null,
+      total_items: totalItems,
+      total_price: totalPrice,
+      currency: DEFAULT_CURRENCY,
+      admin_notes: admin_notes?.trim() ? admin_notes.trim() : null,
+    })
+    .select('id')
+    .single()
+
+  if (insertError || !reservation) {
+    logger.error('[admin/reservations] POST reservation error:', insertError)
+    return NextResponse.json(
+      { error: insertError?.message ?? 'Erreur lors de la création' },
+      { status: 500 },
+    )
+  }
+
+  const { error: itemsError } = await supabaseAdmin
+    .from('reservation_items')
+    .insert(
+      items.map((it) => ({
+        reservation_id: reservation.id,
+        product_id: it.product_id ?? null,
+        product_name: it.product_name.trim(),
+        unit_price: round2(it.unit_price),
+        quantity: it.quantity,
+      })),
+    )
+
+  if (itemsError) {
+    // Rollback best-effort : pas de transaction multi-statements via PostgREST,
+    // on supprime la réservation orpheline (le cascade nettoie d'éventuels items).
+    logger.error('[admin/reservations] POST items error:', itemsError)
+    await supabaseAdmin.from('reservations').delete().eq('id', reservation.id)
+    return NextResponse.json({ error: itemsError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ id: reservation.id }, { status: 201 })
 }
 
 export async function PATCH(request: NextRequest) {
