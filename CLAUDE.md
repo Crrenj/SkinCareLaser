@@ -75,6 +75,8 @@ La table `admin_users` est la **source de vérité unifiée** : middleware, `req
 
 **Hiérarchie de rôles** (migration `20260529120000`) : `admin_users.role` ∈ `{admin, super_admin}`. `is_user_admin` reste binaire (présence dans la table = accès panel) — **inchangée**. La gestion de l'équipe admin (promouvoir/révoquer/changer de rôle) est réservée aux **super_admin** via `requireSuperAdmin()` (`src/lib/requireAdmin.ts`, + `getAdminRole(userId)`). Garde-fous serveur : pas d'auto-modification, pas de modification d'un AUTRE super_admin (anti-coup / anti-orphelinage → retrait d'un super_admin = en base). UI : page `/admin/admins` (section *Acceso* sidebar) + `GET /api/admin/admins` ; la mutation passe par `PATCH /api/admin/users/[id]` (désormais super-admin only, body `{ isAdmin?, role? }`). L'owner fondateur (`j@gmail.com`) est seedé super_admin.
 
+**Modèle « un compte, deux casquettes »** (2026-06-04) : un admin **n'est pas** un compte séparé — c'est un compte client + une ligne `admin_users` (**additif** ; il garde panier/réservations/favoris/profil, aucun privilège client perdu). L'UX reflète ça : footer sidebar admin → **« Voir le site »** + **« Mon compte »** (`/account/profile`) ; sidebar `/account` → **« Panneau admin »** si `is_user_admin` (calculé server-side dans `account/layout.tsx`). **Pas de page profil dédiée dans l'admin** : on réutilise `/account/*` (choix explicite, zéro duplication — ne pas créer `/admin/account`). **Landing post-login** = `ADMIN_HOME_PATH` (= **`/admin`**, le dashboard avec stats), mais `login/page.tsx` + `/auth/callback` font primer `redirectedFrom`/`next` pour TOUT LE MONDE (l'admin n'est plus happé vers le dashboard s'il visait une page précise). Création d'un admin = **promouvoir un inscrit** via `/admin/users` (pas d'invitation email). Mémoire `account-model-one-user-two-hats`.
+
 ### Route map
 
 **Pages publiques sous `[locale]/`** (FR/EN/ES) — `not-found.tsx` design FARMAU au niveau locale :
@@ -111,7 +113,7 @@ La table `admin_users` est la **source de vérité unifiée** : middleware, `req
 - `src/app/[locale]/blog/page.tsx` — index des posts publiés (SSR, `revalidate=60`)
 - `src/app/[locale]/blog/[slug]/page.tsx` — post individuel (metadata, hreflang)
 
-**Admin (localisé FR/ES/EN via cookie)** sidebar 6 sections (General/Catálogo/Operaciones/Clientes/Contenido/Cuenta) :
+**Admin (localisé FR/ES/EN via cookie)** sidebar 6 sections (General/Catálogo/Operaciones/Clientes/Configuración [settings + apariencia]/Acceso [admins]) :
 - `src/app/admin/*` — `product`, `marques`, `stock`, `tags`, `messages`, `annonce`, `reservations`, **`users`**, **`newsletter`**, **`blog`**, **`apariencia`** (thème du site), `setup` (diag), `settings`
 
 **API** :
@@ -236,7 +238,7 @@ Découpage par scope/page :
 - **`src/components/banners/*`** — `BannerEditorial`, `BannerHero`, `BannerQuote`. `Banner.tsx` racine est un dispatcher sur `type` + normalize pour rétro-compat des 6 anciens `banner_type`.
 - **`src/components/pdp/*`** — `PdpGallery`, `PdpAccordions` (5 `<details>` natifs), `PdpPharmacist` (variantes A/B, conditionnel), `PdpStickyBar` (IntersectionObserver mobile), `PdpTrustSignals`, `PdpQuantity`, `PdpStockBadge`, `PdpWishlistButton`
 - **`src/components/footer/*`** — `FooterNewsletter` = **bande claire `.news`** (sand-100) rendue AVANT le footer sombre (form POST `/api/newsletter` optimistic). Le `Footer.tsx` racine est sur fond `--c-ink-panel*` avec grid 5 colonnes (Brand+socials | Produits | Besoins | Service | FARMAU) + bottom bar legal/payments.
-- **`src/components/admin/dashboard/*`** — `Sidebar` (sticky `top-0 h-screen` ; brand `FARMAU` + pill `Admin`, footer = carte identité avatar+email+rôle+logout — **plus de switcher langue/thème ici**), `PageHeader` (crumbs + title serif + `HeaderTools` + actions, partagé par toutes les pages admin), `HeaderTools` + `AdminModeContext` (langue/thème du header, cf. section i18n), `StatusBadge`, widgets dashboard (`RevenueWidget`, `LowStockWidget`, `TopProductsWidget`, `RecentReservationsWidget`, `RecentMessagesWidget`)
+- **`src/components/admin/dashboard/*`** — `Sidebar` (sticky `top-0 h-screen` ; brand `FARMAU` + pill `Admin`, footer = carte identité avatar+email+rôle+logout + **ponts côté client** (« Voir le site » → boutique `/{locale}`, « Mon compte » → `/{locale}/account/profile`, locale via `useLocale()`) — **plus de switcher langue/thème ici**), `PageHeader` (crumbs + title serif + `HeaderTools` + actions, partagé par toutes les pages admin), `HeaderTools` + `AdminModeContext` (langue/thème du header, cf. section i18n), `StatusBadge`, widgets dashboard (`RevenueWidget`, `LowStockWidget`, `TopProductsWidget`, `RecentReservationsWidget`, `RecentMessagesWidget`)
 - **`src/components/NavSearch.tsx`** — input + dropdown sticky avec recents (localStorage `farmau:search:recents`), popular categories, résultats live SWR `/api/search`, bestsellers fallback en no-result, navigation clavier ↑↓ ↵ Esc, `⌘K`/`Ctrl+K` global.
 - **`src/components/MobileDrawer.tsx`** — off-canvas fullscreen, nav serif italique actif, LocaleSwitcher block, footer login/admin/signout.
 - **`src/components/NavBar.tsx`** — barre unique 70px **non-sticky** (défile avec la page ; v2 commit `bc7e158`). Méga-menus catálogo/besoins, recherche plein écran (`nav/SearchOverlay`), panier (`CartDrawer`), drawer mobile, langue, compte. ⚠️ Les overlays/drawers sont rendus **HORS du `<header>`** (en frères via fragment) : son `backdrop-blur` (= `backdrop-filter`) en ferait sinon le bloc conteneur de leurs `position:fixed` (drawer panier qui déborde à droite → scroll horizontal, scrim coupé à 70px) — voir Pièges. Bouton panier = **toggle**. **`src/components/nav/ScrollToTop.tsx`** = bouton flottant « remonter en haut » (visible quand le header quitte le viewport, IntersectionObserver ; clé i18n `Nav.backToTop`).
@@ -265,7 +267,16 @@ Découpage par scope/page :
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest + build + e2e sur PR et push main.
 
-## État du projet (2026-06-03)
+## État du projet (2026-06-04)
+
+### Fait ✅ (session 2026-06-04 — modèle compte « un user, deux casquettes » + landing admin)
+
+Alignement de l'UX compte sur le modèle de données réel : un admin n'est pas un compte séparé mais un compte client + une ligne `admin_users` (**additif**, aucun privilège client perdu). Avant, l'admin était enfermé dans la coquille `/admin` sans retour ni accès à son profil perso. 2 commits sur `main` (`443d8b9`, `ea67dc9`).
+
+- **Ponts admin ↔ client (`443d8b9`)** : footer sidebar admin → **« Voir le site »** (`/{locale}`, nouvel onglet) + **« Mon compte »** (`/{locale}/account/profile`, locale via `useLocale()`). Sidebar `/account` → **« Panneau admin »** (`/admin`, `next/link` brut) si `is_user_admin` (calculé server-side dans `account/layout.tsx`, prop `isAdmin`). **Pas de page profil dédiée dans l'admin** : on réutilise `/account/*` (choix explicite, zéro duplication). Login : la destination explicite (`redirectedFrom`/`next`) prime **pour tout le monde** → l'admin n'est plus happé vers le dashboard s'il visait une page. Sidebar admin réorganisée : `sectionAccount`/`sectionPersonalization` supprimées → **« Configuration »** (settings + apparence) + **« Accès »** (admins). `/admin/users` : bouton « Promouvoir admin ». Aucune migration DB. Mémoire `account-model-one-user-two-hats`.
+- **Landing admin = dashboard, pas produits (`ea67dc9`)** : `ADMIN_HOME_PATH` passe de `/admin/product` à **`/admin`** (le tableau de bord avec widgets revenus/stock/top produits/réservations/messages) et devient la **source unique**, câblée dans login mot de passe + OAuth callback (`auth/callback`) + lien « Dashboard admin » NavBar + MobileDrawer + error boundary admin. Les liens vers la page produits (nav « Produits », CTA dashboard, `TopProductsWidget`, setup) restent inchangés. Tests de redirection mis à jour.
+
+**Vérif** : tsc 0 · lint 0 · vitest 8/8 · parité i18n **1620×3**.
 
 ### Fait ✅ (session 2026-06-03 — fix overlays NavBar (drawer panier) + thème public en direct)
 
