@@ -1293,6 +1293,7 @@
         "security": "Seguridad",
         "preferences": "Preferencias"
       },
+      "adminPanel": "Panel de administración",
       "signOut": "Cerrar sesión"
     },
     "reservations": {
@@ -1472,7 +1473,8 @@
       "sectionCatalog": "Catálogo",
       "sectionOps": "Operaciones",
       "sectionCustomers": "Clientes",
-      "sectionAccount": "Cuenta",
+      "sectionConfig": "Configuración",
+      "sectionAccess": "Acceso",
       "navOverview": "Vista general",
       "navProducts": "Productos",
       "navBrands": "Marcas",
@@ -1483,12 +1485,12 @@
       "navAnnounce": "Página de inicio",
       "navUsers": "Usuarios",
       "navNewsletter": "Newsletter",
-      "navSettings": "Configuración",
+      "navSettings": "Tienda",
       "navBlog": "Blog",
-      "sectionPersonalization": "Personalización",
       "navAppearance": "Apariencia",
-      "sectionAccess": "Acceso",
-      "navAdmins": "Administradores"
+      "navAdmins": "Administradores",
+      "viewSite": "Ver el sitio",
+      "myAccount": "Mi cuenta"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1863,7 +1865,7 @@
       "colRole": "Rol",
       "never": "Nunca",
       "admin": "Admin",
-      "promote": "Promover",
+      "promote": "Hacer admin",
       "confirmPromote": "¿Promover a {email} como admin?",
       "confirmDemote": "¿Quitar derechos admin a {email}?",
       "errorCannotDemoteSelf": "No puedes quitarte los derechos de admin.",

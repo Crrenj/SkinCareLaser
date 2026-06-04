@@ -1293,6 +1293,7 @@
         "security": "Sécurité",
         "preferences": "Préférences"
       },
+      "adminPanel": "Panneau admin",
       "signOut": "Se déconnecter"
     },
     "reservations": {
@@ -1472,7 +1473,8 @@
       "sectionCatalog": "Catalogue",
       "sectionOps": "Opérations",
       "sectionCustomers": "Clients",
-      "sectionAccount": "Compte",
+      "sectionConfig": "Configuration",
+      "sectionAccess": "Accès",
       "navOverview": "Vue d'ensemble",
       "navProducts": "Produits",
       "navBrands": "Marques",
@@ -1483,12 +1485,12 @@
       "navAnnounce": "Page d'accueil",
       "navUsers": "Utilisateurs",
       "navNewsletter": "Newsletter",
-      "navSettings": "Configuration",
+      "navSettings": "Boutique",
       "navBlog": "Blog",
-      "sectionPersonalization": "Personnalisation",
       "navAppearance": "Apparence",
-      "sectionAccess": "Accès",
-      "navAdmins": "Administrateurs"
+      "navAdmins": "Administrateurs",
+      "viewSite": "Voir le site",
+      "myAccount": "Mon compte"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1863,7 +1865,7 @@
       "colRole": "Rôle",
       "never": "Jamais",
       "admin": "Admin",
-      "promote": "Promouvoir",
+      "promote": "Promouvoir admin",
       "confirmPromote": "Promouvoir {email} comme admin ?",
       "confirmDemote": "Retirer les droits admin à {email} ?",
       "errorCannotDemoteSelf": "Vous ne pouvez pas vous retirer les droits admin.",

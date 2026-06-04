@@ -6,8 +6,10 @@ import { usePathname } from 'next/navigation'
 import {
   Boxes,
   Building2,
+  CircleUserRound,
   ClipboardList,
   Cog,
+  ExternalLink,
   FileText,
   Home,
   LogOut,
@@ -20,7 +22,7 @@ import {
   Users,
 } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
 
 /** Initiales pour l'avatar du compte, dérivées de l'email (local-part). */
@@ -62,9 +64,8 @@ type Section = {
     | 'sectionCatalog'
     | 'sectionOps'
     | 'sectionCustomers'
-    | 'sectionPersonalization'
+    | 'sectionConfig'
     | 'sectionAccess'
-    | 'sectionAccount'
   items: NavItem[]
 }
 
@@ -105,16 +106,15 @@ const SECTIONS: Section[] = [
     ],
   },
   {
-    titleKey: 'sectionPersonalization',
-    items: [{ href: '/admin/apariencia', labelKey: 'navAppearance', icon: Palette }],
+    titleKey: 'sectionConfig',
+    items: [
+      { href: '/admin/settings', labelKey: 'navSettings', icon: Cog },
+      { href: '/admin/apariencia', labelKey: 'navAppearance', icon: Palette },
+    ],
   },
   {
     titleKey: 'sectionAccess',
     items: [{ href: '/admin/admins', labelKey: 'navAdmins', icon: ShieldCheck }],
-  },
-  {
-    titleKey: 'sectionAccount',
-    items: [{ href: '/admin/settings', labelKey: 'navSettings', icon: Cog }],
   },
 ]
 
@@ -133,6 +133,7 @@ type SidebarProps = {
 
 export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
   const pathname = usePathname()
+  const locale = useLocale()
   const dialogId = useId()
   const [stats, setStats] = useState<Stats>({})
   const tNav = useTranslations('Admin.sidebar')
@@ -261,6 +262,30 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
           >
             <LogOut className="w-4 h-4" />
           </button>
+        </div>
+
+        {/* Ponts vers le côté client : un admin reste un client (compte unique,
+            deux casquettes). « Voir le site » ouvre la boutique publique ;
+            « Mon compte » mène au profil/sécurité perso côté /account. */}
+        <div className="mt-1 flex flex-col gap-0.5">
+          <Link
+            href={`/${locale}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onCloseMobile}
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-[13px] text-ink-700 hover:bg-sand-200 hover:text-ink-900 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 shrink-0 text-ink-500" />
+            <span className="flex-1">{tNav('viewSite')}</span>
+          </Link>
+          <Link
+            href={`/${locale}/account/profile`}
+            onClick={onCloseMobile}
+            className="flex items-center gap-3 px-3 py-2 rounded-md text-[13px] text-ink-700 hover:bg-sand-200 hover:text-ink-900 transition-colors"
+          >
+            <CircleUserRound className="w-4 h-4 shrink-0 text-ink-500" />
+            <span className="flex-1">{tNav('myAccount')}</span>
+          </Link>
         </div>
       </div>
     </nav>

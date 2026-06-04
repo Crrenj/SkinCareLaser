@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react'
+import NextLink from 'next/link'
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
@@ -20,7 +21,13 @@ const ITEMS = [
   { href: '/account/preferences', key: 'preferences', icon: Settings },
 ] as const
 
-export function AccountSidebar({ userEmail }: { userEmail: string }) {
+export function AccountSidebar({
+  userEmail,
+  isAdmin = false,
+}: {
+  userEmail: string
+  isAdmin?: boolean
+}) {
   const t = useTranslations('Account.sidebar')
   const pathname = usePathname()
   const router = useRouter()
@@ -63,6 +70,18 @@ export function AccountSidebar({ userEmail }: { userEmail: string }) {
           })}
         </ul>
       </nav>
+
+      {/* Pont vers l'admin : compte unique, deux casquettes. /admin n'est pas
+          localisé → next/link brut (le Link next-intl préfixerait → 404). */}
+      {isAdmin && (
+        <NextLink
+          href="/admin"
+          className="mt-4 flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-sm text-[14px] font-semibold text-ink-900 bg-sand-200 hover:bg-sand-300 transition-colors w-[calc(100%+1.5rem)]"
+        >
+          <Shield size={16} strokeWidth={1.7} className="text-clay-700" />
+          {t('adminPanel')}
+        </NextLink>
+      )}
 
       <button
         type="button"

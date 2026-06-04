@@ -91,21 +91,22 @@ function LoginForm() {
         setRedirecting(true)
         setLoading(false)
 
+        // Destination explicite (deep-link ou redirect du middleware) prioritaire
+        // pour TOUT LE MONDE : un admin n'est plus happé vers le dashboard s'il
+        // visait une page précise (ex. agir comme client). Sans destination :
+        // admin → dashboard, client → accueil.
         const savedRedirect =
           typeof window !== 'undefined' ? sessionStorage.getItem('redirect_to') : null
-        const redirectPath = isAdmin
-          ? '/admin/product'
-          : savedRedirect ?? next ?? '/'
+        const wanted = savedRedirect ?? next ?? null
+        const redirectPath = wanted ?? (isAdmin ? '/admin/product' : '/')
 
         // Laisser un instant aux cookies de session de se poser
         await new Promise((resolve) => setTimeout(resolve, 400))
 
-        if (!isAdmin) {
-          try {
-            sessionStorage.removeItem('redirect_to')
-          } catch {
-            // ignored
-          }
+        try {
+          sessionStorage.removeItem('redirect_to')
+        } catch {
+          // ignored
         }
 
         router.push(redirectPath)

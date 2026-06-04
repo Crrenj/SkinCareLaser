@@ -1293,6 +1293,7 @@
         "security": "Security",
         "preferences": "Preferences"
       },
+      "adminPanel": "Admin panel",
       "signOut": "Sign out"
     },
     "reservations": {
@@ -1472,7 +1473,8 @@
       "sectionCatalog": "Catalogue",
       "sectionOps": "Operations",
       "sectionCustomers": "Customers",
-      "sectionAccount": "Account",
+      "sectionConfig": "Configuration",
+      "sectionAccess": "Access",
       "navOverview": "Overview",
       "navProducts": "Products",
       "navBrands": "Brands",
@@ -1483,12 +1485,12 @@
       "navAnnounce": "Homepage",
       "navUsers": "Users",
       "navNewsletter": "Newsletter",
-      "navSettings": "Settings",
+      "navSettings": "Shop",
       "navBlog": "Blog",
-      "sectionPersonalization": "Personalization",
       "navAppearance": "Appearance",
-      "sectionAccess": "Access",
-      "navAdmins": "Administrators"
+      "navAdmins": "Administrators",
+      "viewSite": "View site",
+      "myAccount": "My account"
     },
     "crumbs": {
       "admin": "Admin",
@@ -1863,7 +1865,7 @@
       "colRole": "Role",
       "never": "Never",
       "admin": "Admin",
-      "promote": "Promote",
+      "promote": "Make admin",
       "confirmPromote": "Promote {email} to admin?",
       "confirmDemote": "Remove admin rights from {email}?",
       "errorCannotDemoteSelf": "You cannot remove your own admin rights.",
