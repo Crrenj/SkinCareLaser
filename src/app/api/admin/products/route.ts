@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { parseBody, productCreate } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 // GET /api/admin/products -> liste des produits avec pagination
 export async function GET(req: NextRequest) {
@@ -62,8 +63,7 @@ export async function GET(req: NextRequest) {
       totalPages: Math.ceil((count || 0) / limit),
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la récupération des produits', error, 500)
   }
 }
 
@@ -162,7 +162,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la création du produit'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la création du produit', error, 500)
   }
 }

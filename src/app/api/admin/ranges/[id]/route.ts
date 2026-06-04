@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, rangeBody } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 export async function PATCH(
   req: NextRequest,
@@ -59,8 +60,7 @@ export async function PATCH(
 
     return NextResponse.json(range)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la modification de la gamme'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la modification de la gamme', error, 500)
   }
 }
 
@@ -110,7 +110,6 @@ export async function DELETE(
       message: `Gamme "${existingRange.name}" supprimée avec succès`,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la suppression de la gamme'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la suppression de la gamme', error, 500)
   }
 }

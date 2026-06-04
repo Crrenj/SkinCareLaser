@@ -67,3 +67,8 @@ next-env.d.ts
 /_probe-*.mjs
 /_audit-*.mjs
 /_check-*.mjs
+
+# Dossiers de données / handoffs locaux (non versionnés)
+/assets
+/design_handoff_themes_system
+/uploads

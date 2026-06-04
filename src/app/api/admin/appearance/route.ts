@@ -3,6 +3,7 @@ import { revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { appearanceBody, parseBody } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 import { THEME_CONFIG_TAG } from '@/lib/getThemeConfig'
 
 const SELECT = 'theme, default_mode, allow_visitor_mode, updated_at' as const
@@ -31,9 +32,7 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(data)
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Erreur lors de la lecture de l'apparence"
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError("Erreur lors de la lecture de l'apparence", error, 500)
   }
 }
 
@@ -68,8 +67,6 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(data)
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Erreur lors de la sauvegarde de l'apparence"
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError("Erreur lors de la sauvegarde de l'apparence", error, 500)
   }
 }

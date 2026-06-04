@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, brandBody } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -19,8 +20,7 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(data)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la récupération des marques'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la récupération des marques', error, 500)
   }
 }
 
@@ -55,7 +55,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(brand, { status: 201 })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la création de la marque'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la création de la marque', error, 500)
   }
 }

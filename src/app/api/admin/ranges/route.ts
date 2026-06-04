@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, rangeBody } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin()
@@ -24,8 +25,7 @@ export async function GET(req: NextRequest) {
     if (error) throw error
     return NextResponse.json(data)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la récupération des gammes'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la récupération des gammes', error, 500)
   }
 }
 
@@ -70,7 +70,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(range, { status: 201 })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la création de la gamme'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la création de la gamme', error, 500)
   }
 }

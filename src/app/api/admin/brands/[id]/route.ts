@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, brandBody } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 export async function PATCH(
   req: NextRequest,
@@ -49,8 +50,7 @@ export async function PATCH(
 
     return NextResponse.json(brand)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la modification de la marque'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la modification de la marque', error, 500)
   }
 }
 
@@ -129,7 +129,6 @@ export async function DELETE(
       message: `Marque "${existingBrand.name}" supprimée avec succès`,
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la suppression de la marque'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la suppression de la marque', error, 500)
   }
 }

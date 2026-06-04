@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, messagePatch } from '@/lib/schemas'
 
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       logger.error('Erreur récupération messages:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     const { data: statsData } = await supabaseAdmin.rpc('get_messages_stats')
@@ -96,7 +97,7 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       logger.error('Erreur mise à jour message:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json({ message: data })
@@ -125,7 +126,7 @@ export async function DELETE(request: NextRequest) {
 
     if (error) {
       logger.error('Erreur suppression message:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json({ success: true })

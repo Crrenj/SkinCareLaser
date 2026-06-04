@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { apiError } from '@/lib/apiError'
 
 export async function PATCH(
   req: NextRequest,
@@ -100,8 +101,7 @@ export async function PATCH(
 
     return NextResponse.json(data)
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la mise à jour'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la mise à jour', error, 500)
   }
 }
 
@@ -136,7 +136,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la suppression'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la suppression', error, 500)
   }
 }

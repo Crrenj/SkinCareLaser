@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { apiError } from '@/lib/apiError'
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin()
@@ -82,7 +83,6 @@ export async function GET(req: NextRequest) {
       totalPages: Math.ceil((count || 0) / limit),
     })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur lors de la récupération des produits'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la récupération des produits', error, 500)
   }
 }

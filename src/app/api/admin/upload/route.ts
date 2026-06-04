@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, uploadBody } from '@/lib/schemas'
+import { apiError } from '@/lib/apiError'
 
 const BUCKET = 'product-image'
 // Doit rester aligné avec allowed_mime_types du bucket Storage.
@@ -86,8 +87,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: publicUrl, path: data.path })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur upload'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError("Erreur lors de l'upload", error, 500)
   }
 }
 
@@ -112,7 +112,6 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Erreur suppression'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la suppression', error, 500)
   }
 }

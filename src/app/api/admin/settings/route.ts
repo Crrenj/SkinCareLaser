@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { apiError } from '@/lib/apiError'
 import type { Database } from '@/lib/database.types'
 
 type SettingsUpdate = Database['public']['Tables']['shop_settings']['Update']
@@ -50,9 +51,7 @@ export async function GET() {
     if (error) throw error
     return NextResponse.json(data)
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Erreur lors de la lecture des paramètres'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la lecture des paramètres', error, 500)
   }
 }
 
@@ -101,8 +100,6 @@ export async function PATCH(req: NextRequest) {
     if (error) throw error
     return NextResponse.json(data)
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Erreur lors de la sauvegarde des paramètres'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiError('Erreur lors de la sauvegarde des paramètres', error, 500)
   }
 }
