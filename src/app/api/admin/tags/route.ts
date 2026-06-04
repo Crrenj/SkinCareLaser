@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagBody } from '@/lib/schemas'
 
@@ -20,7 +21,7 @@ export async function GET() {
 
     if (error) {
       logger.error('Erreur récupération tags:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json(tags || [])
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Ce tag existe déjà' }, { status: 409 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json(data)

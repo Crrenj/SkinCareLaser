@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { guardMutation } from '@/lib/csrf'
 
 /**
  * GET /api/wishlist
@@ -35,6 +36,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = guardMutation(request, { json: true })
+  if (guard) return guard
+
   const supabase = await createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'auth_required' }, { status: 401 })

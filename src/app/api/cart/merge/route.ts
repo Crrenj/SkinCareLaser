@@ -1,9 +1,13 @@
 import { logger } from '@/lib/logger'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { guardMutation } from '@/lib/csrf'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const guard = guardMutation(request, { json: false })
+  if (guard) return guard
+
   const cookieStore = await cookies()
   const anonId = cookieStore.get('cart_id')?.value
 

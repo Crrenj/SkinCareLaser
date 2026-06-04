@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { guardMutation } from '@/lib/csrf'
 
 /**
  * POST /api/cart/reserve
@@ -16,7 +17,10 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
  *
  * Succès : 200 { success: true, reservationId }
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const guard = guardMutation(request, { json: false })
+  if (guard) return guard
+
   const supabase = await createSupabaseServerClient()
 
   // 1. Vérifie l'auth via cookie session

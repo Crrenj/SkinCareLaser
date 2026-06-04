@@ -1,9 +1,30 @@
 import type { NextConfig } from 'next'
+import { createHash } from 'crypto'
 import createNextIntlPlugin from 'next-intl/plugin'
+import { THEME_MODE_SCRIPT } from './src/lib/themeModeScript'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
+// Hash CSP du seul script inline (anti-flash thème), calculé au build →
+// toujours synchrone avec le script. Permet `script-src 'sha256-…'` sans
+// 'unsafe-inline' tout en gardant le SSG (pas de nonce = pas de rendu dynamique).
+const themeScriptCspHash = `'sha256-${createHash('sha256')
+  .update(THEME_MODE_SCRIPT)
+  .digest('base64')}'`
+
 const nextConfig: NextConfig = {
+  // Ne pas divulguer la stack (anti-fingerprinting).
+  poweredByHeader: false,
+
+  // Strip console.* des bundles prod (garde error/warn) — évite les fuites
+  // d'infos résiduelles dans la console du navigateur.
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === 'production'
+        ? { exclude: ['error', 'warn'] }
+        : false,
+  },
+
   // Optimisations de performance
   experimental: {
     optimizePackageImports: ['lucide-react', 'react-icons'],
@@ -41,7 +62,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              `script-src 'self' ${themeScriptCspHash}`,
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",

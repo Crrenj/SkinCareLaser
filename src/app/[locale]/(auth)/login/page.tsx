@@ -2,6 +2,7 @@
 
 import { logger } from '@/lib/logger'
 import { ADMIN_HOME_PATH } from '@/lib/constants'
+import { safeRedirectPath } from '@/lib/safeRedirect'
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -48,7 +49,8 @@ function LoginForm() {
         setError(errorParam as LoginErrorKey)
       }
     }
-    if (next) {
+    // On ne mémorise que les cibles internes sûres (anti open-redirect).
+    if (next && safeRedirectPath(next)) {
       try {
         sessionStorage.setItem('redirect_to', next)
       } catch {
@@ -98,7 +100,9 @@ function LoginForm() {
         // admin → dashboard, client → accueil.
         const savedRedirect =
           typeof window !== 'undefined' ? sessionStorage.getItem('redirect_to') : null
-        const wanted = savedRedirect ?? next ?? null
+        // Valide la cible AVANT le push (anti open-redirect : un attaquant peut
+        // fournir ?redirectedFrom=//evil.com). Sans cible interne sûre → défaut.
+        const wanted = safeRedirectPath(savedRedirect ?? next)
         const redirectPath = wanted ?? (isAdmin ? ADMIN_HOME_PATH : '/')
 
         // Laisser un instant aux cookies de session de se poser

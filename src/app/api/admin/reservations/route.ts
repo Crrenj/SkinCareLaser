@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, reservationCreate, reservationPatch } from '@/lib/schemas'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     logger.error('[admin/reservations] GET error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   // Petit compteur par status pour les onglets
@@ -215,7 +216,7 @@ export async function PATCH(request: NextRequest) {
 
   if (error) {
     logger.error('[admin/reservations] PATCH error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   return NextResponse.json({ reservation: data })

@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { guardMutation } from '@/lib/csrf'
 
 const ALLOWED_LOCALES = ['fr', 'en', 'es'] as const
 type Locale = (typeof ALLOWED_LOCALES)[number]
@@ -15,6 +16,9 @@ function isLocale(value: unknown): value is Locale {
  * Auth required. Met à jour profiles.preferred_locale de l'user connecté.
  */
 export async function PATCH(request: NextRequest) {
+  const guard = guardMutation(request, { json: true })
+  if (guard) return guard
+
   const supabase = await createSupabaseServerClient()
   const {
     data: { user },

@@ -83,6 +83,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ q, hits: [] satisfies SearchHit[] })
   }
 
+  // Échappe les métacaractères LIKE (%, _, \) : l'input public ne doit pas
+  // injecter de wildcards (DoS requête / scraping). PostgREST couvre déjà
+  // l'injection SQL ; seuls les wildcards LIKE sont à neutraliser.
+  const safe = q.replace(/[\\%_]/g, (c) => `\\${c}`)
+
   const { data, error } = await supabase
     .from('products')
     .select(`
@@ -94,7 +99,7 @@ export async function GET(request: NextRequest) {
       product_images ( url, alt ),
       range:ranges ( brand:brands ( name ) )
     `)
-    .ilike('name', `%${q}%`)
+    .ilike('name', `%${safe}%`)
     .limit(limit)
     .returns<RawHit[]>()
 

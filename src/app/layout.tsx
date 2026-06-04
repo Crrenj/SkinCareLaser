@@ -6,6 +6,7 @@ import { SWRProvider } from '@/components/SWRProvider'
 import { AuthProvider } from '@/components/AuthProvider'
 import { getThemeConfig, resolveInitialMode } from '@/lib/getThemeConfig'
 import { ThemeFavicon } from '@/components/ThemeFavicon'
+import { THEME_MODE_SCRIPT } from '@/lib/themeModeScript'
 
 const serif = Instrument_Serif({
   variable: "--font-instrument",
@@ -47,11 +48,6 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
 };
-
-// Script anti-flash : résout `data-mode` AVANT le premier paint (dans <head>).
-// Priorité : override visiteur en localStorage (si autorisé) > défaut admin >
-// préférence système (si défaut = 'system'). Évite le flash clair→sombre.
-const THEME_MODE_SCRIPT = `(function(){try{var d=document.documentElement;var a=d.getAttribute('data-allow-mode')==='1';var def=d.getAttribute('data-default-mode')||'light';var s=null;try{if(a){s=localStorage.getItem('farmau:mode');}}catch(e){}var m=s||def;if(m==='system'){m=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}if(m!=='dark'&&m!=='light'){m='light';}d.setAttribute('data-mode',m);}catch(e){}})();`
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Lit la locale next-intl du request (cf. middleware + [locale] segment).

@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagTypePatch } from '@/lib/schemas'
 
@@ -33,7 +34,7 @@ export async function PATCH(
       if (error.code === '23505') {
         return NextResponse.json({ error: 'Ce slug existe déjà' }, { status: 409 })
       }
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json(data)
@@ -78,7 +79,7 @@ export async function DELETE(
 
     if (error) {
       logger.error('Erreur suppression type de tag:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json({ success: true })

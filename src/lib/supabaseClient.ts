@@ -17,9 +17,17 @@ import { createBrowserClient, type CookieOptions } from '@supabase/ssr'
  * au lieu de rester connecté — comportement attendu et conforme au
  * threat model.
  */
+// Garde léger sans Zod (évite d'alourdir le bundle navigateur) : fail-fast
+// avec un message clair si une var publique obligatoire manque, au lieu d'un
+// `undefined` silencieux qui casserait plus loin de façon cryptique.
+function requiredPublicEnv(name: string, value: string | undefined): string {
+  if (!value) throw new Error(`[env] Variable publique manquante : ${name}`)
+  return value
+}
+
 export const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  requiredPublicEnv('NEXT_PUBLIC_SUPABASE_URL', process.env.NEXT_PUBLIC_SUPABASE_URL),
+  requiredPublicEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   {
     cookies: {
       get(name: string) {

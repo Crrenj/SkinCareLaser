@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { routing } from '@/i18n/routing'
+import { safeRedirectPath } from '@/lib/safeRedirect'
 
 /**
  * Callback Supabase Auth — gère 3 flux :
@@ -81,10 +82,9 @@ function AuthCallbackInner() {
           const localeParam = searchParams.get('locale')
           const stored =
             typeof window !== 'undefined' ? sessionStorage.getItem('redirect_to') : null
-          let candidate = nextParam ?? stored ?? '/'
-
-          // S'assurer que la cible commence bien par /
-          if (!candidate.startsWith('/')) candidate = `/${candidate}`
+          // Valide la source avant tout traitement (anti open-redirect). Garantit
+          // un chemin interne commençant par "/" (ou défaut "/").
+          let candidate = safeRedirectPath(nextParam ?? stored) ?? '/'
 
           // Préfixer la locale si manquante
           const localePrefix = candidate.match(/^\/([a-z]{2})(\/|$)/i)?.[1]?.toLowerCase()

@@ -42,11 +42,29 @@ export async function checkRateLimit(
 }
 
 /**
- * Extrait l'IP client depuis les headers Vercel/proxy. Fallback "unknown"
- * pour ne jamais retourner null (un bucket "unknown" reste un bucket).
+ * Extrait l'IP client de façon non-spoofable, par ordre de confiance.
+ *
+ * ⚠️ Ne JAMAIS utiliser le 1er hop de `x-forwarded-for` : il est entièrement
+ * contrôlé par l'appelant (CWE-348). Un attaquant le ferait tourner pour
+ * obtenir un bucket de rate-limit neuf à chaque requête.
+ *
+ * 1. `x-vercel-forwarded-for` (1er hop) — posé/écrasé par l'edge Vercel, fiable.
+ * 2. fallback hors-Vercel : DERNIER hop de `x-forwarded-for` (proxy de confiance le plus proche).
+ * 3. `x-real-ip`.
+ * 4. `'unknown'` (un bucket "unknown" reste un bucket).
  */
 export function getClientIp(request: Request): string {
+  const vercel = request.headers.get('x-vercel-forwarded-for')
+  if (vercel) {
+    const first = vercel.split(',')[0]?.trim()
+    if (first) return first
+  }
+
   const fwd = request.headers.get('x-forwarded-for')
-  if (fwd) return fwd.split(',')[0].trim()
+  if (fwd) {
+    const hops = fwd.split(',').map((s) => s.trim()).filter(Boolean)
+    if (hops.length > 0) return hops[hops.length - 1]
+  }
+
   return request.headers.get('x-real-ip')?.trim() || 'unknown'
 }

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { CartResponse, AddToCartRequest, UpdateCartRequest } from '@/types/cart'
+import { guardMutation } from '@/lib/csrf'
 
 /**
  * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
@@ -165,6 +166,9 @@ export async function GET() {
 
 // POST : Ajouter/modifier un item dans le panier
 export async function POST(request: NextRequest) {
+  const guard = guardMutation(request, { json: true })
+  if (guard) return guard
+
   try {
     const body: AddToCartRequest = await request.json()
     const { productId, quantity } = body
@@ -242,6 +246,9 @@ export async function POST(request: NextRequest) {
 // À ne pas confondre avec POST/add_to_cart qui INCRÉMENTE : envoyer une
 // quantité cible ici écrit la valeur telle quelle.
 export async function PATCH(request: NextRequest) {
+  const guard = guardMutation(request, { json: true })
+  if (guard) return guard
+
   try {
     const body: UpdateCartRequest = await request.json()
     const { productId, quantity } = body
@@ -318,6 +325,9 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE : Supprimer un item du panier
 export async function DELETE(request: NextRequest) {
+  const guard = guardMutation(request, { json: false })
+  if (guard) return guard
+
   try {
     const { searchParams } = new URL(request.url)
     const productId = searchParams.get('productId')

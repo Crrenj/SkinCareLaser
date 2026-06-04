@@ -18,11 +18,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Security audit (deps)
+        run: npm audit --audit-level=high
+        continue-on-error: true
 
       - name: Lint
         run: npm run lint
@@ -48,7 +52,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version-file: '.nvmrc'
           cache: 'npm'
 
       - name: Install dependencies
@@ -77,3 +81,18 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        # Informationnel : ne bloque pas le merge (license requise pour les orgs
+        # GitHub ; gratuit sur un compte perso). Durcir en retirant ce flag.
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,5 +1,7 @@
+import 'server-only'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/database.types'
+import { getServerEnv } from '@/lib/env'
 
 /**
  * Client Supabase avec la clé service-role qui bypass les RLS.
@@ -11,8 +13,9 @@ import type { Database } from '@/lib/database.types'
  * de crasher au chargement du module.
  */
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+// Clé service-role résolue via env.ts (accepte les 2 noms ; non-throwant →
+// supabaseAdmin reste `null` si absente, comportement historique préservé).
+const supabaseServiceKey = getServerEnv().serviceKey
 
 export const supabaseAdmin: SupabaseClient<Database> | null =
   supabaseUrl && supabaseServiceKey

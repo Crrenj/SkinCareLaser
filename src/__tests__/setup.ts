@@ -2,6 +2,11 @@ import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 import frMessages from '@/messages/fr.json'
 
+// `server-only` throw si importé hors d'un Server Component. En test (env
+// happy-dom = client), tout module serveur transitivement importé (ex.
+// supabaseAdmin via rateLimit) le déclencherait → on le neutralise.
+vi.mock('server-only', () => ({}))
+
 // Mock du module next/navigation
 vi.mock('next/navigation', () => ({
   useRouter: () => ({

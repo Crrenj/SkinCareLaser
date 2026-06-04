@@ -1,7 +1,9 @@
 import { logger } from '@/lib/logger'
 import { NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 import { createSupabaseServerClient } from './supabaseServer'
 import { supabaseAdmin } from './supabaseAdmin'
+import { assertOriginFromHeaders } from './csrf'
 
 export type AdminGuardResult =
   | { ok: true; userId: string }
@@ -24,6 +26,12 @@ export type AdminRole = 'admin' | 'super_admin'
  *   - 500 si configuration Supabase manquante côté serveur
  */
 export async function requireAdmin(): Promise<AdminGuardResult> {
+  // Garde CSRF centralisée pour toutes les routes /api/admin/* : rejette les
+  // requêtes cross-origin (les requêtes same-origin et sans Origin passent),
+  // y compris sur les GET — l'API admin n'a aucune raison d'être cross-origin.
+  const originError = assertOriginFromHeaders(await headers())
+  if (originError) return { ok: false, response: originError }
+
   const supabase = await createSupabaseServerClient()
 
   // getUser() valide le JWT côté serveur Supabase (vs getSession() qui se
@@ -112,6 +120,9 @@ export async function getAdminRole(userId: string): Promise<AdminRole | null> {
  *   - 403 { error: 'super_admin_required' } si admin simple ou non-admin
  */
 export async function requireSuperAdmin(): Promise<AdminGuardResult> {
+  const originError = assertOriginFromHeaders(await headers())
+  if (originError) return { ok: false, response: originError }
+
   const supabase = await createSupabaseServerClient()
   const {
     data: { user },

@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Dépendances npm — un PR groupé hebdomadaire (évite 15 PR/semaine sur
+  # Next 15 + React 19). Le build CI sert de garde anti-régression.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      all-dependencies:
+        patterns:
+          - "*"
+
+  # Actions GitHub utilisées par les workflows CI.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

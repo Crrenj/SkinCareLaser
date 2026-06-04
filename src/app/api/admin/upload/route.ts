@@ -14,6 +14,19 @@ const EXT_BY_TYPE: Record<string, string> = {
 const MAX_BYTES = 5 * 1024 * 1024 // 5 Mo, aligné avec file_size_limit du bucket
 
 /**
+ * Détecte le type d'image réel via les magic-bytes (signatures de fichier).
+ * Le `contentType` déclaré par le client est falsifiable ; on vérifie le
+ * contenu réel pour empêcher l'upload d'un fichier exécutable (.html/.svg)
+ * déguisé en image puis servi depuis un bucket public.
+ */
+function sniffImageType(buf: Buffer): 'png' | 'jpg' | 'webp' | null {
+  if (buf.length >= 8 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return 'png'
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpg'
+  if (buf.length >= 12 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') return 'webp'
+  return null
+}
+
+/**
  * POST /api/admin/upload — Upload une image (produit, blog, bannière).
  * Body: { file: base64, fileName: string, contentType: string, folder?: 'products'|'blog'|'banners' }
  * Renvoie l'URL publique. Le chemin est généré côté serveur (folder/uuid.ext)
@@ -48,6 +61,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Image trop lourde (5 Mo maximum).' },
         { status: 413 },
+      )
+    }
+
+    // Magic-bytes : le contenu réel doit correspondre au type déclaré.
+    if (sniffImageType(fileBuffer) !== ext) {
+      return NextResponse.json(
+        { error: 'Le contenu du fichier ne correspond pas à une image PNG/JPG/WebP valide.' },
+        { status: 400 },
       )
     }
 

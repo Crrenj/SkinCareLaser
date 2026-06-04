@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, homeLayoutBody } from '@/lib/schemas'
 import { resolveHomeLayout } from '@/lib/homeSections'
@@ -28,7 +29,7 @@ export async function GET() {
 
   if (error) {
     logger.error('GET /api/admin/home-layout:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   // home_layout : colonne JSONB (migration 20260529095909), lue via cast.
@@ -58,7 +59,7 @@ export async function PATCH(req: NextRequest) {
 
   if (error) {
     logger.error('PATCH /api/admin/home-layout:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   for (const locale of ['fr', 'es', 'en']) revalidatePath(`/${locale}`)

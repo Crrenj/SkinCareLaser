@@ -1,6 +1,7 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagTypeBody } from '@/lib/schemas'
 
@@ -22,7 +23,7 @@ export async function GET() {
 
     if (error) {
       logger.error('Erreur récupération types de tags:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return apiError('Erreur serveur', error, 500)
     }
 
     return NextResponse.json(tagTypes || [])

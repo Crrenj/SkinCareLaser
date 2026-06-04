@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
+import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, postCreate, postUpdate, postDelete } from '@/lib/schemas'
 import { logger } from '@/lib/logger'
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
 
   if (error) {
     logger.error('GET /api/admin/posts:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   return NextResponse.json({ posts: data, totalCount: count ?? 0 })
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     if (error.code === '23505') {
       return NextResponse.json({ error: 'Un article avec ce slug existe déjà' }, { status: 409 })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   return NextResponse.json(data, { status: 201 })
@@ -99,7 +100,7 @@ export async function PATCH(req: NextRequest) {
     if (error.code === '23505') {
       return NextResponse.json({ error: 'Un article avec ce slug existe déjà' }, { status: 409 })
     }
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   return NextResponse.json(data)
@@ -119,7 +120,7 @@ export async function DELETE(req: NextRequest) {
   const { error } = await supabaseAdmin.from('posts').delete().eq('id', id)
   if (error) {
     logger.error('DELETE /api/admin/posts:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return apiError('Erreur serveur', error, 500)
   }
 
   return NextResponse.json({ ok: true })
