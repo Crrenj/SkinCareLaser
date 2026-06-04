@@ -1,29 +1,35 @@
 import type { Metadata } from 'next'
-import { Plus, Search } from 'lucide-react'
+import {
+  AlertTriangle,
+  Boxes,
+  ClipboardList,
+  Mail,
+  Plus,
+  Search,
+  ShoppingCart,
+  Users,
+} from 'lucide-react'
 import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { toLocaleTag } from '@/lib/constants'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { buildReservationReferenceCompact } from '@/lib/reservation'
+import { formatPrice } from '@/lib/formatPrice'
+import { getDashboardData } from './_dashboard/data'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
-import { RevenueWidget, type DailyPoint } from '@/components/admin/dashboard/RevenueWidget'
-import {
-  LowStockWidget,
-  type LowStockItem,
-} from '@/components/admin/dashboard/LowStockWidget'
-import {
-  TopProductsWidget,
-  type TopProductRow,
-} from '@/components/admin/dashboard/TopProductsWidget'
-import {
-  RecentReservationsWidget,
-  type ReservationRow,
-} from '@/components/admin/dashboard/RecentReservationsWidget'
-import {
-  RecentMessagesWidget,
-  type MessageRow,
-} from '@/components/admin/dashboard/RecentMessagesWidget'
-import type { ReservationStatus } from '@/components/admin/dashboard/StatusBadge'
+import { StatCard } from '@/components/admin/dashboard/StatCard'
+import { DashboardSectionHeader } from '@/components/admin/dashboard/DashboardSectionHeader'
+import { RevenueWidget } from '@/components/admin/dashboard/RevenueWidget'
+import { LowStockWidget } from '@/components/admin/dashboard/LowStockWidget'
+import { TopProductsWidget } from '@/components/admin/dashboard/TopProductsWidget'
+import { RecentReservationsWidget } from '@/components/admin/dashboard/RecentReservationsWidget'
+import { RecentMessagesWidget } from '@/components/admin/dashboard/RecentMessagesWidget'
+import { CatalogueReadinessWidget } from '@/components/admin/dashboard/CatalogueReadinessWidget'
+import { InventoryWidget } from '@/components/admin/dashboard/InventoryWidget'
+import { BrandBreakdownWidget } from '@/components/admin/dashboard/BrandBreakdownWidget'
+import { ReservationStatusWidget } from '@/components/admin/dashboard/ReservationStatusWidget'
+import { CustomersWidget } from '@/components/admin/dashboard/CustomersWidget'
+import { EngagementWidget } from '@/components/admin/dashboard/EngagementWidget'
+import { ContentWidget } from '@/components/admin/dashboard/ContentWidget'
+import { QuickActionsWidget } from '@/components/admin/dashboard/QuickActionsWidget'
 
 export const metadata: Metadata = {
   title: 'Vista general · Admin · FARMAU',
@@ -33,200 +39,6 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 export const revalidate = 300
 
-const DAY_MS = 24 * 60 * 60 * 1000
-
-function startOfDayUTC(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
-}
-
-function dateKey(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
-// Version compacte FAR-…XXXX pour les widgets denses — factorisée dans
-// @/lib/reservation (la full FAR-YYYYMMDD-XXXX est sur la confirmation).
-
-async function fetchRevenue(): Promise<{ current: DailyPoint[]; previous: DailyPoint[] }> {
-  if (!supabaseAdmin) return { current: [], previous: [] }
-  const today = startOfDayUTC(new Date())
-  const start = new Date(today.getTime() - 13 * DAY_MS) // 14 jours (current + previous)
-
-  const { data, error } = await supabaseAdmin
-    .from('reservations')
-    .select('total_price, status, created_at')
-    .gte('created_at', start.toISOString())
-    .neq('status', 'cancelled')
-
-  if (error || !data) return { current: [], previous: [] }
-
-  // Buckets vides pour les 14 jours
-  const buckets = new Map<string, { reserved: number; confirmed: number }>()
-  for (let i = 0; i < 14; i += 1) {
-    const d = new Date(start.getTime() + i * DAY_MS)
-    buckets.set(dateKey(d), { reserved: 0, confirmed: 0 })
-  }
-
-  for (const row of data as Array<{
-    total_price: number | string | null
-    status: string | null
-    created_at: string | null
-  }>) {
-    if (!row.created_at) continue
-    const k = dateKey(startOfDayUTC(new Date(row.created_at)))
-    const bucket = buckets.get(k)
-    if (!bucket) continue
-    const value = Number(row.total_price ?? 0)
-    bucket.reserved += value
-    if (row.status === 'confirmed' || row.status === 'collected') {
-      bucket.confirmed += value
-    }
-  }
-
-  const ordered = [...buckets.entries()]
-    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
-    .map(([date, v]) => ({ date, reserved: v.reserved, confirmed: v.confirmed }))
-
-  return {
-    previous: ordered.slice(0, 7),
-    current: ordered.slice(7, 14),
-  }
-}
-
-async function fetchLowStock(): Promise<LowStockItem[]> {
-  if (!supabaseAdmin) return []
-  const { data, error } = await supabaseAdmin
-    .from('products')
-    .select(
-      `id, name, stock, volume,
-       range:ranges ( brand:brands (name) )`,
-    )
-    .eq('is_active', true)
-    .lt('stock', 5)
-    .order('stock', { ascending: true })
-    .limit(5)
-
-  if (error || !data) return []
-  return (data as Array<{
-    id: string
-    name: string
-    stock: number | null
-    volume: string | null
-    range?: { brand?: { name?: string | null } | null } | null
-  }>).map((p) => ({
-    id: p.id,
-    name: p.name,
-    brand: p.range?.brand?.name ?? null,
-    volume: p.volume ?? null,
-    stock: p.stock ?? 0,
-  }))
-}
-
-async function fetchTopProducts(): Promise<TopProductRow[]> {
-  if (!supabaseAdmin) return []
-  const thirtyDaysAgo = new Date(Date.now() - 30 * DAY_MS).toISOString()
-
-  // Récupère les items des réservations non annulées des 30 derniers jours.
-  // On agrège côté Node — volumes raisonnables pour un dashboard.
-  const { data, error } = await supabaseAdmin
-    .from('reservation_items')
-    .select(
-      `product_id, product_name, quantity, unit_price,
-       reservations!inner (status, created_at),
-       products ( range:ranges ( brand:brands (name) ) )`,
-    )
-    .gte('reservations.created_at', thirtyDaysAgo)
-    .neq('reservations.status', 'cancelled')
-
-  if (error || !data) return []
-
-  type Row = {
-    product_id: string | null
-    product_name: string
-    quantity: number
-    unit_price: number | string
-    products?: {
-      range?: { brand?: { name?: string | null } | null } | null
-    } | null
-  }
-
-  const agg = new Map<
-    string,
-    { productId: string | null; name: string; brand: string | null; units: number; total: number }
-  >()
-  for (const row of data as Row[]) {
-    const key = row.product_id ?? row.product_name
-    const cur = agg.get(key) ?? {
-      productId: row.product_id,
-      name: row.product_name,
-      brand: row.products?.range?.brand?.name ?? null,
-      units: 0,
-      total: 0,
-    }
-    cur.units += row.quantity
-    cur.total += Number(row.unit_price) * row.quantity
-    agg.set(key, cur)
-  }
-  return [...agg.values()]
-    .sort((a, b) => b.units - a.units)
-    .slice(0, 4)
-    .map((r) => ({
-      productId: r.productId,
-      name: r.name,
-      brand: r.brand,
-      units: r.units,
-      totalDop: r.total,
-    }))
-}
-
-async function fetchRecentReservations(): Promise<ReservationRow[]> {
-  if (!supabaseAdmin) return []
-  const { data, error } = await supabaseAdmin
-    .from('reservations')
-    .select('id, contact_name, status, total_price, created_at')
-    .order('created_at', { ascending: false })
-    .limit(5)
-  if (error || !data) return []
-  return (data as Array<{
-    id: string
-    contact_name: string | null
-    status: string
-    total_price: number | string
-    created_at: string
-  }>).map((r) => ({
-    id: r.id,
-    reference: buildReservationReferenceCompact(r.id),
-    contactName: r.contact_name ?? '',
-    status: (r.status as ReservationStatus) ?? 'pending',
-    totalPrice: Number(r.total_price ?? 0),
-    whatsappOpened: false,
-  }))
-}
-
-async function fetchRecentMessages(): Promise<MessageRow[]> {
-  if (!supabaseAdmin) return []
-  const { data, error } = await supabaseAdmin
-    .from('contact_messages')
-    .select('id, user_email, subject, message, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(5)
-  if (error || !data) return []
-  return (data as Array<{
-    id: string
-    user_email: string
-    subject: string
-    message: string
-    status: string | null
-    created_at: string | null
-  }>).map((m) => ({
-    id: m.id,
-    from: m.user_email.split('@')[0],
-    subject: m.subject,
-    preview: m.message,
-    createdAt: m.created_at ?? new Date().toISOString(),
-    unread: m.status === 'unread',
-  }))
-}
-
 function todayLabel(locale: string): string {
   return new Intl.DateTimeFormat(toLocaleTag(locale), {
     weekday: 'long',
@@ -235,29 +47,23 @@ function todayLabel(locale: string): string {
   }).format(new Date())
 }
 
+const fmt0 = (n: number) => formatPrice(n, { fractionDigits: 0 })
+
 export default async function AdminDashboardPage() {
-  const [revenue, lowStock, topProducts, recentReservations, recentMessages, locale, tCrumbs, tDashboard, tCommon, tProduct] =
-    await Promise.all([
-      fetchRevenue(),
-      fetchLowStock(),
-      fetchTopProducts(),
-      fetchRecentReservations(),
-      fetchRecentMessages(),
-      getLocale(),
-      getTranslations('Admin.crumbs'),
-      getTranslations('Admin.crumbs'),
-      getTranslations('Admin.common'),
-      getTranslations('Admin.product'),
-    ])
-  void tDashboard
+  const [d, locale, tCrumbs, tCommon, tProduct] = await Promise.all([
+    getDashboardData(),
+    getLocale(),
+    getTranslations('Admin.crumbs'),
+    getTranslations('Admin.common'),
+    getTranslations('Admin.product'),
+  ])
+
+  const lowCritical = d.inventory.distribution.low + d.inventory.distribution.oos
 
   return (
     <>
       <PageHeader
-        crumbs={[
-          { label: tCrumbs('admin'), href: '/admin' },
-          { label: tCrumbs('dashboard') },
-        ]}
+        crumbs={[{ label: tCrumbs('admin'), href: '/admin' }, { label: tCrumbs('dashboard') }]}
         title={`${tCrumbs('dashboard')} · ${todayLabel(locale)}`}
         actions={
           <>
@@ -280,12 +86,122 @@ export default async function AdminDashboardPage() {
       />
 
       <div className="bg-sand-100 px-5 lg:px-8 py-6 lg:py-7">
-        <div className="grid grid-cols-12 gap-4 lg:gap-5 max-w-[1240px] mx-auto">
-          <RevenueWidget current={revenue.current} previous={revenue.previous} />
-          <LowStockWidget items={lowStock} />
-          <TopProductsWidget rows={topProducts} />
-          <RecentReservationsWidget rows={recentReservations} />
-          <RecentMessagesWidget rows={recentMessages} />
+        <div className="max-w-[1240px] mx-auto flex flex-col gap-7 lg:gap-9">
+          {/* ───────── Pulse : tout d'un coup d'œil ───────── */}
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+            <StatCard
+              label="Productos activos"
+              value={String(d.readiness.activeProducts)}
+              sub={`${d.readiness.brands} marcas · ${d.readiness.ranges} gamas`}
+              icon={Boxes}
+              accent="ink"
+              href="/admin/product"
+            />
+            <StatCard
+              label="Reservas activas"
+              value={String(d.reservationStatus.activeCount)}
+              sub={`${fmt0(d.reservationStatus.confirmedRevenue)} DOP confirmado`}
+              icon={ClipboardList}
+              accent="clay"
+              href="/admin/reservations"
+            />
+            <StatCard
+              label="Stock crítico"
+              value={String(lowCritical)}
+              sub={`${d.inventory.distribution.oos} agotados · < 5 uds`}
+              icon={AlertTriangle}
+              accent={lowCritical > 0 ? 'brick' : 'olive'}
+              alert={lowCritical > 0}
+              href="/admin/stock"
+            />
+            <StatCard
+              label="Mensajes sin leer"
+              value={String(d.inbox.unread)}
+              sub={`${d.inbox.total} en total`}
+              icon={Mail}
+              accent={d.inbox.unread > 0 ? 'clay' : 'olive'}
+              alert={d.inbox.unread > 0}
+              href="/admin/messages"
+            />
+            <StatCard
+              label="Clientes"
+              value={String(d.customers.total)}
+              sub={`+${d.customers.new7d} esta semana`}
+              icon={Users}
+              accent="ink"
+              href="/admin/users"
+            />
+            <StatCard
+              label="Carritos activos"
+              value={String(d.engagement.activeCarts)}
+              sub={`${d.engagement.cartUnits} uds en curso`}
+              icon={ShoppingCart}
+              accent="ink"
+            />
+          </div>
+
+          {/* ───────── 01 · Reservas e ingresos ───────── */}
+          <section className="flex flex-col gap-4">
+            <DashboardSectionHeader
+              index="01"
+              title="Reservas e ingresos"
+              description="Click & collect · últimos 7 días"
+            />
+            <div className="grid grid-cols-12 gap-4 lg:gap-5">
+              <RevenueWidget
+                current={d.revenue.current}
+                previous={d.revenue.previous}
+                className="col-span-12 lg:col-span-8"
+              />
+              <ReservationStatusWidget
+                data={d.reservationStatus}
+                className="col-span-12 lg:col-span-4"
+              />
+              <RecentReservationsWidget rows={d.recentReservations} className="col-span-12" />
+            </div>
+          </section>
+
+          {/* ───────── 02 · Catálogo e inventario ───────── */}
+          <section className="flex flex-col gap-4">
+            <DashboardSectionHeader
+              index="02"
+              title="Catálogo e inventario"
+              description={`${d.readiness.activeProducts} productos · ${d.readiness.brands} marcas`}
+            />
+            <div className="grid grid-cols-12 gap-4 lg:gap-5">
+              <CatalogueReadinessWidget data={d.readiness} className="col-span-12 lg:col-span-7" />
+              <InventoryWidget data={d.inventory} className="col-span-12 lg:col-span-5" />
+              <BrandBreakdownWidget bars={d.brandBars} className="col-span-12" />
+              <TopProductsWidget rows={d.topProducts} className="col-span-12 md:col-span-6" />
+              <LowStockWidget items={d.lowStock} className="col-span-12 md:col-span-6" />
+            </div>
+          </section>
+
+          {/* ───────── 03 · Clientes y actividad ───────── */}
+          <section className="flex flex-col gap-4">
+            <DashboardSectionHeader
+              index="03"
+              title="Clientes y actividad"
+              description="Cuentas, carritos y bandeja"
+            />
+            <div className="grid grid-cols-12 gap-4 lg:gap-5">
+              <CustomersWidget
+                data={d.customers}
+                className="col-span-12 md:col-span-6 lg:col-span-4"
+              />
+              <EngagementWidget
+                data={d.engagement}
+                className="col-span-12 md:col-span-6 lg:col-span-4"
+              />
+              <ContentWidget data={d.content} className="col-span-12 lg:col-span-4" />
+              <RecentMessagesWidget rows={d.recentMessages} className="col-span-12" />
+            </div>
+          </section>
+
+          {/* ───────── Atajos ───────── */}
+          <div className="grid grid-cols-12 gap-4 lg:gap-5">
+            <QuickActionsWidget className="col-span-12" />
+          </div>
         </div>
       </div>
     </>

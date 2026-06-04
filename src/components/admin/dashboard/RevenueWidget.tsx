@@ -16,6 +16,8 @@ type RevenueWidgetProps = {
   current: DailyPoint[]
   /** 7 points pour la semaine précédente (utilisés pour calculer le trend). */
   previous: DailyPoint[]
+  /** Classes de grille (col-span…). */
+  className?: string
 }
 
 const fmtDOP = (n: number) => formatPrice(Math.round(n), { fractionDigits: 0 })
@@ -32,7 +34,7 @@ function trend(current: number, previous: number) {
   }
 }
 
-export function RevenueWidget({ current, previous }: RevenueWidgetProps) {
+export function RevenueWidget({ current, previous, className = 'col-span-12' }: RevenueWidgetProps) {
   const reservedNow = sum(current, 'reserved')
   const confirmedNow = sum(current, 'confirmed')
   const reservedTrend = trend(reservedNow, sum(previous, 'reserved'))
@@ -40,7 +42,7 @@ export function RevenueWidget({ current, previous }: RevenueWidgetProps) {
   const conversion = reservedNow > 0 ? (confirmedNow / reservedNow) * 100 : 0
 
   return (
-    <article className="bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-4 col-span-12 lg:col-span-8">
+    <article className={`bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-4 ${className}`}>
       <div className="flex justify-between items-baseline">
         <div>
           <h3 className="font-serif text-[20px] text-ink-900 m-0 mb-0.5">Reservas</h3>

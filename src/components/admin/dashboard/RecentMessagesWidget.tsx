@@ -23,9 +23,15 @@ function relativeTime(iso: string): string {
   return new Intl.DateTimeFormat('es-DO', { day: 'numeric', month: 'short' }).format(new Date(iso))
 }
 
-export function RecentMessagesWidget({ rows }: { rows: MessageRow[] }) {
+export function RecentMessagesWidget({
+  rows,
+  className = 'col-span-12',
+}: {
+  rows: MessageRow[]
+  className?: string
+}) {
   return (
-    <article className="bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 col-span-12">
+    <article className={`bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 ${className}`}>
       <div className="flex justify-between items-baseline">
         <div>
           <h3 className="font-serif text-[20px] text-ink-900 m-0 mb-0.5">Mensajes recientes</h3>

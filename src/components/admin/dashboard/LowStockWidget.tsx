@@ -9,11 +9,11 @@ export type LowStockItem = {
   stock: number
 }
 
-type Props = { items: LowStockItem[] }
+type Props = { items: LowStockItem[]; className?: string }
 
-export function LowStockWidget({ items }: Props) {
+export function LowStockWidget({ items, className = 'col-span-12' }: Props) {
   return (
-    <article className="bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 col-span-12 lg:col-span-4">
+    <article className={`bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 ${className}`}>
       <div className="flex justify-between items-baseline">
         <div>
           <h3 className="font-serif text-[20px] text-ink-900 m-0 mb-0.5">Stock crítico</h3>

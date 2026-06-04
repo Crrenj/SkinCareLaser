@@ -11,9 +11,15 @@ export type TopProductRow = {
 
 const fmtDOP = (n: number) => formatPrice(Math.round(n), { fractionDigits: 0 })
 
-export function TopProductsWidget({ rows }: { rows: TopProductRow[] }) {
+export function TopProductsWidget({
+  rows,
+  className = 'col-span-12',
+}: {
+  rows: TopProductRow[]
+  className?: string
+}) {
   return (
-    <article className="bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 col-span-12 lg:col-span-6">
+    <article className={`bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 ${className}`}>
       <div className="flex justify-between items-baseline">
         <div>
           <h3 className="font-serif text-[20px] text-ink-900 m-0 mb-0.5">Top productos</h3>
