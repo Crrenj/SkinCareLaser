@@ -190,6 +190,13 @@ export default function NavBar() {
                     <span className="font-mono text-[10.5px] text-ink-400">{s.count}</span>
                   </Link>
                 ))}
+                <Link
+                  href="/catalogue"
+                  className="mt-1 flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[12.5px] font-semibold text-clay-700 transition-colors hover:bg-sand-100"
+                >
+                  {t('mega.allProducts')}
+                  <ArrowRight size={13} strokeWidth={2} />
+                </Link>
               </div>
               {/* Col 2 · Marques */}
               <div>
