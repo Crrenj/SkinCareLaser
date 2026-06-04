@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Loader2, Mail } from 'lucide-react'
+import { Search, Loader2, LifeBuoy } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useMessagesData } from './_hooks/useMessagesData'
-import { FILTERS, type StatusFilter } from './_lib/types'
-import { Kpi, StatusPill, PriorityIcon, statsCountFor } from './_components/MessageHelpers'
+import { FILTERS, CATEGORIES, type StatusFilter, type CategoryFilter } from './_lib/types'
+import { Kpi, StatusPill, CategoryBadge, PriorityIcon, statsCountFor } from './_components/MessageHelpers'
 import { MessageDetailModal } from './_components/MessageDetailModal'
 import type { ContactMessage } from './_lib/types'
 
@@ -15,23 +15,26 @@ export default function MessagesAdminPage() {
   const tCrumbs = useTranslations('Admin.crumbs')
   const tCommon = useTranslations('Admin.common')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
   const [showModal, setShowModal] = useState(false)
 
-  const { messages, stats, loading, markAsRead, changeStatus, deleteMessage, confirmDialog } =
+  const { messages, stats, loading, changeStatus, setPriority, deleteMessage, confirmDialog } =
     useMessagesData(statusFilter)
 
-  const filtered = messages.filter(
-    (m) =>
-      m.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.message.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filtered = messages.filter((m) => {
+    if (categoryFilter !== 'all' && m.category !== categoryFilter) return false
+    const q = searchTerm.toLowerCase()
+    return (
+      m.subject.toLowerCase().includes(q) ||
+      m.user_email.toLowerCase().includes(q) ||
+      m.message.toLowerCase().includes(q)
+    )
+  })
 
-  const handleDelete = async (id: string) => {
-    return deleteMessage(id, t('deleteConfirmTitle'), t('deleteConfirmBody'), t('deleteConfirmLabel'))
-  }
+  const handleDelete = async (id: string) =>
+    deleteMessage(id, t('deleteConfirmTitle'), t('deleteConfirmBody'), t('deleteConfirmLabel'))
 
   return (
     <>
@@ -85,14 +88,33 @@ export default function MessagesAdminPage() {
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             <Kpi label={t('kpiTotal')} value={stats.total} />
-            <Kpi label={t('kpiUnread')} value={stats.unread} accent="clay" />
-            <Kpi label={t('kpiRead')} value={stats.read} />
-            <Kpi label={t('kpiReplied')} value={stats.replied} accent="olive" />
-            <Kpi label={t('kpiArchived')} value={stats.archived} />
+            <Kpi label={t('kpiOpen')} value={stats.open} accent="clay" />
+            <Kpi label={t('kpiInProgress')} value={stats.in_progress} accent="ochre" />
+            <Kpi label={t('kpiResolved')} value={stats.resolved} accent="olive" />
+            <Kpi label={t('kpiClosed')} value={stats.closed} />
             <Kpi label={t('kpiToday')} value={stats.today} accent="clay" />
             <Kpi label={t('kpiWeek')} value={stats.this_week} />
           </div>
         )}
+
+        {/* Filtre catégorie (secondaire, côté client) */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] tracking-[0.14em] uppercase text-ink-500 font-semibold mr-1">
+            {t('categoryFilterLabel')}
+          </span>
+          <CategoryChip active={categoryFilter === 'all'} onClick={() => setCategoryFilter('all')}>
+            {t('categoryAll')}
+          </CategoryChip>
+          {CATEGORIES.map((c) => (
+            <CategoryChip
+              key={c.value}
+              active={categoryFilter === c.value}
+              onClick={() => setCategoryFilter(c.value)}
+            >
+              {t(c.labelKey)}
+            </CategoryChip>
+          ))}
+        </div>
 
         {loading ? (
           <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">
@@ -101,34 +123,34 @@ export default function MessagesAdminPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-sand-50 border border-sand-300 rounded-xl py-14 text-center text-ink-500 text-[13.5px]">
-            <Mail className="w-6 h-6 mx-auto mb-3 opacity-50" />
+            <LifeBuoy className="w-6 h-6 mx-auto mb-3 opacity-50" />
             {t('emptyState')}
           </div>
         ) : (
           <ul className="bg-sand-50 border border-sand-300 rounded-xl overflow-hidden shadow-[0_1px_2px_rgba(31,27,22,0.06),0_12px_32px_-8px_rgba(31,27,22,0.08)] divide-y divide-sand-200 list-none m-0 p-0">
             {filtered.map((message) => {
-              const isUnread = message.status === 'unread'
+              const isOpen = message.status === 'open'
               return (
-                <li key={message.id} className={isUnread ? 'bg-clay-50/50' : ''}>
+                <li key={message.id} className={isOpen ? 'bg-clay-50/50' : ''}>
                   <button
                     type="button"
                     onClick={() => {
                       setSelectedMessage(message)
                       setShowModal(true)
-                      if (isUnread) markAsRead(message.id)
                     }}
                     className="w-full text-left px-5 py-4 hover:bg-sand-100 transition-colors flex items-start gap-3 group"
                   >
                     <span
                       aria-hidden
-                      className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${isUnread ? 'bg-clay-700' : 'bg-transparent border border-sand-400'}`}
+                      className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${isOpen ? 'bg-clay-700' : 'bg-transparent border border-sand-400'}`}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <PriorityIcon priority={message.priority} t={t} />
-                        <span className={`text-[14px] truncate ${isUnread ? 'font-semibold text-ink-900' : 'font-medium text-ink-800'}`}>
+                        <span className={`text-[14px] truncate ${isOpen ? 'font-semibold text-ink-900' : 'font-medium text-ink-800'}`}>
                           {message.subject}
                         </span>
+                        <CategoryBadge category={message.category} t={t} />
                         <StatusPill status={message.status} t={t} />
                       </div>
                       <div className="flex items-center gap-2 text-[12px] text-ink-500 mb-1.5 flex-wrap font-mono">
@@ -152,11 +174,32 @@ export default function MessagesAdminPage() {
           open={showModal}
           onClose={() => setShowModal(false)}
           onChangeStatus={changeStatus}
+          onSetPriority={setPriority}
           onDelete={handleDelete}
         />
       )}
 
       {confirmDialog}
     </>
+  )
+}
+
+function CategoryChip({
+  active, onClick, children,
+}: {
+  active: boolean; onClick: () => void; children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-2.5 py-1 text-[12px] rounded-full border transition-colors ${
+        active
+          ? 'bg-ink-900 text-sand-50 border-ink-900 font-medium'
+          : 'bg-sand-50 text-ink-700 border-sand-300 hover:border-sand-500 hover:text-ink-900'
+      }`}
+    >
+      {children}
+    </button>
   )
 }

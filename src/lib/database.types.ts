@@ -201,6 +201,7 @@ export type Database = {
       contact_messages: {
         Row: {
           admin_notes: string | null
+          category: string
           created_at: string | null
           id: string
           message: string
@@ -215,6 +216,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          category?: string
           created_at?: string | null
           id?: string
           message: string
@@ -229,6 +231,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          category?: string
           created_at?: string | null
           id?: string
           message?: string
@@ -957,11 +960,16 @@ export type Database = {
         }[]
       }
       cleanup_banner_positions: { Args: never; Returns: undefined }
-      create_contact_message: {
-        Args: { p_email: string; p_message: string; p_subject: string }
+      create_reservation: { Args: { p_cart_id: string }; Returns: string }
+      create_ticket: {
+        Args: {
+          p_category: string
+          p_email: string
+          p_message: string
+          p_subject: string
+        }
         Returns: Json
       }
-      create_reservation: { Args: { p_cart_id: string }; Returns: string }
       expire_stale_reservations: { Args: never; Returns: number }
       get_messages_stats: { Args: never; Returns: Json }
       get_or_create_cart: {

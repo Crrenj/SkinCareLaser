@@ -1,25 +1,42 @@
 'use client'
 
-import { Reply, Archive, Trash2, EyeOff, X } from 'lucide-react'
+import { Clock, Check, Archive, Trash2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
-import type { ContactMessage } from '../_lib/types'
+import { StatusPill, CategoryBadge } from './MessageHelpers'
+import type { ContactMessage, TicketStatus, TicketPriority } from '../_lib/types'
 
 interface Props {
   message: ContactMessage
   open: boolean
   onClose: () => void
   onChangeStatus: (id: string, status: string) => Promise<boolean>
+  onSetPriority: (id: string, priority: TicketPriority) => Promise<boolean>
   onDelete: (id: string) => Promise<boolean>
 }
 
-export function MessageDetailModal({ message, open, onClose, onChangeStatus, onDelete }: Props) {
+const STATUS_LABEL_KEY: Record<TicketStatus, string> = {
+  open: 'statusOpen',
+  in_progress: 'statusInProgress',
+  resolved: 'statusResolved',
+  closed: 'statusClosed',
+}
+
+const PRIORITIES: TicketPriority[] = ['low', 'normal', 'high', 'urgent']
+const PRIORITY_LABEL_KEY: Record<TicketPriority, string> = {
+  low: 'priorityLow',
+  normal: 'priorityNormal',
+  high: 'priorityHigh',
+  urgent: 'priorityUrgent',
+}
+
+export function MessageDetailModal({ message, open, onClose, onChangeStatus, onSetPriority, onDelete }: Props) {
   const t = useTranslations('Admin.messages')
   const dialogRef = useModalA11y(open, onClose)
 
   if (!open) return null
 
-  const handleStatus = async (status: string) => {
+  const handleStatus = async (status: TicketStatus) => {
     const ok = await onChangeStatus(message.id, status)
     if (ok) onClose()
   }
@@ -28,6 +45,14 @@ export function MessageDetailModal({ message, open, onClose, onChangeStatus, onD
     const ok = await onDelete(message.id)
     if (ok) onClose()
   }
+
+  // Transitions disponibles = tous les statuts sauf l'actuel.
+  const allActions: { status: TicketStatus; labelKey: string; icon: React.ReactNode; accent: 'ink' | 'olive' }[] = [
+    { status: 'in_progress', labelKey: 'actionInProgress', icon: <Clock className="w-3.5 h-3.5" />, accent: 'ink' },
+    { status: 'resolved', labelKey: 'actionResolved', icon: <Check className="w-3.5 h-3.5" />, accent: 'olive' },
+    { status: 'closed', labelKey: 'actionClose', icon: <Archive className="w-3.5 h-3.5" />, accent: 'ink' },
+  ]
+  const statusActions = allActions.filter((a) => a.status !== message.status)
 
   return (
     <div
@@ -42,13 +67,17 @@ export function MessageDetailModal({ message, open, onClose, onChangeStatus, onD
         aria-labelledby="messages-modal-title"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-2xl bg-sand-50 border border-sand-300 rounded-xl shadow-[0_24px_60px_-12px_rgba(31,27,22,0.35)] overflow-hidden"
+        className="w-full max-w-2xl bg-sand-50 border border-sand-300 rounded-xl shadow-[0_24px_60px_-12px_rgba(31,27,22,0.35)] overflow-hidden text-ink-900"
       >
         <header className="px-6 py-5 border-b border-sand-300 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 id="messages-modal-title" className="font-serif text-[22px] text-ink-900 leading-tight m-0 mb-2">
               {message.subject}
             </h3>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <CategoryBadge category={message.category} t={t} />
+              <StatusPill status={message.status} t={t} />
+            </div>
             <div className="flex items-center gap-2 text-[12px] text-ink-500 font-mono flex-wrap">
               <span className="truncate">{message.user_email}</span>
               <span className="text-ink-500">·</span>
@@ -79,16 +108,32 @@ export function MessageDetailModal({ message, open, onClose, onChangeStatus, onD
             </div>
           </section>
 
+          {/* Priorité de triage */}
+          <label className="flex items-center gap-3 text-[12.5px] text-ink-700">
+            <span className="font-semibold">{t('priorityLabel')}</span>
+            <select
+              value={message.priority}
+              onChange={(e) => onSetPriority(message.id, e.target.value as TicketPriority)}
+              className="bg-sand-50 border border-sand-300 rounded-md px-2.5 py-1.5 text-[13px] text-ink-900 outline-none focus-visible:ring-2 focus-visible:ring-clay-700"
+            >
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>{t(PRIORITY_LABEL_KEY[p])}</option>
+              ))}
+            </select>
+          </label>
+
+          {/* Transitions de statut */}
           <div className="flex flex-wrap gap-2">
-            <ActionButton onClick={() => handleStatus('read')} icon={<EyeOff className="w-3.5 h-3.5" />}>
-              {t('actionMarkRead')}
-            </ActionButton>
-            <ActionButton onClick={() => handleStatus('replied')} icon={<Reply className="w-3.5 h-3.5" />} accent="olive">
-              {t('actionMarkReplied')}
-            </ActionButton>
-            <ActionButton onClick={() => handleStatus('archived')} icon={<Archive className="w-3.5 h-3.5" />}>
-              {t('actionArchive')}
-            </ActionButton>
+            {statusActions.map((a) => (
+              <ActionButton
+                key={a.status}
+                onClick={() => handleStatus(a.status)}
+                icon={a.icon}
+                accent={a.accent}
+              >
+                {t(a.labelKey)}
+              </ActionButton>
+            ))}
             <ActionButton onClick={handleDelete} icon={<Trash2 className="w-3.5 h-3.5" />} accent="brick">
               {t('actionDelete')}
             </ActionButton>
@@ -96,12 +141,13 @@ export function MessageDetailModal({ message, open, onClose, onChangeStatus, onD
 
           <div className="text-[11px] text-ink-500 border-t border-sand-300 pt-4 flex flex-wrap gap-x-5 gap-y-1 font-mono">
             <span>
-              <b className="text-ink-700">{t('metaStatus')}</b>{' '}
-              {t(`status${message.status.charAt(0).toUpperCase() + message.status.slice(1)}` as
-                'statusUnread' | 'statusRead' | 'statusReplied' | 'statusArchived')}
+              <b className="text-ink-700">{t('metaStatus')}</b> {t(STATUS_LABEL_KEY[message.status])}
             </span>
             <span>
-              <b className="text-ink-700">{t('metaPriority')}</b> {message.priority}
+              <b className="text-ink-700">{t('metaCategory')}</b> {t(`category${message.category.charAt(0).toUpperCase()}${message.category.slice(1)}`)}
+            </span>
+            <span>
+              <b className="text-ink-700">{t('metaPriority')}</b> {t(PRIORITY_LABEL_KEY[message.priority])}
             </span>
             {message.replied_at && (
               <span>

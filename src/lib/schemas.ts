@@ -110,12 +110,28 @@ export const bannerUpdate = z.object({
   attribution_photo_url: z.string().nullish(),
 })
 
+// Système de tickets de support (contact_messages)
+export const TICKET_CATEGORIES = ['bug', 'order', 'product', 'account', 'other'] as const
+export const TICKET_STATUSES = ['open', 'in_progress', 'resolved', 'closed'] as const
+export const TICKET_PRIORITIES = ['low', 'normal', 'high', 'urgent'] as const
+
+// PATCH admin d'un ticket (statut / catégorie / priorité / notes internes)
 export const messagePatch = z.object({
   id: z.string().uuid('id requis'),
-  status: z.string().optional(),
-  priority: z.string().optional(),
-  admin_notes: z.string().optional(),
+  status: z.enum(TICKET_STATUSES).optional(),
+  category: z.enum(TICKET_CATEGORIES).optional(),
+  priority: z.enum(TICKET_PRIORITIES).optional(),
+  admin_notes: z.string().max(4000).optional(),
   replied_at: z.string().optional(),
+})
+
+// Création publique d'un ticket (centre d'aide /aide + page /contact).
+// Email requis mais PAS de compte requis (tickets anonymes autorisés).
+export const ticketCreate = z.object({
+  email: z.string().trim().email('Email invalide').max(200),
+  category: z.enum(TICKET_CATEGORIES).optional(),
+  subject: z.string().trim().min(1, 'Sujet requis').max(200),
+  message: z.string().trim().min(1, 'Message requis').max(4000),
 })
 
 export const reservationPatch = z.object({

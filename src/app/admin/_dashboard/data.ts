@@ -209,7 +209,7 @@ async function fetchRecentMessages(): Promise<MessageRow[]> {
     subject: m.subject,
     preview: m.message,
     createdAt: m.created_at ?? new Date().toISOString(),
-    unread: m.status === 'unread',
+    unread: m.status === 'open',
   }))
 }
 
@@ -541,7 +541,7 @@ async function fetchInbox(): Promise<{ unread: number; total: number }> {
   const sb = supabaseAdmin
   const [totalRes, unreadRes] = await Promise.all([
     sb.from('contact_messages').select('*', { count: 'exact', head: true }),
-    sb.from('contact_messages').select('*', { count: 'exact', head: true }).eq('status', 'unread'),
+    sb.from('contact_messages').select('*', { count: 'exact', head: true }).eq('status', 'open'),
   ])
   return { unread: unreadRes.count ?? 0, total: totalRes.count ?? 0 }
 }

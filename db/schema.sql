@@ -251,13 +251,16 @@ CREATE INDEX IF NOT EXISTS idx_banners_active_position ON public.banners(is_acti
 -- ======================================================================
 -- 7. MESSAGES DE CONTACT
 -- ======================================================================
+-- Système de tickets de support (migration 20260604130000) : statut = cycle
+-- ticket (open/in_progress/resolved/closed) + colonne category.
 CREATE TABLE IF NOT EXISTS public.contact_messages (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_email  TEXT NOT NULL,
   user_id     UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   subject     TEXT NOT NULL,
   message     TEXT NOT NULL,
-  status      TEXT DEFAULT 'unread' CHECK (status IN ('unread','read','replied','archived')),
+  category    TEXT NOT NULL DEFAULT 'other' CHECK (category IN ('bug','order','product','account','other')),
+  status      TEXT DEFAULT 'open' CHECK (status IN ('open','in_progress','resolved','closed')),
   priority    TEXT DEFAULT 'normal' CHECK (priority IN ('low','normal','high','urgent')),
   admin_notes TEXT,
   replied_at  TIMESTAMPTZ,
@@ -267,9 +270,10 @@ CREATE TABLE IF NOT EXISTS public.contact_messages (
 );
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
 
-CREATE INDEX IF NOT EXISTS idx_contact_messages_email   ON public.contact_messages(user_email);
-CREATE INDEX IF NOT EXISTS idx_contact_messages_status  ON public.contact_messages(status);
-CREATE INDEX IF NOT EXISTS idx_contact_messages_created ON public.contact_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_email    ON public.contact_messages(user_email);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status   ON public.contact_messages(status);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_category ON public.contact_messages(category);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created  ON public.contact_messages(created_at DESC);
 
 -- ======================================================================
 -- 7b. RATE LIMITING (buckets fixed-window, service_role only)
@@ -849,61 +853,62 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- RPC messages — create_contact_message
-CREATE OR REPLACE FUNCTION public.create_contact_message(
-  p_email   TEXT,
-  p_subject TEXT,
-  p_message TEXT
-) RETURNS JSON AS $$
+-- RPC tickets — create_ticket (remplace create_contact_message, migration
+-- 20260604130000). Accepte les emails anonymes (lie user_id si le compte existe),
+-- ajoute la catégorie. service_role uniquement.
+CREATE OR REPLACE FUNCTION public.create_ticket(
+  p_email    TEXT,
+  p_category TEXT,
+  p_subject  TEXT,
+  p_message  TEXT
+) RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
   v_user_id    UUID;
+  v_category   TEXT;
   v_message_id UUID;
 BEGIN
-  SELECT id INTO v_user_id FROM auth.users WHERE email = p_email;
-  IF v_user_id IS NULL THEN
-    RETURN json_build_object('success', false,
-      'error', 'Email non trouvé. Vous devez avoir un compte pour envoyer un message.');
-  END IF;
+  v_category := CASE
+    WHEN p_category IN ('bug','order','product','account','other') THEN p_category
+    ELSE 'other'
+  END;
 
-  INSERT INTO public.contact_messages (user_email, user_id, subject, message)
-  VALUES (p_email, v_user_id, p_subject, p_message)
+  SELECT id INTO v_user_id FROM auth.users WHERE email = p_email;
+
+  INSERT INTO public.contact_messages (user_email, user_id, category, subject, message)
+  VALUES (p_email, v_user_id, v_category, p_subject, p_message)
   RETURNING id INTO v_message_id;
 
-  RETURN json_build_object('success', true, 'message_id', v_message_id,
-    'message', 'Message envoyé avec succès!');
+  RETURN json_build_object('success', true, 'message_id', v_message_id);
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
--- RPC messages — mark as read
-CREATE OR REPLACE FUNCTION public.mark_message_as_read(p_message_id UUID)
-RETURNS BOOLEAN AS $$
-BEGIN
-  UPDATE public.contact_messages
-  SET status = 'read', updated_at = NOW()
-  WHERE id = p_message_id;
-  RETURN FOUND;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- RPC messages — stats
+-- RPC tickets — stats (par statut du cycle ticket)
 CREATE OR REPLACE FUNCTION public.get_messages_stats()
-RETURNS JSON AS $$
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 DECLARE
   v_stats JSON;
 BEGIN
   SELECT json_build_object(
-    'total',      COUNT(*),
-    'unread',     COUNT(*) FILTER (WHERE status = 'unread'),
-    'read',       COUNT(*) FILTER (WHERE status = 'read'),
-    'replied',    COUNT(*) FILTER (WHERE status = 'replied'),
-    'archived',   COUNT(*) FILTER (WHERE status = 'archived'),
-    'today',      COUNT(*) FILTER (WHERE created_at::date = CURRENT_DATE),
-    'this_week',  COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE - INTERVAL '7 days')
+    'total',       COUNT(*),
+    'open',        COUNT(*) FILTER (WHERE status = 'open'),
+    'in_progress', COUNT(*) FILTER (WHERE status = 'in_progress'),
+    'resolved',    COUNT(*) FILTER (WHERE status = 'resolved'),
+    'closed',      COUNT(*) FILTER (WHERE status = 'closed'),
+    'today',       COUNT(*) FILTER (WHERE created_at::date = CURRENT_DATE),
+    'this_week',   COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE - INTERVAL '7 days')
   ) INTO v_stats
   FROM public.contact_messages;
   RETURN v_stats;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- ======================================================================
 -- 10. POLICIES RLS
@@ -999,9 +1004,9 @@ CREATE POLICY "Users view own messages" ON public.contact_messages FOR SELECT US
   user_email = (SELECT email FROM auth.users WHERE id = auth.uid())
 );
 CREATE POLICY "Admin manage messages"   ON public.contact_messages FOR ALL    USING (public.is_user_admin(auth.uid()));
-CREATE POLICY "Insert valid email"      ON public.contact_messages FOR INSERT WITH CHECK (
-  user_email IN (SELECT email FROM auth.users)
-);
+-- Policy "Insert valid email" supprimée (migration 20260604130000) : les tickets
+-- anonymes passent par create_ticket (SECURITY DEFINER) / service_role ; aucun
+-- insert direct anon n'est exposé.
 
 -- ----- storage policies -----
 DROP POLICY IF EXISTS "Public read product-image"   ON storage.objects;

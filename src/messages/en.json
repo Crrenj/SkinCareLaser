@@ -673,8 +673,8 @@
     "submitLoading": "Sending...",
     "conditionsHeading": "Sending conditions",
     "conditions": {
-      "haveAccount": "No account required to write to us",
-      "useAccountEmail": "Provide a valid email where we can reply",
+      "haveAccount": "No account is needed to contact us.",
+      "useAccountEmail": "Use a valid email so we can reply to you.",
       "replyTime": "We reply within 24-48 business hours",
       "allFieldsRequired": "All fields are required"
     },
@@ -1057,6 +1057,10 @@
     "manifesto": {
       "title": "Our manifesto — FARMAU",
       "description": "Why FARMAU exists: pharmacy first, curation over volume, advice over promotion."
+    },
+    "help": {
+      "title": "Help center — FARMAU",
+      "description": "Need help? Check the FAQ, access your reservations or report a problem (bug, error, question) to the FARMAU team."
     }
   },
   "BrandsIndex": {
@@ -1482,7 +1486,7 @@
       "navStock": "Stock",
       "navTags": "Tags",
       "navReservations": "Reservations",
-      "navMessages": "Messages",
+      "navMessages": "Support",
       "navAnnounce": "Homepage",
       "navUsers": "Users",
       "navNewsletter": "Newsletter",
@@ -1504,7 +1508,7 @@
       "stock": "Stock",
       "tags": "Tags",
       "reservations": "Reservations",
-      "messages": "Messages",
+      "messages": "Support",
       "announce": "Homepage",
       "users": "Users",
       "newsletter": "Newsletter",
@@ -1766,39 +1770,50 @@
       "deleteTypeConfirmBody": "This type and all its tags will be deleted. Products will not be affected."
     },
     "messages": {
-      "title": "Messages",
+      "title": "Support tickets",
       "searchPlaceholder": "Search by subject, email or content…",
       "kpiTotal": "Total",
-      "kpiUnread": "Unread",
-      "kpiRead": "Read",
-      "kpiReplied": "Replied",
-      "kpiArchived": "Archived",
+      "kpiOpen": "Open",
+      "kpiInProgress": "In progress",
+      "kpiResolved": "Resolved",
+      "kpiClosed": "Closed",
       "kpiToday": "Today",
       "kpiWeek": "This week",
       "filterAll": "All",
-      "filterUnread": "Unread",
-      "filterRead": "Read",
-      "filterReplied": "Replied",
-      "filterArchived": "Archived",
-      "emptyState": "No messages.",
-      "loadError": "Failed to load messages.",
-      "statusUnread": "Unread",
-      "statusRead": "Read",
-      "statusReplied": "Replied",
-      "statusArchived": "Archived",
-      "priorityUrgent": "Urgent",
+      "filterOpen": "Open",
+      "filterInProgress": "In progress",
+      "filterResolved": "Resolved",
+      "filterClosed": "Closed",
+      "categoryFilterLabel": "Category:",
+      "categoryAll": "All",
+      "categoryBug": "Bug / Technical",
+      "categoryOrder": "Order & reservation",
+      "categoryProduct": "Product & advice",
+      "categoryAccount": "Account & login",
+      "categoryOther": "Other",
+      "emptyState": "No tickets.",
+      "loadError": "Error loading tickets.",
+      "statusOpen": "Open",
+      "statusInProgress": "In progress",
+      "statusResolved": "Resolved",
+      "statusClosed": "Closed",
+      "priorityLabel": "Priority:",
+      "priorityLow": "Low",
+      "priorityNormal": "Normal",
       "priorityHigh": "High",
+      "priorityUrgent": "Urgent",
       "messageHeading": "Message:",
-      "actionMarkRead": "Mark as read",
-      "actionMarkReplied": "Mark as replied",
-      "actionArchive": "Archive",
+      "actionInProgress": "Mark in progress",
+      "actionResolved": "Mark resolved",
+      "actionClose": "Close ticket",
       "actionDelete": "Delete",
       "modalCloseAria": "Close",
       "metaStatus": "Status:",
+      "metaCategory": "Category:",
       "metaPriority": "Priority:",
-      "metaRepliedAt": "Replied at:",
-      "deleteConfirmTitle": "Delete message",
-      "deleteConfirmBody": "Are you sure you want to delete this message?",
+      "metaRepliedAt": "Handled on:",
+      "deleteConfirmTitle": "Delete ticket",
+      "deleteConfirmBody": "Are you sure you want to delete this ticket?",
       "deleteConfirmLabel": "Delete"
     },
     "annonce": {
@@ -2088,5 +2103,71 @@
     "heading": "Blog",
     "subtitle": "Advice, news and dermo-cosmetic updates",
     "empty": "No articles yet. Check back soon!"
+  },
+  "Help": {
+    "eyebrow": "Help center",
+    "title": "How can we <em>help you</em>?",
+    "subtitle": "Find a quick answer, or report a problem — bug, error or question. Our team gets back to you as soon as possible.",
+    "quickAccessHeading": "Quick access",
+    "quickAccess": {
+      "faq": {
+        "title": "Frequently asked questions",
+        "desc": "Answers to the most common questions about products, reservations and pickup."
+      },
+      "delivery": {
+        "title": "Pickup & click-and-collect",
+        "desc": "How to reserve online and pick up your products at the pharmacy."
+      },
+      "reservations": {
+        "title": "My reservations",
+        "desc": "Track the status of your reservations from your account."
+      },
+      "contact": {
+        "title": "Contact us",
+        "desc": "Contact details, opening hours and the general contact form."
+      }
+    },
+    "channels": {
+      "heading": "Other channels",
+      "whatsapp": {
+        "heading": "WhatsApp",
+        "desc": "The fastest way for a question about a reservation.",
+        "cta": "Message on WhatsApp"
+      },
+      "email": {
+        "heading": "Email",
+        "desc": "For detailed requests or attachments."
+      },
+      "phone": {
+        "heading": "Phone",
+        "desc": "During the pharmacy's opening hours."
+      }
+    },
+    "form": {
+      "heading": "Report a problem",
+      "intro": "Describe your problem (bug, error, question). No account needed — just leave an email so we can reply.",
+      "categoryLabel": "Type of problem",
+      "category": {
+        "bug": "Bug / Technical issue",
+        "order": "Order & reservation",
+        "product": "Product & advice",
+        "account": "Account & login",
+        "other": "Other"
+      },
+      "emailLabel": "Your email",
+      "emailPlaceholder": "you@example.com",
+      "emailHint": "So we can reply. No account required.",
+      "subjectLabel": "Subject",
+      "subjectPlaceholder": "Sum up the problem in a few words",
+      "messageLabel": "Description",
+      "messagePlaceholder": "Describe what happened and, if possible, the steps to reproduce it…",
+      "submit": "Send report",
+      "submitLoading": "Sending…",
+      "success": "Thank you! Your report was sent. We'll get back to you soon.",
+      "errors": {
+        "generic": "An error occurred. Please try again.",
+        "network": "Network error. Check your connection and try again."
+      }
+    }
   }
 }

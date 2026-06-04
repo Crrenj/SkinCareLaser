@@ -673,8 +673,8 @@
     "submitLoading": "Enviando...",
     "conditionsHeading": "Condiciones de envío",
     "conditions": {
-      "haveAccount": "No necesita una cuenta para escribirnos",
-      "useAccountEmail": "Indique un correo válido donde responder",
+      "haveAccount": "No necesitas una cuenta para escribirnos.",
+      "useAccountEmail": "Indica un email válido para recibir nuestra respuesta.",
       "replyTime": "Respondemos en 24-48h hábiles",
       "allFieldsRequired": "Todos los campos son obligatorios"
     },
@@ -1057,6 +1057,10 @@
     "manifesto": {
       "title": "Nuestro manifiesto — FARMAU",
       "description": "Por qué existe FARMAU: la farmacia primero, la selección antes que el volumen, el consejo antes que la promoción."
+    },
+    "help": {
+      "title": "Centro de ayuda — FARMAU",
+      "description": "¿Necesitas ayuda? Consulta las preguntas frecuentes, accede a tus reservas o reporta un problema (error, fallo, duda) al equipo FARMAU."
     }
   },
   "BrandsIndex": {
@@ -1482,7 +1486,7 @@
       "navStock": "Stock",
       "navTags": "Etiquetas",
       "navReservations": "Reservas",
-      "navMessages": "Mensajes",
+      "navMessages": "Soporte",
       "navAnnounce": "Página de inicio",
       "navUsers": "Usuarios",
       "navNewsletter": "Newsletter",
@@ -1504,7 +1508,7 @@
       "stock": "Stock",
       "tags": "Etiquetas",
       "reservations": "Reservas",
-      "messages": "Mensajes",
+      "messages": "Soporte",
       "announce": "Página de inicio",
       "users": "Usuarios",
       "newsletter": "Newsletter",
@@ -1766,39 +1770,50 @@
       "deleteTypeConfirmBody": "Este tipo y todas sus etiquetas serán eliminados. Los productos no serán afectados."
     },
     "messages": {
-      "title": "Mensajes",
+      "title": "Tickets de soporte",
       "searchPlaceholder": "Buscar por asunto, email o contenido…",
       "kpiTotal": "Total",
-      "kpiUnread": "No leídos",
-      "kpiRead": "Leídos",
-      "kpiReplied": "Respondidos",
-      "kpiArchived": "Archivados",
+      "kpiOpen": "Abiertos",
+      "kpiInProgress": "En curso",
+      "kpiResolved": "Resueltos",
+      "kpiClosed": "Cerrados",
       "kpiToday": "Hoy",
       "kpiWeek": "Esta semana",
       "filterAll": "Todos",
-      "filterUnread": "No leídos",
-      "filterRead": "Leídos",
-      "filterReplied": "Respondidos",
-      "filterArchived": "Archivados",
-      "emptyState": "No hay mensajes.",
-      "loadError": "Error al cargar los mensajes.",
-      "statusUnread": "No leído",
-      "statusRead": "Leído",
-      "statusReplied": "Respondido",
-      "statusArchived": "Archivado",
-      "priorityUrgent": "Urgente",
+      "filterOpen": "Abiertos",
+      "filterInProgress": "En curso",
+      "filterResolved": "Resueltos",
+      "filterClosed": "Cerrados",
+      "categoryFilterLabel": "Categoría:",
+      "categoryAll": "Todas",
+      "categoryBug": "Error / Técnico",
+      "categoryOrder": "Pedido y reserva",
+      "categoryProduct": "Producto y consejo",
+      "categoryAccount": "Cuenta y acceso",
+      "categoryOther": "Otro",
+      "emptyState": "Ningún ticket.",
+      "loadError": "Error al cargar los tickets.",
+      "statusOpen": "Abierto",
+      "statusInProgress": "En curso",
+      "statusResolved": "Resuelto",
+      "statusClosed": "Cerrado",
+      "priorityLabel": "Prioridad:",
+      "priorityLow": "Baja",
+      "priorityNormal": "Normal",
       "priorityHigh": "Alta",
+      "priorityUrgent": "Urgente",
       "messageHeading": "Mensaje:",
-      "actionMarkRead": "Marcar como leído",
-      "actionMarkReplied": "Marcar como respondido",
-      "actionArchive": "Archivar",
+      "actionInProgress": "Marcar en curso",
+      "actionResolved": "Marcar resuelto",
+      "actionClose": "Cerrar ticket",
       "actionDelete": "Eliminar",
       "modalCloseAria": "Cerrar",
       "metaStatus": "Estado:",
+      "metaCategory": "Categoría:",
       "metaPriority": "Prioridad:",
-      "metaRepliedAt": "Respondido el:",
-      "deleteConfirmTitle": "Eliminar el mensaje",
-      "deleteConfirmBody": "¿Seguro que quieres eliminar este mensaje?",
+      "metaRepliedAt": "Atendido el:",
+      "deleteConfirmTitle": "Eliminar el ticket",
+      "deleteConfirmBody": "¿Seguro que quieres eliminar este ticket?",
       "deleteConfirmLabel": "Eliminar"
     },
     "annonce": {
@@ -2088,5 +2103,71 @@
     "heading": "Blog",
     "subtitle": "Consejos, actualidad y novedades dermo-cosméticas",
     "empty": "No hay artículos por el momento. ¡Vuelve pronto!"
+  },
+  "Help": {
+    "eyebrow": "Centro de ayuda",
+    "title": "¿Cómo podemos <em>ayudarte</em>?",
+    "subtitle": "Encuentra una respuesta rápida o repórtanos un problema — error, fallo o duda. Nuestro equipo te responde lo antes posible.",
+    "quickAccessHeading": "Accesos rápidos",
+    "quickAccess": {
+      "faq": {
+        "title": "Preguntas frecuentes",
+        "desc": "Respuestas a las dudas más comunes sobre productos, reservas y retiros."
+      },
+      "delivery": {
+        "title": "Retiro y click-and-collect",
+        "desc": "Cómo reservar en línea y retirar tus productos en la farmacia."
+      },
+      "reservations": {
+        "title": "Mis reservas",
+        "desc": "Sigue el estado de tus reservas desde tu cuenta."
+      },
+      "contact": {
+        "title": "Contáctanos",
+        "desc": "Datos de contacto, horarios y formulario de contacto general."
+      }
+    },
+    "channels": {
+      "heading": "Otros canales",
+      "whatsapp": {
+        "heading": "WhatsApp",
+        "desc": "Lo más rápido para una duda sobre una reserva.",
+        "cta": "Escribir por WhatsApp"
+      },
+      "email": {
+        "heading": "Email",
+        "desc": "Para solicitudes detalladas o con archivos adjuntos."
+      },
+      "phone": {
+        "heading": "Teléfono",
+        "desc": "Durante el horario de apertura de la farmacia."
+      }
+    },
+    "form": {
+      "heading": "Reportar un problema",
+      "intro": "Describe tu problema (error, fallo, duda). No necesitas cuenta — déjanos un email para responderte.",
+      "categoryLabel": "Tipo de problema",
+      "category": {
+        "bug": "Error / Problema técnico",
+        "order": "Pedido y reserva",
+        "product": "Producto y consejo",
+        "account": "Cuenta y acceso",
+        "other": "Otro"
+      },
+      "emailLabel": "Tu email",
+      "emailPlaceholder": "tu@ejemplo.com",
+      "emailHint": "Para responderte. No se requiere cuenta.",
+      "subjectLabel": "Asunto",
+      "subjectPlaceholder": "Resume el problema en pocas palabras",
+      "messageLabel": "Descripción",
+      "messagePlaceholder": "Describe qué pasó y, si puedes, los pasos para reproducirlo…",
+      "submit": "Enviar el reporte",
+      "submitLoading": "Enviando…",
+      "success": "¡Gracias! Tu reporte se envió correctamente. Te responderemos pronto.",
+      "errors": {
+        "generic": "Ocurrió un error. Inténtalo de nuevo.",
+        "network": "Error de red. Revisa tu conexión e inténtalo de nuevo."
+      }
+    }
   }
 }

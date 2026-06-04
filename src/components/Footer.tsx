@@ -42,7 +42,7 @@ const SERVICE_LINKS = [
   { key: 'delivery', href: '/livraison' },
   { key: 'pharmacists', href: '/a-propos' },
   { key: 'faq', href: '/faq' },
-  { key: 'help', href: '/contact' },
+  { key: 'help', href: '/aide' },
 ] as const
 
 const BRAND_LINKS = [

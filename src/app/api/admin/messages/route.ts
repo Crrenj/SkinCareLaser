@@ -64,11 +64,12 @@ export async function PATCH(request: NextRequest) {
     const raw = await request.json()
     const parsed = parseBody(messagePatch, raw)
     if (!parsed.ok) return parsed.response
-    const { id, status, priority, admin_notes, replied_at } = parsed.data
+    const { id, status, category, priority, admin_notes, replied_at } = parsed.data
 
     const updateData: {
       updated_at: string
       status?: string
+      category?: string
       priority?: string
       admin_notes?: string
       replied_at?: string
@@ -78,6 +79,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (status) updateData.status = status
+    if (category) updateData.category = category
     if (priority) updateData.priority = priority
     if (admin_notes !== undefined) updateData.admin_notes = admin_notes
     if (replied_at) {

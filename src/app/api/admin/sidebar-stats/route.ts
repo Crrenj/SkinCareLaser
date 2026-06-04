@@ -9,7 +9,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
  *   - products  : total produits actifs
  *   - low_stock : produits actifs avec stock < 5
  *   - reservations : réservations en attente d'action (pending|confirmed)
- *   - messages  : messages non lus
+ *   - messages  : tickets de support ouverts (status = open)
  *
  * Cache HTTP 15 s pour limiter les hits si la sidebar reste ouverte.
  */
@@ -37,7 +37,7 @@ export async function GET() {
     supabaseAdmin
       .from('contact_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'unread'),
+      .eq('status', 'open'),
   ])
 
   return NextResponse.json(
