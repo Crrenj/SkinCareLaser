@@ -15,6 +15,8 @@ Les deux policies user-facing ont un `USING` (filtre la cible) mais **aucun `WIT
 
 **Impact** : un utilisateur authentifié appelant PostgREST **directement** (`/rest/v1/cart_items`, `/rest/v1/carts` avec son JWT) pourrait INSERT/UPDATE une ligne pointant vers le cart **d'autrui** (ou re-parenter son cart vers un autre `user_id`). **Mitigé pour les flux applicatifs** (les routes `/api/cart/*` passent par `supabaseAdmin` service-role + valident l'ownership côté route), mais l'accès API direct reste ouvert. Classe d'IDOR confirmée par Lanjo (B2).
 
+> ⚠️ **CORRECTION (vérif 5-agents, 2026-06-05) — P1-1 est un FAUX POSITIF.** En Postgres, une policy `FOR ALL`/`FOR UPDATE` avec `USING` mais **sans** `WITH CHECK` utilise **l'expression `USING` comme `WITH CHECK` par défaut** pour INSERT/UPDATE. L'ownership est donc **déjà** appliqué en écriture. Les deux `ALTER POLICY … WITH CHECK` de la migration sont des **no-op fonctionnels** (clarté/explicite seulement, **aucun gain de sécurité**). Aucun IDOR réel ici. Confirmé indépendamment par les lentilles RLS-sémantique (#2) et red-team (#5).
+
 ### P1-2 — Default privileges : `anon` hérite de TOUT sur les futurs objets
 `pg_default_acl` (owner `postgres`, schéma `public`) : `anon=arwdDxtm` sur les **tables** (a,r,w,d,D,x,t,m), `anon=X` sur les **fonctions**, `anon=rwU` sur les **séquences**.
 **Impact** : chaque future table créée par `postgres` est **auto-exposée à anon** (lecture/écriture) tant qu'on ne pose pas RLS + policies ; oublier `ENABLE ROW LEVEL SECURITY` = table grand ouverte. Chaque future fonction est anon-exécutable par défaut (origine des advisors `*_security_definer_function_executable`). **N'affecte PAS les tables existantes** (grants déjà figés). Lanjo B4.
@@ -88,6 +90,68 @@ END $$;
 
 ---
 
-## Prochaine étape
+## Vérification 5-agents (2026-06-05) — verdict **GO** sur la version corrigée
 
-Avant `apply_migration` : lancer les **5 agents de vérification indépendants**. Points d'attention prioritaires : (a) le `WITH CHECK` sur `carts` ne doit pas bloquer un flux légitime (merge = SECURITY DEFINER, OK ; vérifier qu'aucune route ne fait un UPDATE direct de `carts.user_id` hors service-role) ; (b) confirmer qu'aucune table existante ne dépend des default privileges anon (elles ont des grants explicites) ; (c) `rls_auto_enable` n'est appelée par aucune policy/trigger en prod.
+5 agents Opus indépendants (lecture seule, base live + code) : **call-sites, RLS-sémantique, signatures, idempotence, red-team**.
+
+| Lentille | Verdict | Point clé |
+|---|---|---|
+| Call-sites | **GO** | 100 % des écritures cart passent par service-role (`supabaseAdmin`) ou RPC SECURITY DEFINER → le WITH CHECK n'est jamais sur un chemin applicatif. Aucun script seed ne fait de DDL/ne dépend des default-priv anon. |
+| RLS-sémantique | **GO** | Les 2 `ALTER POLICY WITH CHECK` = **no-op** (USING déjà utilisé comme WITH CHECK). Merge anon→user = SECURITY DEFINER → bypass RLS, non impacté. `is_user_admin` non touchée. |
+| Signatures | **GO** | Noms de policies / signature `rls_auto_enable()` / rôles exacts. **Caveat** : un default-ACL **parallèle owné par `supabase_admin`** grante aussi anon → le REVOKE `FOR ROLE postgres` est **incomplet** (hardening partiel, pas une régression). |
+| Idempotence | **NO-GO sur le draft** → corrigé | Draft : placeholder `(...)` non rempli, `ALTER POLICY` sans garde (pas de `IF EXISTS` natif en PG17), sous-SELECT scalaire fragile. **Version corrigée fournie ci-dessous.** |
+| Red-team | **GO** | Aucune régression de lecture anon (grants existants intacts), `is_user_admin` garde EXECUTE, event-trigger `ensure_rls` non cassé par le REVOKE, aucun reload PostgREST, locks instantanés (métadonnées, 263 lignes carts). |
+
+**Conclusion : GO unanime sur la version corrigée ci-dessous.** Mais **valeur réelle modeste** : les 2 `WITH CHECK` sont cosmétiques (faux positif IDOR) ; seuls les `REVOKE` (default-privileges + `rls_auto_enable`) apportent un durcissement **prospectif** (futurs objets) + nettoient 2 advisors. Le double filet `ensure_rls` (auto-RLS sur nouvelles tables) mitige déjà l'essentiel.
+
+### Migration corrigée (idempotente, rejouable) — **TOUJOURS NON APPLIQUÉE**
+
+```sql
+-- supabase/migrations/20260605120000_cart_rls_withcheck_and_revokes.sql
+
+-- 1. cart_items : WITH CHECK = miroir EXACT du USING (EXISTS corrélé). No-op de sécurité, explicite.
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policy WHERE polname='Manage own cart items' AND polrelid='public.cart_items'::regclass) THEN
+    EXECUTE $sql$ ALTER POLICY "Manage own cart items" ON public.cart_items
+      WITH CHECK (EXISTS (SELECT 1 FROM carts WHERE carts.id = cart_items.cart_id
+        AND (carts.user_id = (SELECT auth.uid()) OR (carts.anonymous_id)::text = (auth.jwt() ->> 'anonymous_id')))) $sql$;
+  END IF;
+END $$;
+
+-- 2. carts : WITH CHECK = miroir du USING (FOR UPDATE).
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_policy WHERE polname='Update own cart' AND polrelid='public.carts'::regclass) THEN
+    EXECUTE $sql$ ALTER POLICY "Update own cart" ON public.carts
+      WITH CHECK ((SELECT auth.uid()) = user_id OR (anonymous_id)::text = (auth.jwt() ->> 'anonymous_id')) $sql$;
+  END IF;
+END $$;
+
+-- 3. Default privileges : ferme l'exposition anon des FUTURS objets (postgres-owned). Idempotent.
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON TABLES FROM anon;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM anon;
+-- (Optionnel, si le runner a le rôle supabase_admin — hardening complet :)
+-- ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON TABLES FROM anon;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon;
+-- ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM anon;
+
+-- 4. rls_auto_enable() : hygiène advisor (event-trigger → REVOKE sans effet sur l'auto-RLS).
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+             WHERE n.nspname='public' AND p.proname='rls_auto_enable' AND pg_get_function_identity_arguments(p.oid)='') THEN
+    REVOKE EXECUTE ON FUNCTION public.rls_auto_enable() FROM PUBLIC, anon, authenticated;
+  END IF;
+END $$;
+
+-- 5. Assertions finales (qualifiées par table — anti "more than one row").
+DO $$ BEGIN
+  IF (SELECT polwithcheck FROM pg_policy WHERE polname='Manage own cart items' AND polrelid='public.cart_items'::regclass) IS NULL
+    THEN RAISE EXCEPTION 'cart_items WITH CHECK non posé'; END IF;
+  IF (SELECT polwithcheck FROM pg_policy WHERE polname='Update own cart' AND polrelid='public.carts'::regclass) IS NULL
+    THEN RAISE EXCEPTION 'carts WITH CHECK non posé'; END IF;
+END $$;
+```
+
+⚠️ **Ne PAS toucher `is_user_admin`** (appelée par 15 policies `TO public` dont les lectures anon de `products`/`banners` — la révoquer casse le catalogue). L'advisor `is_user_admin` restera (intentionnel). **P1-4 buckets** + **leaked-password** = Dashboard, hors SQL.
+
+**Statut : migration vérifiée GO mais NON appliquée** — en attente du feu vert utilisateur (pause demandée).
