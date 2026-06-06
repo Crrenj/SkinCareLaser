@@ -78,10 +78,10 @@ function ConfirmDialogModal({
 
   const confirmBg =
     tone === 'danger'
-      ? 'bg-brick-600 hover:bg-brick-800 focus-visible:ring-brick-600'
+      ? 'bg-brick-600 text-sand-50 hover:bg-brick-800 focus-visible:ring-brick-600'
       : tone === 'warning'
-        ? 'bg-ochre-600 hover:bg-ochre-600/90 focus-visible:ring-ochre-600'
-        : 'bg-clay-700 hover:bg-clay-800 focus-visible:ring-clay-700'
+        ? 'bg-ochre-600 text-sand-50 hover:bg-ochre-600/90 focus-visible:ring-ochre-600'
+        : 'bg-clay-700 text-on-accent hover:bg-accent-hover focus-visible:ring-clay-700'
 
   const iconBg =
     tone === 'danger'
@@ -142,7 +142,7 @@ function ConfirmDialogModal({
           <button
             type="button"
             onClick={onConfirm}
-            className={`px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 border-0 rounded-[10px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 transition-colors ${confirmBg}`}
+            className={`px-[18px] py-[11px] text-[13.5px] font-medium border-0 rounded-[10px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 transition-colors ${confirmBg}`}
           >
             {confirmLabel}
           </button>

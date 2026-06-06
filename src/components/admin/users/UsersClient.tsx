@@ -217,7 +217,7 @@ export function UsersClient() {
                           disabled={updatingId === r.id}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                             r.isAdmin
-                              ? 'bg-clay-700 hover:bg-clay-800 text-on-accent'
+                              ? 'bg-clay-700 hover:bg-accent-hover text-on-accent'
                               : 'bg-transparent border border-sand-400 text-ink-700 hover:border-ink-700 hover:text-ink-900'
                           }`}
                         >

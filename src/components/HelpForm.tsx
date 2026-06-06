@@ -142,7 +142,7 @@ export default function HelpForm({ className = '' }: { className?: string }) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-clay-700 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider rounded-lg hover:bg-clay-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-clay-700 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider rounded-lg hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay-700 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {loading ? (
             <>

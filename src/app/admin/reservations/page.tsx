@@ -306,7 +306,7 @@ export default function ReservationsAdminPage() {
             </button>
             <button
               type="button"
-              className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-clay-800 text-on-accent inline-flex items-center gap-1.5 transition-colors"
+              className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-accent-hover text-on-accent inline-flex items-center gap-1.5 transition-colors"
               onClick={() => setShowNew(true)}
             >
               <Plus className="w-3.5 h-3.5" />

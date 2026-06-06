@@ -46,7 +46,7 @@ export function CartEmpty({ whatsappLink: waLinkProp }: { whatsappLink?: string 
       <div className="flex flex-col sm:flex-row gap-3 mt-2 w-full sm:w-auto">
         <Link
           href="/catalogue"
-          className="inline-flex items-center justify-center h-12 px-7 rounded-lg bg-clay-700 text-on-accent font-medium text-[14.5px] hover:bg-clay-800 transition-colors"
+          className="inline-flex items-center justify-center h-12 px-7 rounded-lg bg-clay-700 text-on-accent font-medium text-[14.5px] hover:bg-accent-hover transition-colors"
         >
           {t('ctaCatalogue')}
         </Link>

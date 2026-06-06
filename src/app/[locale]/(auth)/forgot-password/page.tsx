@@ -67,7 +67,7 @@ export default function ForgotPasswordPage() {
             type="submit"
             disabled={loading}
             className="h-11 rounded-lg bg-clay-700 text-on-accent text-[14.5px] font-medium
-                       hover:bg-clay-800 transition-colors
+                       hover:bg-accent-hover transition-colors
                        disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? t('submitLoading') : t('submitButton')}

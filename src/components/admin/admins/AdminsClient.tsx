@@ -322,7 +322,7 @@ export function AdminsClient() {
             <button
               type="submit"
               disabled={searching || search.trim().length < 2}
-              className="inline-flex items-center gap-2 px-4 h-10 rounded-md bg-clay-700 hover:bg-clay-800 text-on-accent text-[13px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-2 px-4 h-10 rounded-md bg-clay-700 hover:bg-accent-hover text-on-accent text-[13px] font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               {tc('search')}
@@ -357,7 +357,7 @@ export function AdminsClient() {
                           type="button"
                           onClick={() => handleMakeAdmin(u)}
                           disabled={updatingId === u.id}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11.5px] font-semibold uppercase tracking-wider bg-clay-700 hover:bg-clay-800 text-on-accent disabled:opacity-50 transition-colors shrink-0"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11.5px] font-semibold uppercase tracking-wider bg-clay-700 hover:bg-accent-hover text-on-accent disabled:opacity-50 transition-colors shrink-0"
                         >
                           {updatingId === u.id ? (
                             <Loader2 className="w-3 h-3 animate-spin" />

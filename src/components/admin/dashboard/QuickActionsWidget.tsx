@@ -54,7 +54,7 @@ export function QuickActionsWidget({ className }: { className?: string }) {
             href={href}
             className={`flex flex-col items-start gap-2.5 rounded-lg border p-3 no-underline transition-colors ${
               primary
-                ? 'bg-clay-700 border-clay-700 text-on-accent hover:bg-clay-800'
+                ? 'bg-clay-700 border-clay-700 text-on-accent hover:bg-accent-hover'
                 : 'bg-sand-100 border-sand-200 text-ink-900 hover:border-clay-700/45 hover:bg-sand-200'
             }`}
           >

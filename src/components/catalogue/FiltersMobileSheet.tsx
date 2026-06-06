@@ -311,7 +311,7 @@ export function FiltersMobileSheet({
           type="button"
           onClick={handleApply}
           disabled={matchedCount === 0}
-          className="w-full h-[50px] rounded-xl bg-clay-700 text-on-accent text-[14.5px] font-medium hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+          className="w-full h-[50px] rounded-xl bg-clay-700 text-on-accent text-[14.5px] font-medium hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
         >
           {t('applyButton')} · {t('applyCount', { count: matchedCount })}
         </button>

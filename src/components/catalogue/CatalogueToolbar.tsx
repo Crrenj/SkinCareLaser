@@ -37,8 +37,8 @@ export function CatalogueToolbar({ activeFilters, onClearAll, sort, onSortChange
                 type="button"
                 onClick={f.onRemove}
                 aria-label={t('removeFilterAriaLabel', { label: f.label })}
-                className={`inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-[3px] text-[13px] font-medium text-sand-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 ${
-                  i === 0 ? 'bg-ink-900 hover:bg-ink-800' : 'bg-clay-700 hover:bg-clay-800'
+                className={`inline-flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-[3px] text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700 ${
+                  i === 0 ? 'bg-ink-900 text-sand-50 hover:bg-ink-800' : 'bg-clay-700 text-on-accent hover:bg-accent-hover'
                 }`}
               >
                 {f.label}

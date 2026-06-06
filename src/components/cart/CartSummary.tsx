@@ -88,7 +88,7 @@ export function CartSummary({
         disabled={reserving}
         className={
           (isPage ? 'mt-2 h-13' : 'h-12') +
-          ' rounded-xl bg-clay-700 hover:bg-clay-800 text-on-accent font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight'
+          ' rounded-xl bg-clay-700 hover:bg-accent-hover text-on-accent font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight'
         }
         style={isPage ? { height: 52 } : undefined}
       >

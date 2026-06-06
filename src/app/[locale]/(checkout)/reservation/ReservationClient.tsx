@@ -240,7 +240,7 @@ export default function ReservationClient({ initialProfile }: ReservationClientP
                     type="button"
                     onClick={triggerReviewSubmit}
                     disabled={submitting}
-                    className="mt-3 h-14 rounded-xl bg-clay-700 hover:bg-clay-800 text-on-accent font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight gap-0.5"
+                    className="mt-3 h-14 rounded-xl bg-clay-700 hover:bg-accent-hover text-on-accent font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center leading-tight gap-0.5"
                   >
                     {submitting ? (
                       <span className="inline-flex items-center gap-2 text-[14.5px]">

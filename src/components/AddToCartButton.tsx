@@ -121,7 +121,7 @@ export function AddToCartButton({
 
   // Gabarit générique pour default / outline / ghost
   const baseClasses = {
-    default: 'bg-clay-700 text-white hover:bg-clay-800',
+    default: 'bg-clay-700 text-on-accent hover:bg-accent-hover',
     outline: 'border border-clay-700 text-clay-700 hover:bg-clay-50',
     ghost: 'text-clay-700 hover:bg-clay-50',
   } as const

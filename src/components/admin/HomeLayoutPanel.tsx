@@ -76,7 +76,7 @@ export function HomeLayoutPanel() {
           type="button"
           onClick={save}
           disabled={saving || !dirty}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-clay-700 px-4 py-2 text-[13px] font-medium text-on-accent transition-colors hover:bg-clay-800 disabled:opacity-50"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-clay-700 px-4 py-2 text-[13px] font-medium text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
           {saving ? t('saving') : t('save')}

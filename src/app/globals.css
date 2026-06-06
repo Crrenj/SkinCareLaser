@@ -31,6 +31,11 @@
      texte = fond (cf. plus bas). text-on-accent = utilitaire généré ici. [C-15] */
   --color-on-accent: var(--c-on-accent);
 
+  /* Fond du CTA au survol. Défaut = --c-accent-deep (= ancien hover:bg-clay-800).
+     Surchargé botanico/marino-dark : là accent-deep est ÉCLAIRCI (pour text-clay-800)
+     → blanc illisible au hover ; on assombrit à la place. bg-accent-hover. [C-15] */
+  --color-accent-hover: var(--c-accent-hover);
+
   --color-ink-50:  var(--c-ink-50);
   --color-ink-100: var(--c-ink-100);
   --color-ink-200: var(--c-ink-200);
@@ -121,6 +126,7 @@
      sombre → foncé) : reproduit exactement l'ancien text-sand-50. Les thèmes
      sombres qui n'atteignent pas 4.5:1 ainsi le surchargent dans leur bloc. */
   --c-on-accent: var(--c-bg);
+  --c-accent-hover: var(--c-accent-deep);
 
   /* Mappings tokens Tailwind redéclarés ICI (pas seulement dans @theme/:root)
      pour qu'ils SE RÉSOLVENT sur l'élément thémé : var(--c-*) référencé depuis
@@ -144,6 +150,7 @@
   --color-clay-800: var(--c-accent-deep);
   --color-clay-900: var(--c-accent-900);
   --color-on-accent: var(--c-on-accent);
+  --color-accent-hover: var(--c-accent-hover);
   --color-ink-50:  var(--c-ink-50);
   --color-ink-100: var(--c-ink-100);
   --color-ink-200: var(--c-ink-200);
@@ -190,6 +197,9 @@
   /* accent-strong #5B6B3F (vert foncé) : texte=fond donne 2.74:1.
      Texte blanc → 5.80:1. [C-15] */
   --c-on-accent: #FFFFFF;
+  /* hover : accent-deep ici ÉCLAIRCIT (#7f8c66) → blanc à 3.59 ; on assombrit
+     plutôt (#424d2d) → blanc à 9.01:1. [C-15] */
+  --c-accent-hover: color-mix(in srgb, var(--c-accent-strong) 72%, #000);
 }
 
 /* ── CORAL ──────────────────────────────────────────── */
@@ -216,6 +226,8 @@
   /* accent-strong #3D6B7A (bleu foncé) : texte=fond donne 2.98:1.
      Texte blanc → 5.86:1. [C-15] */
   --c-on-accent: #FFFFFF;
+  /* hover : idem botanico — on assombrit (#2c4d58) → blanc à 9.09:1. [C-15] */
+  --c-accent-hover: color-mix(in srgb, var(--c-accent-strong) 72%, #000);
 }
 
 /* ── ÁMBAR ──────────────────────────────────────────── */

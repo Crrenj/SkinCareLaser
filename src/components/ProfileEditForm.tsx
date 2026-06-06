@@ -263,7 +263,7 @@ export default function ProfileEditForm({
         <button
           type="submit"
           disabled={saving}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium rounded-lg text-white bg-clay-700 hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium rounded-lg text-on-accent bg-clay-700 hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? (
             t('saving')

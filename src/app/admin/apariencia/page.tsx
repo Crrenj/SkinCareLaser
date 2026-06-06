@@ -214,7 +214,7 @@ export default function AppearancePage() {
                   type="button"
                   onClick={handleSave}
                   disabled={!isDirty || saving}
-                  className="px-4 py-2.5 text-[13px] font-medium bg-clay-700 text-on-accent rounded-lg hover:bg-clay-800 disabled:opacity-40 inline-flex items-center gap-2 transition-colors"
+                  className="px-4 py-2.5 text-[13px] font-medium bg-clay-700 text-on-accent rounded-lg hover:bg-accent-hover disabled:opacity-40 inline-flex items-center gap-2 transition-colors"
                 >
                   {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                   {t('save')}

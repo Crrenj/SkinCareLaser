@@ -117,7 +117,7 @@ export function NewsletterClient() {
         <button
           type="button"
           onClick={handleExportCsv}
-          className="inline-flex items-center gap-1.5 h-10 px-4 rounded-md text-[12.5px] font-medium bg-clay-700 hover:bg-clay-800 text-on-accent transition-colors"
+          className="inline-flex items-center gap-1.5 h-10 px-4 rounded-md text-[12.5px] font-medium bg-clay-700 hover:bg-accent-hover text-on-accent transition-colors"
         >
           <Download className="w-3.5 h-3.5" />
           {t('exportCsv')}

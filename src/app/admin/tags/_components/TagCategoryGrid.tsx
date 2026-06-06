@@ -87,7 +87,7 @@ export function TagCategoryGrid({
               <button
                 type="button"
                 onClick={() => onCreateTag(category.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium bg-clay-700 text-on-accent rounded-md hover:bg-clay-800 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium bg-clay-700 text-on-accent rounded-md hover:bg-accent-hover transition-colors"
               >
                 <Plus className="w-3 h-3" strokeWidth={2.4} />
                 {t('addTagButton')}

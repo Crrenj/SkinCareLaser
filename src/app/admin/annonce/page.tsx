@@ -140,7 +140,7 @@ export default function AnnoncePage() {
             <button
               type="button"
               onClick={() => openModal()}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-on-accent text-[13px] font-medium rounded-md hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-clay-700 text-on-accent text-[13px] font-medium rounded-md hover:bg-accent-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
             >
               <Plus className="w-3.5 h-3.5" strokeWidth={2.4} />
               {t('addButton')}

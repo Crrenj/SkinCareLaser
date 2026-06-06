@@ -115,7 +115,7 @@ async function EmptyState() {
       </p>
       <Link
         href="/catalogue"
-        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-sm bg-clay-700 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
+        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-sm bg-clay-700 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider hover:bg-accent-hover transition-colors"
       >
         {t('emptyCta')}
       </Link>

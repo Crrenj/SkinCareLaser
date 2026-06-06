@@ -76,7 +76,7 @@ export default async function AdminDashboardPage() {
             </Link>
             <Link
               href="/admin/product"
-              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 text-on-accent hover:bg-clay-800 transition-colors no-underline"
+              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 text-on-accent hover:bg-accent-hover transition-colors no-underline"
             >
               <Search className="w-3.5 h-3.5" />
               {tCommon('search')}

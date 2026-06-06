@@ -38,7 +38,7 @@ export function SecurityActions({ email }: SecurityActionsProps) {
         type="button"
         onClick={handleResetPassword}
         disabled={status === 'sending' || status === 'sent'}
-        className="inline-flex items-center gap-2.5 px-5 py-3 rounded-sm bg-clay-700 hover:bg-clay-800 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-60 disabled:cursor-not-allowed self-start"
+        className="inline-flex items-center gap-2.5 px-5 py-3 rounded-sm bg-clay-700 hover:bg-accent-hover text-on-accent text-[12.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-60 disabled:cursor-not-allowed self-start"
       >
         <Key size={15} strokeWidth={1.8} />
         {status === 'sending' ? t('sending') : t('changePasswordCta')}
