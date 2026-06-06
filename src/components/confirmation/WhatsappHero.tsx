@@ -8,6 +8,10 @@ type Props = {
   whatsappUrl: string
   /** Aperçu du message qui sera envoyé, affiché dans le mockup téléphone. */
   messagePreview: string
+  /** Téléphone pharmacie (shop_settings.contact_phone) pour le fallback tel:. */
+  phone?: string
+  /** Email pharmacie (shop_settings.contact_email) pour le fallback mailto:. */
+  email?: string
 }
 
 /**
@@ -17,8 +21,9 @@ type Props = {
  * sticky-bottom mobile.
  */
 export const WhatsappHero = forwardRef<HTMLAnchorElement, Props>(
-  function WhatsappHero({ whatsappUrl, messagePreview }, ref) {
+  function WhatsappHero({ whatsappUrl, messagePreview, phone, email }, ref) {
     const t = useTranslations('Reservation.confirmation')
+    const telDigits = (phone ?? '').replace(/[^\d+]/g, '')
     return (
       <article className="relative bg-sand-50 border border-sand-300 rounded-2xl p-6 lg:p-9 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-8 lg:gap-10 items-center overflow-hidden">
         <span
@@ -56,22 +61,28 @@ export const WhatsappHero = forwardRef<HTMLAnchorElement, Props>(
           </a>
           <p className="text-[12.5px] text-ink-500 leading-[1.5] m-0">
             {t.rich('fallback', {
-              call: (chunks) => (
-                <a
-                  href="tel:+18091234567"
-                  className="text-ink-700 underline underline-offset-[3px] hover:text-ink-900 transition-colors"
-                >
-                  {chunks}
-                </a>
-              ),
-              mail: (chunks) => (
-                <a
-                  href="mailto:hola@farmau.do"
-                  className="text-ink-700 underline underline-offset-[3px] hover:text-ink-900 transition-colors"
-                >
-                  {chunks}
-                </a>
-              ),
+              call: (chunks) =>
+                telDigits ? (
+                  <a
+                    href={`tel:${telDigits}`}
+                    className="text-ink-700 underline underline-offset-[3px] hover:text-ink-900 transition-colors"
+                  >
+                    {chunks}
+                  </a>
+                ) : (
+                  <>{chunks}</>
+                ),
+              mail: (chunks) =>
+                email ? (
+                  <a
+                    href={`mailto:${email}`}
+                    className="text-ink-700 underline underline-offset-[3px] hover:text-ink-900 transition-colors"
+                  >
+                    {chunks}
+                  </a>
+                ) : (
+                  <>{chunks}</>
+                ),
             })}
           </p>
         </div>

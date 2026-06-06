@@ -30,6 +30,11 @@ type Props = {
   createdAt: string | null
   pickupLocation: PickupLocation
   items: ConfirmationItem[]
+  /** Numéro WhatsApp boutique (shop_settings.whatsapp_number) pour le CTA. */
+  whatsappNumber: string
+  /** Coordonnées pharmacie pour le fallback tel:/mailto: (shop_settings). */
+  pharmacyPhone: string
+  pharmacyEmail: string
 }
 
 type DraftSnapshot = {
@@ -51,6 +56,9 @@ export default function ConfirmationClient({
   createdAt,
   items,
   pickupLocation,
+  whatsappNumber,
+  pharmacyPhone,
+  pharmacyEmail,
 }: Props) {
   const t = useTranslations('Reservation.confirmation')
   const reference = useMemo(
@@ -130,7 +138,10 @@ export default function ConfirmationClient({
     }
   }, [reference, draft, items, subtotal, firstName, contactName, contactPhone, pickupLocation])
 
-  const whatsappUrl = useMemo(() => buildReservationWhatsappLink(payload), [payload])
+  const whatsappUrl = useMemo(
+    () => buildReservationWhatsappLink(payload, whatsappNumber),
+    [payload, whatsappNumber],
+  )
   const messagePreview = useMemo(() => buildReservationMessage(payload), [payload])
 
   const heroCtaRef = useRef<HTMLAnchorElement | null>(null)
@@ -144,6 +155,8 @@ export default function ConfirmationClient({
           ref={heroCtaRef}
           whatsappUrl={whatsappUrl}
           messagePreview={messagePreview}
+          phone={pharmacyPhone}
+          email={pharmacyEmail}
         />
 
         <ReservationTimeline reference={reference} />

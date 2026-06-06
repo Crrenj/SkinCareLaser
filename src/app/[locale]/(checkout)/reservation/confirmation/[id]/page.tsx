@@ -109,6 +109,9 @@ export default async function ConfirmationPage({
       createdAt={reservation.created_at ?? null}
       items={enrichedItems}
       pickupLocation={pickup}
+      whatsappNumber={settings.whatsapp_number ?? ''}
+      pharmacyPhone={settings.contact_phone ?? ''}
+      pharmacyEmail={settings.contact_email ?? ''}
     />
   )
 }

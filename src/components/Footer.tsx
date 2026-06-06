@@ -127,16 +127,8 @@ export default async function Footer() {
           <FooterLegalLink href="/legal/mentions-legales" label={t('bottom.legal')} />
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex gap-2">
-            {['Visa', 'Mastercard', 'PayPal', 'Azul'].map((label) => (
-              <span
-                key={label}
-                className="font-mono text-[10px] px-2 py-1 border border-[var(--c-ink-panel-border)] rounded-sm text-[var(--c-ink-panel-muted)]"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
+          {/* Pas de badges de paiement : FARMAU est sans paiement en ligne
+              (réservation + retrait/coordination WhatsApp). */}
           <ThemeModeToggle />
         </div>
       </div>

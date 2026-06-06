@@ -32,14 +32,10 @@ export function AddressStep({ initial, onSubmit }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (
-      !data.firstName.trim() ||
-      !data.lastName.trim() ||
-      !data.street.trim() ||
-      !data.city.trim() ||
-      !data.postalCode.trim() ||
-      !data.phone.trim()
-    ) {
+    // Click & collect : seuls nom + téléphone sont requis (contact pour la
+    // coordination WhatsApp). L'adresse postale reste facultative (retrait
+    // en pharmacie — pas de livraison).
+    if (!data.firstName.trim() || !data.lastName.trim() || !data.phone.trim()) {
       setError(t('errors.missingFields'))
       return
     }
@@ -76,7 +72,6 @@ export function AddressStep({ initial, onSubmit }: Props) {
         <Field
           fullWidth
           label={t('streetLabel')}
-          required
           value={data.street}
           onChange={handleChange('street')}
           placeholder={t('streetPlaceholder')}
@@ -86,7 +81,6 @@ export function AddressStep({ initial, onSubmit }: Props) {
 
         <Field
           label={t('cityLabel')}
-          required
           value={data.city}
           onChange={handleChange('city')}
           placeholder={t('cityPlaceholder')}
@@ -94,7 +88,6 @@ export function AddressStep({ initial, onSubmit }: Props) {
         />
         <Field
           label={t('postalCodeLabel')}
-          required
           value={data.postalCode}
           onChange={handleChange('postalCode')}
           placeholder={t('postalCodePlaceholder')}
