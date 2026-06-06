@@ -28,11 +28,12 @@ export default async function ConfirmationPage({
 }) {
   const { locale, id } = await params
   const supabase = await createSupabaseServerClient()
+  // getUser() valide le JWT côté serveur (vs getSession() qui lit le cookie). [C-30]
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     redirect(`/${locale}/login?next=/reservation/confirmation/${id}`)
   }
 
@@ -44,7 +45,7 @@ export default async function ConfirmationPage({
     .eq('id', id)
     .maybeSingle()
 
-  if (!reservation || reservation.user_id !== session.user.id) {
+  if (!reservation || reservation.user_id !== user.id) {
     redirect(`/${locale}/account/profile`)
   }
 

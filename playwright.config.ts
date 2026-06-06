@@ -2,6 +2,11 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests',
+  // Bootstrap/teardown : purge des users de test périmés (@farmau.test) avant et
+  // après la suite. Ces modules importent le helper service-role qui exige
+  // ALLOW_E2E=1 (garde-fou D30) → la suite refuse de tourner sans opt-in. [C-19]
+  globalSetup: './tests/_helpers/global-setup.ts',
+  globalTeardown: './tests/_helpers/global-teardown.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,

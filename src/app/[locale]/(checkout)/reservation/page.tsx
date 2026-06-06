@@ -37,18 +37,19 @@ export default async function ReservationPage({
   const { locale } = await params
   const supabase = await createSupabaseServerClient()
 
+  // getUser() valide le JWT côté serveur (vs getSession() qui lit le cookie). [C-30]
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     redirect(`/${locale}/login?next=/reservation`)
   }
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('first_name, last_name, phone')
-    .eq('id', session.user.id)
+    .eq('id', user.id)
     .maybeSingle()
 
   if (!profile?.phone) {
@@ -61,7 +62,7 @@ export default async function ReservationPage({
         firstName: profile?.first_name ?? '',
         lastName: profile?.last_name ?? '',
         phone: profile?.phone ?? '',
-        email: session.user.email ?? '',
+        email: user.email ?? '',
       }}
     />
   )

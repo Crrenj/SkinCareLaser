@@ -243,7 +243,8 @@ describe('Authentication Tests', () => {
 
     it('affiche une erreur si les mots de passe ne correspondent pas', async () => {
       render(<SignupPage />)
-      await fillSignupForm({ password: 'password123', confirm: 'password456' })
+      // Les deux passent la longueur min (12) mais diffèrent → mismatch.
+      await fillSignupForm({ password: 'password12345', confirm: 'password67890' })
       await userEvent.click(submitSignup())
 
       expect(screen.getByText(signupMessages.errors.passwordsMismatch)).toBeInTheDocument()
@@ -271,15 +272,15 @@ describe('Authentication Tests', () => {
       render(<SignupPage />)
       await fillSignupForm({
         email: 'newuser@example.com',
-        password: 'password123',
-        confirm: 'password123',
+        password: 'password1234',
+        confirm: 'password1234',
       })
       await userEvent.click(submitSignup())
 
       await waitFor(() => {
         expect(mockSignUp).toHaveBeenCalledWith(expect.objectContaining({
           email: 'newuser@example.com',
-          password: 'password123',
+          password: 'password1234',
           options: expect.objectContaining({
             emailRedirectTo: expect.stringContaining('/auth/callback'),
             data: expect.objectContaining({
