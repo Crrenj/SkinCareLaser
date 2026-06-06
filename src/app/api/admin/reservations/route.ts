@@ -31,6 +31,10 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status') // 'all' | un status valide | null
+  // scope sépare la boîte de réception (réservations en cours) du journal des
+  // ventes (lignes retirées). Source unique partagée par les pages
+  // /admin/reservations (inbox) et /admin/ventas (sales).
+  const scope = searchParams.get('scope') // 'inbox' | 'sales' | null
 
   let query = supabaseAdmin
     .from('reservations')
@@ -48,7 +52,23 @@ export async function GET(request: NextRequest) {
     )
     .order('created_at', { ascending: false })
 
-  if (status && status !== 'all' && VALID_STATUSES.includes(status as ReservationStatus)) {
+  if (scope === 'sales') {
+    // Journal des ventes = uniquement les lignes retirées (toutes origines).
+    query = query.eq('status', 'collected')
+  } else if (scope === 'inbox') {
+    // Boîte de réception = tout sauf les ventes retirées, avec narrowing
+    // optionnel par onglet de statut (pending/confirmed/expired/cancelled).
+    query = query.neq('status', 'collected')
+    if (
+      status &&
+      status !== 'all' &&
+      status !== 'collected' &&
+      VALID_STATUSES.includes(status as ReservationStatus)
+    ) {
+      query = query.eq('status', status as ReservationStatus)
+    }
+  } else if (status && status !== 'all' && VALID_STATUSES.includes(status as ReservationStatus)) {
+    // Compat héritée : filtre simple par statut sans scope.
     query = query.eq('status', status as ReservationStatus)
   }
 

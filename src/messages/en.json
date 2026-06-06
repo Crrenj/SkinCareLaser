@@ -1531,6 +1531,7 @@
       "navStock": "Stock",
       "navTags": "Tags",
       "navReservations": "Reservations",
+      "navSales": "Sales",
       "navMessages": "Support",
       "navAnnounce": "Homepage",
       "navUsers": "Users",
@@ -1888,6 +1889,47 @@
         "confirm": "Yes, delete"
       }
     },
+    "sales": {
+      "title": "Sales",
+      "crumbOps": "Operations",
+      "newCounterSale": "Counter sale",
+      "countTotal": "{count} sales",
+      "searchPlaceholder": "Search a sale…",
+      "searchAria": "Search in sales",
+      "showing": "Showing {from}–{to} of {total} sales",
+      "errorLoad": "Load error",
+      "errorUnknown": "Unknown error",
+      "errorCreate": "Could not record the sale",
+      "createdToast": "Sale recorded",
+      "voidConfirm": "Void this sale? Stock will be restored and the row will leave the journal.",
+      "voidTitle": "Void sale",
+      "voidButton": "Void the sale",
+      "bulkVoidConfirm": "Void {count} sales? Stock will be restored.",
+      "bulkVoidTitle": "Void sales",
+      "bulkVoidButton": "Void the sales",
+      "source": {
+        "all": "All",
+        "account": "Account",
+        "guest": "Guest",
+        "counter": "Counter"
+      },
+      "sort": {
+        "newest": "Newest",
+        "oldest": "Oldest"
+      },
+      "summary": {
+        "today": "Revenue today",
+        "month": "Revenue this month",
+        "count": "Sales this month",
+        "avgBasket": "Avg. basket"
+      },
+      "empty": {
+        "title": "No",
+        "titleEmphasis": "sales.",
+        "body": "Counter sales and picked-up reservations will appear here.",
+        "reset": "Clear all"
+      }
+    },
     "reservations": {
       "title": "Reservations",
       "crumbOps": "Operations",
@@ -1943,7 +1985,11 @@
         "successSold": "Sale recorded",
         "soldLabel": "Counter sale (already picked up)",
         "soldHint": "The customer leaves with the goods: recorded as sold and stock is decremented.",
-        "errorCreate": "Could not create the reservation"
+        "errorCreate": "Could not create the reservation",
+        "eyebrowSale": "Counter sale · manual",
+        "titleSale": "New counter sale",
+        "saleHint": "The customer leaves with the goods: recorded as sold, stock is decremented right away.",
+        "reservationHint": "Reservation to fulfil later: stock is only decremented at pickup."
       },
       "status": {
         "pending": "Reserved",

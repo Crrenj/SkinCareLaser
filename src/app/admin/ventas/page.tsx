@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Download, Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
-import { FilterBar, type SortOption } from '@/components/admin/reservations/FilterBar'
 import { BulkActionBar } from '@/components/admin/reservations/BulkActionBar'
 import { ReservationsTable } from '@/components/admin/reservations/ReservationsTable'
 import { ReservationDrawer } from '@/components/admin/reservations/ReservationDrawer'
@@ -17,26 +16,36 @@ import {
   type NewReservationPayload,
 } from '@/components/admin/reservations/NewReservationDrawer'
 import {
+  SalesFilterBar,
+  type SalesSortOption,
+  type SalesSourceFilter,
+} from '@/components/admin/sales/SalesFilterBar'
+import { SalesSummary } from '@/components/admin/sales/SalesSummary'
+import {
   buildReservationRef,
+  fmtDOP,
   type DbReservationStatus,
   type Reservation,
-  type StatusFilter,
-  fmtDOP,
-  nextStatusFor,
 } from '@/components/admin/reservations/types'
 
 const PAGE_SIZE = 25
 
-export default function ReservationsAdminPage() {
-  const t = useTranslations('Admin.reservations')
-  const [reservations, setReservations] = useState<Reservation[]>([])
-  const [counts, setCounts] = useState<Record<string, number>>({})
+/** Date de référence d'une vente : retrait (collected_at), repli création. */
+function saleTime(r: Reservation): number {
+  return new Date(r.collected_at ?? r.created_at).getTime()
+}
+
+export default function SalesAdminPage() {
+  const t = useTranslations('Admin.sales')
+  const tr = useTranslations('Admin.reservations')
+
+  const [rows, setRows] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [filter, setFilter] = useState<StatusFilter>('pending')
+  const [filter, setFilter] = useState<SalesSourceFilter>('all')
   const [search, setSearch] = useState('')
-  const [sort, setSort] = useState<SortOption>('newest')
+  const [sort, setSort] = useState<SalesSortOption>('newest')
   const [page, setPage] = useState(1)
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -50,35 +59,38 @@ export default function ReservationsAdminPage() {
     setLoading(true)
     setError(null)
     try {
-      const params = new URLSearchParams({ scope: 'inbox' })
-      if (filter !== 'all') params.set('status', filter)
-      const res = await fetch(`/api/admin/reservations?${params}`)
+      const res = await fetch('/api/admin/reservations?scope=sales')
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || t('errorLoad'))
-      setReservations(json.reservations ?? [])
-      setCounts(json.counts ?? {})
+      setRows(json.reservations ?? [])
     } catch (e) {
       setError(e instanceof Error ? e.message : t('errorUnknown'))
     } finally {
       setLoading(false)
     }
-  }, [filter, t])
+  }, [t])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  // Reset sélection/pagination quand on change de filtre / recherche / tri
   useEffect(() => {
     setSelectedIds(new Set())
     setPage(1)
   }, [filter, search, sort])
 
-  // Filtrage/tri client-side (le filtre status est déjà appliqué côté API)
+  // Compteurs d'onglets par origine (sur l'ensemble du journal).
+  const counts = useMemo<Record<SalesSourceFilter, number>>(() => {
+    const c: Record<SalesSourceFilter, number> = { all: rows.length, account: 0, guest: 0, counter: 0 }
+    for (const r of rows) c[r.source] += 1
+    return c
+  }, [rows])
+
   const visible = useMemo(() => {
     const haystack = search.trim().toLowerCase()
+    const bySource = filter === 'all' ? rows : rows.filter((r) => r.source === filter)
     const filtered = haystack
-      ? reservations.filter((r) =>
+      ? bySource.filter((r) =>
           [
             buildReservationRef(r.id, r.created_at),
             r.contact_name,
@@ -88,13 +100,13 @@ export default function ReservationsAdminPage() {
             .filter((v): v is string => !!v)
             .some((v) => v.toLowerCase().includes(haystack)),
         )
-      : reservations
+      : bySource
     const sorted = [...filtered].sort((a, b) => {
       switch (sort) {
         case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          return saleTime(b) - saleTime(a)
         case 'oldest':
-          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          return saleTime(a) - saleTime(b)
         case 'total-desc':
           return b.total_price - a.total_price
         case 'total-asc':
@@ -102,7 +114,7 @@ export default function ReservationsAdminPage() {
       }
     })
     return sorted
-  }, [reservations, search, sort])
+  }, [rows, search, filter, sort])
 
   const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE))
   const pageRows = useMemo(
@@ -111,23 +123,17 @@ export default function ReservationsAdminPage() {
   )
 
   const selectedRows = useMemo(
-    () => reservations.filter((r) => selectedIds.has(r.id)),
-    [reservations, selectedIds],
+    () => rows.filter((r) => selectedIds.has(r.id)),
+    [rows, selectedIds],
   )
 
-  const sharedStatus = useMemo<DbReservationStatus | null>(() => {
-    if (selectedRows.length === 0) return null
-    const first = selectedRows[0].status
-    return selectedRows.every((r) => r.status === first) ? first : null
-  }, [selectedRows])
+  // Toutes les ventes partagent le statut « collected ».
+  const sharedStatus: DbReservationStatus | null = selectedRows.length > 0 ? 'collected' : null
 
   const expandedReservation = useMemo(
-    () => reservations.find((r) => r.id === expandedId) ?? null,
-    [reservations, expandedId],
+    () => rows.find((r) => r.id === expandedId) ?? null,
+    [rows, expandedId],
   )
-
-  const totalCount = counts.all ?? reservations.length
-  const pendingCount = counts.pending ?? 0
 
   /* ─────────── Actions ─────────── */
 
@@ -149,25 +155,27 @@ export default function ReservationsAdminPage() {
     })
   }, [])
 
-  const updateStatus = useCallback(
-    async (id: string, status: DbReservationStatus) => {
+  // Annuler une vente = repasser en « cancelled » → la RPC PATCH restaure le stock
+  // et la ligne quitte le journal (elle réapparaît côté Réservations / Annulées).
+  const voidSale = useCallback(
+    async (id: string) => {
       setBusyId(id)
       try {
         const res = await fetch('/api/admin/reservations', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, status }),
+          body: JSON.stringify({ id, status: 'cancelled' }),
         })
         const json = await res.json()
-        if (!res.ok) throw new Error(json.error || 'Error')
+        if (!res.ok) throw new Error(json.error || tr('errorUpdate'))
         await fetchData()
       } catch (e) {
-        setError(e instanceof Error ? e.message : t('errorUpdate'))
+        setError(e instanceof Error ? e.message : tr('errorUpdate'))
       } finally {
         setBusyId(null)
       }
     },
-    [fetchData, t],
+    [fetchData, tr],
   )
 
   const updateNote = useCallback(async (id: string, value: string) => {
@@ -178,14 +186,12 @@ export default function ReservationsAdminPage() {
     })
     if (!res.ok) {
       const json = await res.json().catch(() => ({}))
-      throw new Error(json.error || t('errorSaveNote'))
+      throw new Error(json.error || tr('errorSaveNote'))
     }
-    setReservations((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, admin_notes: value } : r)),
-    )
-  }, [t])
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, admin_notes: value } : r)))
+  }, [tr])
 
-  const createReservation = useCallback(
+  const createSale = useCallback(
     async (payload: NewReservationPayload) => {
       const res = await fetch('/api/admin/reservations', {
         method: 'POST',
@@ -194,13 +200,11 @@ export default function ReservationsAdminPage() {
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        toast.error(json.error || t('create.errorCreate'))
+        toast.error(json.error || t('errorCreate'))
         throw new Error(json.error || 'create failed')
       }
-      toast.success(t('create.successToast'))
+      toast.success(t('createdToast'))
       setShowNew(false)
-      // Réservation manuelle (jamais "vendue" ici) → onglet "à contacter".
-      setFilter('pending')
       await fetchData()
     },
     [fetchData, t],
@@ -210,73 +214,52 @@ export default function ReservationsAdminPage() {
     const phone = r.contact_phone.replace(/\D/g, '')
     const ref = buildReservationRef(r.id, r.created_at)
     const lines = [
-      t('whatsappHello', { name: r.contact_name || '' }).trim(),
+      tr('whatsappHello', { name: r.contact_name || '' }).trim(),
       '',
-      t('whatsappIntro', { ref }),
+      tr('whatsappIntro', { ref }),
       '',
       ...r.items.map((it) => `• ${it.quantity}× ${it.product_name}`),
       '',
-      t('whatsappTotal', { amount: fmtDOP(r.total_price), currency: r.currency || DEFAULT_CURRENCY }),
+      tr('whatsappTotal', { amount: fmtDOP(r.total_price), currency: r.currency || DEFAULT_CURRENCY }),
       '',
-      t('whatsappCta'),
+      tr('whatsappCta'),
     ]
     return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
-  }, [t])
+  }, [tr])
 
   const openWhatsapp = useCallback(
     (r: Reservation) => {
-      const url = buildWhatsappLink(r)
-      window.open(url, '_blank', 'noopener,noreferrer')
+      window.open(buildWhatsappLink(r), '_blank', 'noopener,noreferrer')
     },
     [buildWhatsappLink],
   )
 
-  const advance = useCallback(
+  const cancelSale = useCallback(
     async (r: Reservation) => {
-      const next = nextStatusFor(r.status)
-      if (!next) return
-      await updateStatus(r.id, next)
-    },
-    [updateStatus],
-  )
-
-  const cancelReservation = useCallback(
-    async (r: Reservation) => {
-      const ok = await confirm(
-        t('cancelConfirm'),
-        { title: t('cancelTitle'), confirmLabel: t('cancelButton') },
-      )
+      const ok = await confirm(t('voidConfirm'), {
+        title: t('voidTitle'),
+        confirmLabel: t('voidButton'),
+      })
       if (!ok) return
-      await updateStatus(r.id, 'cancelled')
+      await voidSale(r.id)
       setExpandedId(null)
     },
-    [updateStatus, confirm, t],
+    [voidSale, confirm, t],
   )
 
-  const bulkAdvance = useCallback(async () => {
-    if (!sharedStatus) return
-    const next = nextStatusFor(sharedStatus)
-    if (!next) return
-    for (const r of selectedRows) {
-      await updateStatus(r.id, next)
-    }
-    setSelectedIds(new Set())
-  }, [selectedRows, sharedStatus, updateStatus])
-
-  const bulkCancel = useCallback(async () => {
-    const ok = await confirm(
-      t('bulkCancelConfirm', { count: selectedRows.length }),
-      { title: t('bulkCancelTitle'), confirmLabel: t('bulkCancelButton') },
-    )
+  const bulkVoid = useCallback(async () => {
+    const ok = await confirm(t('bulkVoidConfirm', { count: selectedRows.length }), {
+      title: t('bulkVoidTitle'),
+      confirmLabel: t('bulkVoidButton'),
+    })
     if (!ok) return
     for (const r of selectedRows) {
-      await updateStatus(r.id, 'cancelled')
+      await voidSale(r.id)
     }
     setSelectedIds(new Set())
-  }, [selectedRows, updateStatus, confirm, t])
+  }, [selectedRows, voidSale, confirm, t])
 
   const bulkWhatsapp = useCallback(() => {
-    // Ouvre un onglet WhatsApp pour chaque sélection
     for (const r of selectedRows) {
       if (!r.contact_phone) continue
       window.open(buildWhatsappLink(r), '_blank', 'noopener,noreferrer')
@@ -293,36 +276,24 @@ export default function ReservationsAdminPage() {
         ]}
         title={t('title')}
         actions={
-          <>
-            <button
-              type="button"
-              className="h-9 px-3.5 rounded-md text-[13px] border border-sand-300 bg-transparent text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors inline-flex items-center gap-1.5"
-              onClick={() => {
-                if (typeof window === 'undefined') return
-                toast.info(t('exportCsvSoon'))
-              }}
-            >
-              <Download className="w-3.5 h-3.5" />
-              {t('exportCsv')}
-            </button>
-            <button
-              type="button"
-              className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-accent-hover text-on-accent inline-flex items-center gap-1.5 transition-colors"
-              onClick={() => setShowNew(true)}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              {t('newManual')}
-            </button>
-          </>
+          <button
+            type="button"
+            className="h-9 px-4 rounded-md text-[13px] font-medium bg-clay-700 hover:bg-accent-hover text-on-accent inline-flex items-center gap-1.5 transition-colors"
+            onClick={() => setShowNew(true)}
+          >
+            <Plus className="w-3.5 h-3.5" />
+            {t('newCounterSale')}
+          </button>
         }
       />
 
-      {/* Sous-titre compteurs */}
+      <SalesSummary rows={rows} />
+
       <div className="px-5 lg:px-8 pt-3 text-[12.5px] text-ink-500">
-        {t('countTotal', { count: totalCount })} · {t('countPending', { count: pendingCount })}
+        {t('countTotal', { count: counts.all })}
       </div>
 
-      <FilterBar
+      <SalesFilterBar
         search={search}
         onSearchChange={setSearch}
         filter={filter}
@@ -337,8 +308,8 @@ export default function ReservationsAdminPage() {
         sharedStatus={sharedStatus}
         onClear={() => setSelectedIds(new Set())}
         onWhatsappReminder={bulkWhatsapp}
-        onAdvance={bulkAdvance}
-        onCancel={bulkCancel}
+        onAdvance={() => {}}
+        onCancel={bulkVoid}
       />
 
       {error && (
@@ -356,11 +327,14 @@ export default function ReservationsAdminPage() {
             <Loader2 className="w-8 h-8 animate-spin text-clay-700" />
           </div>
         ) : pageRows.length === 0 ? (
-          <EmptyState t={t} onReset={() => {
-            setSearch('')
-            setFilter('all')
-            setSort('newest')
-          }} />
+          <EmptyState
+            t={t}
+            onReset={() => {
+              setSearch('')
+              setFilter('all')
+              setSort('newest')
+            }}
+          />
         ) : (
           <ReservationsTable
             rows={pageRows}
@@ -370,7 +344,8 @@ export default function ReservationsAdminPage() {
             onSelectAll={selectAll}
             onOpenDetail={(id) => setExpandedId(id)}
             onWhatsapp={openWhatsapp}
-            onAdvance={advance}
+            onAdvance={() => {}}
+            dateField="collected_at"
           />
         )}
 
@@ -393,8 +368,8 @@ export default function ReservationsAdminPage() {
           reservation={expandedReservation}
           onClose={() => setExpandedId(null)}
           onWhatsapp={openWhatsapp}
-          onAdvance={advance}
-          onCancel={cancelReservation}
+          onAdvance={() => {}}
+          onCancel={cancelSale}
           onUpdateNote={updateNote}
           busy={busyId === expandedReservation.id}
         />
@@ -403,54 +378,50 @@ export default function ReservationsAdminPage() {
       <NewReservationDrawer
         open={showNew}
         onClose={() => setShowNew(false)}
-        onCreate={createReservation}
-        mode="reservation"
+        onCreate={createSale}
+        mode="sale"
       />
       {confirmDialog}
     </>
   )
 }
 
-function EmptyState({ t, onReset }: { t: (key: string, values?: Record<string, string | number>) => string; onReset: () => void }) {
+function EmptyState({
+  t,
+  onReset,
+}: {
+  t: (key: string, values?: Record<string, string | number>) => string
+  onReset: () => void
+}) {
   return (
     <div className="py-16 px-5 text-center flex flex-col items-center gap-3.5">
       <svg width="80" height="80" viewBox="0 0 120 120" aria-hidden>
-        <circle
-          cx="60"
-          cy="60"
-          r="56"
-          fill="var(--color-sand-100)"
-          stroke="var(--color-sand-300)"
-        />
+        <circle cx="60" cy="60" r="56" fill="var(--color-sand-100)" stroke="var(--color-sand-300)" />
         <g
-          transform="translate(30,30)"
+          transform="translate(34,32)"
           stroke="var(--color-ink-700)"
           strokeWidth="1.6"
           fill="none"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <rect x="6" y="10" width="48" height="40" rx="3" />
-          <line x1="6" y1="22" x2="54" y2="22" />
-          <line x1="14" y1="32" x2="36" y2="32" opacity=".4" />
-          <line x1="14" y1="40" x2="28" y2="40" opacity=".4" />
+          <path d="M4 12h44l-4 30H8z" />
+          <path d="M16 12a12 12 0 0 1 24 0" />
         </g>
       </svg>
       <h3 className="font-serif text-[26px] text-ink-900 m-0 leading-[1.1]">
-        {t('emptyTitle')}{' '}
+        {t('empty.title')}{' '}
         <em className="not-italic text-clay-700" style={{ fontStyle: 'italic' }}>
-          {t('emptyTitleEmphasis')}
+          {t('empty.titleEmphasis')}
         </em>
       </h3>
-      <p className="text-[13px] text-ink-700 max-w-xs m-0 leading-[1.5]">
-        {t('emptyBody')}
-      </p>
+      <p className="text-[13px] text-ink-700 max-w-xs m-0 leading-[1.5]">{t('empty.body')}</p>
       <button
         type="button"
         onClick={onReset}
         className="mt-2 h-9 px-4 rounded-md text-[13px] border border-sand-300 bg-transparent text-ink-700 hover:bg-sand-100 hover:text-ink-900 transition-colors"
       >
-        {t('emptyReset')}
+        {t('empty.reset')}
       </button>
     </div>
   )

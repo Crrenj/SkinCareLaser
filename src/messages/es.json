@@ -1531,6 +1531,7 @@
       "navStock": "Stock",
       "navTags": "Etiquetas",
       "navReservations": "Reservas",
+      "navSales": "Ventas",
       "navMessages": "Soporte",
       "navAnnounce": "Página de inicio",
       "navUsers": "Usuarios",
@@ -1888,6 +1889,47 @@
         "confirm": "Sí, eliminar"
       }
     },
+    "sales": {
+      "title": "Ventas",
+      "crumbOps": "Operaciones",
+      "newCounterSale": "Venta mostrador",
+      "countTotal": "{count} ventas",
+      "searchPlaceholder": "Buscar una venta…",
+      "searchAria": "Buscar en las ventas",
+      "showing": "Mostrando {from}–{to} de {total} ventas",
+      "errorLoad": "Error de carga",
+      "errorUnknown": "Error desconocido",
+      "errorCreate": "No se pudo registrar la venta",
+      "createdToast": "Venta registrada",
+      "voidConfirm": "¿Anular esta venta? Se restaurará el stock y la línea saldrá del registro.",
+      "voidTitle": "Anular venta",
+      "voidButton": "Anular la venta",
+      "bulkVoidConfirm": "¿Anular {count} ventas? Se restaurará el stock.",
+      "bulkVoidTitle": "Anular ventas",
+      "bulkVoidButton": "Anular las ventas",
+      "source": {
+        "all": "Todas",
+        "account": "Cuenta",
+        "guest": "Invitado",
+        "counter": "Mostrador"
+      },
+      "sort": {
+        "newest": "Más recientes",
+        "oldest": "Más antiguas"
+      },
+      "summary": {
+        "today": "Ingresos hoy",
+        "month": "Ingresos del mes",
+        "count": "Ventas del mes",
+        "avgBasket": "Ticket medio"
+      },
+      "empty": {
+        "title": "Ninguna",
+        "titleEmphasis": "venta.",
+        "body": "Las ventas en mostrador y las reservas retiradas aparecerán aquí.",
+        "reset": "Limpiar todo"
+      }
+    },
     "reservations": {
       "title": "Reservas",
       "crumbOps": "Operaciones",
@@ -1943,7 +1985,11 @@
         "successSold": "Venta registrada",
         "soldLabel": "Venta en mostrador (ya retirada)",
         "soldHint": "El cliente se lleva la mercancía: se registra como vendida y se descuenta del stock.",
-        "errorCreate": "No se pudo crear la reserva"
+        "errorCreate": "No se pudo crear la reserva",
+        "eyebrowSale": "Venta mostrador · manual",
+        "titleSale": "Nueva venta en mostrador",
+        "saleHint": "El cliente se lleva la mercancía: se registra como vendida y el stock se descuenta de inmediato.",
+        "reservationHint": "Reserva para retirar más tarde: el stock solo se descuenta al momento de la retirada."
       },
       "status": {
         "pending": "Reservada",

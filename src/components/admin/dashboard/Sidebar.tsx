@@ -17,6 +17,7 @@ import {
   Mailbox,
   Megaphone,
   Palette,
+  Receipt,
   ShieldCheck,
   Star,
   Tag,
@@ -46,6 +47,7 @@ type NavItem = {
     | 'navStock'
     | 'navTags'
     | 'navReservations'
+    | 'navSales'
     | 'navMessages'
     | 'navAnnounce'
     | 'navBlog'
@@ -96,6 +98,7 @@ const SECTIONS: Section[] = [
         badgeKey: 'reservations',
         badgeVariant: 'alert',
       },
+      { href: '/admin/ventas', labelKey: 'navSales', icon: Receipt },
       { href: '/admin/messages', labelKey: 'navMessages', icon: LifeBuoy, badgeKey: 'messages', badgeVariant: 'alert' },
       { href: '/admin/annonce', labelKey: 'navAnnounce', icon: Megaphone },
       { href: '/admin/blog', labelKey: 'navBlog', icon: FileText },

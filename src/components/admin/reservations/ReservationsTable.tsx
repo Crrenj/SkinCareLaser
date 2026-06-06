@@ -21,6 +21,8 @@ type Props = {
   onOpenDetail: (id: string) => void
   onWhatsapp: (r: Reservation) => void
   onAdvance: (r: Reservation) => void
+  /** Colonne date : date de création (défaut) ou de retrait (journal des ventes). */
+  dateField?: 'created_at' | 'collected_at'
 }
 
 export function ReservationsTable({
@@ -32,6 +34,7 @@ export function ReservationsTable({
   onOpenDetail,
   onWhatsapp,
   onAdvance,
+  dateField = 'created_at',
 }: Props) {
   const t = useTranslations('Admin.reservations')
   const { statusLabel, relativeAndAbsolute, originLabel, displayName } = useReservationFormat()
@@ -88,7 +91,9 @@ export function ReservationsTable({
             const ref = buildReservationRef(r.id, r.created_at)
             const checked = selectedIds.has(r.id)
             const selected = checked || expandedId === r.id
-            const dateInfo = relativeAndAbsolute(r.created_at)
+            const dateInfo = relativeAndAbsolute(
+              (dateField === 'collected_at' ? r.collected_at : null) ?? r.created_at,
+            )
             const next = nextStatusFor(r.status)
             return (
               <tr

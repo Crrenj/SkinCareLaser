@@ -1531,6 +1531,7 @@
       "navStock": "Stock",
       "navTags": "Étiquettes",
       "navReservations": "Réservations",
+      "navSales": "Ventes",
       "navMessages": "Tickets",
       "navAnnounce": "Page d'accueil",
       "navUsers": "Utilisateurs",
@@ -1888,6 +1889,47 @@
         "confirm": "Oui, supprimer"
       }
     },
+    "sales": {
+      "title": "Ventes",
+      "crumbOps": "Opérations",
+      "newCounterSale": "Vente comptoir",
+      "countTotal": "{count} ventes",
+      "searchPlaceholder": "Rechercher une vente…",
+      "searchAria": "Rechercher dans les ventes",
+      "showing": "Affichage {from}–{to} sur {total} ventes",
+      "errorLoad": "Erreur de chargement",
+      "errorUnknown": "Erreur inconnue",
+      "errorCreate": "Impossible d'enregistrer la vente",
+      "createdToast": "Vente enregistrée",
+      "voidConfirm": "Annuler cette vente ? Le stock sera restauré et la ligne quittera le journal.",
+      "voidTitle": "Annuler la vente",
+      "voidButton": "Annuler la vente",
+      "bulkVoidConfirm": "Annuler {count} ventes ? Le stock sera restauré.",
+      "bulkVoidTitle": "Annuler les ventes",
+      "bulkVoidButton": "Annuler les ventes",
+      "source": {
+        "all": "Toutes",
+        "account": "Compte",
+        "guest": "Invité",
+        "counter": "Comptoir"
+      },
+      "sort": {
+        "newest": "Plus récentes",
+        "oldest": "Plus anciennes"
+      },
+      "summary": {
+        "today": "CA aujourd'hui",
+        "month": "CA ce mois",
+        "count": "Ventes ce mois",
+        "avgBasket": "Panier moyen"
+      },
+      "empty": {
+        "title": "Aucune",
+        "titleEmphasis": "vente.",
+        "body": "Les ventes au comptoir et les réservations retirées apparaîtront ici.",
+        "reset": "Tout effacer"
+      }
+    },
     "reservations": {
       "title": "Réservations",
       "crumbOps": "Opérations",
@@ -1943,7 +1985,11 @@
         "successSold": "Vente enregistrée",
         "soldLabel": "Vente au comptoir (déjà retirée)",
         "soldHint": "Le client repart avec la marchandise : enregistrée comme vendue et le stock est décrémenté.",
-        "errorCreate": "Impossible de créer la réservation"
+        "errorCreate": "Impossible de créer la réservation",
+        "eyebrowSale": "Vente comptoir · manuelle",
+        "titleSale": "Nouvelle vente comptoir",
+        "saleHint": "Le client repart avec la marchandise : enregistrée comme vendue, le stock est décrémenté immédiatement.",
+        "reservationHint": "Réservation à honorer plus tard : le stock n'est décrémenté qu'au moment du retrait."
       },
       "status": {
         "pending": "Réservée",
