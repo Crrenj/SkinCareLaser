@@ -109,7 +109,7 @@ export default async function AccountSecurityPage({
             </div>
           </div>
           <a
-            href={`mailto:skin@skinlacercenter.net?subject=${encodeURIComponent(
+            href={`mailto:contact@farmau.do?subject=${encodeURIComponent(
               `[FARMAU] Suppression du compte ${email}`,
             )}&body=${encodeURIComponent(
               `Bonjour,\n\nJe souhaite supprimer mon compte FARMAU associé à l'adresse ${email}, conformément à mon droit à l'oubli (Ley 172-13 RD).\n\nMerci de bien vouloir confirmer la suppression.\n\nCordialement,`,

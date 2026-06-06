@@ -181,7 +181,7 @@ export default async function CookiesPage({
         </p>
         <p>
           Pour toute question :{' '}
-          <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>{' '}
+          <a href="mailto:contact@farmau.do">contact@farmau.do</a>{' '}
           ou via la page <Link href="/contact">Contact</Link>.
         </p>
       </LegalSection>

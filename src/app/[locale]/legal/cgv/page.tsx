@@ -73,7 +73,7 @@ const CONTENT: Record<string, LegalContent> = {
             Vous êtes responsable de la confidentialité de vos identifiants. Toute
             activité réalisée depuis votre compte est présumée effectuée par vous.
             En cas de soupçon d&apos;usage non autorisé, contactez-nous immédiatement à{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
           </p>
         </LegalSection>
 
@@ -150,7 +150,7 @@ const CONTENT: Record<string, LegalContent> = {
             Vous pouvez annuler une réservation à tout moment avant le retrait, sans
             frais ni motif, en répondant au message WhatsApp de confirmation ou en
             nous contactant à{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
           </p>
           <p>
             Aucun produit cosmétique déjà retiré et payé en pharmacie ne peut faire
@@ -196,7 +196,7 @@ const CONTENT: Record<string, LegalContent> = {
           <p>
             Vous pouvez demander la suppression de votre compte à tout moment en
             nous écrivant à{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
             La suppression est effective sous 30 jours et entraîne l&apos;effacement des
             données personnelles, sous réserve des obligations légales de
             conservation (voir la{' '}
@@ -272,7 +272,7 @@ const CONTENT: Record<string, LegalContent> = {
             Usted es responsable de la confidencialidad de sus credenciales. Toda
             actividad realizada desde su cuenta se presume efectuada por usted. En
             caso de sospecha de uso no autorizado, contáctenos de inmediato en{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
           </p>
         </LegalSection>
 
@@ -352,7 +352,7 @@ const CONTENT: Record<string, LegalContent> = {
             Puede cancelar una reserva en cualquier momento antes de la recogida,
             sin gastos ni motivo, respondiendo al mensaje de confirmación de
             WhatsApp o contactándonos en{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
           </p>
           <p>
             Ningún producto cosmético ya retirado y pagado en la farmacia puede ser
@@ -397,7 +397,7 @@ const CONTENT: Record<string, LegalContent> = {
           <p>
             Puede solicitar la eliminación de su cuenta en cualquier momento
             escribiéndonos a{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
             La eliminación es efectiva en un plazo de 30 días e implica el borrado
             de los datos personales, sin perjuicio de las obligaciones legales de
             conservación (véase la{' '}

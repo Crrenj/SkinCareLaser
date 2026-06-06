@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { apiError } from '@/lib/apiError'
+import { SHOP_SETTINGS_TAG } from '@/lib/getShopSettings'
 import type { Database } from '@/lib/database.types'
 
 type SettingsUpdate = Database['public']['Tables']['shop_settings']['Update']
@@ -71,6 +73,19 @@ export async function PATCH(req: NextRequest) {
       if (Object.prototype.hasOwnProperty.call(body, field)) {
         const raw = body[field]
         const value = raw == null || raw === '' ? null : String(raw)
+        if (value && value.length > 400) {
+          return NextResponse.json(
+            { error: `Le champ ${field} dépasse 400 caractères` },
+            { status: 400 },
+          )
+        }
+        if (
+          field === 'contact_email' &&
+          value &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        ) {
+          return NextResponse.json({ error: 'Email de contact invalide' }, { status: 400 })
+        }
         if (field === 'shop_name') {
           // NOT NULL en DB
           if (!value) {
@@ -98,6 +113,7 @@ export async function PATCH(req: NextRequest) {
       .single()
 
     if (error) throw error
+    revalidateTag(SHOP_SETTINGS_TAG)
     return NextResponse.json(data)
   } catch (error) {
     return apiError('Erreur lors de la sauvegarde des paramètres', error, 500)

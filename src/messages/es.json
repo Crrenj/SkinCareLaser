@@ -446,7 +446,7 @@
       "whatsappBody": "Tu reserva está guardada, pero todavía no es definitiva. Abre WhatsApp con el mensaje listo y nuestro equipo confirmará disponibilidad y coordinará el pago (efectivo, transferencia o en farmacia) y la entrega.",
       "whatsappCta": "Abrir WhatsApp",
       "whatsappCtaSub": "Te abriremos un mensaje listo",
-      "fallback": "¿No puedes usar WhatsApp? <call>Llámanos al +1 (809) 123-4567</call> o escríbenos a <mail>hola@farmau.do</mail>.",
+      "fallback": "¿No puedes usar WhatsApp? <call>Llámanos al +1 (809) 123-4567</call> o escríbenos a <mail>contact@farmau.do</mail>.",
       "phoneAvatar": "F",
       "phoneOnline": "en línea",
       "phoneInputPlaceholder": "Mensaje listo para enviar",
@@ -1142,7 +1142,7 @@
         },
         "q4": {
           "q": "¿Cómo cancelo una reserva?",
-          "a": "Responde al mensaje WhatsApp de confirmación o escríbenos a <a href='mailto:skin@skinlacercenter.net'>skin@skinlacercenter.net</a>. Sin gastos, sin justificación."
+          "a": "Responde al mensaje WhatsApp de confirmación o escríbenos a <a href='mailto:contact@farmau.do'>contact@farmau.do</a>. Sin gastos, sin justificación."
         },
         "q5": {
           "q": "¿Hay que pagar una señal o un depósito?",
@@ -1214,7 +1214,7 @@
         },
         "q3": {
           "q": "¿Puedo recuperar mis datos personales?",
-          "a": "Sí, conforme a la Ley 172-13 RD. Solicitud a <a href='mailto:skin@skinlacercenter.net'>skin@skinlacercenter.net</a>, respuesta en 30 días."
+          "a": "Sí, conforme a la Ley 172-13 RD. Solicitud a <a href='mailto:contact@farmau.do'>contact@farmau.do</a>, respuesta en 30 días."
         }
       }
     },

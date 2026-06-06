@@ -58,7 +58,7 @@ export default async function MentionsLegalesPage({
 
       <LegalSection id="contact" num="02." title="Contact">
         <ul>
-          <li><strong>Email :</strong> <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a></li>
+          <li><strong>Email :</strong> <a href="mailto:contact@farmau.do">contact@farmau.do</a></li>
           <li><strong>Téléphone :</strong> <a href="tel:+18097243940">+1 809 724 3940</a></li>
           <li><strong>WhatsApp :</strong> <a href="https://wa.me/18094122468">+1 809 412 2468</a></li>
           <li><strong>Horaires :</strong> Lundi à vendredi, 9h–19h (UTC−4)</li>
@@ -69,7 +69,7 @@ export default async function MentionsLegalesPage({
         <p>
           Le directeur de la publication est le représentant légal de FARMAU SRL.
           Pour toute question éditoriale, contactez{' '}
-          <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+          <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
         </p>
       </LegalSection>
 
@@ -159,7 +159,7 @@ export default async function MentionsLegalesPage({
         <p>
           Pour toute question relative aux présentes mentions légales, vous pouvez
           nous écrire à{' '}
-          <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a> ou
+          <a href="mailto:contact@farmau.do">contact@farmau.do</a> ou
           via la page <Link href="/contact">Contact</Link>.
         </p>
       </LegalSection>

@@ -446,7 +446,7 @@
       "whatsappBody": "Your reservation is saved, but not yet definitive. Open WhatsApp with the message ready and our team will confirm availability and coordinate payment (cash, transfer or in pharmacy) and delivery.",
       "whatsappCta": "Open WhatsApp",
       "whatsappCtaSub": "We'll open WhatsApp with a message ready",
-      "fallback": "Can't use WhatsApp? <call>Call us at +1 (809) 123-4567</call> or write to <mail>hola@farmau.do</mail>.",
+      "fallback": "Can't use WhatsApp? <call>Call us at +1 (809) 123-4567</call> or write to <mail>contact@farmau.do</mail>.",
       "phoneAvatar": "F",
       "phoneOnline": "online",
       "phoneInputPlaceholder": "Message ready to send",
@@ -1142,7 +1142,7 @@
         },
         "q4": {
           "q": "How do I cancel a reservation?",
-          "a": "Reply to the confirmation WhatsApp message or write to <a href='mailto:skin@skinlacercenter.net'>skin@skinlacercenter.net</a>. No fees, no reason needed."
+          "a": "Reply to the confirmation WhatsApp message or write to <a href='mailto:contact@farmau.do'>contact@farmau.do</a>. No fees, no reason needed."
         },
         "q5": {
           "q": "Is there a deposit to pay?",
@@ -1214,7 +1214,7 @@
         },
         "q3": {
           "q": "Can I retrieve my personal data?",
-          "a": "Yes, under Ley 172-13 DR. Request at <a href='mailto:skin@skinlacercenter.net'>skin@skinlacercenter.net</a>, reply within 30 days."
+          "a": "Yes, under Ley 172-13 DR. Request at <a href='mailto:contact@farmau.do'>contact@farmau.do</a>, reply within 30 days."
         }
       }
     },

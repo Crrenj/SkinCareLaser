@@ -50,7 +50,7 @@ const CONTENT: Record<string, LegalContent> = {
             Le responsable du traitement de vos données est <strong>FARMAU SRL</strong>,
             siège social à Santiago, République Dominicaine. Pour toute question
             relative à vos données, contactez-nous à{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
           </p>
         </LegalSection>
 
@@ -209,7 +209,7 @@ const CONTENT: Record<string, LegalContent> = {
           </ul>
           <p>
             Pour exercer ces droits, écrivez-nous à{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>{' '}
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>{' '}
             en précisant votre demande et une preuve d&apos;identité. Une réponse vous
             sera apportée dans un délai maximum de 30 jours.
           </p>
@@ -262,7 +262,7 @@ const CONTENT: Record<string, LegalContent> = {
           <ul>
             <li>
               <strong>Email :</strong>{' '}
-              <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>
+              <a href="mailto:contact@farmau.do">contact@farmau.do</a>
             </li>
             <li>
               <strong>Courrier :</strong> FARMAU — Référent données, Calle Jesús de
@@ -287,7 +287,7 @@ const CONTENT: Record<string, LegalContent> = {
             El responsable del tratamiento de sus datos es <strong>FARMAU SRL</strong>,
             con domicilio social en Santiago, República Dominicana. Para cualquier
             consulta relativa a sus datos, contáctenos en{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>.
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>.
           </p>
         </LegalSection>
 
@@ -447,7 +447,7 @@ const CONTENT: Record<string, LegalContent> = {
           </ul>
           <p>
             Para ejercer estos derechos, escríbanos a{' '}
-            <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>{' '}
+            <a href="mailto:contact@farmau.do">contact@farmau.do</a>{' '}
             indicando su solicitud y una prueba de identidad. Le responderemos en un
             plazo máximo de 30 días.
           </p>
@@ -499,7 +499,7 @@ const CONTENT: Record<string, LegalContent> = {
           <ul>
             <li>
               <strong>Correo electrónico:</strong>{' '}
-              <a href="mailto:skin@skinlacercenter.net">skin@skinlacercenter.net</a>
+              <a href="mailto:contact@farmau.do">contact@farmau.do</a>
             </li>
             <li>
               <strong>Correo postal:</strong> FARMAU — Referente de datos, Calle
