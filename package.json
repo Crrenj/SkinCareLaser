@@ -64,12 +64,12 @@
     "eslint": "^9",
     "eslint-config-next": "^15.5.18",
     "glob": "^11.0.3",
-    "happy-dom": "^18.0.1",
+    "happy-dom": "^20.10.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.8"
   },
   "lint-staged": {
     "*.{ts,tsx}": "eslint --fix --no-warn-ignored"
