@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { safeRedirectPath } from '@/lib/safeRedirect'
 import { Mail, Phone, User, Calendar, Save } from 'lucide-react'
 
 type Profile = {
@@ -97,10 +98,12 @@ export default function ProfileEditForm({
     setSaving(false)
     setSuccess(true)
 
-    // Si on vient d'une page précédente (ex: /cart pour réserver), y revenir
-    if (redirectTo) {
+    // Si on vient d'une page précédente (ex: /cart pour réserver), y revenir.
+    // La cible `from` est assainie (anti open-redirect, cf. safeRedirect). [C-31]
+    const safeDest = safeRedirectPath(redirectTo)
+    if (safeDest) {
       // Petit délai pour que le user voie le message de succès
-      setTimeout(() => router.push(redirectTo), 1200)
+      setTimeout(() => router.push(safeDest), 1200)
     } else {
       router.refresh()
     }

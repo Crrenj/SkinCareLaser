@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { safeRedirectOr } from '@/lib/safeRedirect'
 import { AuthLayout, AuthNotice } from '@/components/auth/AuthLayout'
 import { PasswordInput } from '@/components/auth/PasswordInput'
 import { PasswordStrength } from '@/components/auth/PasswordStrength'
@@ -20,7 +21,7 @@ type SignupErrorKey =
   | 'disposableEmail'
   | 'generic'
 
-const MIN_PASSWORD_LENGTH = 8
+const MIN_PASSWORD_LENGTH = 12
 
 export default function SignupPage() {
   const t = useTranslations('Signup')
@@ -132,11 +133,9 @@ export default function SignupPage() {
           // Laisser un instant aux cookies de session SSR de se poser
           await new Promise((resolve) => setTimeout(resolve, 400))
           const nextParam = new URLSearchParams(window.location.search).get('next')
-          const dest =
-            nextParam && nextParam.startsWith('/') && !nextParam.startsWith('//')
-              ? nextParam
-              : '/'
-          router.push(dest)
+          // Anti open-redirect : `next` assaini (cf. safeRedirect — bloque
+          // //evil.com, /\evil.com, schémas, traversal). [C-08]
+          router.push(safeRedirectOr(nextParam, '/'))
         } else {
           // Fallback : si « Confirm email » est encore actif côté Supabase,
           // aucune session n'est renvoyée → l'utilisateur doit vérifier son email.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { parseBody, productUpdate } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
 
 export async function PATCH(
@@ -15,13 +16,19 @@ export async function PATCH(
 
   try {
     const body = await req.json()
+    const parsed = parseBody(productUpdate, body)
+    if (!parsed.ok) return parsed.response
     const { id } = await params
-    const { brand_id: _brandId, range_id, selectedTags, imageFile, ...productData } = body
 
-    if (imageFile && productData.slug) {
+    // parsed.data (strict) ferme le mass-assignment : seules name/slug/
+    // description/price/stock sont mises à jour (cf. POST). [C-09]
+    const { brand_id: _brandId, range_id, selectedTags, imageFile, ...updateFields } =
+      parsed.data
+
+    let newImageUrl: string | null = null
+    if (imageFile && updateFields.slug) {
       let brandName = ''
-
-      if (range_id) {
+      if (range_id && range_id !== '') {
         const { data: range } = await supabaseAdmin
           .from('ranges')
           .select('brands(name)')
@@ -44,8 +51,8 @@ export async function PATCH(
 
       const imageBuffer = Buffer.from(imageFile, 'base64')
       const imagePath = brandName
-        ? `${brandName}/${productData.slug}.png`
-        : `${productData.slug}.png`
+        ? `${brandName}/${updateFields.slug}.png`
+        : `${updateFields.slug}.png`
 
       const { error: uploadError } = await supabaseAdmin.storage
         .from('product-image')
@@ -57,34 +64,36 @@ export async function PATCH(
         .from('product-image')
         .getPublicUrl(imagePath)
 
-      productData.image_url = publicUrl
-      delete productData.imageFile
+      newImageUrl = publicUrl
     }
-
-    const { image_url, ...updateData } = productData
 
     const { data, error } = await supabaseAdmin
       .from('products')
-      .update({ ...updateData, updated_at: new Date().toISOString() })
+      .update({ ...updateFields, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
-
-    if (range_id) {
-      await supabaseAdmin
-        .from('products')
-        .update({ range_id })
-        .eq('id', id)
+    if (error) {
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'Un produit avec ce slug existe déjà' },
+          { status: 409 },
+        )
+      }
+      throw error
     }
 
-    if (image_url) {
+    if (range_id && range_id !== '') {
+      await supabaseAdmin.from('products').update({ range_id }).eq('id', id)
+    }
+
+    if (newImageUrl) {
       await supabaseAdmin.from('product_images').delete().eq('product_id', id)
       await supabaseAdmin.from('product_images').insert({
         product_id: id,
-        url: image_url,
-        alt: `Image de ${updateData.name || 'produit'}`,
+        url: newImageUrl,
+        alt: `Image de ${updateFields.name || 'produit'}`,
       })
     }
 

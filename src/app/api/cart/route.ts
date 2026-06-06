@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { CartResponse, AddToCartRequest, UpdateCartRequest } from '@/types/cart'
+import { CartResponse } from '@/types/cart'
 import { guardMutation } from '@/lib/csrf'
+import { parseBody, cartItemBody } from '@/lib/schemas'
 
 /**
  * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
@@ -170,36 +171,26 @@ export async function POST(request: NextRequest) {
   if (guard) return guard
 
   try {
-    const body: AddToCartRequest = await request.json()
-    const { productId, quantity } = body
-
-    if (!productId || quantity <= 0) {
-      return NextResponse.json(
-        { error: 'Paramètres invalides' },
-        { status: 400 }
-      )
-    }
+    const parsed = parseBody(cartItemBody, await request.json())
+    if (!parsed.ok) return parsed.response
+    const { productId, quantity } = parsed.data
 
     const { userId, anonId } = await resolveCartContext()
     const supabase = getDb()
 
-    const { data: product, error: productError } = await supabase
+    // Le contrôle de stock CUMULÉ (existant + delta <= stock) est fait
+    // atomiquement dans la RPC add_to_cart (M1, FOR UPDATE). Ici on vérifie
+    // seulement l'existence du produit. [C-13]
+    const { error: productError } = await supabase
       .from('products')
-      .select('stock, price')
+      .select('id')
       .eq('id', productId)
       .single()
 
-    if (productError || !product) {
+    if (productError) {
       return NextResponse.json(
         { error: 'Produit non trouvé' },
         { status: 404 }
-      )
-    }
-
-    if ((product.stock ?? 0) < quantity) {
-      return NextResponse.json(
-        { error: 'Stock insuffisant' },
-        { status: 400 }
       )
     }
 
@@ -225,6 +216,11 @@ export async function POST(request: NextRequest) {
     })
 
     if (rpcError) {
+      // M1 : la RPC lève 'Stock insuffisant'/'Quantité invalide' (ERRCODE
+      // check_violation 23514) → 400 client plutôt que 500. [C-13]
+      if (rpcError.code === '23514' || /stock|quantit/i.test(rpcError.message)) {
+        return NextResponse.json({ error: 'Stock insuffisant' }, { status: 400 })
+      }
       logger.error('Erreur RPC add_to_cart:', rpcError)
       return NextResponse.json(
         { error: 'Erreur lors de l\'ajout au panier' },
@@ -250,15 +246,9 @@ export async function PATCH(request: NextRequest) {
   if (guard) return guard
 
   try {
-    const body: UpdateCartRequest = await request.json()
-    const { productId, quantity } = body
-
-    if (!productId || quantity <= 0) {
-      return NextResponse.json(
-        { error: 'Paramètres invalides' },
-        { status: 400 }
-      )
-    }
+    const parsed = parseBody(cartItemBody, await request.json())
+    if (!parsed.ok) return parsed.response
+    const { productId, quantity } = parsed.data
 
     const { userId, anonId } = await resolveCartContext()
     const supabase = getDb()
@@ -277,6 +267,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Quantité absolue : on valide la cible (et non un delta) contre le stock.
+    // cartItemBody borne déjà 1..99 (MAX_CART_QUANTITY). [C-28]
     if ((product.stock ?? 0) < quantity) {
       return NextResponse.json(
         { error: 'Stock insuffisant' },

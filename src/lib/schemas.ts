@@ -68,6 +68,13 @@ export const stockBody = z.object({
   stock: z.number().int().min(0, 'Le stock ne peut pas être négatif'),
 })
 
+// Panier public : POST (incrément) et PATCH (quantité absolue). Borne 1..99
+// = MAX_CART_QUANTITY ; productId doit être un UUID. [C-28]
+export const cartItemBody = z.object({
+  productId: z.string().uuid('productId invalide'),
+  quantity: z.number().int().min(1).max(99),
+})
+
 const VALID_SLOTS = ['hero', 'banner', 'card', 'modal'] as const
 const VALID_STATUSES = ['draft', 'scheduled', 'active', 'paused', 'expired'] as const
 
@@ -161,14 +168,35 @@ export const reservationCreate = z.object({
     .max(100),
 })
 
+// Champs RÉELLEMENT envoyés par le formulaire admin (ProductFormState).
+// Strict (pas de .passthrough()) → Zod retire les clés inconnues, fermant le
+// mass-assignment (is_active/is_featured/old_price/currency/id/created_at…). [C-09]
+// brand_id/range_id restent `string` (le form envoie '' quand non sélectionné ;
+// la route normalise '' → null, et la FK DB valide l'UUID).
 export const productCreate = z.object({
-  name: z.string().min(1, 'name requis'),
-  slug: z.string().min(1, 'slug requis'),
-  brand_id: z.string().uuid().optional(),
-  range_id: z.string().uuid().nullish(),
-  selectedTags: z.array(z.string().uuid()).optional(),
+  name: z.string().trim().min(1, 'name requis').max(300),
+  slug: z.string().trim().min(1, 'slug requis').max(300),
+  description: z.string().max(5000).optional(),
+  price: z.number().nonnegative('Prix invalide'),
+  stock: z.number().int().min(0, 'Stock invalide'),
+  brand_id: z.string().optional(),
+  range_id: z.string().nullish(),
   imageFile: z.string().optional(),
-}).passthrough()
+  selectedTags: z.array(z.string().uuid()).optional(),
+})
+
+// PATCH : mêmes champs, tous optionnels (mise à jour partielle).
+export const productUpdate = z.object({
+  name: z.string().trim().min(1).max(300).optional(),
+  slug: z.string().trim().min(1).max(300).optional(),
+  description: z.string().max(5000).optional(),
+  price: z.number().nonnegative().optional(),
+  stock: z.number().int().min(0).optional(),
+  brand_id: z.string().optional(),
+  range_id: z.string().nullish(),
+  imageFile: z.string().optional(),
+  selectedTags: z.array(z.string().uuid()).optional(),
+})
 
 export const userPatch = z.object({
   is_admin: z.boolean().optional(),

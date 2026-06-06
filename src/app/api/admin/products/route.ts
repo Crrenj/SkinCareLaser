@@ -79,8 +79,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const parsed = parseBody(productCreate, body)
     if (!parsed.ok) return parsed.response
-     
-    const { brand_id, range_id, selectedTags, imageFile, ...productData } = body
+
+    // parsed.data (strict) : seules les clés du schéma passent → fin du
+    // mass-assignment (le body brut n'est plus utilisé). [C-09]
+    const { brand_id, range_id, selectedTags, imageFile, ...productData } = parsed.data
 
     let imageUrl: string | null = null
     let brandName = ''
@@ -117,7 +119,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Si pas de range_id explicite mais une marque, on prend la 1ère gamme de la marque.
-    let effectiveRangeId: string | null = range_id ?? null
+    let effectiveRangeId: string | null = range_id && range_id !== '' ? range_id : null
     if (!effectiveRangeId && brand_id) {
       const { data: availableRanges } = await supabaseAdmin
         .from('ranges')
@@ -131,13 +133,21 @@ export async function POST(req: NextRequest) {
       .from('products')
       .insert({
         ...productData,
-        currency: productData.currency || DEFAULT_CURRENCY,
+        currency: DEFAULT_CURRENCY,
         range_id: effectiveRangeId,
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (error.code === '23505') {
+        return NextResponse.json(
+          { error: 'Un produit avec ce slug existe déjà' },
+          { status: 409 },
+        )
+      }
+      throw error
+    }
 
     if (product && imageUrl) {
       await supabaseAdmin

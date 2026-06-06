@@ -47,10 +47,12 @@ export function useAuth() {
         // (null/undefined -> user). Sinon on re-fetchait le panier
         // (et autres effets) à chaque retour d'onglet.
         if (event === 'SIGNED_IN' && incomingUserId && incomingUserId !== previousUserId) {
-          if (previousUserId === null || previousUserId === undefined) {
-            await handleUserLogin()
-          }
+          // Vraie transition d'identité : null/undefined -> user, OU userA ->
+          // userB (navigateur partagé). On rejoue le merge panier + purge la
+          // wishlist dans les DEUX cas, sinon les favoris du compte précédent
+          // fuiteraient sur le suivant. [C-23]
           previousUserIdRef.current = incomingUserId
+          await handleUserLogin()
         } else if (event === 'SIGNED_OUT' && previousUserId !== null) {
           previousUserIdRef.current = null
           await handleUserLogout()

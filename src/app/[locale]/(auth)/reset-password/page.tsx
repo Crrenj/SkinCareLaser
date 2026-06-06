@@ -9,7 +9,7 @@ import { AuthLayout, AuthNotice } from '@/components/auth/AuthLayout'
 import { PasswordInput } from '@/components/auth/PasswordInput'
 import { PasswordStrength } from '@/components/auth/PasswordStrength'
 
-const MIN_PASSWORD_LENGTH = 8
+const MIN_PASSWORD_LENGTH = 12
 
 type Stage = 'verifying' | 'form' | 'expired' | 'success'
 type ResetErrorKey = 'tooShort' | 'mismatch' | 'expired' | 'missingToken' | 'generic'

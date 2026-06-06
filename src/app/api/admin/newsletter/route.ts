@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   let query = supabaseAdmin
     .from('newsletter_subscribers')
-    .select('id, email, lang, created_at, confirmed_at, ip')
+    .select('id, email, lang, created_at, confirmed_at')
     .order('created_at', { ascending: false })
     .limit(limit)
 
@@ -48,8 +48,9 @@ export async function GET(request: NextRequest) {
   }
 
   if (format === 'csv') {
+    // PII : l'IP des abonnés N'EST PAS exportée (Ley 172-13 / RGPD). [C-11]
     const lines = [
-      'id,email,lang,created_at,confirmed_at,ip',
+      'id,email,lang,created_at,confirmed_at',
       ...(data ?? []).map((row) =>
         [
           row.id,
@@ -57,7 +58,6 @@ export async function GET(request: NextRequest) {
           row.lang,
           row.created_at ?? '',
           row.confirmed_at ?? '',
-          escapeCsv(row.ip ?? ''),
         ].join(','),
       ),
     ]
@@ -87,8 +87,12 @@ export async function GET(request: NextRequest) {
 }
 
 function escapeCsv(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`
+  // Anti-injection de formule (Excel/Sheets) : préfixe une apostrophe aux
+  // valeurs commençant par =, +, -, @, tab ou CR avant l'échappement CSV. [C-11]
+  let v = value
+  if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`
+  if (v.includes(',') || v.includes('"') || v.includes('\n')) {
+    return `"${v.replace(/"/g, '""')}"`
   }
-  return value
+  return v
 }

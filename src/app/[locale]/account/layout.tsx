@@ -15,18 +15,21 @@ export default async function AccountLayout({
 }) {
   const { locale } = await params
   const supabase = await createSupabaseServerClient()
+  // getUser() valide le JWT côté serveur (vs getSession() qui fait confiance au
+  // cookie). Ce layout est l'unique gate de /account/* (le middleware ne le
+  // couvre pas). [C-29/C-30]
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (!user) {
     redirect(`/${locale}/login?redirectedFrom=${encodeURIComponent(`/${locale}/account/profile`)}`)
   }
 
   // Un admin reste un client : on lui propose un raccourci vers le panneau admin
   // depuis son espace compte (pont symétrique du « Mon compte » côté admin).
   const { data: isAdmin } = await supabase.rpc('is_user_admin', {
-    check_user_id: session.user.id,
+    check_user_id: user.id,
   })
 
   return (
@@ -36,7 +39,7 @@ export default async function AccountLayout({
       <main id="main-content" className="flex-grow">
         <div className="max-w-7xl mx-auto px-6 lg:px-14 py-10 lg:py-14">
           <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-10 lg:gap-14">
-            <AccountSidebar userEmail={session.user.email ?? ''} isAdmin={isAdmin === true} />
+            <AccountSidebar userEmail={user.email ?? ''} isAdmin={isAdmin === true} />
             <div className="min-w-0">{children}</div>
           </div>
         </div>

@@ -23,21 +23,12 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createSupabaseServerClient()
 
-  // 1. Vérifie l'auth via cookie session
+  // 1. Vérifie l'auth via getUser() (JWT validé serveur, pas le cookie brut). [C-30]
   const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession()
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (sessionError) {
-    logger.error('[reserve] session error:', sessionError)
-    return NextResponse.json(
-      { success: false, error: 'Erreur de session', code: 'session_error' },
-      { status: 500 },
-    )
-  }
-
-  if (!session) {
+  if (!user) {
     return NextResponse.json(
       {
         success: false,
@@ -52,7 +43,7 @@ export async function POST(request: NextRequest) {
   const { data: cart, error: cartError } = await supabase
     .from('carts')
     .select('id')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .maybeSingle()
 
   if (cartError) {
