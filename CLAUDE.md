@@ -267,6 +267,21 @@ Découpage par scope/page :
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest + build + e2e sur PR et push main.
 
+## État du projet (2026-06-06)
+
+### Fait ✅ (session 2026-06-06 — remédiation V1 post-audit, phases 0-5)
+
+Exécution du plan `docs/audits/full-audit-2026-06-05/00-REMEDIATION-PLAN.md` (audit 38 workstreams, verdict GO-conditionnel, 0 P0 / 24 P1). **8 commits sur `main`** (`4030af9`→`b8b160b`), **1 migration appliquée (M1)**, 2 fixes de données DB. Vérif par phase : tsc 0 · lint 0 · build vert.
+
+- **P0 `4030af9`** : `venv/` dé-suivi (1010 fichiers) ; **job e2e retiré de la CI** (écrivait en prod ; lancer `ALLOW_E2E=1 npm run test`) ; deps `npm audit fix` + **vitest@4 / happy-dom** ; `npm audit --audit-level=high` bloquant.
+- **P1 `e065e33`** : **`getShopSettings` réécrit cookieless + `unstable_cache`** (tag `shop-settings-config`, modèle `getThemeConfig`) → fin du couplage `cookies()` + du FALLBACK figé ; `/api/admin/settings` PATCH → `revalidateTag` + validation email ; email canonique **`contact@farmau.do`** (legal ×4, account/security, messages) ; `shop_settings.contact_email` posé en DB.
+- **P2 `c3d9731`** : tunnel **pickup-only** (`ShippingStep` sans zones payantes ; `AddressStep` adresse optionnelle) ; **WhatsApp threadé** `confirmation/[id]/page`→`ConfirmationClient`→`buildReservationWhatsappLink(payload, shop_settings.whatsapp_number)` + `WhatsappHero` tel/mailto depuis settings (**`NEXT_PUBLIC_WHATSAPP_NUMBER` supprimé**) ; message/total = sous-total seul ; `formatPrice` défaut **0 décimale** ; footer sans badges paiement.
+- **P3 `84b82e7`+`4ba9aef`** : `safeRedirectPath` signup+profil ; **`getUser()`** sur `/account/layout` + `/api/cart/reserve` ; **`productCreate`/`productUpdate` STRICT** (sans `.passthrough()`) + routes consomment `parsed.data` + `23505→409` (fin du mass-assignment) ; `slug` jamais vide ; **migration M1 `add_to_cart`** = stock **cumulé atomique** (`FOR UPDATE`) + cap 99 (**appliquée prod**, grants `service_role` + `search_path` préservés, 0 régression advisor) ; `cartItemBody` Zod ; `useAuth` rejoue merge+purge wishlist sur switch A→B ; export newsletter sans IP + anti-injection formule ; mdp min 12 ; **bannières** : titre `DOMPurify` (allowlist `<em>/<strong>/<br>`) + CTA `<a>` externe / `<Link>` interne dé-préfixé + `banners.link_url` normalisés en DB.
+- **P4 `7baa051`** : `BlogClient` `dialogRef` attaché (focus-trap réparé) ; `ContactForm` `role=status/alert` ; **dark mode** `clay-800/900` (`--c-accent-deep/900`) éclaircis vers le texte dans `[data-mode="dark"]` (étaient mélangés vers #000 → `text-clay-800` invisible) ; `LocaleSwitcher` `bg-white`→`bg-sand-50`.
+- **P5 `b8b160b`** : `create-admin`/`make-existing-user-admin` réparés (retrait `profiles.is_admin` droppé → **bootstrap admin re-fonctionne**) ; `robots` `disallow /*/account/` ; blog `hreflang` = locale du post seule ; `admin-smoke` landing `/admin` ; garde-fou `ALLOW_E2E` (e2e refuse de tourner sans opt-in).
+
+**Reste à faire (voir `00-REMEDIATION-PLAN.md` § « Reste à faire »)** : i18n admin réservations (C-10) · `seed-import.cjs` colonnes droppées (C-16) · régé `database.types.ts`+`db/schema.sql`+compteurs CLAUDE.md (C-130) · `sitemap` hreflang blog + `noindex` auth (C-12/C-46) · playwright globalSetup/teardown + specs sécu (C-19) · contraste CTA dark `--c-on-accent` (C-15 partiel) · `getUser` reservation/confirmation (C-30 partiel). **Action user** : activer Supabase « Leaked password protection » (D6). ⚠️ Compteurs ci-dessous (« 22 routes admin », « 1 admin », « 0 posts ») **périmés** — à rafraîchir lors de la régé.
+
 ## État du projet (2026-06-04)
 
 ### Fait ✅ (session 2026-06-04 — refonte dashboard admin « vue 360° »)

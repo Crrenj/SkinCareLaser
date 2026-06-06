@@ -1,8 +1,30 @@
 # Plan de remédiation V1 — FARMAU
 
-> **Statut : APPROUVÉ (2026-06-06) — en pause AVANT exécution. Aucune phase démarrée.**
-> Validé par **3 relecteurs Opus indépendants** (vs code + DB live). Audit source : `docs/audits/full-audit-2026-06-05/` (`00-VERDICT.md`, `00-REGISTRE-CONSOLIDE.md`).
-> Exécution prévue : **6 phases**, commits directs sur `main` (chaque push = déploiement Vercel prod). Reprendre à la **Phase 0**.
+> **Statut : Phases 0→5 EXÉCUTÉES et déployées sur `main` (2026-06-06).** Reliquat ci-dessous pour une session suivante.
+> Validé par 3 relecteurs Opus. Audit source : `00-VERDICT.md` / `00-REGISTRE-CONSOLIDE.md`.
+>
+> ### ✅ Fait (commits sur `main`)
+> - `4030af9` **P0** — venv dé-suivi, e2e hors CI, deps (vitest@4/happy-dom, audit fix)
+> - `e065e33` **P1** — `getShopSettings` cookieless+`unstable_cache` (+`revalidateTag` au PATCH settings + validation email), email canonique `contact@farmau.do` (legal/account/messages)
+> - `c3d9731` **P2** — tunnel pickup-only, WhatsApp threadé depuis `shop_settings`, `AddressStep` adresse optionnelle, `formatPrice` 0 déc., footer sans badges paiement
+> - `84b82e7` **P3** — `safeRedirect` signup+profil, `getUser()` /account+reserve, `productCreate/Update` STRICT + `parsed.data` + 23505→409, `slug`≠'', **migration M1 `add_to_cart` (stock cumulé `FOR UPDATE` + cap 99 — APPLIQUÉE prod)**, `cartItemBody` Zod, `useAuth` A→B, newsletter sans IP + anti-formule, mdp 12
+> - `4ba9aef` **P3** — bannières DOMPurify `<em>` + CTA locale/externe (+ `banners.link_url` normalisés)
+> - `7baa051` **P4** — `BlogClient` `dialogRef`, `ContactForm` aria-live, dark `clay-800/900` lisibles, `LocaleSwitcher` `bg-white`→token
+> - `b8b160b` **P5** — `create-admin`/`make-admin` réparés (retrait `profiles.is_admin`), `robots /*/account/`, blog `hreflang` locale-post, `admin-smoke` /admin, garde-fou `ALLOW_E2E`
+>
+> **DB (prod) :** M1 appliquée (grants/`search_path` préservés, 0 régression advisor) · `shop_settings.contact_email`=`contact@farmau.do` · `banners.link_url` normalisés (`/es/…`→`/…`).
+>
+> ### ⏳ Reste à faire (session suivante)
+> 1. **i18n module admin réservations** — ~40 chaînes ES en dur → namespace `Admin.reservations` FR/ES/EN. Fichiers : `components/admin/reservations/{types,FilterBar,BulkActionBar,ReservationsTable,ReservationDrawer}.tsx` + `BannerDeleteModal`, `TagSelector`, compteur panier `producto/productos`. [C-10]
+> 2. **`scripts/seed-import.cjs`** — retirer `image_url` (col droppée, ~l.267) + `product_ranges` (table droppée, ~l.279-281), poser `range_id`. [C-16]
+> 3. **Régénération** — `database.types.ts` (MCP `generate_typescript_types`) + `db/schema.sql` + compteurs `CLAUDE.md` (22→28 routes, 1→2 admin, 0→4 posts). [C-130]
+> 4. **SEO** — `sitemap.ts` hreflang blog = locale du post seule ; `noindex` metadata sur pages auth (login/signup/forgot/reset). [C-12/C-46]
+> 5. **Tests** — `playwright.config` `globalSetup`/`globalTeardown` → `cleanupStaleTestUsers()` ; specs sécu (open-redirect bloqué, mass-assignment→400, super_admin). [C-19]
+> 6. **Contraste CTA dark** — token `--c-on-accent` + rewiring `text-sand-50` sur `bg-clay-700` [C-15 partiel] · **`getUser`** sur `reservation/page` + `confirmation/[id]/page` [C-30 partiel].
+>
+> **Hors périmètre assumé** : grants TABLE RLS (D24) ; rendu statique `[locale]` bloqué par `getLocale()` du root layout (cluster perf C-02/03/04). **Action user** : activer Supabase « Leaked password protection » (D6).
+>
+> _Le plan détaillé original (Context, décisions, phases) suit, inchangé._
 
 ---
 
