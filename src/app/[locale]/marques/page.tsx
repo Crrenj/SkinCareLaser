@@ -197,7 +197,7 @@ function BrandCardLink({
   return (
     <Link
       href={`/marques/${brand.slug}`}
-      className="group flex flex-col bg-white border border-sand-300 rounded-md overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_36px_-16px_rgba(31,27,22,0.16)]"
+      className="group flex flex-col bg-sand-100 border border-sand-300 rounded-md overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_16px_36px_-16px_rgba(31,27,22,0.16)]"
     >
       <div className="relative aspect-[4/3] bg-gradient-to-br from-sand-100 via-sand-300 to-sand-500 overflow-hidden">
         {brand.imageUrl ? (

@@ -15,7 +15,7 @@ export function PdpQuantity({ value, onChange, min = 1, max = 99 }: PdpQuantityP
   const increment = () => value < max && onChange(value + 1)
 
   return (
-    <div className="flex items-center justify-between h-[52px] border border-ink-900 rounded-sm bg-white px-2">
+    <div className="flex items-center justify-between h-[52px] border border-ink-900 rounded-sm bg-sand-50 px-2">
       <button
         type="button"
         onClick={decrement}

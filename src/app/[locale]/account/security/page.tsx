@@ -56,7 +56,7 @@ export default async function AccountSecurityPage({
       </header>
 
       <div className="flex flex-col gap-5">
-        <section className="bg-white border border-sand-300 rounded-md p-6">
+        <section className="bg-sand-100 border border-sand-300 rounded-md p-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="w-10 h-10 rounded-sm bg-sand-100 flex items-center justify-center shrink-0">
               <Key size={18} strokeWidth={1.7} className="text-clay-700" />
@@ -73,7 +73,7 @@ export default async function AccountSecurityPage({
           <SecurityActions email={email} />
         </section>
 
-        <section className="bg-white border border-sand-300 rounded-md p-6">
+        <section className="bg-sand-100 border border-sand-300 rounded-md p-6">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-sm bg-sand-100 flex items-center justify-center shrink-0">
               <ShieldCheck size={18} strokeWidth={1.7} className="text-olive-600" />
@@ -94,7 +94,7 @@ export default async function AccountSecurityPage({
           </div>
         </section>
 
-        <section className="bg-white border border-brick-200 rounded-md p-6">
+        <section className="bg-sand-100 border border-brick-200 rounded-md p-6">
           <div className="flex items-start gap-4 mb-4">
             <div className="w-10 h-10 rounded-sm bg-brick-50 flex items-center justify-center shrink-0">
               <Trash2 size={18} strokeWidth={1.7} className="text-brick-600" />

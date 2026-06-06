@@ -44,7 +44,7 @@ export function PdpStickyBar({
   return (
     <div
       aria-hidden={!visible}
-      className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-sand-200 shadow-[0_-8px_24px_-8px_rgba(31,27,22,0.12)] grid grid-cols-[1fr_auto] gap-3 px-3 py-3 transition-transform duration-200 ${
+      className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-sand-50 border-t border-sand-200 shadow-[0_-8px_24px_-8px_rgba(31,27,22,0.12)] grid grid-cols-[1fr_auto] gap-3 px-3 py-3 transition-transform duration-200 ${
         visible ? 'translate-y-0' : 'translate-y-full'
       }`}
     >

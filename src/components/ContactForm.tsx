@@ -57,7 +57,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
   }
 
   return (
-    <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
+    <div className={`bg-sand-100 rounded-lg shadow-lg p-6 ${className}`}>
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-ink-900 mb-2">
           {t('title')}

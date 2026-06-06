@@ -133,7 +133,7 @@ export default function AdminSetupPage() {
                   <p className="text-sm text-ink-700 mb-2">
                     {t('step2Body')}
                   </p>
-                  <pre className="bg-gray-900 text-ink-200 p-3 rounded-md text-sm overflow-x-auto">
+                  <pre className="bg-ink-900 text-ink-200 p-3 rounded-md text-sm overflow-x-auto">
 {t('step2Code')}
                   </pre>
                 </div>
@@ -143,7 +143,7 @@ export default function AdminSetupPage() {
                   <p className="text-sm text-yellow-800">
                     {t('step3Body')}
                   </p>
-                  <pre className="bg-gray-900 text-ink-200 p-2 rounded-md text-sm mt-2">
+                  <pre className="bg-ink-900 text-ink-200 p-2 rounded-md text-sm mt-2">
 npm run dev
                   </pre>
                 </div>
@@ -166,14 +166,14 @@ npm run dev
               <div className="flex gap-3">
                 <Link 
                   href="/admin/product" 
-                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className="inline-flex items-center px-4 py-2 bg-olive-600 text-white rounded-md hover:bg-olive-700"
                 >
                   {t('goToProducts')}
                 </Link>
                 
                 <button
                   onClick={() => window.location.reload()}
-                  className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                  className="inline-flex items-center px-4 py-2 bg-ink-700 text-white rounded-md hover:bg-ink-800"
                 >
                   {t('recheck')}
                 </button>

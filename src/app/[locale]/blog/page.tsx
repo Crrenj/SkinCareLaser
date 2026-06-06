@@ -60,7 +60,7 @@ export default async function BlogPage({
           </p>
 
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-sand-200 bg-white p-12 text-center">
+            <div className="rounded-xl border border-sand-200 bg-sand-100 p-12 text-center">
               <p className="text-ink-500">{t('empty')}</p>
             </div>
           ) : (
@@ -69,7 +69,7 @@ export default async function BlogPage({
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="group rounded-xl border border-sand-200 bg-white overflow-hidden hover:shadow-md transition-shadow"
+                  className="group rounded-xl border border-sand-200 bg-sand-100 overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="relative aspect-[16/9] bg-sand-100">
                     {post.cover_image_url ? (

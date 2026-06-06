@@ -25,7 +25,7 @@ export function CartIcon({ className = '', onClick }: CartIconProps) {
         {/* Badge avec le nombre d'items */}
         {totalItems > 0 && (
           <span 
-            className="absolute -top-1 -right-1 bg-clay-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium cart-badge"
+            className="absolute -top-1 -right-1 bg-clay-500 text-on-accent text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium cart-badge"
             data-testid="cart-badge"
           >
             {totalItems > 99 ? '99+' : totalItems}
@@ -35,7 +35,7 @@ export function CartIcon({ className = '', onClick }: CartIconProps) {
       
       {/* Indicateur de chargement */}
       {isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-50 rounded flex items-center justify-center">
+        <div className="absolute inset-0 bg-sand-50/50 rounded flex items-center justify-center">
           <div className="w-4 h-4 border-2 border-sand-300 border-t-brick-600 rounded-full animate-spin"></div>
         </div>
       )}

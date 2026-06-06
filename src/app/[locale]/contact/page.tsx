@@ -64,7 +64,7 @@ export default async function ContactPage({
           <ContactForm />
 
           <div className="space-y-8">
-            <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="bg-sand-100 rounded-lg shadow-lg p-8">
               <h2 className="text-2xl font-bold text-ink-900 mb-6">{t('contactInfoHeading')}</h2>
 
               <div className="space-y-6">
@@ -145,7 +145,7 @@ export default async function ContactPage({
 
         <section className="mt-12 max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold text-ink-900 mb-6 text-center">{t('mapHeading')}</h2>
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="bg-sand-100 rounded-lg shadow-lg p-6">
             <div className="h-96 rounded-lg overflow-hidden">
               <iframe
                 src="https://maps.google.com/maps?q=Calle%20Jesus%20de%20Galindez%20Esq%20Calle%203%20Cerros%20de%20Gurabo%20Santiago%20República%20Dominicana&output=embed"

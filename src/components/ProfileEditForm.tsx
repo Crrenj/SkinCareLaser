@@ -112,7 +112,7 @@ export default function ProfileEditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white rounded-2xl shadow-lg p-6 space-y-5"
+      className="bg-sand-100 rounded-2xl shadow-lg p-6 space-y-5"
     >
       {error && (
         <div className="bg-clay-50 border-l-4 border-brick-600 p-4 rounded">

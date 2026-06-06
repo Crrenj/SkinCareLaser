@@ -66,7 +66,7 @@ export async function HomeByNeed({ featured = [] }: HomeByNeedProps) {
               <Link
                 key={card.slug}
                 href={href}
-                className="group bg-sand-50 hover:bg-white transition-colors flex flex-col"
+                className="group bg-sand-50 hover:bg-sand-100 transition-colors flex flex-col"
               >
                 <Plate className="aspect-[16/10] border-0 border-b border-sand-300" />
                 <div className="p-[26px] pb-7 flex flex-col flex-1">

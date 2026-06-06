@@ -33,7 +33,7 @@ export function PdpWishlistButton({ productId }: PdpWishlistButtonProps) {
       onClick={handleClick}
       aria-label={t('wishlistAriaLabel')}
       aria-pressed={isFavorite}
-      className={`w-[52px] h-[52px] bg-white border border-ink-900 rounded-sm flex items-center justify-center transition-colors ${
+      className={`w-[52px] h-[52px] bg-sand-50 border border-ink-900 rounded-sm flex items-center justify-center transition-colors ${
         isFavorite
           ? 'bg-clay-50 text-clay-700'
           : 'text-ink-900 hover:bg-clay-50 hover:text-clay-700'

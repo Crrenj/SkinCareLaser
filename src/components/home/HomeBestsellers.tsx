@@ -55,7 +55,7 @@ export async function HomeBestsellers({ products }: HomeBestsellersProps) {
             return (
               <article
                 key={p.id}
-                className="group relative bg-sand-50 hover:bg-white transition-colors p-[22px] pb-5 flex flex-col"
+                className="group relative bg-sand-50 hover:bg-sand-100 transition-colors p-[22px] pb-5 flex flex-col"
               >
                 {tag && (
                   <span

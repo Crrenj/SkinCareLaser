@@ -37,7 +37,7 @@ export function ProductCardHeart({ productId, className = '' }: ProductCardHeart
       onClick={handleClick}
       aria-label={t('wishlistAriaLabel')}
       aria-pressed={isFavorite}
-      className={`inline-flex items-center justify-center w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm text-ink-900 hover:bg-white hover:text-clay-700 transition-colors shadow-sm ${
+      className={`inline-flex items-center justify-center w-9 h-9 rounded-full bg-sand-50/90 backdrop-blur-sm text-ink-900 hover:bg-sand-50 hover:text-clay-700 transition-colors shadow-sm ${
         isFavorite ? 'text-clay-700' : ''
       } ${className}`}
     >

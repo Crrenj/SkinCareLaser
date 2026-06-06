@@ -84,7 +84,7 @@ export function PreferencesForm({ initialPreferredLocale }: PreferencesFormProps
   return (
     <div className="flex flex-col gap-5">
       {/* Newsletter */}
-      <section className="bg-white border border-sand-300 rounded-md p-6">
+      <section className="bg-sand-100 border border-sand-300 rounded-md p-6">
         <div className="flex items-start gap-4 mb-4">
           <div className="w-10 h-10 rounded-sm bg-sand-100 flex items-center justify-center shrink-0">
             <Mail size={18} strokeWidth={1.7} className="text-clay-700" />
@@ -143,7 +143,7 @@ export function PreferencesForm({ initialPreferredLocale }: PreferencesFormProps
       </section>
 
       {/* Locale */}
-      <section className="bg-white border border-sand-300 rounded-md p-6">
+      <section className="bg-sand-100 border border-sand-300 rounded-md p-6">
         <div className="flex items-start gap-4 mb-4">
           <div className="w-10 h-10 rounded-sm bg-sand-100 flex items-center justify-center shrink-0">
             <Globe size={18} strokeWidth={1.7} className="text-clay-700" />

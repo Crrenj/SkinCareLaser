@@ -100,7 +100,7 @@ export default async function ManifestePage({
                 return (
                   <article
                     key={pillar.key}
-                    className="bg-white border border-sand-300 rounded-md p-7 lg:p-8"
+                    className="bg-sand-100 border border-sand-300 rounded-md p-7 lg:p-8"
                   >
                     <div className="flex items-start gap-4 mb-4">
                       <div className="font-serif italic text-[36px] leading-none text-clay-400 -tracking-[0.01em]">

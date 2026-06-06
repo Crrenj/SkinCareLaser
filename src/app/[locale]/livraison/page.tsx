@@ -193,7 +193,7 @@ function Step({
   body: string
 }) {
   return (
-    <article className="bg-white border border-sand-300 rounded-md p-7">
+    <article className="bg-sand-100 border border-sand-300 rounded-md p-7">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="font-serif italic text-[48px] leading-none text-clay-400 -tracking-[0.02em]">
           {num}
@@ -220,7 +220,7 @@ function InfoCard({
   lines: string[]
 }) {
   return (
-    <article className="bg-white border border-sand-300 rounded-md p-6">
+    <article className="bg-sand-100 border border-sand-300 rounded-md p-6">
       <div className="flex items-center gap-3 mb-3 pb-3 border-b border-sand-200">
         <div className="w-9 h-9 rounded-sm bg-sand-100 flex items-center justify-center text-clay-700">
           {icon}

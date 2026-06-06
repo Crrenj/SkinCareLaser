@@ -195,7 +195,7 @@ function ReviewForm({ productId }: { productId: string }) {
 
   if (!authed) {
     return (
-      <div className="bg-sand-50 border border-sand-300 rounded-xl p-6 text-center">
+      <div className="bg-sand-100 border border-sand-300 rounded-xl p-6 text-center">
         <p className="text-[14px] text-ink-700 mb-3">{t('loginToReview')}</p>
         <button
           type="button"
@@ -217,7 +217,7 @@ function ReviewForm({ productId }: { productId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-sand-50 border border-sand-300 rounded-xl p-6">
+    <form onSubmit={handleSubmit} className="bg-sand-100 border border-sand-300 rounded-xl p-6">
       <h3 className="font-serif text-[20px] text-ink-900 mb-4">{t('formHeading')}</h3>
 
       <div className="mb-4">
@@ -251,7 +251,7 @@ function ReviewForm({ productId }: { productId: string }) {
         onChange={(e) => setTitle(e.target.value)}
         maxLength={120}
         placeholder={t('titlePlaceholder')}
-        className="w-full bg-white border border-sand-400 rounded-lg px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/15 transition-[border-color,box-shadow] mb-3"
+        className="w-full bg-sand-50 border border-sand-400 rounded-lg px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/15 transition-[border-color,box-shadow] mb-3"
       />
       <textarea
         value={body}
@@ -259,7 +259,7 @@ function ReviewForm({ productId }: { productId: string }) {
         maxLength={2000}
         rows={3}
         placeholder={t('bodyPlaceholder')}
-        className="w-full bg-white border border-sand-400 rounded-lg px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/15 transition-[border-color,box-shadow] resize-y"
+        className="w-full bg-sand-50 border border-sand-400 rounded-lg px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/15 transition-[border-color,box-shadow] resize-y"
       />
 
       <div className="flex items-center gap-4 mt-4">

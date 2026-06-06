@@ -106,7 +106,7 @@ export default async function AccountReservationsPage({
 async function EmptyState() {
   const t = await getTranslations('Account.reservations')
   return (
-    <div className="bg-white border border-sand-300 rounded-md py-16 px-6 text-center">
+    <div className="bg-sand-100 border border-sand-300 rounded-md py-16 px-6 text-center">
       <p className="font-serif italic text-[20px] text-ink-700 max-w-md mx-auto mb-6">
         {t('emptyTitle')}
       </p>
@@ -142,7 +142,7 @@ async function ReservationCard({ reservation }: { reservation: ReservationRow })
   const isActive = reservation.status === 'pending' || reservation.status === 'confirmed'
 
   return (
-    <li className="bg-white border border-sand-300 rounded-md p-5 lg:p-6">
+    <li className="bg-sand-100 border border-sand-300 rounded-md p-5 lg:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4 pb-4 border-b border-sand-200">
         <div>
           <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-500 mb-1">

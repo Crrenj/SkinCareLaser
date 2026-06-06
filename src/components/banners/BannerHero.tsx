@@ -20,7 +20,7 @@ const OVERLAY =
   'linear-gradient(90deg, rgba(31,27,22,0.72) 0%, rgba(31,27,22,0.4) 48%, rgba(31,27,22,0.05) 100%)'
 
 const CTA_CLASS =
-  'group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-[2px] bg-sand-50 text-ink-900 text-[12.5px] font-semibold uppercase tracking-[0.06em] hover:bg-white transition-colors'
+  'group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-[2px] bg-sand-50 text-ink-900 text-[12.5px] font-semibold uppercase tracking-[0.06em] hover:bg-sand-100 transition-colors'
 
 /**
  * Bannière « Hero » — campagne pleine largeur. Image full-bleed (ou plaque

@@ -91,7 +91,7 @@ export default async function PharmaciePage({
 
             {/* Infos contact */}
             <aside className="flex flex-col gap-5">
-              <div className="bg-white border border-sand-300 rounded-md p-6">
+              <div className="bg-sand-100 border border-sand-300 rounded-md p-6">
                 <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-clay-700 font-semibold mb-3">
                   {t('locationLabel')}
                 </div>
@@ -163,7 +163,7 @@ export default async function PharmaciePage({
         {/* Bloc "Comment venir" + "Pour qui" */}
         <section className="px-6 lg:px-14 py-14 lg:py-20 bg-sand-100">
           <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10">
-            <article className="bg-white border border-sand-300 rounded-md p-7">
+            <article className="bg-sand-100 border border-sand-300 rounded-md p-7">
               <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-clay-700 font-semibold mb-3">
                 {t('access.eyebrow')}
               </div>
@@ -175,7 +175,7 @@ export default async function PharmaciePage({
               </p>
             </article>
 
-            <article className="bg-white border border-sand-300 rounded-md p-7">
+            <article className="bg-sand-100 border border-sand-300 rounded-md p-7">
               <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-clay-700 font-semibold mb-3">
                 {t('forWho.eyebrow')}
               </div>

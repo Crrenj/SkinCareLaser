@@ -58,8 +58,8 @@ export function AccountSidebar({
                   aria-current={active ? 'page' : undefined}
                   className={`flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-sm text-[14px] leading-snug border-l-2 transition-colors ${
                     active
-                      ? 'border-clay-700 bg-white text-ink-900 font-semibold'
-                      : 'border-transparent text-ink-700 hover:text-ink-900 hover:bg-white'
+                      ? 'border-clay-700 bg-sand-200 text-ink-900 font-semibold'
+                      : 'border-transparent text-ink-700 hover:text-ink-900 hover:bg-sand-100'
                   }`}
                 >
                   <Icon size={16} strokeWidth={1.7} className={active ? 'text-clay-700' : 'text-ink-500'} />

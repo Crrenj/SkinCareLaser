@@ -122,7 +122,7 @@ function AuthCallbackInner() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-sand-200">
-      <div className="text-center bg-white rounded-2xl shadow-xl p-8 max-w-md">
+      <div className="text-center bg-sand-100 rounded-2xl shadow-xl p-8 max-w-md">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-sand-300 border-t-clay-700 mx-auto" />
         <p className="mt-4 text-ink-800 font-medium">{status}</p>
         <p className="mt-2 text-sm text-ink-500">Veuillez patienter…</p>
