@@ -103,25 +103,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   }))
 
-  // Blog posts
+  // Blog posts — un post n'existe que dans SA locale (posts.locale) : on l'émet
+  // à sa propre locale et on n'annonce PAS de fausses traductions hreflang. [C-12]
   const { data: blogPosts } = await supabase
     .from('posts')
-    .select('slug, updated_at')
+    .select('slug, updated_at, locale')
     .eq('is_published', true)
 
   const blogEntries: MetadataRoute.Sitemap = (blogPosts ?? [])
     .filter((p) => p.slug)
-    .map((p) => ({
-      url: `${BASE_URL}/${routing.defaultLocale}/blog/${p.slug}`,
-      lastModified: p.updated_at ? new Date(p.updated_at) : now,
-      changeFrequency: 'weekly',
-      priority: 0.6,
-      alternates: {
-        languages: Object.fromEntries(
-          routing.locales.map((loc) => [loc, `${BASE_URL}/${loc}/blog/${p.slug}`]),
-        ),
-      },
-    }))
+    .map((p) => {
+      const postLocale = p.locale ?? routing.defaultLocale
+      const url = `${BASE_URL}/${postLocale}/blog/${p.slug}`
+      return {
+        url,
+        lastModified: p.updated_at ? new Date(p.updated_at) : now,
+        changeFrequency: 'weekly',
+        priority: 0.6,
+        alternates: {
+          languages: { [postLocale]: url, 'x-default': url },
+        },
+      }
+    })
 
   return [...staticEntries, ...brandEntries, ...needEntries, ...productEntries, ...blogEntries]
 }
