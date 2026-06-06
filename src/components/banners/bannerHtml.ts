@@ -1,15 +1,25 @@
-import DOMPurify from 'isomorphic-dompurify'
-
 /**
  * Titre de bannière : autorise UNIQUEMENT `<em>`/`<strong>`/`<br>` (le pivot
  * italique est un design documenté) et retire tout autre HTML. Anti-XSS stocké
  * (le titre vient de la DB, éditable par l'admin). [C-54]
+ *
+ * Implémentation SANS dépendance (plus de DOMPurify/jsdom) : on échappe TOUT le
+ * HTML, puis on restaure uniquement les 3 balises autorisées, sans attribut.
+ * Toute balise avec attribut/autre nom reste échappée (inerte) car le motif
+ * exige `>` immédiatement après le nom de balise. Évite de charger jsdom côté
+ * serveur (le home rendait 500 en Node 20 : html-encoding-sniffer require()
+ * @exodus/bytes désormais ESM-only → ERR_REQUIRE_ESM). [fix home 500]
  */
 export function sanitizeBannerTitle(title: string): string {
-  return DOMPurify.sanitize(title, {
-    ALLOWED_TAGS: ['em', 'strong', 'br'],
-    ALLOWED_ATTR: [],
-  })
+  const escaped = title
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+  return escaped
+    .replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>')
+    .replace(/&lt;br\s*\/?&gt;/gi, '<br>')
 }
 
 /**
