@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
         confirmed_at, collected_at,
         contact_phone, contact_email, contact_name,
         total_items, total_price, currency,
-        admin_notes,
+        admin_notes, source,
         items:reservation_items(
           id, product_id, product_name, unit_price, quantity
         )

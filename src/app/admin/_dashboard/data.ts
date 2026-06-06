@@ -162,7 +162,7 @@ async function fetchRecentReservations(): Promise<ReservationRow[]> {
   if (!supabaseAdmin) return []
   const { data, error } = await supabaseAdmin
     .from('reservations')
-    .select('id, contact_name, status, total_price, created_at')
+    .select('id, contact_name, status, total_price, created_at, source')
     .order('created_at', { ascending: false })
     .limit(5)
   if (error || !data) return []
@@ -173,11 +173,13 @@ async function fetchRecentReservations(): Promise<ReservationRow[]> {
       status: string
       total_price: number | string
       created_at: string
+      source: string | null
     }>
   ).map((r) => ({
     id: r.id,
     reference: buildReservationReferenceCompact(r.id),
     contactName: r.contact_name ?? '',
+    source: r.source ?? 'account',
     status: (r.status as ReservationStatus) ?? 'pending',
     totalPrice: Number(r.total_price ?? 0),
     whatsappOpened: false,

@@ -30,6 +30,7 @@ const FALLBACK: ShopSettings = {
   theme: 'terra',
   default_mode: 'light',
   allow_visitor_mode: true,
+  home_layout: null,
   updated_at: new Date(0).toISOString(),
   updated_by: null,
 }

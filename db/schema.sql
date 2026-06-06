@@ -858,12 +858,17 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "total_price" numeric(10,2) NOT NULL,
     "currency" "text" DEFAULT 'DOP'::"text" NOT NULL,
     "admin_notes" "text",
+    "source" "text" DEFAULT 'account'::"text" NOT NULL,
+    "confirmation_token" "text",
+    "anonymous_id" "uuid",
+    "stock_applied" boolean DEFAULT false NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "confirmed_at" timestamp with time zone,
     "collected_at" timestamp with time zone,
     CONSTRAINT "reservations_total_items_check" CHECK (("total_items" > 0)),
-    CONSTRAINT "reservations_total_price_check" CHECK (("total_price" >= (0)::numeric))
+    CONSTRAINT "reservations_total_price_check" CHECK (("total_price" >= (0)::numeric)),
+    CONSTRAINT "reservations_source_check" CHECK (("source" = ANY (ARRAY['account'::"text", 'guest'::"text", 'counter'::"text"])))
 );
 
 

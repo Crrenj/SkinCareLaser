@@ -634,7 +634,9 @@ export type Database = {
       reservations: {
         Row: {
           admin_notes: string | null
+          anonymous_id: string | null
           collected_at: string | null
+          confirmation_token: string | null
           confirmed_at: string | null
           contact_email: string | null
           contact_name: string | null
@@ -643,7 +645,9 @@ export type Database = {
           currency: string
           expires_at: string
           id: string
+          source: string
           status: Database["public"]["Enums"]["reservation_status"]
+          stock_applied: boolean
           total_items: number
           total_price: number
           updated_at: string
@@ -651,7 +655,9 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          anonymous_id?: string | null
           collected_at?: string | null
+          confirmation_token?: string | null
           confirmed_at?: string | null
           contact_email?: string | null
           contact_name?: string | null
@@ -660,7 +666,9 @@ export type Database = {
           currency?: string
           expires_at: string
           id?: string
+          source?: string
           status?: Database["public"]["Enums"]["reservation_status"]
+          stock_applied?: boolean
           total_items: number
           total_price: number
           updated_at?: string
@@ -668,7 +676,9 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          anonymous_id?: string | null
           collected_at?: string | null
+          confirmation_token?: string | null
           confirmed_at?: string | null
           contact_email?: string | null
           contact_name?: string | null
@@ -677,7 +687,9 @@ export type Database = {
           currency?: string
           expires_at?: string
           id?: string
+          source?: string
           status?: Database["public"]["Enums"]["reservation_status"]
+          stock_applied?: boolean
           total_items?: number
           total_price?: number
           updated_at?: string
@@ -691,6 +703,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           default_mode: string
+          home_layout: Json | null
           id: number
           pickup_address: string | null
           pickup_hours: string | null
@@ -710,6 +723,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           default_mode?: string
+          home_layout?: Json | null
           id?: number
           pickup_address?: string | null
           pickup_hours?: string | null
@@ -729,6 +743,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           default_mode?: string
+          home_layout?: Json | null
           id?: number
           pickup_address?: string | null
           pickup_hours?: string | null
