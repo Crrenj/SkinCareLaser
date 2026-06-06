@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
 
   const parsed = parseBody(reservationCreate, raw)
   if (!parsed.ok) return parsed.response
-  const { contact_name, contact_phone, contact_email, admin_notes, items } = parsed.data
+  const { contact_name, contact_phone, contact_email, admin_notes, items, sold } = parsed.data
 
   const round2 = (n: number) => Math.round(n * 100) / 100
   const totalItems = items.reduce((sum, it) => sum + it.quantity, 0)
@@ -112,15 +112,21 @@ export async function POST(request: NextRequest) {
     items.reduce((sum, it) => sum + it.unit_price * it.quantity, 0),
   )
 
-  const expiresAt = new Date(
-    Date.now() + MANUAL_RESERVATION_TTL_DAYS * 24 * 60 * 60 * 1000,
-  ).toISOString()
+  const nowIso = new Date().toISOString()
+  // Vente finalisée (sold) → collected immédiat, pas d'expiration utile
+  // (expires_at est NOT NULL → on met now, sans effet car non-pending).
+  // Sinon réservation comptoir en attente (TTL classique).
+  const expiresAt = sold
+    ? nowIso
+    : new Date(Date.now() + MANUAL_RESERVATION_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString()
 
   const { data: reservation, error: insertError } = await supabaseAdmin
     .from('reservations')
     .insert({
       user_id: null,
-      status: 'pending',
+      source: 'counter',
+      status: sold ? 'collected' : 'pending',
+      collected_at: sold ? nowIso : null,
       expires_at: expiresAt,
       contact_phone: contact_phone.trim(),
       contact_email: contact_email?.trim() ? contact_email.trim() : null,
@@ -159,6 +165,16 @@ export async function POST(request: NextRequest) {
     logger.error('[admin/reservations] POST items error:', itemsError)
     await supabaseAdmin.from('reservations').delete().eq('id', reservation.id)
     return NextResponse.json({ error: itemsError.message }, { status: 500 })
+  }
+
+  // Vente finalisée : décrémente le stock maintenant que les items existent.
+  // RPC idempotente (flag stock_applied). Erreur loggée non bloquante.
+  if (sold) {
+    const { error: stockErr } = await supabaseAdmin.rpc(
+      'apply_reservation_collection',
+      { p_reservation_id: reservation.id },
+    )
+    if (stockErr) logger.error('[admin/reservations] counter sale stock error:', stockErr)
   }
 
   return NextResponse.json({ id: reservation.id }, { status: 201 })

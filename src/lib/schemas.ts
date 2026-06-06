@@ -155,6 +155,10 @@ export const reservationCreate = z.object({
   // accepte une chaîne vide ('') depuis le formulaire → traitée comme absente côté route
   contact_email: z.union([z.string().trim().email('Email invalide').max(200), z.literal('')]).optional(),
   admin_notes: z.string().trim().max(2000).optional(),
+  // Vente au comptoir déjà finalisée (le client repart avec la marchandise) →
+  // la réservation naît directement en statut collected + décrément du stock.
+  // Sinon = pending. status/source ne sont PAS exposés (dérivés serveur).
+  sold: z.boolean().optional().default(false),
   items: z
     .array(
       z.object({

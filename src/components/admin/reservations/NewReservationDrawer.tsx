@@ -20,6 +20,7 @@ export type NewReservationPayload = {
   contact_phone: string
   contact_email: string
   admin_notes: string
+  sold: boolean
   items: NewReservationItem[]
 }
 
@@ -52,6 +53,7 @@ export function NewReservationDrawer({ open, onClose, onCreate }: NewReservation
   const [phone, setPhone] = useState('')
   const [email, setEmail] = useState('')
   const [note, setNote] = useState('')
+  const [sold, setSold] = useState(false)
   const [items, setItems] = useState<NewReservationItem[]>([])
 
   const [query, setQuery] = useState('')
@@ -66,6 +68,7 @@ export function NewReservationDrawer({ open, onClose, onCreate }: NewReservation
     setPhone('')
     setEmail('')
     setNote('')
+    setSold(false)
     setItems([])
     setQuery('')
     setHits([])
@@ -161,6 +164,7 @@ export function NewReservationDrawer({ open, onClose, onCreate }: NewReservation
           contact_phone: phone.trim(),
           contact_email: email.trim(),
           admin_notes: note.trim(),
+          sold,
           items: items.map((it) => ({
             product_id: it.product_id,
             product_name: it.product_name.trim(),
@@ -175,7 +179,7 @@ export function NewReservationDrawer({ open, onClose, onCreate }: NewReservation
         setSubmitting(false)
       }
     },
-    [canSubmit, onCreate, name, phone, email, note, items],
+    [canSubmit, onCreate, name, phone, email, note, sold, items],
   )
 
   if (!open) return null
@@ -426,6 +430,18 @@ export function NewReservationDrawer({ open, onClose, onCreate }: NewReservation
           {/* Footer */}
           <footer className="px-[22px] py-[14px] pb-[18px] border-t border-sand-200 shrink-0 relative">
             <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
+            <label className="flex items-start gap-2.5 mb-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={sold}
+                onChange={(e) => setSold(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-clay-700"
+              />
+              <span className="text-[12.5px] leading-tight">
+                <span className="font-medium text-ink-900">{t('soldLabel')}</span>
+                <span className="block text-[11.5px] text-ink-500">{t('soldHint')}</span>
+              </span>
+            </label>
             <div className="flex justify-between items-center">
               <span className="text-[12px] text-ink-700 inline-flex items-baseline gap-2">
                 <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-500">
@@ -452,7 +468,7 @@ export function NewReservationDrawer({ open, onClose, onCreate }: NewReservation
                   className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-ink-900 border-0 rounded-[10px] hover:bg-ink-800 transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  {submitting ? t('creating') : t('submit')}
+                  {submitting ? t('creating') : sold ? t('submitSold') : t('submit')}
                 </button>
               </div>
             </div>

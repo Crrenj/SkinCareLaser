@@ -1915,8 +1915,12 @@
         "notePlaceholder": "E.g. Stock confirmed at the pharmacy. Customer prefers to pay cash.",
         "total": "Total",
         "submit": "Create reservation",
+        "submitSold": "Record sale",
         "creating": "Creating…",
         "successToast": "Reservation created",
+        "successSold": "Sale recorded",
+        "soldLabel": "Counter sale (already picked up)",
+        "soldHint": "The customer leaves with the goods: recorded as sold and stock is decremented.",
         "errorCreate": "Could not create the reservation"
       },
       "status": {

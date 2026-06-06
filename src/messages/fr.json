@@ -1915,8 +1915,12 @@
         "notePlaceholder": "Ex. Stock confirmé en pharmacie. Le client préfère payer en espèces.",
         "total": "Total",
         "submit": "Créer la réservation",
+        "submitSold": "Enregistrer la vente",
         "creating": "Création…",
         "successToast": "Réservation créée",
+        "successSold": "Vente enregistrée",
+        "soldLabel": "Vente au comptoir (déjà retirée)",
+        "soldHint": "Le client repart avec la marchandise : enregistrée comme vendue et le stock est décrémenté.",
         "errorCreate": "Impossible de créer la réservation"
       },
       "status": {

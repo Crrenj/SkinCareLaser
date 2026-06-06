@@ -196,10 +196,10 @@ export default function ReservationsAdminPage() {
         toast.error(json.error || t('create.errorCreate'))
         throw new Error(json.error || 'create failed')
       }
-      toast.success(t('create.successToast'))
+      toast.success(payload.sold ? t('create.successSold') : t('create.successToast'))
       setShowNew(false)
-      // Bascule sur "à contacter" pour voir la nouvelle réservation tout de suite
-      setFilter('pending')
+      // Vente finalisée → onglet "retirées" ; sinon "à contacter".
+      setFilter(payload.sold ? 'collected' : 'pending')
       await fetchData()
     },
     [fetchData, t],
