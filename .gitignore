@@ -46,6 +46,9 @@ yarn-error.log*
 # MCP config (contient des clés API)
 .mcp.json
 
+# Supabase CLI — état scratch local (project-ref, versions, pooler-url)
+/supabase/.temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

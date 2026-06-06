@@ -18,6 +18,13 @@
 -- migration). Vestigial conservé : enum order_status (encore en DB, sans table).
 -- Source de vérité = supabase/migrations/.
 --
+-- ⚠️ STALE depuis 2026-06 (deltas NON reflétés ici, présents dans les migrations
+-- + dans src/lib/database.types.ts régénéré) : `add_to_cart` durci M1 (stock
+-- cumulé FOR UPDATE + cap 99) ; `mark_message_as_read` DROPPÉE ; fonction
+-- `create_ticket` + colonnes tickets sur contact_messages ; `posts.author_name` ;
+-- `newsletter_subscribers.token_expires_at`. Full regen fidèle = `supabase link`
+-- puis `supabase db dump --schema public` (nécessite le mot de passe DB).
+--
 -- Contenu :
 --   0. Extensions
 --   1. Profils & admins

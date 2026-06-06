@@ -977,7 +977,6 @@ export type Database = {
         Returns: string
       }
       is_user_admin: { Args: { check_user_id: string }; Returns: boolean }
-      mark_message_as_read: { Args: { p_message_id: string }; Returns: boolean }
       merge_anon_cart_to_user: { Args: { p_anon_id: string }; Returns: string }
       remove_from_cart: {
         Args: { p_anon_id?: string; p_product_id: string; p_user_id?: string }

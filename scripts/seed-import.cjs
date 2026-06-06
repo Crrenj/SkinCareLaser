@@ -264,7 +264,7 @@ async function importBrand(brand, tagTypeIds, tagCache) {
             currency: 'DOP',
             stock: 0,
             is_active: hasRealPrice, // Activé seulement si un vrai prix est saisi
-            image_url: imageUrl,
+            range_id: rangeId, // FK directe 1-n (la table n-n product_ranges a été supprimée)
           }, { onConflict: 'slug' })
           .select()
           .single()
@@ -273,11 +273,6 @@ async function importBrand(brand, tagTypeIds, tagCache) {
           continue
         }
         productId = data.id
-      }
-
-      // product_ranges
-      if (!DRY_RUN) {
-        await supabase.from('product_ranges').upsert({ product_id: productId, range_id: rangeId }, { onConflict: 'product_id,range_id' })
       }
 
       // product_images (delete-then-insert pour idempotence sur re-run)

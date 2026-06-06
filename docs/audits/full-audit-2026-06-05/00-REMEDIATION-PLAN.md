@@ -14,13 +14,18 @@
 >
 > **DB (prod) :** M1 appliquée (grants/`search_path` préservés, 0 régression advisor) · `shop_settings.contact_email`=`contact@farmau.do` · `banners.link_url` normalisés (`/es/…`→`/…`).
 >
-> ### ⏳ Reste à faire (session suivante)
-> 1. **i18n module admin réservations** — ~40 chaînes ES en dur → namespace `Admin.reservations` FR/ES/EN. Fichiers : `components/admin/reservations/{types,FilterBar,BulkActionBar,ReservationsTable,ReservationDrawer}.tsx` + `BannerDeleteModal`, `TagSelector`, compteur panier `producto/productos`. [C-10]
-> 2. **`scripts/seed-import.cjs`** — retirer `image_url` (col droppée, ~l.267) + `product_ranges` (table droppée, ~l.279-281), poser `range_id`. [C-16]
-> 3. **Régénération** — `database.types.ts` (MCP `generate_typescript_types`) + `db/schema.sql` + compteurs `CLAUDE.md` (22→28 routes, 1→2 admin, 0→4 posts). [C-130]
-> 4. **SEO** — `sitemap.ts` hreflang blog = locale du post seule ; `noindex` metadata sur pages auth (login/signup/forgot/reset). [C-12/C-46]
-> 5. **Tests** — `playwright.config` `globalSetup`/`globalTeardown` → `cleanupStaleTestUsers()` ; specs sécu (open-redirect bloqué, mass-assignment→400, super_admin). [C-19]
-> 6. **Contraste CTA dark** — token `--c-on-accent` + rewiring `text-sand-50` sur `bg-clay-700` [C-15 partiel] · **`getUser`** sur `reservation/page` + `confirmation/[id]/page` [C-30 partiel].
+> ### Reliquat — état (mis à jour 2026-06-06 bis)
+> ✅ **FAIT cette session** (non encore committé — tsc 0 · lint 0 · vitest 26/26 · build vert) :
+> 1. **i18n module admin réservations** [C-10] — hook `useReservationFormat` (statut/temps/markAs) + ~68 clés `Admin.reservations` ×3 ; `FilterBar`/`BulkActionBar`/`ReservationsTable`/`ReservationDrawer`/`types.ts` ; `BannerDeleteModal` (`Admin.annonce.deleteModal`), `TagSelector` (`Admin.modals.product.tagsHeading`), compteur panier → `Cart.drawerProductsCount`.
+> 2. **`scripts/seed-import.cjs`** [C-16] — `image_url` retiré, `range_id` posé direct, bloc `product_ranges` supprimé.
+> 3. **Régénération (partielle)** [C-130] — `database.types.ts` synchro (drop `mark_message_as_read`) ; compteurs `CLAUDE.md` rafraîchis via MCP (28 routes, 2 admins, 4 posts). _`db/schema.sql` full dump NON fait (voir restant)._
+> 4. **SEO** [C-12/C-46] — `sitemap.ts` blog = locale du post seule (+x-default) ; `noindex` pages auth via nouveau `(auth)/layout.tsx`.
+> 5. **Tests** [C-19] — `playwright.config` `globalSetup`/`globalTeardown` → `cleanupStaleTestUsers()` ; `src/__tests__/schemas.test.ts` (mass-assignment C-09 + cap panier C-13/28, unitaire vérifiable) ; `tests/security.spec.ts` (open-redirect login). _Open-redirect logique déjà couvert par `safeRedirect.test.ts`._ Aussi : 2 tests `auth.test.tsx` réparés (mdp 12).
+> 6. **`getUser()`** [C-30] — `reservation/page.tsx` + `confirmation/[id]/page.tsx` migrés de `getSession()`.
+>
+> ⏳ **RESTANT** :
+> - **Contraste CTA dark `--c-on-accent`** [C-15] — touche **~72 sites** `bg-clay-700 text-sand-50` (public + admin + auth) + valeurs par thème/mode. **Décision design + QA visuelle 6×2 requises** → à cadrer avec l'utilisateur avant le sweep.
+> - **`db/schema.sql` full dump** — `supabase link` + `supabase db dump --schema public` ; **nécessite le mot de passe DB** (absent de l'env ici). Snapshot non-canonique ; header `db/schema.sql` mis à jour pour documenter les deltas.
 >
 > **Hors périmètre assumé** : grants TABLE RLS (D24) ; rendu statique `[locale]` bloqué par `getLocale()` du root layout (cluster perf C-02/03/04). **Action user** : activer Supabase « Leaked password protection » (D6).
 >
