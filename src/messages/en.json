@@ -1930,6 +1930,11 @@
         "expired": "Expired",
         "cancelled": "Cancelled"
       },
+      "origin": {
+        "account": "Account",
+        "guest": "Anonymous (web)",
+        "counter": "Counter"
+      },
       "markAs": {
         "confirmed": "Mark confirmed",
         "collected": "Mark collected"

@@ -1930,6 +1930,11 @@
         "expired": "Expirada",
         "cancelled": "Cancelada"
       },
+      "origin": {
+        "account": "Cuenta",
+        "guest": "Anónimo (web)",
+        "counter": "Mostrador"
+      },
       "markAs": {
         "confirmed": "Marcar confirmada",
         "collected": "Marcar entregada"

@@ -6,12 +6,26 @@ export type ReservationRow = {
   id: string
   reference: string
   contactName: string
+  source: string
   status: ReservationStatus
   totalPrice: number
   whatsappOpened: boolean
 }
 
 const fmtDOP = (n: number) => formatPrice(n)
+
+// Libellés d'origine (ES en dur, cohérent avec les widgets dashboard).
+const ORIGIN_ES: Record<string, string> = {
+  account: 'Cuenta',
+  guest: 'Anónimo (web)',
+  counter: 'Mostrador',
+}
+function displayNameEs(name: string, source: string): string {
+  const trimmed = name.trim()
+  if (trimmed) return trimmed
+  if (source === 'guest' || source === 'counter') return ORIGIN_ES[source]
+  return '—'
+}
 
 export function RecentReservationsWidget({
   rows,
@@ -56,8 +70,13 @@ export function RecentReservationsWidget({
               </span>
               <span className="flex items-center gap-1.5 min-w-0">
                 <span className="font-medium text-ink-900 text-[13.5px] truncate">
-                  {r.contactName || '—'}
+                  {displayNameEs(r.contactName, r.source)}
                 </span>
+                {r.source !== 'account' && (
+                  <span className="shrink-0 px-1.5 py-px rounded-full text-[9px] font-semibold uppercase tracking-[0.04em] bg-sand-200 text-ink-700">
+                    {r.source === 'guest' ? 'Web' : 'Mostrador'}
+                  </span>
+                )}
                 {r.whatsappOpened && (
                   <span title="Cliente abrió WhatsApp" className="text-[13px] shrink-0">
                     💬

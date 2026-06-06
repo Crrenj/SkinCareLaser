@@ -4,6 +4,7 @@ import { Check, MoreHorizontal } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { Reservation } from './types'
 import {
+  ORIGIN_CHIP_CLASS,
   STATUS_BADGE_CLASS,
   buildReservationRef,
   fmtDOP,
@@ -33,7 +34,7 @@ export function ReservationsTable({
   onAdvance,
 }: Props) {
   const t = useTranslations('Admin.reservations')
-  const { statusLabel, relativeAndAbsolute } = useReservationFormat()
+  const { statusLabel, relativeAndAbsolute, originLabel, displayName } = useReservationFormat()
   const allChecked = rows.length > 0 && rows.every((r) => selectedIds.has(r.id))
   const someChecked = rows.some((r) => selectedIds.has(r.id))
 
@@ -132,11 +133,17 @@ export function ReservationsTable({
                 <Td>
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="font-medium text-ink-900 text-[13.5px] flex items-center gap-1.5 truncate">
-                      {r.contact_name || '—'}
-                      {/* Placeholder 💬 : nécessite whatsapp_sent_at en DB. */}
+                      {displayName(r.contact_name, r.source)}
                     </span>
-                    <span className="text-[11.5px] text-ink-500 font-mono">
-                      {r.contact_phone}
+                    <span className="flex items-center gap-1.5 text-[11.5px] text-ink-500 font-mono min-w-0">
+                      <span className="truncate">{r.contact_phone}</span>
+                      {r.source !== 'account' && (
+                        <span
+                          className={`shrink-0 px-1.5 py-px rounded-full text-[9px] font-sans font-semibold uppercase tracking-[0.04em] ${ORIGIN_CHIP_CLASS[r.source]}`}
+                        >
+                          {originLabel(r.source)}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </Td>

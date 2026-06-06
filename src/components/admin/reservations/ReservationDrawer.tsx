@@ -6,6 +6,7 @@ import { ArrowRight, Loader2 } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
 import type { Reservation } from './types'
 import {
+  ORIGIN_CHIP_CLASS,
   STATUS_BADGE_CLASS,
   buildReservationRef,
   fmtDOP,
@@ -33,7 +34,8 @@ export function ReservationDrawer({
   busy = false,
 }: ReservationDrawerProps) {
   const t = useTranslations('Admin.reservations')
-  const { statusLabel, nextStatusLabel, relativeAndAbsolute } = useReservationFormat()
+  const { statusLabel, nextStatusLabel, relativeAndAbsolute, originLabel, displayName } =
+    useReservationFormat()
   const r = reservation
   const ref = buildReservationRef(r.id, r.created_at)
   const date = relativeAndAbsolute(r.created_at)
@@ -108,16 +110,25 @@ export function ReservationDrawer({
               id="reservation-drawer-title"
               className="font-serif text-[22px] text-ink-900 m-0 mt-1"
             >
-              {r.contact_name || t('drawer.noName')}
+              {displayName(r.contact_name, r.source)}
             </h3>
-            <span
-              className={`self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.04em] uppercase mt-1 ${
-                STATUS_BADGE_CLASS[r.status]
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-              {statusLabel(r.status)}
-            </span>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              <span
+                className={`self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.04em] uppercase ${
+                  STATUS_BADGE_CLASS[r.status]
+                }`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+                {statusLabel(r.status)}
+              </span>
+              {r.source !== 'account' && (
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-[0.04em] uppercase ${ORIGIN_CHIP_CLASS[r.source]}`}
+                >
+                  {originLabel(r.source)}
+                </span>
+              )}
+            </div>
           </div>
           <PopClose onClick={onClose} />
         </header>
@@ -126,7 +137,7 @@ export function ReservationDrawer({
         <div className="flex-1 overflow-y-auto px-[22px] py-[14px] flex flex-col gap-[14px]">
           <Section title={t('drawer.sectionClient')}>
             <CardBlock>
-              <Row label={t('drawer.rowName')} value={r.contact_name || '—'} />
+              <Row label={t('drawer.rowName')} value={displayName(r.contact_name, r.source)} />
               <Row label={t('drawer.rowPhone')} value={r.contact_phone} isLink={`tel:${r.contact_phone}`} />
               <Row
                 label={t('drawer.rowEmail')}

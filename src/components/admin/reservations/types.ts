@@ -18,6 +18,9 @@ export type DbReservationStatus =
 
 export type StatusFilter = DbReservationStatus | 'all'
 
+/** Origine d'une réservation/vente. */
+export type ReservationSource = 'account' | 'guest' | 'counter'
+
 export type ReservationItem = {
   id: string
   product_id: string | null
@@ -41,6 +44,7 @@ export type Reservation = {
   total_price: number
   currency: string
   admin_notes: string | null
+  source: ReservationSource
   items: ReservationItem[]
 }
 
@@ -50,6 +54,13 @@ export const STATUS_BADGE_CLASS: Record<DbReservationStatus, string> = {
   collected: 'bg-ink-200 text-ink-800',
   expired: 'bg-sand-300 text-ink-800',
   cancelled: 'bg-brick-600/12 text-brick-600',
+}
+
+/** Pastille d'origine (compte / web invité / comptoir). */
+export const ORIGIN_CHIP_CLASS: Record<ReservationSource, string> = {
+  account: 'bg-sand-200 text-ink-700',
+  guest: 'bg-clay-200 text-clay-800',
+  counter: 'bg-olive-600/15 text-olive-600',
 }
 
 /**

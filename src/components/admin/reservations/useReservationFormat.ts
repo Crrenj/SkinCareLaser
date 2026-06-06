@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toLocaleTag } from '@/lib/constants'
-import { nextStatusFor, type DbReservationStatus } from './types'
+import { nextStatusFor, type DbReservationStatus, type ReservationSource } from './types'
 
 /**
  * Helpers de formatage localisés du module réservations (labels de statut,
@@ -28,6 +28,21 @@ export function useReservationFormat() {
   )
 
   const statusLabel = useCallback((s: DbReservationStatus) => t(`status.${s}`), [t])
+
+  // Libellé d'origine (chip) : Cuenta / Anónimo (web) / Mostrador.
+  const originLabel = useCallback((src: ReservationSource) => t(`origin.${src}`), [t])
+
+  // Nom à afficher : nom fourni, sinon repli selon l'origine
+  // (invité web → « Anónimo (web) », comptoir → « Mostrador »), sinon « — ».
+  const displayName = useCallback(
+    (name: string | null | undefined, src: ReservationSource): string => {
+      const trimmed = name?.trim()
+      if (trimmed) return trimmed
+      if (src === 'guest' || src === 'counter') return t(`origin.${src}`)
+      return '—'
+    },
+    [t],
+  )
 
   const nextStatusLabel = useCallback(
     (s: DbReservationStatus): string | null => {
@@ -54,5 +69,5 @@ export function useReservationFormat() {
     [t, absFmt],
   )
 
-  return { statusLabel, nextStatusLabel, relativeAndAbsolute }
+  return { statusLabel, nextStatusLabel, relativeAndAbsolute, originLabel, displayName }
 }

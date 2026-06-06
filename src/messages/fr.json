@@ -1930,6 +1930,11 @@
         "expired": "Expirée",
         "cancelled": "Annulée"
       },
+      "origin": {
+        "account": "Compte",
+        "guest": "Anonyme (web)",
+        "counter": "Comptoir"
+      },
       "markAs": {
         "confirmed": "Marquer confirmée",
         "collected": "Marquer remise"
