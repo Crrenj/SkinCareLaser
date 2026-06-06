@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
-import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import { localizedPath } from '@/lib/seo'
 import Image from 'next/image'
 import DOMPurify from 'isomorphic-dompurify'
 import { BlogPostJsonLd } from '@/components/blog/BlogPostJsonLd'
@@ -21,19 +21,24 @@ export async function generateMetadata({
   const supabase = await createSupabaseServerClient()
   const { data: post } = await supabase
     .from('posts')
-    .select('title, excerpt')
+    .select('title, excerpt, locale')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
 
   if (!post) return { title: 'Article introuvable' }
 
+  // Un post n'existe que dans SA locale (posts.locale) → on n'annonce PAS de
+  // fausses traductions hreflang fr/es/en. Canonical = locale du post. [C-12]
+  const postLocale = post.locale ?? locale
+  const canonical = localizedPath(postLocale, `/blog/${slug}`)
+
   return {
     title: `${post.title} · FARMAU`,
     description: post.excerpt ?? undefined,
     alternates: {
-      canonical: localizedPath(locale, `/blog/${slug}`),
-      languages: buildLanguageAlternates(`/blog/${slug}`),
+      canonical,
+      languages: { [postLocale]: canonical, 'x-default': canonical },
     },
   }
 }

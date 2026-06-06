@@ -39,14 +39,14 @@ test.describe('Admin loggé — smoke lecture seule', () => {
     await page.locator('#email').fill(admin.email)
     await page.locator('#password').fill(admin.password)
     await Promise.all([
-      page.waitForURL(/\/admin\//, { timeout: 30_000 }),
+      page.waitForURL(/\/admin(\/|$)/, { timeout: 30_000 }),
       page.getByRole('button', { name: /se connecter/i }).click(),
     ])
   }
 
-  test('Login admin → /admin/product + sidebar visible', async ({ page }) => {
+  test('Login admin → /admin (dashboard) + sidebar visible', async ({ page }) => {
     await loginAdmin(page)
-    await expect(page).toHaveURL(/\/admin\/product/)
+    await expect(page).toHaveURL(/\/admin(\/|$)/)
     await expect(page.locator('[data-testid="admin-sidebar"]')).toBeVisible({ timeout: 30_000 })
   })
 

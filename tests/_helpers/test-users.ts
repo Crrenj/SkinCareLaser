@@ -16,6 +16,16 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   )
 }
 
+// Garde-fou D30 : la suite e2e écrit dans le SEUL projet Supabase (= prod, pas
+// de branche de test sur le plan actuel). On refuse de tourner sans opt-in
+// explicite pour éviter toute écriture accidentelle (CI, lancement par erreur).
+// Lancer en local : `ALLOW_E2E=1 npm run test`. Données balisées @farmau.test.
+if (!process.env.ALLOW_E2E) {
+  throw new Error(
+    'Suite e2e désactivée par sécurité : relancer avec `ALLOW_E2E=1 npm run test` (cf. D30).',
+  )
+}
+
 const admin: SupabaseClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 })

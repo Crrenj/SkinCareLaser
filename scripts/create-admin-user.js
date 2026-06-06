@@ -92,7 +92,6 @@ async function makeUserAdmin(userId, email) {
     .from('profiles')
     .upsert({
       id: userId,
-      is_admin: true,
       role: 'admin',
       display_name: 'Admin Principal'
     })
