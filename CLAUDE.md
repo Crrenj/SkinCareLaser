@@ -263,7 +263,8 @@ Découpage par scope/page :
 - Path alias `@/*` → `src/*`.
 - TypeScript `strict: true`, **0 erreur tsc**. Lint : **0 warning**. ESLint config honore `^_` pattern.
 - ESLint warnings non bloquants au build (cf `eslint.config.mjs`). Le fichier `database.types.ts` est ignoré (généré).
-- **Ne jamais commit sans demande explicite** (règle Cursor `alwaysApply`).
+- **Commit sur demande explicite** (règle Cursor `alwaysApply`) — pas de commit spontané.
+- **Stager UNIQUEMENT les fichiers modifiés par la session courante** : `git add <chemins explicites>`, **jamais `git add -A` / `git add .`**. Une session parallèle peut avoir modifié ou **staged** d'autres fichiers ; `git commit` embarque TOUT l'index → on committe alors par erreur le travail d'autrui (incident vécu : du refactor PDP/i18n parallèle s'est retrouvé dans une commit de réservations). Réflexe avant commit : `git reset` (vide l'index) puis `git add` de tes seuls fichiers, et **vérifier `git diff --cached --name-only`** avant de committer.
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest + build + e2e sur PR et push main.
 
