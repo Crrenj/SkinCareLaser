@@ -18,16 +18,15 @@
 > ✅ **FAIT cette session** (non encore committé — tsc 0 · lint 0 · vitest 26/26 · build vert) :
 > 1. **i18n module admin réservations** [C-10] — hook `useReservationFormat` (statut/temps/markAs) + ~68 clés `Admin.reservations` ×3 ; `FilterBar`/`BulkActionBar`/`ReservationsTable`/`ReservationDrawer`/`types.ts` ; `BannerDeleteModal` (`Admin.annonce.deleteModal`), `TagSelector` (`Admin.modals.product.tagsHeading`), compteur panier → `Cart.drawerProductsCount`.
 > 2. **`scripts/seed-import.cjs`** [C-16] — `image_url` retiré, `range_id` posé direct, bloc `product_ranges` supprimé.
-> 3. **Régénération (partielle)** [C-130] — `database.types.ts` synchro (drop `mark_message_as_read`) ; compteurs `CLAUDE.md` rafraîchis via MCP (28 routes, 2 admins, 4 posts). _`db/schema.sql` full dump NON fait (voir restant)._
+> 3. **Régénération** [C-130] — `database.types.ts` synchro (drop `mark_message_as_read`) ; compteurs `CLAUDE.md` rafraîchis via MCP (28 routes, 2 admins, 4 posts) ; **`db/schema.sql` régénéré** (dump fidèle host-`pg_dump` 17 sans Docker via nouveau `scripts/db-dump.sh`).
 > 4. **SEO** [C-12/C-46] — `sitemap.ts` blog = locale du post seule (+x-default) ; `noindex` pages auth via nouveau `(auth)/layout.tsx`.
 > 5. **Tests** [C-19] — `playwright.config` `globalSetup`/`globalTeardown` → `cleanupStaleTestUsers()` ; `src/__tests__/schemas.test.ts` (mass-assignment C-09 + cap panier C-13/28, unitaire vérifiable) ; `tests/security.spec.ts` (open-redirect login). _Open-redirect logique déjà couvert par `safeRedirect.test.ts`._ Aussi : 2 tests `auth.test.tsx` réparés (mdp 12).
 > 6. **`getUser()`** [C-30] — `reservation/page.tsx` + `confirmation/[id]/page.tsx` migrés de `getSession()`.
 >
 > ⏳ **RESTANT** :
-> - **Contraste CTA dark `--c-on-accent`** [C-15] — touche **~72 sites** `bg-clay-700 text-sand-50` (public + admin + auth) + valeurs par thème/mode. **Décision design + QA visuelle 6×2 requises** → à cadrer avec l'utilisateur avant le sweep.
-> - **`db/schema.sql` full dump** — `supabase link` + `supabase db dump --schema public` ; **nécessite le mot de passe DB** (absent de l'env ici). Snapshot non-canonique ; header `db/schema.sql` mis à jour pour documenter les deltas.
+> - **Contraste CTA dark `--c-on-accent`** [C-15] — touche **~72 sites** `bg-clay-700 text-sand-50` (public + admin + auth) + valeurs par thème/mode. **Décision design + QA visuelle 6×2 requises** → reporté (choix utilisateur, passe design dédiée).
 >
-> **Hors périmètre assumé** : grants TABLE RLS (D24) ; rendu statique `[locale]` bloqué par `getLocale()` du root layout (cluster perf C-02/03/04). **Action user** : activer Supabase « Leaked password protection » (D6).
+> **Hors périmètre assumé** : grants TABLE RLS (D24) ; rendu statique `[locale]` bloqué par `getLocale()` du root layout (cluster perf C-02/03/04). **D6 (« Leaked password protection ») : nécessite le plan Supabase Pro → NON retenu** (risque accepté ; ne pas re-flaguer).
 >
 > _Le plan détaillé original (Context, décisions, phases) suit, inchangé._
 
@@ -58,7 +57,7 @@ L'audit du 2026-06-05 (`docs/audits/full-audit-2026-06-05/`, 38 workstreams) a r
 
 ## Actions utilisateur en parallèle
 - **D5 (env Vercel)** — vérifier : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (+ `RESEND_API_KEY`/`RESEND_FROM_EMAIL` opt.). **Aucune nouvelle var** (WhatsApp passe en DB ; `NEXT_PUBLIC_WHATSAPP_NUMBER` supprimée). Opt. `NEXT_PUBLIC_SITE_URL=https://farmau.do`.
-- **D6** — activer **Auth → Leaked password protection** (Supabase dashboard).
+- ~~**D6** — activer **Auth → Leaked password protection**~~ → **nécessite le plan Supabase Pro → NON retenu** (risque accepté tel quel, ne pas re-flaguer).
 - **Coordonnées** — renseigner tél/WhatsApp/horaires réels dans `/admin/settings` (je pose `contact@farmau.do` ; tu corriges les numéros).
 - **D7 (vérif visuelle)** — valider chaque phase déployée.
 
