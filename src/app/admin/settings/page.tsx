@@ -100,7 +100,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-sand-50">
       <PageHeader crumbs={[{ label: t('crumb') }, { label: t('title') }]} title={t('title')} />
 
-      <form onSubmit={handleSave} className="px-5 lg:px-8 py-6 max-w-[880px]">
+      <form onSubmit={handleSave} className="px-5 lg:px-8 py-6 max-w-[1240px] mx-auto">
         <p className="font-serif italic text-[16px] text-ink-700 mb-7 max-w-[620px]">
           {t('subtitle')}
         </p>

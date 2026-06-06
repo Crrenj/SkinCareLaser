@@ -94,7 +94,7 @@ export default function AppearancePage() {
         title={t('title')}
       />
 
-      <div className="px-5 lg:px-8 py-6 max-w-[1040px]">
+      <div className="px-5 lg:px-8 py-6 max-w-[1240px] mx-auto">
         <p className="font-serif italic text-[16px] text-ink-700 mb-7 max-w-[640px]">
           {t('subtitle')}
         </p>
