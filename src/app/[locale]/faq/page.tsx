@@ -122,7 +122,7 @@ export default async function FaqPage({
                 href="https://wa.me/18094122468"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-sm bg-clay-700 hover:bg-clay-800 text-sand-50 text-[12.5px] font-semibold uppercase tracking-wider transition-colors"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-sm bg-clay-700 hover:bg-clay-800 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider transition-colors"
               >
                 <MessageCircle size={16} strokeWidth={1.8} />
                 {t('contact.whatsapp')}

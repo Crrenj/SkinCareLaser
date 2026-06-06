@@ -152,7 +152,7 @@ async function EmptyState({ locale }: { locale: string }) {
       </p>
       <Link
         href="/catalogue"
-        className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-sm bg-clay-700 text-sand-50 text-[13px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
+        className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-sm bg-clay-700 text-on-accent text-[13px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
       >
         {t('emptyCta')}
       </Link>

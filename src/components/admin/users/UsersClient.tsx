@@ -217,7 +217,7 @@ export function UsersClient() {
                           disabled={updatingId === r.id}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                             r.isAdmin
-                              ? 'bg-clay-700 hover:bg-clay-800 text-sand-50'
+                              ? 'bg-clay-700 hover:bg-clay-800 text-on-accent'
                               : 'bg-transparent border border-sand-400 text-ink-700 hover:border-ink-700 hover:text-ink-900'
                           }`}
                         >
@@ -301,7 +301,7 @@ function RoleBadge({
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
-        isSuper ? 'bg-clay-700 text-sand-50' : 'bg-sand-200 text-ink-700'
+        isSuper ? 'bg-clay-700 text-on-accent' : 'bg-sand-200 text-ink-700'
       }`}
     >
       {isSuper ? <ShieldCheck className="w-3 h-3" /> : <Shield className="w-3 h-3" />}

@@ -70,7 +70,7 @@ export function StockEditModal({ item, open, onClose, onSave }: Props) {
             <button type="button" onClick={onClose} className="px-4 py-2 text-[13px] text-ink-700 bg-transparent border border-sand-300 rounded-md hover:bg-sand-100 transition-colors">
               {tCommon('cancel')}
             </button>
-            <button type="submit" className="px-4 py-2 text-[13px] font-medium text-sand-50 bg-clay-700 rounded-md hover:bg-clay-800 transition-colors">
+            <button type="submit" className="px-4 py-2 text-[13px] font-medium text-on-accent bg-clay-700 rounded-md hover:bg-clay-800 transition-colors">
               {tCommon('save')}
             </button>
           </div>

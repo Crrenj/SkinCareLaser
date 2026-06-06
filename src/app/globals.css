@@ -25,6 +25,12 @@
   --color-clay-800: var(--c-accent-deep);
   --color-clay-900: var(--c-accent-900);
 
+  /* Premier-plan du CTA (texte/icône posé sur un fond accent clay-600/700/800).
+     Défaut = --c-bg (= comportement historique de text-sand-50). Surchargé par
+     thème dans les blocs sombres dont l'accent-strong est trop foncé pour un
+     texte = fond (cf. plus bas). text-on-accent = utilitaire généré ici. [C-15] */
+  --color-on-accent: var(--c-on-accent);
+
   --color-ink-50:  var(--c-ink-50);
   --color-ink-100: var(--c-ink-100);
   --color-ink-200: var(--c-ink-200);
@@ -111,6 +117,11 @@
   --c-accent-deep: color-mix(in srgb, var(--c-accent-strong) 72%, #000);
   --c-accent-900: color-mix(in srgb, var(--c-accent-strong) 50%, #000);
 
+  /* Premier-plan accent par défaut = fond du thème (clair → quasi-blanc,
+     sombre → foncé) : reproduit exactement l'ancien text-sand-50. Les thèmes
+     sombres qui n'atteignent pas 4.5:1 ainsi le surchargent dans leur bloc. */
+  --c-on-accent: var(--c-bg);
+
   /* Mappings tokens Tailwind redéclarés ICI (pas seulement dans @theme/:root)
      pour qu'ils SE RÉSOLVENT sur l'élément thémé : var(--c-*) référencé depuis
      @theme est figé sur :root (substitution au point de déclaration), donc un
@@ -132,6 +143,7 @@
   --color-clay-700: var(--c-accent-strong);
   --color-clay-800: var(--c-accent-deep);
   --color-clay-900: var(--c-accent-900);
+  --color-on-accent: var(--c-on-accent);
   --color-ink-50:  var(--c-ink-50);
   --color-ink-100: var(--c-ink-100);
   --color-ink-200: var(--c-ink-200);
@@ -152,6 +164,9 @@
 [data-theme="terra"][data-mode="dark"] {
   --c-bg: #1F1B16; --c-surface: #3C3830; --c-text: #F4EFE7;
   --c-accent: #D89A75; --c-accent-strong: #B86F4A; --c-bird: #FBF8F4;
+  /* accent-strong #B86F4A (mi-ton chaud) : texte=fond donne 4.41:1 (< AA).
+     Texte quasi-noir → 5.01:1 (le blanc empirerait à 3.88). [C-15] */
+  --c-on-accent: #160A05;
 }
 
 /* ── NOIR ───────────────────────────────────────────── */
@@ -172,6 +187,9 @@
 [data-theme="botanico"][data-mode="dark"] {
   --c-bg: #1E2418; --c-surface: #2D3624; --c-text: #DBE0CC;
   --c-accent: #8B9A66; --c-accent-strong: #5B6B3F; --c-bird: #DBE0CC;
+  /* accent-strong #5B6B3F (vert foncé) : texte=fond donne 2.74:1.
+     Texte blanc → 5.80:1. [C-15] */
+  --c-on-accent: #FFFFFF;
 }
 
 /* ── CORAL ──────────────────────────────────────────── */
@@ -182,6 +200,9 @@
 [data-theme="coral"][data-mode="dark"] {
   --c-bg: #2E1810; --c-surface: #4A2820; --c-text: #F0D7C5;
   --c-accent: #D89A75; --c-accent-strong: #B86F4A; --c-bird: #F0D7C5;
+  /* accent-strong #B86F4A (mi-ton chaud) : texte=fond donne 4.31:1 (< AA).
+     Texte quasi-noir → 5.01:1 (le blanc empirerait à 3.88). [C-15] */
+  --c-on-accent: #160A05;
 }
 
 /* ── MARINO ─────────────────────────────────────────── */
@@ -192,6 +213,9 @@
 [data-theme="marino"][data-mode="dark"] {
   --c-bg: #0F1B22; --c-surface: #1E2E37; --c-text: #C5D6DC;
   --c-accent: #7AA5B5; --c-accent-strong: #3D6B7A; --c-bird: #C5D6DC;
+  /* accent-strong #3D6B7A (bleu foncé) : texte=fond donne 2.98:1.
+     Texte blanc → 5.86:1. [C-15] */
+  --c-on-accent: #FFFFFF;
 }
 
 /* ── ÁMBAR ──────────────────────────────────────────── */

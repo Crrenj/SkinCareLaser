@@ -153,7 +153,7 @@ export default function ProductClient({
               type="button"
               onClick={handleAddToCart}
               disabled={outOfStock}
-              className="h-[52px] bg-clay-700 text-sand-50 rounded-sm font-semibold text-[14px] uppercase tracking-wider hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-[52px] bg-clay-700 text-on-accent rounded-sm font-semibold text-[14px] uppercase tracking-wider hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('addToCartCta')}
             </button>

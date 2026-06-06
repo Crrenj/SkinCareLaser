@@ -39,7 +39,7 @@ export function HomeHero({ productCount, brandCount }: HomeHeroProps) {
             <div className="flex flex-wrap items-center gap-3.5">
               <Link
                 href="/catalogue"
-                className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-[2px] bg-clay-700 text-sand-50 text-[12.5px] font-semibold uppercase tracking-[0.06em] hover:bg-clay-800 transition-colors"
+                className="group inline-flex items-center gap-2.5 px-5 py-3 rounded-[2px] bg-clay-700 text-on-accent text-[12.5px] font-semibold uppercase tracking-[0.06em] hover:bg-clay-800 transition-colors"
               >
                 {t('primaryCta')}
                 <span className="transition-transform group-hover:translate-x-1">→</span>

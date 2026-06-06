@@ -227,7 +227,7 @@ export default function CatalogueClient({
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="px-5 py-2.5 bg-clay-700 text-sand-50 rounded-[3px] text-[13px] font-medium hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
+                className="px-5 py-2.5 bg-clay-700 text-on-accent rounded-[3px] text-[13px] font-medium hover:bg-clay-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
               >
                 {t('resetFilters')}
               </button>

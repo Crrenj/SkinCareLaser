@@ -136,7 +136,7 @@ function ProductBadge({ kind, promoPct }: { kind: ProductCardBadge; promoPct: nu
   const styles = {
     new: 'bg-olive-600 text-sand-50 border-olive-600',
     promo: 'bg-brick-600 text-sand-50 border-brick-600',
-    best: 'bg-clay-700 text-sand-50 border-clay-700',
+    best: 'bg-clay-700 text-on-accent border-clay-700',
   } as const
 
   let label: string

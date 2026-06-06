@@ -225,7 +225,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
                       <span
                         className={`text-[10px] font-semibold leading-[1.4] rounded-full px-1.5 py-px ${
                           item.badgeVariant === 'alert'
-                            ? 'bg-clay-700 text-sand-50'
+                            ? 'bg-clay-700 text-on-accent'
                             : 'bg-ink-500 text-sand-50'
                         }`}
                       >
@@ -244,7 +244,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
         <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-[10px] hover:bg-sand-200 transition-colors">
           <span
             aria-hidden
-            className="w-[34px] h-[34px] shrink-0 rounded-full bg-clay-700 text-sand-50 text-[12.5px] font-semibold tracking-[0.02em] inline-flex items-center justify-center"
+            className="w-[34px] h-[34px] shrink-0 rounded-full bg-clay-700 text-on-accent text-[12.5px] font-semibold tracking-[0.02em] inline-flex items-center justify-center"
           >
             {initialsFromEmail(email)}
           </span>

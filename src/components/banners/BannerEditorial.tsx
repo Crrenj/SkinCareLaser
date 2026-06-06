@@ -40,7 +40,7 @@ export function BannerEditorial({
   const cta = ctaHref ? resolveBannerCta(ctaHref) : null
   const ctaClass = `group inline-flex items-center gap-2.5 self-start px-5 py-3 rounded-[2px] text-[12.5px] font-semibold uppercase tracking-[0.06em] transition-colors ${
     ctaVariant === 'solid'
-      ? 'bg-clay-700 text-sand-50 hover:bg-clay-800'
+      ? 'bg-clay-700 text-on-accent hover:bg-clay-800'
       : 'border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-sand-50'
   }`
 

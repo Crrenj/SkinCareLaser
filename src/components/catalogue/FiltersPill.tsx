@@ -74,7 +74,7 @@ export function FiltersPill({ groupCount, activeFilters, onOpen, hidden }: Props
         <SlidersHorizontal className="w-3.5 h-3.5" />
         <span>{t('pillLabel')}</span>
         {groupCount > 0 && (
-          <span className="bg-clay-700 text-sand-50 text-[11px] font-semibold px-1.5 py-px rounded-full leading-[1.4]">
+          <span className="bg-clay-700 text-on-accent text-[11px] font-semibold px-1.5 py-px rounded-full leading-[1.4]">
             {groupCount}
           </span>
         )}

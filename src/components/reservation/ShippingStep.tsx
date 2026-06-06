@@ -87,7 +87,7 @@ export function ShippingStep({ onSubmit, onBack }: Props) {
         </button>
         <button
           type="submit"
-          className="h-12 px-7 rounded-lg bg-clay-700 text-sand-50 font-medium text-[14.5px] hover:bg-clay-800 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto"
+          className="h-12 px-7 rounded-lg bg-clay-700 text-on-accent font-medium text-[14.5px] hover:bg-clay-800 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           {t('continue')}
           <ArrowRight className="w-3.5 h-3.5" />

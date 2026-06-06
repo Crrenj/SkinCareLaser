@@ -151,7 +151,7 @@ export function BlogClient() {
         </p>
         <button
           onClick={openCreate}
-          className="rounded-lg bg-clay-700 px-5 py-2.5 text-sm font-medium text-sand-50 hover:bg-clay-800 transition-colors"
+          className="rounded-lg bg-clay-700 px-5 py-2.5 text-sm font-medium text-on-accent hover:bg-clay-800 transition-colors"
         >
           {t('newPost')}
         </button>
@@ -320,7 +320,7 @@ export function BlogClient() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="rounded-lg bg-clay-700 px-5 py-2 text-sm font-medium text-sand-50 hover:bg-clay-800 transition-colors disabled:opacity-50"
+                className="rounded-lg bg-clay-700 px-5 py-2 text-sm font-medium text-on-accent hover:bg-clay-800 transition-colors disabled:opacity-50"
               >
                 {saving ? t('saving') : t('save')}
               </button>

@@ -290,7 +290,7 @@ export function FiltersMobileSheet({
                       aria-pressed={on}
                       className={`px-3 py-[7px] rounded-[10px] text-[12.5px] leading-[1.3] border transition-colors inline-flex items-center gap-1 ${
                         on
-                          ? 'bg-clay-700 text-sand-50 border-clay-700'
+                          ? 'bg-clay-700 text-on-accent border-clay-700'
                           : 'bg-sand-50 text-ink-700 border-sand-300 hover:border-ink-700'
                       }`}
                     >
@@ -311,7 +311,7 @@ export function FiltersMobileSheet({
           type="button"
           onClick={handleApply}
           disabled={matchedCount === 0}
-          className="w-full h-[50px] rounded-xl bg-clay-700 text-sand-50 text-[14.5px] font-medium hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+          className="w-full h-[50px] rounded-xl bg-clay-700 text-on-accent text-[14.5px] font-medium hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
         >
           {t('applyButton')} · {t('applyCount', { count: matchedCount })}
         </button>

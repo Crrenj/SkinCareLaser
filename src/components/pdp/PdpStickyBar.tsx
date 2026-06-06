@@ -61,7 +61,7 @@ export function PdpStickyBar({
         type="button"
         onClick={onAdd}
         disabled={disabled}
-        className="px-5 bg-clay-700 text-sand-50 rounded-sm font-semibold text-[13px] uppercase tracking-wider hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-5 bg-clay-700 text-on-accent rounded-sm font-semibold text-[13px] uppercase tracking-wider hover:bg-clay-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {t('addToCart')}
       </button>

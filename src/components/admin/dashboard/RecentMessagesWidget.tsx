@@ -62,7 +62,7 @@ export function RecentMessagesWidget({
               <div className="flex justify-between items-center text-[11.5px] text-ink-500 font-medium">
                 <span className="truncate">{m.from}</span>
                 {m.unread && (
-                  <span className="bg-clay-700 text-sand-50 text-[9.5px] px-1.5 py-0.5 rounded-full uppercase tracking-[0.06em] font-semibold whitespace-nowrap">
+                  <span className="bg-clay-700 text-on-accent text-[9.5px] px-1.5 py-0.5 rounded-full uppercase tracking-[0.06em] font-semibold whitespace-nowrap">
                     Sin leer
                   </span>
                 )}

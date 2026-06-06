@@ -179,7 +179,7 @@ export function PreferencesForm({ initialPreferredLocale }: PreferencesFormProps
             type="button"
             onClick={handleSaveLocale}
             disabled={localeStatus.kind === 'saving'}
-            className="inline-flex items-center justify-center px-5 h-11 rounded-sm bg-clay-700 hover:bg-clay-800 text-sand-50 text-[12.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center px-5 h-11 rounded-sm bg-clay-700 hover:bg-clay-800 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {localeStatus.kind === 'saving' ? t('saving') : t('saveLocaleCta')}
           </button>

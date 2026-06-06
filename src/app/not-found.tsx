@@ -18,7 +18,7 @@ export default function RootNotFound() {
       </p>
       <Link
         href="/fr"
-        className="inline-flex items-center px-6 py-3.5 rounded-sm bg-clay-700 text-sand-50 text-[13px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
+        className="inline-flex items-center px-6 py-3.5 rounded-sm bg-clay-700 text-on-accent text-[13px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
       >
         Volver al inicio
       </Link>

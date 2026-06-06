@@ -351,7 +351,7 @@ export default function NavBar() {
               {user ? (
                 <>
                   <div className="mb-1.5 flex items-center gap-3 border-b border-sand-200 px-3 pb-2.5 pt-3">
-                    <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-clay-700 text-sm font-semibold text-sand-50">
+                    <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-clay-700 text-sm font-semibold text-on-accent">
                       {initial}
                     </span>
                     <span className="min-w-0">
@@ -416,7 +416,7 @@ export default function NavBar() {
             {totalItems > 0 && (
               <span
                 data-testid="cart-badge"
-                className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-[1.5px] border-sand-50 bg-clay-700 px-1 text-[10px] font-semibold leading-none text-sand-50"
+                className="absolute right-1 top-1 flex h-[17px] min-w-[17px] items-center justify-center rounded-full border-[1.5px] border-sand-50 bg-clay-700 px-1 text-[10px] font-semibold leading-none text-on-accent"
               >
                 {totalItems > 99 ? '99+' : totalItems}
               </span>

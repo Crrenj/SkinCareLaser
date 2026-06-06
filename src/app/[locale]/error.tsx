@@ -15,7 +15,7 @@ export default function LocaleError({ reset }: { error: Error; reset: () => void
       <div className="flex gap-4">
         <button
           onClick={reset}
-          className="h-11 px-6 rounded-lg bg-clay-700 text-sand-50 text-[14px] font-medium hover:bg-clay-800 transition-colors"
+          className="h-11 px-6 rounded-lg bg-clay-700 text-on-accent text-[14px] font-medium hover:bg-clay-800 transition-colors"
         >
           {t('retry')}
         </button>

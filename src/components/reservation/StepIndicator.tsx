@@ -49,7 +49,7 @@ export function StepIndicator({ current, completed, onEdit, compact = false }: S
             <span
               className={`inline-flex items-center justify-center w-6 h-6 lg:w-[26px] lg:h-[26px] rounded-full border text-[11px] font-mono font-semibold transition-colors ${
                 isDone
-                  ? 'bg-clay-700 text-sand-50 border-clay-700'
+                  ? 'bg-clay-700 text-on-accent border-clay-700'
                   : isCurrent
                     ? 'bg-ink-900 text-sand-50 border-ink-900'
                     : 'bg-sand-200 text-ink-500 border-sand-300'

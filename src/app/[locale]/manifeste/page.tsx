@@ -150,7 +150,7 @@ export default async function ManifestePage({
             <div className="flex flex-wrap items-center justify-center gap-3.5">
               <Link
                 href="/catalogue"
-                className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-sm bg-clay-700 text-sand-50 text-[12.5px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
+                className="group inline-flex items-center gap-2.5 px-6 py-3.5 rounded-sm bg-clay-700 text-on-accent text-[12.5px] font-semibold uppercase tracking-wider hover:bg-clay-800 transition-colors"
               >
                 {t('cta.primary')}
                 <ArrowRight size={16} strokeWidth={1.8} className="transition-transform group-hover:translate-x-1" />

@@ -72,7 +72,7 @@ export function CookieBanner() {
         <button
           type="button"
           onClick={() => persist('accepted')}
-          className="inline-flex items-center px-4 py-2.5 rounded-sm bg-clay-700 hover:bg-clay-800 text-sand-50 text-[12px] font-semibold uppercase tracking-wider transition-colors"
+          className="inline-flex items-center px-4 py-2.5 rounded-sm bg-clay-700 hover:bg-clay-800 text-on-accent text-[12px] font-semibold uppercase tracking-wider transition-colors"
         >
           {t('acceptLabel')}
         </button>

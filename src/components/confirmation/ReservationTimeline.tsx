@@ -46,7 +46,7 @@ export function ReservationTimeline({ reference }: { reference: string }) {
                   state === 'done'
                     ? 'bg-olive-600 text-white border-olive-600'
                     : state === 'current'
-                      ? 'bg-clay-700 text-sand-50 border-clay-700'
+                      ? 'bg-clay-700 text-on-accent border-clay-700'
                       : 'bg-sand-200 text-ink-700 border-sand-300'
                 }`}
                 aria-label={`Step ${step}`}

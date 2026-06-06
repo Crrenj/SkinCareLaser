@@ -277,7 +277,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2 text-[13px] font-medium bg-clay-700 hover:bg-clay-800 text-sand-50 rounded-lg disabled:opacity-50 inline-flex items-center gap-2 transition-colors"
+                className="px-4 py-2 text-[13px] font-medium bg-clay-700 hover:bg-clay-800 text-on-accent rounded-lg disabled:opacity-50 inline-flex items-center gap-2 transition-colors"
               >
                 {saving && <Loader2 className="w-4 h-4 animate-spin" />}
                 {t('saveBtn')}

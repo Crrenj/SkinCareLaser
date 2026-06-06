@@ -184,7 +184,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading || redirecting}
-          className="h-11 rounded-lg bg-clay-700 text-sand-50 text-[14.5px] font-medium
+          className="h-11 rounded-lg bg-clay-700 text-on-accent text-[14.5px] font-medium
                      hover:bg-clay-800 transition-colors
                      disabled:opacity-50 disabled:cursor-not-allowed"
         >

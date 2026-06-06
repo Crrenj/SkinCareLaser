@@ -146,7 +146,7 @@ export function TagTypeModal({
               </button>
               <button
                 type="submit"
-                className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-clay-700 border-0 rounded-[10px] hover:bg-clay-800 transition-colors"
+                className="px-[18px] py-[11px] text-[13.5px] font-medium text-on-accent bg-clay-700 border-0 rounded-[10px] hover:bg-clay-800 transition-colors"
               >
                 {editingType ? tc('save') : t('submitCreate')}
               </button>
