@@ -1558,7 +1558,8 @@
         "brandPlaceholder": "Seleccionar marca",
         "rangeLabel": "Gama",
         "rangePlaceholder": "Seleccionar gama",
-        "submitCreate": "Crear producto"
+        "submitCreate": "Crear producto",
+        "tagsHeading": "Etiquetas del producto"
       },
       "brand": {
         "eyebrowNew": "Marcas · nueva",
@@ -1833,7 +1834,13 @@
       "activate": "Activar",
       "deactivate": "Desactivar",
       "refresh": "Actualizar vista previa",
-      "previewEmptyHint": "Ninguna bandera activa — la home se muestra sin banner CMS."
+      "previewEmptyHint": "Ninguna bandera activa — la home se muestra sin banner CMS.",
+      "deleteModal": {
+        "title": "Eliminar anuncio",
+        "body": "Vas a eliminar este anuncio. Las impresiones acumuladas se perderán.",
+        "keep": "Mantener",
+        "confirm": "Sí, eliminar"
+      }
     },
     "reservations": {
       "title": "Reservas",
@@ -1887,6 +1894,87 @@
         "creating": "Creando…",
         "successToast": "Reserva creada",
         "errorCreate": "No se pudo crear la reserva"
+      },
+      "status": {
+        "pending": "Reservada",
+        "confirmed": "Confirmada",
+        "collected": "Entregada",
+        "expired": "Expirada",
+        "cancelled": "Cancelada"
+      },
+      "markAs": {
+        "confirmed": "Marcar confirmada",
+        "collected": "Marcar entregada"
+      },
+      "time": {
+        "justNow": "Justo ahora",
+        "minutesAgo": "Hace {count} min",
+        "hoursAgo": "Hace {count} h",
+        "yesterday": "Ayer",
+        "daysAgo": "{count, plural, one {Hace # día} other {Hace # días}}"
+      },
+      "filterSearchPlaceholder": "Buscar por referencia, cliente, teléfono…",
+      "filterSearchAria": "Buscar reservas",
+      "tabs": {
+        "all": "Todas",
+        "pending": "Reservadas",
+        "confirmed": "Confirmadas",
+        "collected": "Entregadas",
+        "expired": "Expiradas",
+        "cancelled": "Canceladas"
+      },
+      "sortBy": "Ordenar por",
+      "sort": {
+        "newest": "Más recientes",
+        "oldest": "Más antiguas",
+        "totalDesc": "Total descendente",
+        "totalAsc": "Total ascendente"
+      },
+      "bulk": {
+        "toolbarAria": "Acciones por lote",
+        "selected": "{count, plural, one {# reserva seleccionada} other {# reservas seleccionadas}}",
+        "deselect": "Deseleccionar",
+        "whatsappReminder": "Recordatorio WhatsApp",
+        "markConfirmed": "Marcar confirmadas",
+        "markCollected": "Marcar entregadas",
+        "cancel": "Cancelar"
+      },
+      "selectAll": "Seleccionar todo",
+      "deselectAll": "Deseleccionar todo",
+      "selectRow": "Seleccionar fila",
+      "deselectRow": "Deseleccionar fila",
+      "col": {
+        "reference": "Referencia",
+        "client": "Cliente",
+        "items": "Artículos",
+        "total": "Total",
+        "status": "Estado",
+        "date": "Fecha",
+        "actions": "Acciones"
+      },
+      "unit": "{count, plural, one {ud} other {uds}}",
+      "action": {
+        "whatsapp": "Abrir WhatsApp con cliente",
+        "detail": "Ver detalle"
+      },
+      "drawer": {
+        "noName": "Sin nombre",
+        "sectionClient": "Cliente",
+        "rowName": "Nombre",
+        "rowPhone": "Tel",
+        "rowEmail": "Email",
+        "sectionProducts": "Productos · {count, plural, one {# producto} other {# productos}}",
+        "perUnit": "×{qty} · {price} DOP / ud",
+        "sectionTotal": "Total",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "noteSection": "Nota interna · solo equipo FARMAU",
+        "notePlaceholder": "Ej. Stock confirmado en farmacia. Cliente prefiere efectivo.",
+        "saving": "Guardando…",
+        "saved": "Guardado",
+        "openWhatsapp": "Abrir WhatsApp",
+        "noNextAction": "Sin acción siguiente",
+        "cancelReservation": "Cancelar reserva"
       }
     },
     "users": {

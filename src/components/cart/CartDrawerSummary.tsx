@@ -29,7 +29,7 @@ export function CartDrawerSummary({
       <div className="bg-sand-100 rounded-xl px-4 py-[14px] flex flex-col gap-2 text-[13px] text-ink-700">
         <div className="flex justify-between items-baseline">
           <span className="text-[12px] text-ink-500">
-            {t('subtotal')} · {itemCount} {itemCount === 1 ? 'producto' : 'productos'}
+            {t('subtotal')} · {t('drawerProductsCount', { count: itemCount })}
           </span>
           <span className="font-mono text-[13px] text-ink-900">{fmt(subtotal)} DOP</span>
         </div>

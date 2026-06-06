@@ -1558,7 +1558,8 @@
         "brandPlaceholder": "Sélectionner une marque",
         "rangeLabel": "Gamme",
         "rangePlaceholder": "Sélectionner une gamme",
-        "submitCreate": "Créer le produit"
+        "submitCreate": "Créer le produit",
+        "tagsHeading": "Tags du produit"
       },
       "brand": {
         "eyebrowNew": "Marques · nouvelle",
@@ -1833,7 +1834,13 @@
       "activate": "Activer",
       "deactivate": "Désactiver",
       "refresh": "Rafraîchir l'aperçu",
-      "previewEmptyHint": "Aucune bannière active — la home s'affiche sans bannière CMS."
+      "previewEmptyHint": "Aucune bannière active — la home s'affiche sans bannière CMS.",
+      "deleteModal": {
+        "title": "Supprimer l'annonce",
+        "body": "Vous allez supprimer cette annonce. Les impressions accumulées seront perdues.",
+        "keep": "Conserver",
+        "confirm": "Oui, supprimer"
+      }
     },
     "reservations": {
       "title": "Réservations",
@@ -1887,6 +1894,87 @@
         "creating": "Création…",
         "successToast": "Réservation créée",
         "errorCreate": "Impossible de créer la réservation"
+      },
+      "status": {
+        "pending": "Réservée",
+        "confirmed": "Confirmée",
+        "collected": "Remise",
+        "expired": "Expirée",
+        "cancelled": "Annulée"
+      },
+      "markAs": {
+        "confirmed": "Marquer confirmée",
+        "collected": "Marquer remise"
+      },
+      "time": {
+        "justNow": "À l'instant",
+        "minutesAgo": "Il y a {count} min",
+        "hoursAgo": "Il y a {count} h",
+        "yesterday": "Hier",
+        "daysAgo": "{count, plural, one {Il y a # jour} other {Il y a # jours}}"
+      },
+      "filterSearchPlaceholder": "Rechercher par référence, client, téléphone…",
+      "filterSearchAria": "Rechercher des réservations",
+      "tabs": {
+        "all": "Toutes",
+        "pending": "Réservées",
+        "confirmed": "Confirmées",
+        "collected": "Remises",
+        "expired": "Expirées",
+        "cancelled": "Annulées"
+      },
+      "sortBy": "Trier par",
+      "sort": {
+        "newest": "Plus récentes",
+        "oldest": "Plus anciennes",
+        "totalDesc": "Total décroissant",
+        "totalAsc": "Total croissant"
+      },
+      "bulk": {
+        "toolbarAria": "Actions par lot",
+        "selected": "{count, plural, one {# réservation sélectionnée} other {# réservations sélectionnées}}",
+        "deselect": "Désélectionner",
+        "whatsappReminder": "Rappel WhatsApp",
+        "markConfirmed": "Marquer confirmées",
+        "markCollected": "Marquer remises",
+        "cancel": "Annuler"
+      },
+      "selectAll": "Tout sélectionner",
+      "deselectAll": "Tout désélectionner",
+      "selectRow": "Sélectionner la ligne",
+      "deselectRow": "Désélectionner la ligne",
+      "col": {
+        "reference": "Référence",
+        "client": "Client",
+        "items": "Articles",
+        "total": "Total",
+        "status": "Statut",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "unit": "{count, plural, one {unité} other {unités}}",
+      "action": {
+        "whatsapp": "Ouvrir WhatsApp avec le client",
+        "detail": "Voir le détail"
+      },
+      "drawer": {
+        "noName": "Sans nom",
+        "sectionClient": "Client",
+        "rowName": "Nom",
+        "rowPhone": "Tél",
+        "rowEmail": "Email",
+        "sectionProducts": "Produits · {count, plural, one {# produit} other {# produits}}",
+        "perUnit": "×{qty} · {price} DOP / u.",
+        "sectionTotal": "Total",
+        "subtotal": "Sous-total",
+        "total": "Total",
+        "noteSection": "Note interne · équipe FARMAU uniquement",
+        "notePlaceholder": "Ex. Stock confirmé en pharmacie. Le client préfère payer en espèces.",
+        "saving": "Enregistrement…",
+        "saved": "Enregistré",
+        "openWhatsapp": "Ouvrir WhatsApp",
+        "noNextAction": "Aucune action suivante",
+        "cancelReservation": "Annuler la réservation"
       }
     },
     "users": {

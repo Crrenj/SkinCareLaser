@@ -1558,7 +1558,8 @@
         "brandPlaceholder": "Select brand",
         "rangeLabel": "Range",
         "rangePlaceholder": "Select range",
-        "submitCreate": "Create product"
+        "submitCreate": "Create product",
+        "tagsHeading": "Product tags"
       },
       "brand": {
         "eyebrowNew": "Brands · new",
@@ -1833,7 +1834,13 @@
       "activate": "Activate",
       "deactivate": "Deactivate",
       "refresh": "Refresh preview",
-      "previewEmptyHint": "No active banner — the home shows without a CMS banner."
+      "previewEmptyHint": "No active banner — the home shows without a CMS banner.",
+      "deleteModal": {
+        "title": "Delete banner",
+        "body": "You are about to delete this banner. Accumulated impressions will be lost.",
+        "keep": "Keep",
+        "confirm": "Yes, delete"
+      }
     },
     "reservations": {
       "title": "Reservations",
@@ -1887,6 +1894,87 @@
         "creating": "Creating…",
         "successToast": "Reservation created",
         "errorCreate": "Could not create the reservation"
+      },
+      "status": {
+        "pending": "Reserved",
+        "confirmed": "Confirmed",
+        "collected": "Collected",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      },
+      "markAs": {
+        "confirmed": "Mark confirmed",
+        "collected": "Mark collected"
+      },
+      "time": {
+        "justNow": "Just now",
+        "minutesAgo": "{count} min ago",
+        "hoursAgo": "{count} h ago",
+        "yesterday": "Yesterday",
+        "daysAgo": "{count, plural, one {# day ago} other {# days ago}}"
+      },
+      "filterSearchPlaceholder": "Search by reference, client, phone…",
+      "filterSearchAria": "Search reservations",
+      "tabs": {
+        "all": "All",
+        "pending": "Reserved",
+        "confirmed": "Confirmed",
+        "collected": "Collected",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      },
+      "sortBy": "Sort by",
+      "sort": {
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "totalDesc": "Total descending",
+        "totalAsc": "Total ascending"
+      },
+      "bulk": {
+        "toolbarAria": "Batch actions",
+        "selected": "{count, plural, one {# reservation selected} other {# reservations selected}}",
+        "deselect": "Deselect",
+        "whatsappReminder": "WhatsApp reminder",
+        "markConfirmed": "Mark confirmed",
+        "markCollected": "Mark collected",
+        "cancel": "Cancel"
+      },
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "selectRow": "Select row",
+      "deselectRow": "Deselect row",
+      "col": {
+        "reference": "Reference",
+        "client": "Client",
+        "items": "Items",
+        "total": "Total",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "unit": "{count, plural, one {unit} other {units}}",
+      "action": {
+        "whatsapp": "Open WhatsApp with client",
+        "detail": "View detail"
+      },
+      "drawer": {
+        "noName": "No name",
+        "sectionClient": "Client",
+        "rowName": "Name",
+        "rowPhone": "Phone",
+        "rowEmail": "Email",
+        "sectionProducts": "Products · {count, plural, one {# product} other {# products}}",
+        "perUnit": "×{qty} · {price} DOP / unit",
+        "sectionTotal": "Total",
+        "subtotal": "Subtotal",
+        "total": "Total",
+        "noteSection": "Internal note · FARMAU team only",
+        "notePlaceholder": "E.g. Stock confirmed at pharmacy. Customer prefers cash.",
+        "saving": "Saving…",
+        "saved": "Saved",
+        "openWhatsapp": "Open WhatsApp",
+        "noNextAction": "No next action",
+        "cancelReservation": "Cancel reservation"
       }
     },
     "users": {

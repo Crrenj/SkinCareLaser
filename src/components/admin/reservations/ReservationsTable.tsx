@@ -1,15 +1,15 @@
 'use client'
 
 import { Check, MoreHorizontal } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { Reservation } from './types'
 import {
   STATUS_BADGE_CLASS,
-  STATUS_LABEL_ES,
   buildReservationRef,
   fmtDOP,
   nextStatusFor,
-  relativeAndAbsolute,
 } from './types'
+import { useReservationFormat } from './useReservationFormat'
 
 type Props = {
   rows: Reservation[]
@@ -32,6 +32,8 @@ export function ReservationsTable({
   onWhatsapp,
   onAdvance,
 }: Props) {
+  const t = useTranslations('Admin.reservations')
+  const { statusLabel, relativeAndAbsolute } = useReservationFormat()
   const allChecked = rows.length > 0 && rows.every((r) => selectedIds.has(r.id))
   const someChecked = rows.some((r) => selectedIds.has(r.id))
 
@@ -59,7 +61,7 @@ export function ReservationsTable({
                     !allChecked,
                   )
                 }
-                aria-label={allChecked ? 'Deseleccionar todo' : 'Seleccionar todo'}
+                aria-label={allChecked ? t('deselectAll') : t('selectAll')}
                 className={`w-[18px] h-[18px] rounded-[4px] inline-flex items-center justify-center text-[11px] font-semibold transition-colors ${
                   allChecked
                     ? 'bg-ink-900 border-2 border-ink-900 text-sand-50'
@@ -71,13 +73,13 @@ export function ReservationsTable({
                 {allChecked ? '✓' : someChecked ? '—' : ''}
               </button>
             </Th>
-            <Th>Referencia</Th>
-            <Th>Cliente</Th>
-            <Th align="center">Artículos</Th>
-            <Th align="right">Total</Th>
-            <Th align="center">Estado</Th>
-            <Th>Fecha</Th>
-            <Th align="center">Acciones</Th>
+            <Th>{t('col.reference')}</Th>
+            <Th>{t('col.client')}</Th>
+            <Th align="center">{t('col.items')}</Th>
+            <Th align="right">{t('col.total')}</Th>
+            <Th align="center">{t('col.status')}</Th>
+            <Th>{t('col.date')}</Th>
+            <Th align="center">{t('col.actions')}</Th>
           </tr>
         </thead>
         <tbody>
@@ -111,7 +113,7 @@ export function ReservationsTable({
                   <button
                     type="button"
                     onClick={() => onToggleSelect(r.id)}
-                    aria-label={checked ? 'Deseleccionar fila' : 'Seleccionar fila'}
+                    aria-label={checked ? t('deselectRow') : t('selectRow')}
                     data-stop-row-click
                     className={`w-[18px] h-[18px] rounded-[4px] inline-flex items-center justify-center text-[11px] font-semibold transition-colors ${
                       checked
@@ -142,7 +144,7 @@ export function ReservationsTable({
                   <span className="font-serif text-[18px] text-ink-900 leading-none">
                     {r.total_items}
                     <small className="block font-sans text-[10px] text-ink-500 tracking-[0.06em] mt-0">
-                      {r.total_items === 1 ? 'ud' : 'uds'}
+                      {t('unit', { count: r.total_items })}
                     </small>
                   </span>
                 </Td>
@@ -158,7 +160,7 @@ export function ReservationsTable({
                       STATUS_BADGE_CLASS[r.status]
                     }`}
                   >
-                    {STATUS_LABEL_ES[r.status]}
+                    {statusLabel(r.status)}
                   </span>
                 </Td>
                 <Td>
@@ -176,7 +178,7 @@ export function ReservationsTable({
                   >
                     {r.contact_phone && (
                       <RowAction
-                        title="Abrir WhatsApp con cliente"
+                        title={t('action.whatsapp')}
                         hoverClass="hover:text-[#25D366]"
                         onClick={() => onWhatsapp(r)}
                       >
@@ -193,11 +195,7 @@ export function ReservationsTable({
                     )}
                     {next && (
                       <RowAction
-                        title={
-                          next === 'confirmed'
-                            ? 'Marcar confirmada'
-                            : 'Marcar entregada'
-                        }
+                        title={next === 'confirmed' ? t('markAs.confirmed') : t('markAs.collected')}
                         hoverClass="hover:text-clay-700"
                         onClick={() => onAdvance(r)}
                       >
@@ -205,7 +203,7 @@ export function ReservationsTable({
                       </RowAction>
                     )}
                     <RowAction
-                      title="Ver detalle"
+                      title={t('action.detail')}
                       onClick={() => onOpenDetail(r.id)}
                     >
                       <MoreHorizontal className="w-3.5 h-3.5" />

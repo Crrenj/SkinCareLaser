@@ -1,6 +1,7 @@
 'use client'
 
 import { TagIcon } from '@heroicons/react/24/outline'
+import { useTranslations } from 'next-intl'
 import type { Tag, TagType } from '../_lib/types'
 
 type TagSelectorProps = {
@@ -11,11 +12,12 @@ type TagSelectorProps = {
 }
 
 export function TagSelector({ tagTypes, tags, selectedIds, onToggle }: TagSelectorProps) {
+  const t = useTranslations('Admin.modals.product')
   return (
     <div className="bg-sand-100 p-4 rounded-lg">
       <h4 className="text-md font-semibold text-ink-900 mb-4 flex items-center">
         <TagIcon className="h-5 w-5 mr-2" />
-        Tags du produit
+        {t('tagsHeading')}
       </h4>
       <div className="space-y-4">
         {tagTypes.map((type) => {

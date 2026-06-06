@@ -1,6 +1,7 @@
 'use client'
 
 import { Search } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import type { StatusFilter, DbReservationStatus } from './types'
 
 const TAB_ORDER: StatusFilter[] = [
@@ -11,15 +12,6 @@ const TAB_ORDER: StatusFilter[] = [
   'cancelled',
   'expired',
 ]
-
-const TAB_LABEL: Record<StatusFilter, string> = {
-  all: 'Todas',
-  pending: 'Reservadas',
-  confirmed: 'Confirmadas',
-  collected: 'Entregadas',
-  expired: 'Expiradas',
-  cancelled: 'Canceladas',
-}
 
 export type SortOption = 'newest' | 'oldest' | 'total-desc' | 'total-asc'
 
@@ -44,6 +36,7 @@ export function FilterBar({
   sort,
   onSortChange,
 }: FilterBarProps) {
+  const t = useTranslations('Admin.reservations')
   return (
     <div className="bg-sand-100 border-b border-sand-300 px-5 lg:px-8 py-3.5 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4 sticky top-[88px] z-[4]">
       <label className="flex items-center gap-2 bg-sand-50 border border-sand-300 rounded-md px-3 py-1.5 text-ink-700 min-w-0 flex-1 max-w-md">
@@ -52,9 +45,9 @@ export function FilterBar({
           type="search"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Buscar por referencia, cliente, teléfono…"
+          placeholder={t('filterSearchPlaceholder')}
           className="flex-1 min-w-0 bg-transparent border-0 outline-none text-[13.5px] text-ink-900 placeholder:text-ink-500"
-          aria-label="Buscar reservas"
+          aria-label={t('filterSearchAria')}
         />
       </label>
 
@@ -73,7 +66,7 @@ export function FilterBar({
                   : 'bg-sand-50 text-ink-700 border-sand-300 hover:border-sand-500 hover:text-ink-900'
               }`}
             >
-              {TAB_LABEL[tab]}
+              {t(`tabs.${tab}`)}
               <span
                 className={`font-mono text-[10.5px] ${
                   active ? 'opacity-85' : 'opacity-70'
@@ -87,7 +80,7 @@ export function FilterBar({
       </div>
 
       <div className="flex items-center gap-2 lg:ml-auto text-[12.5px] text-ink-700">
-        <span>Ordenar por</span>
+        <span>{t('sortBy')}</span>
         <select
           value={sort}
           onChange={(e) => onSortChange(e.target.value as SortOption)}
@@ -99,10 +92,10 @@ export function FilterBar({
             backgroundPosition: 'right 10px center',
           }}
         >
-          <option value="newest">Más recientes</option>
-          <option value="oldest">Más antiguas</option>
-          <option value="total-desc">Total descendente</option>
-          <option value="total-asc">Total ascendente</option>
+          <option value="newest">{t('sort.newest')}</option>
+          <option value="oldest">{t('sort.oldest')}</option>
+          <option value="total-desc">{t('sort.totalDesc')}</option>
+          <option value="total-asc">{t('sort.totalAsc')}</option>
         </select>
       </div>
     </div>

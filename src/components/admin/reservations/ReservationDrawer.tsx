@@ -1,18 +1,17 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
 import type { Reservation } from './types'
 import {
   STATUS_BADGE_CLASS,
-  STATUS_LABEL_ES,
   buildReservationRef,
   fmtDOP,
   nextStatusFor,
-  nextStatusLabel,
-  relativeAndAbsolute,
 } from './types'
+import { useReservationFormat } from './useReservationFormat'
 
 type ReservationDrawerProps = {
   reservation: Reservation
@@ -33,6 +32,8 @@ export function ReservationDrawer({
   onUpdateNote,
   busy = false,
 }: ReservationDrawerProps) {
+  const t = useTranslations('Admin.reservations')
+  const { statusLabel, nextStatusLabel, relativeAndAbsolute } = useReservationFormat()
   const r = reservation
   const ref = buildReservationRef(r.id, r.created_at)
   const date = relativeAndAbsolute(r.created_at)
@@ -107,7 +108,7 @@ export function ReservationDrawer({
               id="reservation-drawer-title"
               className="font-serif text-[22px] text-ink-900 m-0 mt-1"
             >
-              {r.contact_name || 'Sin nombre'}
+              {r.contact_name || t('drawer.noName')}
             </h3>
             <span
               className={`self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-[0.04em] uppercase mt-1 ${
@@ -115,7 +116,7 @@ export function ReservationDrawer({
               }`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
-              {STATUS_LABEL_ES[r.status]}
+              {statusLabel(r.status)}
             </span>
           </div>
           <PopClose onClick={onClose} />
@@ -123,21 +124,19 @@ export function ReservationDrawer({
 
         {/* Body — sections in cards */}
         <div className="flex-1 overflow-y-auto px-[22px] py-[14px] flex flex-col gap-[14px]">
-          <Section title="Cliente">
+          <Section title={t('drawer.sectionClient')}>
             <CardBlock>
-              <Row label="Nombre" value={r.contact_name || '—'} />
-              <Row label="Tel" value={r.contact_phone} isLink={`tel:${r.contact_phone}`} />
+              <Row label={t('drawer.rowName')} value={r.contact_name || '—'} />
+              <Row label={t('drawer.rowPhone')} value={r.contact_phone} isLink={`tel:${r.contact_phone}`} />
               <Row
-                label="Email"
+                label={t('drawer.rowEmail')}
                 value={r.contact_email || '—'}
                 isLink={r.contact_email ? `mailto:${r.contact_email}` : undefined}
               />
             </CardBlock>
           </Section>
 
-          <Section
-            title={`Productos · ${r.items.length} ${r.items.length === 1 ? 'producto' : 'productos'}`}
-          >
+          <Section title={t('drawer.sectionProducts', { count: r.items.length })}>
             <CardBlock className="px-[14px] py-1">
               <div className="flex flex-col">
                 {r.items.map((it, idx) => (
@@ -150,7 +149,7 @@ export function ReservationDrawer({
                     <div className="text-ink-900">
                       {it.product_name}
                       <small className="block text-ink-500 font-mono text-[10.5px] mt-0.5">
-                        ×{it.quantity} · {fmtDOP(it.unit_price)} DOP / ud
+                        {t('drawer.perUnit', { qty: it.quantity, price: fmtDOP(it.unit_price) })}
                       </small>
                     </div>
                     <span className="font-mono text-[12px] text-ink-900 text-right">
@@ -162,33 +161,33 @@ export function ReservationDrawer({
             </CardBlock>
           </Section>
 
-          <Section title="Total">
+          <Section title={t('drawer.sectionTotal')}>
             <CardBlock>
-              <Row label="Subtotal" value={`${fmtDOP(r.total_price)} DOP`} />
+              <Row label={t('drawer.subtotal')} value={`${fmtDOP(r.total_price)} DOP`} />
               <div className="flex justify-between items-baseline py-[7px] font-semibold">
                 <span className="text-[11px] tracking-[0.06em] uppercase text-ink-900 font-medium">
-                  Total
+                  {t('drawer.total')}
                 </span>
                 <span className="font-mono text-[14px] text-ink-900">{fmtDOP(r.total_price)} DOP</span>
               </div>
             </CardBlock>
           </Section>
 
-          <Section title="Nota interna · solo equipo FARMAU">
+          <Section title={t('drawer.noteSection')}>
             <textarea
               value={note}
               onChange={handleNoteChange}
-              placeholder="Ej. Stock confirmado en farmacia. Cliente prefiere efectivo."
+              placeholder={t('drawer.notePlaceholder')}
               className="w-full min-h-[80px] px-3 py-2.5 rounded-[10px] border border-sand-200 bg-sand-50 text-[13px] text-ink-900 leading-[1.5] resize-y focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors"
             />
             <span className="text-[11px] text-ink-500 mt-1 inline-flex items-center gap-1">
               {saveState === 'saving' && (
                 <>
                   <Loader2 className="w-3 h-3 animate-spin" />
-                  Guardando…
+                  {t('drawer.saving')}
                 </>
               )}
-              {saveState === 'saved' && <>Guardado</>}
+              {saveState === 'saved' && <>{t('drawer.saved')}</>}
             </span>
           </Section>
         </div>
@@ -207,7 +206,7 @@ export function ReservationDrawer({
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M20.5 3.4C18.3 1.2 15.3 0 12.1 0 5.5 0 .2 5.3.2 11.9c0 2.1.6 4.1 1.6 5.9L0 24l6.4-1.7c1.7.9 3.7 1.4 5.7 1.4 6.6 0 11.9-5.3 11.9-11.9 0-3.2-1.2-6.2-3.5-8.4z" />
                 </svg>
-                Abrir WhatsApp
+                {t('drawer.openWhatsapp')}
               </button>
             )}
             {next && nextLabel ? (
@@ -226,7 +225,7 @@ export function ReservationDrawer({
                 disabled
                 className="h-11 rounded-[10px] bg-transparent border border-sand-300 text-ink-500 text-[13px] cursor-not-allowed"
               >
-                Sin acción siguiente
+                {t('drawer.noNextAction')}
               </button>
             )}
           </div>
@@ -238,7 +237,7 @@ export function ReservationDrawer({
               disabled={busy}
               className="self-center text-[11.5px] text-ink-500 hover:text-brick-600 underline underline-offset-[3px] bg-transparent disabled:opacity-50 transition-colors py-0.5"
             >
-              Cancelar reserva
+              {t('drawer.cancelReservation')}
             </button>
           )}
         </footer>

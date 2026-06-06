@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/hooks/useModalA11y'
 
 type BannerDeleteModalProps = {
@@ -14,6 +15,7 @@ export function BannerDeleteModal({
   onCancel,
   onConfirm,
 }: BannerDeleteModalProps) {
+  const t = useTranslations('Admin.annonce.deleteModal')
   const dialogRef = useModalA11y(!!bannerId, onCancel)
   if (!bannerId) return null
 
@@ -44,10 +46,10 @@ export function BannerDeleteModal({
             id="annonce-delete-modal-title"
             className="font-serif text-[22px] leading-[1.15] text-ink-900 -tracking-[0.01em] m-0"
           >
-            Eliminar anuncio
+            {t('title')}
           </h3>
           <p className="font-serif text-[14.5px] leading-[1.5] text-ink-700 italic m-0">
-            Vas a eliminar este anuncio. Las impresiones acumuladas se perderán.
+            {t('body')}
           </p>
         </div>
         <div className="px-[26px] pb-[22px] pt-[14px] flex justify-end gap-2">
@@ -56,14 +58,14 @@ export function BannerDeleteModal({
             onClick={onCancel}
             className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
           >
-            Mantener
+            {t('keep')}
           </button>
           <button
             type="button"
             onClick={() => onConfirm(bannerId)}
             className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-brick-600 border-0 rounded-[10px] hover:bg-brick-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brick-600 focus-visible:ring-offset-2"
           >
-            Sí, eliminar
+            {t('confirm')}
           </button>
         </div>
       </div>

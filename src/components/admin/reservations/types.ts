@@ -1,10 +1,13 @@
 import { formatPrice } from '@/lib/formatPrice'
 
 /**
- * Status DB existants (5 valeurs enum) + label ES par défaut.
+ * Status DB existants (5 valeurs enum).
  * Le design théorique mentionne "Contactada" en plus mais la valeur
  * n'existe pas encore dans l'enum côté DB — à ajouter en migration
  * dédiée si besoin.
+ *
+ * Les libellés localisés (statut, action « marquer X », temps relatif) vivent
+ * dans le hook `useReservationFormat` (namespace i18n `Admin.reservations`).
  */
 export type DbReservationStatus =
   | 'pending'
@@ -41,14 +44,6 @@ export type Reservation = {
   items: ReservationItem[]
 }
 
-export const STATUS_LABEL_ES: Record<DbReservationStatus, string> = {
-  pending: 'Reservada',
-  confirmed: 'Confirmada',
-  collected: 'Entregada',
-  expired: 'Expirada',
-  cancelled: 'Cancelada',
-}
-
 export const STATUS_BADGE_CLASS: Record<DbReservationStatus, string> = {
   pending: 'bg-clay-200 text-clay-800',
   confirmed: 'bg-olive-600/15 text-olive-600',
@@ -67,14 +62,6 @@ export function nextStatusFor(s: DbReservationStatus): DbReservationStatus | nul
   return null
 }
 
-export function nextStatusLabel(s: DbReservationStatus): string | null {
-  const next = nextStatusFor(s)
-  if (!next) return null
-  if (next === 'confirmed') return 'Marcar confirmada'
-  if (next === 'collected') return 'Marcar entregada'
-  return null
-}
-
 export function buildReservationRef(id: string, createdAt: string): string {
   const d = new Date(createdAt)
   const y = d.getUTCFullYear()
@@ -82,30 +69,6 @@ export function buildReservationRef(id: string, createdAt: string): string {
   const day = String(d.getUTCDate()).padStart(2, '0')
   const idPart = id.replace(/-/g, '').slice(0, 4).toUpperCase()
   return `FAR-${y}${m}${day}-${idPart}`
-}
-
-const ABS_DATE_FMT = new Intl.DateTimeFormat('es-DO', {
-  day: 'numeric',
-  month: 'short',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
-export function relativeAndAbsolute(iso: string | null | undefined): {
-  rel: string
-  abs: string
-} {
-  if (!iso) return { rel: '—', abs: '' }
-  const d = new Date(iso)
-  const abs = ABS_DATE_FMT.format(d)
-  const seconds = Math.round((Date.now() - d.getTime()) / 1000)
-  if (seconds < 60) return { rel: 'Justo ahora', abs }
-  if (seconds < 3600) return { rel: `Hace ${Math.floor(seconds / 60)} min`, abs }
-  if (seconds < 86400) return { rel: `Hace ${Math.floor(seconds / 3600)} h`, abs }
-  if (seconds < 172800) return { rel: 'Ayer', abs }
-  const days = Math.floor(seconds / 86400)
-  if (days < 7) return { rel: `Hace ${days} días`, abs }
-  return { rel: abs, abs }
 }
 
 export function fmtDOP(n: number, fractional = 2): string {
