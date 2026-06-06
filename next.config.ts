@@ -1,16 +1,7 @@
 import type { NextConfig } from 'next'
-import { createHash } from 'crypto'
 import createNextIntlPlugin from 'next-intl/plugin'
-import { THEME_MODE_SCRIPT } from './src/lib/themeModeScript'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
-
-// Hash CSP du seul script inline (anti-flash thème), calculé au build →
-// toujours synchrone avec le script. Permet `script-src 'sha256-…'` sans
-// 'unsafe-inline' tout en gardant le SSG (pas de nonce = pas de rendu dynamique).
-const themeScriptCspHash = `'sha256-${createHash('sha256')
-  .update(THEME_MODE_SCRIPT)
-  .digest('base64')}'`
 
 const nextConfig: NextConfig = {
   // Ne pas divulguer la stack (anti-fingerprinting).
@@ -62,7 +53,13 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              `script-src 'self' ${themeScriptCspHash}`,
+              // Next.js App Router injecte ~50 scripts inline `self.__next_f.push`
+              // (payload RSC) PAR PAGE, impossibles à hasher statiquement. Un CSP
+              // hash-only les bloque → aucune hydratation → page blanche. 'unsafe-inline'
+              // les autorise tout en gardant le SSG (un nonce forcerait le rendu
+              // dynamique). Compromis assumé : on perd la protection XSS inline, on
+              // garde le durcissement des autres directives. [fix CSP white-page]
+              "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
