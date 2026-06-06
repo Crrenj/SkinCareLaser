@@ -980,10 +980,18 @@ CREATE OR REPLACE VIEW "public"."v_bestsellers" AS
     "old_price",
     "is_new",
     "is_featured",
-    (0)::bigint AS "sold_30d"
-   FROM "public"."products" "p"
+    COALESCE("s"."sold_30d", (0)::bigint)::bigint AS "sold_30d"
+   FROM ("public"."products" "p"
+     LEFT JOIN ( SELECT "ri"."product_id",
+            "sum"("ri"."quantity") AS "sold_30d"
+           FROM ("public"."reservation_items" "ri"
+             JOIN "public"."reservations" "r" ON (("r"."id" = "ri"."reservation_id")))
+          WHERE (("r"."status" = 'collected'::"public"."reservation_status")
+            AND ("r"."collected_at" > ("now"() - '30 days'::interval))
+            AND ("ri"."product_id" IS NOT NULL))
+          GROUP BY "ri"."product_id") "s" ON (("s"."product_id" = "p"."id")))
   WHERE ("is_active" IS DISTINCT FROM false)
-  ORDER BY "is_featured" DESC NULLS LAST, "created_at" DESC;
+  ORDER BY COALESCE("s"."sold_30d", (0)::bigint) DESC, "is_featured" DESC NULLS LAST, "created_at" DESC;
 
 
 ALTER VIEW "public"."v_bestsellers" OWNER TO "postgres";

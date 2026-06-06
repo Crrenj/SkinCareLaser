@@ -111,11 +111,13 @@ async function fetchTopProducts(): Promise<TopProductRow[]> {
     .from('reservation_items')
     .select(
       `product_id, product_name, quantity, unit_price,
-       reservations!inner (status, created_at),
+       reservations!inner (status, collected_at),
        products ( range:ranges ( brand:brands (name) ) )`,
     )
-    .gte('reservations.created_at', thirtyDaysAgo)
-    .neq('reservations.status', 'cancelled')
+    // « Vendu » = réservation collected (= retirée), fenêtre sur collected_at.
+    // Cohérent avec v_bestsellers.sold_30d (ne compte plus les intentions pending).
+    .eq('reservations.status', 'collected')
+    .gte('reservations.collected_at', thirtyDaysAgo)
 
   if (error || !data) return []
 
