@@ -207,6 +207,18 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Aucun champ à mettre à jour' }, { status: 400 })
   }
 
+  // Capture l'ancien statut AVANT l'update pour piloter le stock (décrément à
+  // l'entrée en collected, restauration à la sortie de collected).
+  let previousStatus: ReservationStatusEnum | null = null
+  if (status) {
+    const { data: prev } = await supabaseAdmin
+      .from('reservations')
+      .select('status')
+      .eq('id', id)
+      .single()
+    previousStatus = (prev?.status as ReservationStatusEnum) ?? null
+  }
+
   const { data, error } = await supabaseAdmin
     .from('reservations')
     .update(updateData)
@@ -217,6 +229,25 @@ export async function PATCH(request: NextRequest) {
   if (error) {
     logger.error('[admin/reservations] PATCH error:', error)
     return apiError('Erreur serveur', error, 500)
+  }
+
+  // Stock : appliquer/restaurer le décrément selon la transition de statut.
+  // Les RPC sont idempotentes (garde stock_applied) → robustes même en cas de
+  // ré-appel. Erreur de stock loggée mais non bloquante (le statut a changé).
+  if (status && previousStatus !== status) {
+    if (status === 'collected') {
+      const { error: stockErr } = await supabaseAdmin.rpc(
+        'apply_reservation_collection',
+        { p_reservation_id: id },
+      )
+      if (stockErr) logger.error('[admin/reservations] apply stock error:', stockErr)
+    } else if (previousStatus === 'collected') {
+      const { error: stockErr } = await supabaseAdmin.rpc(
+        'restore_reservation_collection',
+        { p_reservation_id: id },
+      )
+      if (stockErr) logger.error('[admin/reservations] restore stock error:', stockErr)
+    }
   }
 
   return NextResponse.json({ reservation: data })

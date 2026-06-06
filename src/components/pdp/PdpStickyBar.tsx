@@ -27,7 +27,7 @@ export function PdpStickyBar({
   disabled,
   onAdd,
 }: PdpStickyBarProps) {
-  const t = useTranslations('Product.sticky')
+  const t = useTranslations('Product.reservation')
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -61,9 +61,9 @@ export function PdpStickyBar({
         type="button"
         onClick={onAdd}
         disabled={disabled}
-        className="px-5 bg-clay-700 text-on-accent rounded-sm font-semibold text-[13px] uppercase tracking-wider hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-5 bg-clay-700 text-on-accent rounded-sm font-semibold text-[13px] tracking-[0.02em] hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {t('addToCart')}
+        {t('ctaShort')}
       </button>
     </div>
   )

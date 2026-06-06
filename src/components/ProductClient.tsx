@@ -7,13 +7,10 @@ import { useCart } from '@/hooks/useCart'
 import Breadcrumb from '@/components/Breadcrumb'
 import ProductCard from '@/components/ProductCard'
 import { Link } from '@/i18n/navigation'
+import { Info } from 'lucide-react'
 import { PdpGallery } from '@/components/pdp/PdpGallery'
-import { PdpStockBadge } from '@/components/pdp/PdpStockBadge'
-import { PdpQuantity } from '@/components/pdp/PdpQuantity'
-import { PdpWishlistButton } from '@/components/pdp/PdpWishlistButton'
-import { PdpTrustSignals } from '@/components/pdp/PdpTrustSignals'
 import { PdpAccordions, type PdpAccordionData } from '@/components/pdp/PdpAccordions'
-import { PdpPharmacist } from '@/components/pdp/PdpPharmacist'
+import { PdpReservationPanel } from '@/components/pdp/PdpReservationPanel'
 import { PdpStickyBar } from '@/components/pdp/PdpStickyBar'
 
 export type MappedProduct = {
@@ -70,15 +67,12 @@ export default function ProductClient({
 
   const outOfStock = product.stock === 0
 
-  // Construit les data accordéons — chaque section ne s'affiche que si du
-  // contenu existe, d'où l'ordre des fallbacks.
+  // Accordéons recadrés sur la fiche modernisée : on garde uniquement
+  // Description et Composition · INCI (décision actée — pas de Bénéfices,
+  // Mode d'emploi ni Fiche technique sur la fiche FARMAU).
   const accordionData: PdpAccordionData = {
     description: product.description || undefined,
-    benefits: product.benefits,
-    usage: product.usage,
     inci: product.inci,
-    technicalPdfUrl: product.technicalPdfUrl,
-    technical: buildTechnicalSpecs(product),
   }
 
   // Breadcrumb : Accueil › Catalogue › Marque › Gamme › Nom
@@ -142,33 +136,41 @@ export default function ProductClient({
               <span className="text-[13px] text-ink-500">· {product.volume}</span>
             )}
           </div>
-          <PdpStockBadge stock={product.stock ?? undefined} />
 
-          <div
-            ref={buyRowRef}
-            className="grid grid-cols-[120px_1fr_52px] gap-3 mt-7 mb-4"
-          >
-            <PdpQuantity value={quantity} onChange={setQuantity} max={product.stock ?? undefined} />
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={outOfStock}
-              className="h-[52px] bg-clay-700 text-on-accent rounded-sm font-semibold text-[14px] uppercase tracking-wider hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('addToCartCta')}
-            </button>
-            <PdpWishlistButton productId={product.id} />
+          <div className="flex items-center gap-1.5 text-[12px] text-ink-500 mb-4">
+            <Info size={13} strokeWidth={1.7} className="shrink-0" />
+            {t('priceNote')}
           </div>
 
-          <PdpTrustSignals />
+          <div className="mb-6">
+            {outOfStock ? (
+              <span className="inline-flex items-center gap-2 text-[13px] font-medium text-brick-600 bg-brick-600/10 border border-brick-600/25 px-3 py-1.5 rounded-full">
+                <span aria-hidden className="w-2 h-2 rounded-full bg-brick-600" />
+                {t('availabilityOut')}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2 text-[13px] font-medium text-olive-700 bg-olive-100 border border-olive-600/30 px-3 py-1.5 rounded-full">
+                <span aria-hidden className="w-2 h-2 rounded-full bg-olive-600" />
+                {t('availability')}
+              </span>
+            )}
+          </div>
+
+          <div ref={buyRowRef}>
+            <PdpReservationPanel
+              productId={product.id}
+              quantity={quantity}
+              onQuantityChange={setQuantity}
+              onReserve={handleAddToCart}
+              maxQuantity={product.stock ?? undefined}
+              outOfStock={outOfStock}
+            />
+          </div>
         </div>
       </section>
 
-      {/* ── ACCORDIONS ── */}
+      {/* ── ACCORDIONS (Description + Composition · INCI) ── */}
       <PdpAccordions data={accordionData} />
-
-      {/* ── PHARMACIST (variant A/B, ne render rien si vide) ── */}
-      <PdpPharmacist quote={product.pharmacistAdvice} name={product.pharmacistName} />
 
       {/* ── SIMILAR PRODUCTS ── */}
       {similarProducts.length > 0 && (
@@ -218,28 +220,4 @@ export default function ProductClient({
       />
     </div>
   )
-}
-
-/**
- * Reconstruit une fiche technique à partir des tags existants (skin_type,
- * texture, etc.) tant que les colonnes dédiées n'existent pas en DB.
- * Si rien n'est dispo, retourne undefined (l'accordéon n'apparaît pas).
- */
-function buildTechnicalSpecs(product: MappedProduct) {
-  const tags = product.tagsByCategory
-  const labelMap: Record<string, string> = {
-    skin_type: 'Type de peau',
-    texture: 'Texture',
-    category: 'Catégorie',
-    need: 'Besoin',
-  }
-  const specs: { label: string; value: string }[] = []
-  for (const [key, label] of Object.entries(labelMap)) {
-    const values = tags[key]
-    if (values && values.length > 0) {
-      specs.push({ label, value: values.join(', ') })
-    }
-  }
-  if (product.volume) specs.push({ label: 'Volume', value: product.volume })
-  return specs.length > 0 ? specs : undefined
 }

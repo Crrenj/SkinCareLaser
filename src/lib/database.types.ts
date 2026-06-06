@@ -967,6 +967,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_reservation_collection: {
+        Args: { p_reservation_id: string }
+        Returns: undefined
+      }
       check_rate_limit: {
         Args: { p_key: string; p_max: number; p_window_sec: number }
         Returns: {
@@ -999,6 +1003,10 @@ export type Database = {
       }
       reorder_banners: {
         Args: { banner_id: string; new_position: number; old_position: number }
+        Returns: undefined
+      }
+      restore_reservation_collection: {
+        Args: { p_reservation_id: string }
         Returns: undefined
       }
     }
