@@ -979,6 +979,19 @@ export type Database = {
         }[]
       }
       cleanup_banner_positions: { Args: never; Returns: undefined }
+      create_guest_reservation: {
+        Args: {
+          p_anon_id: string
+          p_cart_id: string
+          p_email?: string
+          p_name: string
+          p_phone: string
+        }
+        Returns: {
+          id: string
+          confirmation_token: string
+        }[]
+      }
       create_reservation: { Args: { p_cart_id: string }; Returns: string }
       create_ticket: {
         Args: {

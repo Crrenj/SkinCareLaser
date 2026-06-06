@@ -30,9 +30,10 @@ type ReservationClientProps = {
     phone: string
     email: string
   }
+  isGuest?: boolean
 }
 
-export default function ReservationClient({ initialProfile }: ReservationClientProps) {
+export default function ReservationClient({ initialProfile, isGuest = false }: ReservationClientProps) {
   const t = useTranslations('Reservation')
   const tReview = useTranslations('Reservation.review')
   const router = useRouter()
@@ -115,21 +116,44 @@ export default function ReservationClient({ initialProfile }: ReservationClientP
       setSubmitting(true)
       setError(null)
       try {
-        const res = await fetch('/api/cart/reserve', { method: 'POST' })
+        // Invité : on envoie les coordonnées (nom+tél) ; le serveur résout le
+        // panier via le cookie httpOnly. Connecté : pas de body (la RPC lit le
+        // profil). draft.address contient nom + téléphone saisis à l'étape 1.
+        const guestBody = isGuest
+          ? JSON.stringify({
+              contact_name: `${draft.address?.firstName ?? ''} ${draft.address?.lastName ?? ''}`.trim(),
+              contact_phone: draft.address?.phone ?? '',
+              contact_email: initialProfile.email || '',
+            })
+          : undefined
+        const res = await fetch('/api/cart/reserve', {
+          method: 'POST',
+          ...(guestBody
+            ? { headers: { 'Content-Type': 'application/json' }, body: guestBody }
+            : {}),
+        })
         const json = await res.json()
         if (!res.ok) {
           switch (json.code) {
             case 'auth_required':
-              router.push('/login?next=/reservation')
+              // Ne devrait plus arriver (invités autorisés) ; message générique.
+              setError(json.error || t('errors.generic'))
               return
             case 'phone_required':
-              router.push('/account/profile?required=phone&from=/reservation')
+              if (isGuest) {
+                setError(json.error || t('errors.generic'))
+              } else {
+                router.push('/account/profile?required=phone&from=/reservation')
+              }
               return
             case 'already_active':
               setError(t('errors.already_active'))
               return
             case 'cart_empty':
               setError(t('errors.cart_empty'))
+              return
+            case 'rate_limited':
+              setError(json.error || t('errors.generic'))
               return
             default:
               setError(json.error || t('errors.generic'))
@@ -153,14 +177,19 @@ export default function ReservationClient({ initialProfile }: ReservationClientP
         } catch {
           // ignored
         }
-        router.push(`/reservation/confirmation/${json.reservationId}`)
+        // Invité : accès à la confirmation via le token non-devinable (pas de
+        // session). Connecté : via l'id (RLS auth.uid()).
+        const confirmPath = json.confirmationToken
+          ? `/reservation/confirmation/${json.reservationId}?t=${json.confirmationToken}`
+          : `/reservation/confirmation/${json.reservationId}`
+        router.push(confirmPath)
       } catch {
         setError(t('errors.generic'))
       } finally {
         setSubmitting(false)
       }
     },
-    [draft, initialProfile.email, router, t, totalPrice],
+    [draft, initialProfile.email, isGuest, router, t, totalPrice],
   )
 
   // Si le panier vide arrive en cours (race condition refresh), retour cart.

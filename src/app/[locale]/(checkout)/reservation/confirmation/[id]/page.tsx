@@ -1,9 +1,13 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getShopSettings } from '@/lib/getShopSettings'
 import ConfirmationClient from './ConfirmationClient'
+
+const RESERVATION_SELECT =
+  'id, user_id, contact_name, contact_phone, total_items, total_price, currency, status, created_at'
 
 export async function generateMetadata({
   params,
@@ -23,33 +27,60 @@ export const dynamic = 'force-dynamic'
 
 export default async function ConfirmationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>
+  searchParams: Promise<{ t?: string }>
 }) {
   const { locale, id } = await params
+  const { t: token } = await searchParams
   const supabase = await createSupabaseServerClient()
   // getUser() valide le JWT côté serveur (vs getSession() qui lit le cookie). [C-30]
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  // Résolution de la réservation + du client de lecture des items :
+  //  - Connecté : via RLS (auth.uid() = user_id).
+  //  - Invité : via le confirmation_token non-devinable (service-role, anti-IDOR).
+  type ReservationRow = {
+    id: string
+    user_id: string | null
+    contact_name: string | null
+    contact_phone: string | null
+    total_items: number
+    total_price: number
+    currency: string
+    status: string
+    created_at: string | null
+  }
+  let reservation: ReservationRow | null = null
+
+  if (user) {
+    const { data } = await supabase
+      .from('reservations')
+      .select(RESERVATION_SELECT)
+      .eq('id', id)
+      .maybeSingle()
+    if (!data || (data as ReservationRow).user_id !== user.id) {
+      redirect(`/${locale}/account/profile`)
+    }
+    reservation = data as ReservationRow
+  } else if (token && supabaseAdmin) {
+    const { data } = await supabaseAdmin
+      .from('reservations')
+      .select(RESERVATION_SELECT)
+      .eq('id', id)
+      .eq('confirmation_token', token)
+      .maybeSingle()
+    if (!data) notFound()
+    reservation = data as ReservationRow
+  } else {
     redirect(`/${locale}/login?next=/reservation/confirmation/${id}`)
   }
 
-  const { data: reservation } = await supabase
-    .from('reservations')
-    .select(
-      'id, user_id, contact_name, contact_phone, total_items, total_price, currency, status, created_at',
-    )
-    .eq('id', id)
-    .maybeSingle()
-
-  if (!reservation || reservation.user_id !== user.id) {
-    redirect(`/${locale}/account/profile`)
-  }
-
-  const { data: items } = await supabase
+  const itemsClient = user ? supabase : supabaseAdmin!
+  const { data: items } = await itemsClient
     .from('reservation_items')
     .select(
       `

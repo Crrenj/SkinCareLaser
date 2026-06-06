@@ -42,8 +42,15 @@ export default async function ReservationPage({
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Invité (sans compte) : autorisé à réserver. Les coordonnées (nom+tél) sont
+  // saisies dans le tunnel ; pas de redirection login. [réservation invité]
   if (!user) {
-    redirect(`/${locale}/login?next=/reservation`)
+    return (
+      <ReservationClient
+        isGuest
+        initialProfile={{ firstName: '', lastName: '', phone: '', email: '' }}
+      />
+    )
   }
 
   const { data: profile } = await supabase
@@ -52,6 +59,8 @@ export default async function ReservationPage({
     .eq('id', user.id)
     .maybeSingle()
 
+  // Compte connecté : la RPC create_reservation lit le téléphone du PROFIL
+  // (pas du tunnel) → on garde l'exigence profil pour ce flux.
   if (!profile?.phone) {
     redirect(`/${locale}/account/profile?required=phone&from=/reservation`)
   }

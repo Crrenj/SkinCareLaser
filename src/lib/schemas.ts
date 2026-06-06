@@ -147,6 +147,18 @@ export const reservationPatch = z.object({
   admin_notes: z.string().optional(),
 })
 
+// Réservation INVITÉ depuis la boutique (visiteur sans compte). Les items
+// viennent du panier serveur (cookie) — JAMAIS du client (anti-manipulation
+// de prix). Seuls les coordonnées de contact sont fournies. Téléphone requis
+// (WhatsApp de retrait), nom recommandé, email optionnel.
+export const guestReservationBody = z.object({
+  contact_name: z.string().trim().max(160).optional(),
+  contact_phone: z.string().trim().min(5, 'Téléphone requis').max(40),
+  contact_email: z
+    .union([z.string().trim().email('Email invalide').max(200), z.literal('')])
+    .optional(),
+})
+
 // Création manuelle d'une réservation par l'admin (client walk-in / téléphone
 // sans compte). Le téléphone est requis (WhatsApp), l'email est optionnel.
 export const reservationCreate = z.object({
