@@ -199,6 +199,21 @@ export default async function ProductPage({
   const mainProduct = mapProduct(prodRaw)
   const rangeId = prodRaw.range?.id
 
+  // Avis approuvés — liste affichée + agrégat (résumé PDP + aggregateRating JSON-LD).
+  const { data: reviewRows } = await supabase
+    .from('reviews')
+    .select('id, rating, title, body, author_name, verified_purchase, created_at')
+    .eq('product_id', prodRaw.id)
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .limit(50)
+  const reviews = reviewRows ?? []
+  const reviewCount = reviews.length
+  const reviewAverage =
+    reviewCount > 0
+      ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount) * 10) / 10
+      : 0
+
   // 2. Produits similaires — étape A (même gamme)
   const { data: sameRange } = rangeId
     ? await supabase
@@ -247,12 +262,17 @@ export default async function ProductPage({
         currency={mainProduct.currency}
         images={mainProduct.images}
         stock={mainProduct.stock}
+        ratingValue={reviewAverage}
+        reviewCount={reviewCount}
       />
       <NavBar />
       <main id="main-content" className="flex-grow">
         <ProductClient
           product={mainProduct}
           similarProducts={similarProducts}
+          reviews={reviews}
+          reviewAverage={reviewAverage}
+          reviewCount={reviewCount}
         />
       </main>
       <Footer />

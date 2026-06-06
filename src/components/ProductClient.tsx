@@ -11,6 +11,7 @@ import { Info } from 'lucide-react'
 import { PdpGallery } from '@/components/pdp/PdpGallery'
 import { PdpAccordions, type PdpAccordionData } from '@/components/pdp/PdpAccordions'
 import { PdpReservationPanel } from '@/components/pdp/PdpReservationPanel'
+import { PdpReviews, type ReviewItem } from '@/components/pdp/PdpReviews'
 import { PdpStickyBar } from '@/components/pdp/PdpStickyBar'
 
 export type MappedProduct = {
@@ -38,11 +39,17 @@ export type MappedProduct = {
 interface ProductClientProps {
   product: MappedProduct
   similarProducts: MappedProduct[]
+  reviews: ReviewItem[]
+  reviewAverage: number
+  reviewCount: number
 }
 
 export default function ProductClient({
   product,
   similarProducts,
+  reviews,
+  reviewAverage,
+  reviewCount,
 }: ProductClientProps) {
   const t = useTranslations('Product')
   const [quantity, setQuantity] = useState(1)
@@ -171,6 +178,14 @@ export default function ProductClient({
 
       {/* ── ACCORDIONS (Description + Composition · INCI) ── */}
       <PdpAccordions data={accordionData} />
+
+      {/* ── REVIEWS ── */}
+      <PdpReviews
+        productId={product.id}
+        reviews={reviews}
+        average={reviewAverage}
+        count={reviewCount}
+      />
 
       {/* ── SIMILAR PRODUCTS ── */}
       {similarProducts.length > 0 && (

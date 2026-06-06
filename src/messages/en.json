@@ -206,6 +206,13 @@
     "needsHeading": "Concerns",
     "serviceHeading": "Service",
     "brandHeading": "FARMAU",
+    "reservationHeading": "Reservation",
+    "reservation": {
+      "howItWorks": "How it works",
+      "pickup": "Pharmacy pickup",
+      "payment": "Payment methods",
+      "track": "Track my reservation"
+    },
     "products": {
       "cleansers": "Cleansers",
       "serums": "Serums",
@@ -1006,7 +1013,21 @@
       "verifiedCount": "{count, plural, =0 {No reviews yet} =1 {1 verified review} other {# verified reviews}}",
       "seeAll": "Read all →",
       "emptyState": "Be the first to leave a review on this product.",
-      "outOf": "out of 5"
+      "outOf": "out of 5",
+      "reviewCount": "{count, plural, =0 {No reviews} =1 {1 review} other {# reviews}}",
+      "leaveReview": "Write a review",
+      "formHeading": "Your review",
+      "ratingLabel": "Your rating",
+      "ratingRequired": "Pick a rating.",
+      "titlePlaceholder": "Title (optional)",
+      "bodyPlaceholder": "Share your experience (optional)",
+      "submit": "Post my review",
+      "submitting": "Sending…",
+      "successPending": "Thanks! Your review will be published after moderation.",
+      "loginToReview": "Log in to leave a review.",
+      "verifiedBadge": "Verified reservation",
+      "anonymousAuthor": "FARMAU customer",
+      "errorGeneric": "Something went wrong, please try again."
     },
     "similar": {
       "heading": "You might also like",
@@ -1513,6 +1534,7 @@
       "navMessages": "Support",
       "navAnnounce": "Homepage",
       "navUsers": "Users",
+      "navReviews": "Reviews",
       "navNewsletter": "Newsletter",
       "navSettings": "Shop",
       "navBlog": "Blog",
@@ -2093,6 +2115,27 @@
       "confirmDelete": "Remove {email} from the list?",
       "deleteFailed": "Delete failed.",
       "limitHint": "Showing up to {limit} rows. Refine the filter to see more."
+    },
+    "reviews": {
+      "title": "Product reviews",
+      "filterAll": "All",
+      "filterPending": "Pending",
+      "filterApproved": "Approved",
+      "filterRejected": "Rejected",
+      "statusPending": "Pending",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "approve": "Approve",
+      "reject": "Reject",
+      "verified": "Verified purchase",
+      "deleteConfirm": "Delete this review?",
+      "emptyState": "No reviews.",
+      "anonymous": "Customer",
+      "loadError": "Failed to load reviews.",
+      "toastApproved": "Review approved.",
+      "toastRejected": "Review rejected.",
+      "toastDeleted": "Review deleted.",
+      "toastError": "Action failed, please try again."
     },
     "settings": {
       "title": "Shop & reservations",

@@ -263,6 +263,21 @@ export const postDelete = z.object({
   id: z.string().uuid('id invalide'),
 })
 
+// Avis produit — création côté client. STRICT (pas de .passthrough()) : ni
+// `status` ni `verified_purchase` ne sont acceptés du client, ils sont calculés
+// et forcés côté serveur (anti mass-assignment, cf. productCreate).
+export const reviewCreate = z.object({
+  product_id: z.string().uuid('product_id invalide'),
+  rating: z.coerce.number().int().min(1).max(5),
+  title: z.string().trim().max(120).optional(),
+  body: z.string().trim().max(2000).optional(),
+})
+
+// Modération admin d'un avis.
+export const reviewModerate = z.object({
+  status: z.enum(['pending', 'approved', 'rejected']),
+})
+
 // Apparence du site public (thème + mode + override visiteur). Les valeurs
 // possibles sont aussi listées dans src/lib/themes.ts (garder en phase).
 export const appearanceBody = z.object({

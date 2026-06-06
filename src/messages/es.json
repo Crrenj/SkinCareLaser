@@ -206,6 +206,13 @@
     "needsHeading": "Necesidades",
     "serviceHeading": "Servicio",
     "brandHeading": "FARMAU",
+    "reservationHeading": "La reserva",
+    "reservation": {
+      "howItWorks": "Cómo funciona",
+      "pickup": "Retiro en farmacia",
+      "payment": "Medios de pago",
+      "track": "Seguir mi reserva"
+    },
     "products": {
       "cleansers": "Limpiadores",
       "serums": "Sueros",
@@ -1006,7 +1013,21 @@
       "verifiedCount": "{count, plural, =0 {Sin reseñas} =1 {1 reseña verificada} other {# reseñas verificadas}}",
       "seeAll": "Leer todo →",
       "emptyState": "Sé el primero en dejar una reseña de este producto.",
-      "outOf": "sobre 5"
+      "outOf": "sobre 5",
+      "reviewCount": "{count, plural, =0 {Sin reseñas} =1 {1 reseña} other {# reseñas}}",
+      "leaveReview": "Dejar una reseña",
+      "formHeading": "Tu reseña",
+      "ratingLabel": "Tu valoración",
+      "ratingRequired": "Elige una valoración.",
+      "titlePlaceholder": "Título (opcional)",
+      "bodyPlaceholder": "Comparte tu experiencia (opcional)",
+      "submit": "Publicar mi reseña",
+      "submitting": "Enviando…",
+      "successPending": "¡Gracias! Tu reseña se publicará tras la moderación.",
+      "loginToReview": "Inicia sesión para dejar una reseña.",
+      "verifiedBadge": "Reserva verificada",
+      "anonymousAuthor": "Cliente FARMAU",
+      "errorGeneric": "Ocurrió un error, inténtalo de nuevo."
     },
     "similar": {
       "heading": "También te gustará",
@@ -1513,6 +1534,7 @@
       "navMessages": "Soporte",
       "navAnnounce": "Página de inicio",
       "navUsers": "Usuarios",
+      "navReviews": "Reseñas",
       "navNewsletter": "Newsletter",
       "navSettings": "Tienda",
       "navBlog": "Blog",
@@ -2093,6 +2115,27 @@
       "confirmDelete": "¿Eliminar {email} de la lista?",
       "deleteFailed": "Eliminación fallida.",
       "limitHint": "Mostrando máximo {limit} filas. Refina el filtro para ver el resto."
+    },
+    "reviews": {
+      "title": "Reseñas de productos",
+      "filterAll": "Todas",
+      "filterPending": "Pendientes",
+      "filterApproved": "Aprobadas",
+      "filterRejected": "Rechazadas",
+      "statusPending": "Pendiente",
+      "statusApproved": "Aprobada",
+      "statusRejected": "Rechazada",
+      "approve": "Aprobar",
+      "reject": "Rechazar",
+      "verified": "Compra verificada",
+      "deleteConfirm": "¿Eliminar esta reseña?",
+      "emptyState": "Sin reseñas.",
+      "anonymous": "Cliente",
+      "loadError": "Error al cargar las reseñas.",
+      "toastApproved": "Reseña aprobada.",
+      "toastRejected": "Reseña rechazada.",
+      "toastDeleted": "Reseña eliminada.",
+      "toastError": "Acción fallida, inténtalo de nuevo."
     },
     "settings": {
       "title": "Tienda y reservas",

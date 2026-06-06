@@ -18,6 +18,7 @@ import {
   Megaphone,
   Palette,
   ShieldCheck,
+  Star,
   Tag,
   Users,
   Warehouse,
@@ -49,6 +50,7 @@ type NavItem = {
     | 'navAnnounce'
     | 'navBlog'
     | 'navUsers'
+    | 'navReviews'
     | 'navNewsletter'
     | 'navAppearance'
     | 'navAdmins'
@@ -103,6 +105,7 @@ const SECTIONS: Section[] = [
     titleKey: 'sectionCustomers',
     items: [
       { href: '/admin/users', labelKey: 'navUsers', icon: Users },
+      { href: '/admin/reviews', labelKey: 'navReviews', icon: Star },
       { href: '/admin/newsletter', labelKey: 'navNewsletter', icon: Mailbox },
     ],
   },

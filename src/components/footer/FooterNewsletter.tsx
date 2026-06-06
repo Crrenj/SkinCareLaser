@@ -2,12 +2,15 @@
 
 import { useState, type FormEvent } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import { Mail } from 'lucide-react'
 
 type Status = 'idle' | 'submitting' | 'success' | 'error'
 
 /**
- * Section newsletter (`.news`) — bande claire sand-100 juste avant le footer
- * sombre. Titre serif + champ + bouton ink. POST /api/newsletter, optimistic.
+ * Bande newsletter compacte (mock « Fiche produit modernisée ») — fond clair
+ * clay-50 juste avant le footer sombre. Tuile icône + titre serif + sous-titre
+ * à gauche, formulaire inline à droite. Moins imposante que l'ancienne bande
+ * éditoriale. POST /api/newsletter, optimistic.
  */
 export function FooterNewsletter() {
   const t = useTranslations('Footer.newsletter')
@@ -47,19 +50,22 @@ export function FooterNewsletter() {
   }
 
   return (
-    <section className="bg-sand-100 border-t border-sand-300">
-      <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] py-[clamp(48px,7vw,96px)] grid lg:grid-cols-[1fr_auto] gap-[clamp(32px,5vw,72px)] items-end">
-        <div>
-          <h2
-            className="font-serif font-normal text-[clamp(32px,4vw,52px)] leading-none -tracking-[0.02em] text-ink-900 mb-3.5 [&_em]:italic [&_em]:text-clay-700"
-            dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
-          />
-          <p className="text-[15px] leading-relaxed text-ink-700 max-w-[44ch]">
-            {t('description')}
-          </p>
+    <section className="bg-clay-50 border-t border-clay-200">
+      <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] py-9 flex flex-wrap items-center justify-between gap-x-12 gap-y-6">
+        <div className="flex items-center gap-4 min-w-[260px]">
+          <span className="w-[46px] h-[46px] rounded-xl bg-sand-50 border border-clay-200 flex items-center justify-center text-clay-700 shrink-0">
+            <Mail size={22} strokeWidth={1.6} />
+          </span>
+          <div className="max-w-[34ch]">
+            <h2
+              className="font-serif font-normal text-[25px] leading-[1.1] -tracking-[0.01em] text-ink-900 [&_em]:italic [&_em]:text-clay-700"
+              dangerouslySetInnerHTML={{ __html: t.raw('title') as string }}
+            />
+            <p className="text-[13px] leading-snug text-ink-700 mt-1">{t('description')}</p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2.5 min-w-[min(420px,80vw)]">
+        <form onSubmit={handleSubmit} className="flex-1 min-w-[min(300px,80vw)] max-w-[460px]">
           <div className="flex gap-2">
             <input
               type="email"
@@ -71,17 +77,17 @@ export function FooterNewsletter() {
               aria-invalid={status === 'error'}
               aria-describedby={status === 'error' || status === 'success' ? 'newsletter-feedback' : undefined}
               disabled={status === 'submitting' || status === 'success'}
-              className="flex-1 bg-sand-50 border border-sand-400 rounded-[2px] px-4 py-3.5 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 transition-colors disabled:opacity-60"
+              className="flex-1 min-w-0 bg-sand-50 border border-sand-400 rounded-lg px-4 py-3 text-sm text-ink-900 placeholder:text-ink-500 outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/15 transition-[border-color,box-shadow] disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={status === 'submitting' || status === 'success'}
-              className="bg-ink-900 hover:bg-clay-800 text-sand-50 rounded-[2px] px-6 py-3.5 text-[12.5px] font-semibold uppercase tracking-[0.06em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="bg-clay-700 text-on-accent rounded-lg px-5 py-3 text-[12.5px] font-semibold uppercase tracking-[0.04em] hover:bg-accent-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {status === 'submitting' ? t('submitting') : t('submit')}
             </button>
           </div>
-          <div id="newsletter-feedback" aria-live="polite">
+          <div id="newsletter-feedback" aria-live="polite" className="mt-1.5">
             {status === 'success' ? (
               <p className="font-mono text-[10.5px] tracking-[0.04em] text-olive-600">{t('success')}</p>
             ) : status === 'error' && errorMsg ? (

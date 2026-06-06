@@ -206,6 +206,13 @@
     "needsHeading": "Besoins",
     "serviceHeading": "Service",
     "brandHeading": "FARMAU",
+    "reservationHeading": "La réservation",
+    "reservation": {
+      "howItWorks": "Comment ça marche",
+      "pickup": "Retrait en pharmacie",
+      "payment": "Moyens de paiement",
+      "track": "Suivre ma réservation"
+    },
     "products": {
       "cleansers": "Nettoyants",
       "serums": "Sérums",
@@ -1006,7 +1013,21 @@
       "verifiedCount": "{count, plural, =0 {Aucun avis} =1 {1 avis vérifié} other {# avis vérifiés}}",
       "seeAll": "Tout lire →",
       "emptyState": "Soyez le premier à laisser un avis sur ce produit.",
-      "outOf": "sur 5"
+      "outOf": "sur 5",
+      "reviewCount": "{count, plural, =0 {Aucun avis} =1 {1 avis} other {# avis}}",
+      "leaveReview": "Laisser un avis",
+      "formHeading": "Votre avis",
+      "ratingLabel": "Votre note",
+      "ratingRequired": "Choisissez une note.",
+      "titlePlaceholder": "Titre (optionnel)",
+      "bodyPlaceholder": "Partagez votre expérience (optionnel)",
+      "submit": "Publier mon avis",
+      "submitting": "Envoi…",
+      "successPending": "Merci ! Votre avis sera publié après modération.",
+      "loginToReview": "Connectez-vous pour laisser un avis.",
+      "verifiedBadge": "Réservation vérifiée",
+      "anonymousAuthor": "Client FARMAU",
+      "errorGeneric": "Une erreur est survenue, réessayez."
     },
     "similar": {
       "heading": "Vous aimerez aussi",
@@ -1513,6 +1534,7 @@
       "navMessages": "Tickets",
       "navAnnounce": "Page d'accueil",
       "navUsers": "Utilisateurs",
+      "navReviews": "Avis",
       "navNewsletter": "Newsletter",
       "navSettings": "Boutique",
       "navBlog": "Blog",
@@ -2093,6 +2115,27 @@
       "confirmDelete": "Supprimer {email} de la liste ?",
       "deleteFailed": "Suppression échouée.",
       "limitHint": "Affichage limité à {limit} lignes. Affinez le filtre pour voir le reste."
+    },
+    "reviews": {
+      "title": "Avis produits",
+      "filterAll": "Tous",
+      "filterPending": "En attente",
+      "filterApproved": "Approuvés",
+      "filterRejected": "Rejetés",
+      "statusPending": "En attente",
+      "statusApproved": "Approuvé",
+      "statusRejected": "Rejeté",
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "verified": "Achat vérifié",
+      "deleteConfirm": "Supprimer cet avis ?",
+      "emptyState": "Aucun avis.",
+      "anonymous": "Client",
+      "loadError": "Chargement des avis échoué.",
+      "toastApproved": "Avis approuvé.",
+      "toastRejected": "Avis rejeté.",
+      "toastDeleted": "Avis supprimé.",
+      "toastError": "Action échouée, réessayez."
     },
     "settings": {
       "title": "Boutique & réservation",

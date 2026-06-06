@@ -1880,6 +1880,49 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TAB
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
 
 
+-- ----------------------------------------------------------------------
+-- reviews (avis produits) — bloc ajouté à la main (le dump complet via
+-- scripts/db-dump.sh régénérera ce fichier proprement).
+-- Source de vérité : supabase/migrations/20260606170000_reviews_system.sql
+-- ----------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS "public"."reviews" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "product_id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "rating" smallint NOT NULL,
+    "title" "text",
+    "body" "text",
+    "author_name" "text",
+    "status" "text" DEFAULT 'pending'::"text" NOT NULL,
+    "verified_purchase" boolean DEFAULT false NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "reviews_rating_check" CHECK ((("rating" >= 1) AND ("rating" <= 5))),
+    CONSTRAINT "reviews_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text"])))
+);
+
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_pkey" PRIMARY KEY ("id");
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_user_id_product_id_key" UNIQUE ("user_id", "product_id");
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+CREATE INDEX "idx_reviews_product_status" ON "public"."reviews" USING "btree" ("product_id", "status");
+CREATE INDEX "idx_reviews_status_created" ON "public"."reviews" USING "btree" ("status", "created_at" DESC);
+CREATE INDEX "idx_reviews_user" ON "public"."reviews" USING "btree" ("user_id");
+
+CREATE OR REPLACE TRIGGER "set_reviews_updated_at" BEFORE UPDATE ON "public"."reviews" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
+
+ALTER TABLE "public"."reviews" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can read approved reviews" ON "public"."reviews" FOR SELECT USING (("status" = 'approved'::"text"));
+CREATE POLICY "Users can read own reviews" ON "public"."reviews" FOR SELECT USING ((( SELECT "auth"."uid"()) = "user_id"));
+CREATE POLICY "Admins can manage reviews" ON "public"."reviews" USING ("public"."is_user_admin"(( SELECT "auth"."uid"()))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"())));
+
+
 
 
 

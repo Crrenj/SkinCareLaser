@@ -20,37 +20,21 @@ const PRODUCT_LINKS = [
   { key: 'bodyCare', href: '/catalogue' },
 ] as const
 
-const NEED_SLUGS = [
-  'hydratation',
-  'anti-age',
-  'protection-solaire',
-  'acne',
-  'taches',
-  'nettoyage',
-  'reparation',
-  'apaisant',
-  'cernes',
-  'eclat',
-  'rosacee',
-  'chute-de-cheveux',
-  'exfoliation',
-  'pellicules',
+// Colonne « La réservation » — renforce le mode opératoire FARMAU (réserver →
+// confirmation WhatsApp → retrait & paiement au comptoir). Routes réelles.
+const RESERVATION_LINKS = [
+  { key: 'howItWorks', href: '/livraison' },
+  { key: 'pickup', href: '/pharmacie' },
+  { key: 'payment', href: '/faq' },
+  { key: 'track', href: '/account/reservations' },
 ] as const
 
-const SERVICE_LINKS = [
-  { key: 'contact', href: '/contact' },
-  { key: 'delivery', href: '/livraison' },
-  { key: 'pharmacists', href: '/a-propos' },
-  { key: 'faq', href: '/faq' },
-  { key: 'help', href: '/aide' },
-] as const
-
-const BRAND_LINKS = [
-  { key: 'about', href: '/a-propos' },
-  { key: 'manifesto', href: '/manifeste' },
-  { key: 'brands', href: '/marques' },
-  { key: 'blog', href: '/blog' },
-  { key: 'stores', href: '/pharmacie' },
+// Colonne FARMAU — réutilise les libellés brand.*/service.* existants (clé = chemin complet).
+const FARMAU_LINKS = [
+  { key: 'brand.about', href: '/a-propos' },
+  { key: 'service.contact', href: '/contact' },
+  { key: 'brand.brands', href: '/marques' },
+  { key: 'brand.stores', href: '/pharmacie' },
 ] as const
 
 export default async function Footer() {
@@ -62,9 +46,9 @@ export default async function Footer() {
     <>
       <FooterNewsletter />
       <footer className="bg-[var(--c-ink-panel)] text-[var(--c-ink-panel-fg)]">
-        <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] pt-[clamp(56px,7vw,96px)] pb-8">
-      {/* Grid 5 colonnes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-10 lg:gap-12 pb-[clamp(40px,5vw,64px)] border-b border-[var(--c-ink-panel-border)]">
+        <div className="mx-auto max-w-[1440px] px-[clamp(20px,6vw,104px)] pt-[clamp(40px,5vw,72px)] pb-8">
+      {/* Grid 4 colonnes (mock compact : Marque · Catalogue · Réservation · FARMAU) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] gap-10 lg:gap-12 pb-[clamp(36px,4vw,56px)] border-b border-[var(--c-ink-panel-border)]">
         {/* Brand column */}
         <div className="flex flex-col gap-5 max-w-[320px]">
           <span className="inline-flex items-center gap-3" aria-label="FARMAU">
@@ -98,21 +82,15 @@ export default async function Footer() {
           ))}
         </FooterColumn>
 
-        <FooterColumn heading={t('needsHeading')}>
-          {NEED_SLUGS.map((slug) => (
-            <FooterLink key={slug} href={`/besoins/${slug}`} label={t(`needs.${slug}`)} />
-          ))}
-        </FooterColumn>
-
-        <FooterColumn heading={t('serviceHeading')}>
-          {SERVICE_LINKS.map((link) => (
-            <FooterLink key={link.key} href={link.href} label={t(`service.${link.key}`)} />
+        <FooterColumn heading={t('reservationHeading')}>
+          {RESERVATION_LINKS.map((link) => (
+            <FooterLink key={link.key} href={link.href} label={t(`reservation.${link.key}`)} />
           ))}
         </FooterColumn>
 
         <FooterColumn heading={t('brandHeading')}>
-          {BRAND_LINKS.map((link) => (
-            <FooterLink key={link.key} href={link.href} label={t(`brand.${link.key}`)} />
+          {FARMAU_LINKS.map((link) => (
+            <FooterLink key={link.key} href={link.href} label={t(link.key)} />
           ))}
         </FooterColumn>
       </div>
