@@ -68,7 +68,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
       </div>
 
       {success && (
-        <div className="mb-6 p-4 bg-sand-50 border border-olive-600 rounded-lg">
+        <div role="status" aria-live="polite" className="mb-6 p-4 bg-sand-50 border border-olive-600 rounded-lg">
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-olive-600" />
             <p className="text-olive-600">
@@ -79,7 +79,7 @@ export default function ContactForm({ className = '' }: ContactFormProps) {
       )}
 
       {error && (
-        <div className="mb-6 p-4 bg-clay-50 border border-brick-600 rounded-lg">
+        <div role="alert" className="mb-6 p-4 bg-clay-50 border border-brick-600 rounded-lg">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-brick-600" />
             <p className="text-brick-600">{error}</p>

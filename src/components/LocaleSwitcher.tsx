@@ -56,7 +56,7 @@ export function LocaleSwitcher({
               className={`py-2 text-xs uppercase tracking-wider border rounded-sm transition-colors ${
                 active
                   ? 'bg-ink-900 text-sand-50 border-ink-900'
-                  : 'bg-white text-ink-800 border-sand-300 hover:border-ink-700'
+                  : 'bg-sand-50 text-ink-800 border-sand-300 hover:border-ink-700'
               } disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {loc}

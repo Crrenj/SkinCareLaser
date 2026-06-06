@@ -224,6 +224,14 @@
   --c-ink-panel-muted:  var(--c-ink-500);
   --c-ink-panel-border: var(--c-border);
   --c-ink-panel-accent: var(--c-accent);
+
+  /* Accent foncé : la dérivation par défaut ([data-theme]) mélange vers #000,
+     ce qui rend `text-clay-800`/`text-clay-900` (~27 usages) illisibles sur un
+     fond sombre. En mode sombre on éclaircit vers le texte du thème. [C-15]
+     (Ce bloc suit [data-theme] en ordre source → il l'emporte, y compris pour
+     le shell admin imbriqué.) */
+  --c-accent-deep: color-mix(in srgb, var(--c-accent-strong) 72%, var(--c-text));
+  --c-accent-900: color-mix(in srgb, var(--c-accent-strong) 55%, var(--c-text));
 }
 
 /* Marquee brandline — défilement horizontal continu (pause au survol). */

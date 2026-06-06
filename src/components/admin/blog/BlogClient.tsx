@@ -60,7 +60,7 @@ export function BlogClient() {
     setForm(EMPTY_FORM)
   }, [])
 
-  useModalA11y(modalOpen, closeModal)
+  const dialogRef = useModalA11y<HTMLDivElement>(modalOpen, closeModal)
 
   const fetchPosts = useCallback(async () => {
     setLoading(true)
@@ -218,12 +218,15 @@ export function BlogClient() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-ink-900/40" onClick={closeModal} />
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
-            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-sand-50 shadow-xl mx-4"
+            aria-labelledby="blog-modal-title"
+            tabIndex={-1}
+            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-sand-50 shadow-xl mx-4 focus:outline-none"
           >
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-sand-200 bg-sand-50 px-6 py-4">
-              <h2 className="font-serif text-xl text-ink-900">
+              <h2 id="blog-modal-title" className="font-serif text-xl text-ink-900">
                 {editingPost ? t('editTitle') : t('createTitle')}
               </h2>
               <button onClick={closeModal} className="text-ink-500 hover:text-ink-700">
