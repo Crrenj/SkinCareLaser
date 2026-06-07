@@ -4,10 +4,11 @@ import { logger } from '@/lib/logger'
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import type { StockItem, StockStats, SortColumn, SortOrder } from '../_lib/types'
+import type { StockItem, StockStats, SortColumn, SortOrder, StockEntryPayload } from '../_lib/types'
 
 export function useStockData() {
   const tCommon = useTranslations('Admin.common')
+  const tStock = useTranslations('Admin.stock')
   const [stockItems, setStockItems] = useState<StockItem[]>([])
   const [stats, setStats] = useState<StockStats>({ total: 0, ok: 0, low: 0, out: 0 })
   const [loading, setLoading] = useState(true)
@@ -67,11 +68,30 @@ export function useStockData() {
     }
   }
 
+  const recordStockEntry = async (payload: StockEntryPayload): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/admin/stock/entry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!response.ok) throw new Error('entry_failed')
+      await fetchStockData()
+      toast.success(tStock('entrySaved'))
+      return true
+    } catch (error) {
+      logger.error('Erreur entrée de stock:', error)
+      toast.error(tStock('entryError'))
+      return false
+    }
+  }
+
   return {
     stockItems, stats, loading,
     searchTerm, setSearchTerm,
     filterStatus, setFilterStatus,
     sortColumn, sortOrder, handleSort,
     updateStock,
+    recordStockEntry,
   }
 }

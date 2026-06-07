@@ -1,0 +1,424 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { ChevronDown, Loader2, Minus, Plus, Search, Trash2 } from 'lucide-react'
+import { useModalA11y } from '@/hooks/useModalA11y'
+import { PopClose } from '@/components/ui/PopClose'
+import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { formatPrice } from '@/lib/formatPrice'
+import type { StockEntryLine, StockEntryPayload } from '../_lib/types'
+
+type SearchHit = {
+  id: string
+  slug: string
+  name: string
+  brand: string
+  price: number
+  currency: string
+}
+
+type Props = {
+  open: boolean
+  onClose: () => void
+  onSubmit: (payload: StockEntryPayload) => Promise<void>
+  /** Pré-remplit une ligne (raccourci « entrée » depuis une ligne du tableau). */
+  initialProduct?: { id: string; name: string } | null
+}
+
+const fmt = (n: number) => formatPrice(n, { fractionDigits: 2 })
+
+const inputCls =
+  'w-full px-3 py-[10px] border border-sand-300 rounded-lg text-[13.5px] text-ink-900 bg-sand-50 transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:shadow-[0_0_0_3px_rgba(142,82,50,.14)]'
+const labelCls = 'font-mono text-[10.5px] tracking-[0.12em] uppercase text-ink-700 font-semibold'
+
+export function StockEntryDrawer({ open, onClose, onSubmit, initialProduct }: Props) {
+  const t = useTranslations('Admin.stock.entry')
+  const tc = useTranslations('Admin.common')
+  const dialogRef = useModalA11y(open, onClose)
+
+  const [items, setItems] = useState<StockEntryLine[]>([])
+  const [supplierName, setSupplierName] = useState('')
+  const [supplierRnc, setSupplierRnc] = useState('')
+  const [ncf, setNcf] = useState('')
+  const [invoiceDate, setInvoiceDate] = useState('')
+  const [itbisIncluded, setItbisIncluded] = useState(true)
+  const [note, setNote] = useState('')
+  const [show606, setShow606] = useState(false)
+
+  const [query, setQuery] = useState('')
+  const [hits, setHits] = useState<SearchHit[]>([])
+  const [searching, setSearching] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const tokenRef = useRef<string>('')
+
+  // Reset + nouveau client_token (idempotence) + produit pré-rempli à l'ouverture.
+  useEffect(() => {
+    if (!open) return
+    tokenRef.current = crypto.randomUUID()
+    setItems(
+      initialProduct
+        ? [{ product_id: initialProduct.id, product_name: initialProduct.name, unit_cost: 0, quantity: 1 }]
+        : [],
+    )
+    setSupplierName('')
+    setSupplierRnc('')
+    setNcf('')
+    setInvoiceDate('')
+    setItbisIncluded(true)
+    setNote('')
+    setShow606(false)
+    setQuery('')
+    setHits([])
+    setSearching(false)
+    setSubmitting(false)
+  }, [open, initialProduct])
+
+  // Recherche produits debounced (réutilise /api/search)
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) {
+      setHits([])
+      setSearching(false)
+      return
+    }
+    setSearching(true)
+    const ctrl = new AbortController()
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=8`, { signal: ctrl.signal })
+        const json = await res.json()
+        setHits(Array.isArray(json.hits) ? json.hits : [])
+      } catch {
+        if (!ctrl.signal.aborted) setHits([])
+      } finally {
+        if (!ctrl.signal.aborted) setSearching(false)
+      }
+    }, 220)
+    return () => {
+      ctrl.abort()
+      clearTimeout(timer)
+    }
+  }, [query])
+
+  const addHit = useCallback((hit: SearchHit) => {
+    setItems((prev) => {
+      const existing = prev.findIndex((it) => it.product_id === hit.id)
+      if (existing >= 0) {
+        const next = [...prev]
+        next[existing] = { ...next[existing], quantity: next[existing].quantity + 1 }
+        return next
+      }
+      // unit_cost vide (0) : le prix catalogue est un prix de VENTE, pas le coût.
+      return [...prev, { product_id: hit.id, product_name: hit.name, unit_cost: 0, quantity: 1 }]
+    })
+    setQuery('')
+    setHits([])
+  }, [])
+
+  const updateItem = useCallback((index: number, patch: Partial<StockEntryLine>) => {
+    setItems((prev) => prev.map((it, i) => (i === index ? { ...it, ...patch } : it)))
+  }, [])
+
+  const removeItem = useCallback((index: number) => {
+    setItems((prev) => prev.filter((_, i) => i !== index))
+  }, [])
+
+  const totalCost = useMemo(
+    () => items.reduce((s, it) => s + (Number(it.unit_cost) || 0) * it.quantity, 0),
+    [items],
+  )
+  const totalUnits = useMemo(() => items.reduce((s, it) => s + it.quantity, 0), [items])
+
+  // Coût > 0 obligatoire : un coût 0 est presque toujours un champ oublié et
+  // corromprait le CMP.
+  const canSubmit =
+    items.length > 0 && items.every((it) => it.quantity >= 1 && it.unit_cost > 0) && !submitting
+
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      if (!canSubmit) return
+      setSubmitting(true)
+      try {
+        await onSubmit({
+          client_token: tokenRef.current,
+          supplier_name: supplierName.trim() || undefined,
+          supplier_rnc: supplierRnc.trim() || undefined,
+          ncf: ncf.trim() || undefined,
+          invoice_date: invoiceDate || undefined,
+          note: note.trim() || undefined,
+          itbis_included: itbisIncluded,
+          items: items.map((it) => ({
+            product_id: it.product_id,
+            quantity: it.quantity,
+            unit_cost: Number(it.unit_cost) || 0,
+            itbis_included: itbisIncluded,
+          })),
+        })
+      } catch {
+        // Le parent a affiché un toast d'erreur ; on garde le drawer ouvert.
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [canSubmit, onSubmit, supplierName, supplierRnc, ncf, invoiceDate, note, itbisIncluded, items],
+  )
+
+  if (!open) return null
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
+      onClick={onClose}
+      aria-hidden="true"
+    >
+      <aside
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="stock-entry-title"
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] bg-sand-50 flex flex-col overflow-hidden rounded-tl-[--pop-radius-drawer] rounded-bl-[--pop-radius-drawer]"
+        style={{ boxShadow: 'var(--pop-shadow-drawer-r)' }}
+      >
+        <header className="flex items-start justify-between px-[22px] py-[18px] shrink-0">
+          <div>
+            <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-1">
+              {t('eyebrow')}
+            </span>
+            <h3 id="stock-entry-title" className="font-serif text-[22px] text-ink-900 m-0 mt-1">
+              {t('title')}
+            </h3>
+          </div>
+          <PopClose onClick={onClose} />
+        </header>
+
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto px-[22px] py-[18px] flex flex-col gap-[14px]">
+            {/* Produits */}
+            <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px]">
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionProducts')}</div>
+
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-500 pointer-events-none" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      if (hits[0]) addHit(hits[0])
+                    }
+                  }}
+                  className={`${inputCls} pl-9`}
+                  placeholder={t('searchPlaceholder')}
+                />
+                {searching && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-clay-700 animate-spin" />
+                )}
+
+                {query.trim().length >= 2 && (hits.length > 0 || !searching) && (
+                  <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-10 bg-sand-50 border border-sand-300 rounded-lg overflow-hidden max-h-[260px] overflow-y-auto shadow-[0_8px_24px_rgba(0,0,0,.10)]">
+                    {hits.length === 0 ? (
+                      <div className="px-3 py-3 text-[12.5px] text-ink-500">{t('noResults')}</div>
+                    ) : (
+                      hits.map((hit) => (
+                        <button
+                          key={hit.id}
+                          type="button"
+                          onClick={() => addHit(hit)}
+                          className="w-full text-left px-3 py-2.5 flex items-center justify-between gap-3 hover:bg-sand-100 transition-colors border-b border-sand-200 last:border-b-0"
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-[13px] text-ink-900 truncate">{hit.name}</span>
+                            {hit.brand && (
+                              <span className="block text-[11px] text-ink-500 font-mono uppercase tracking-[0.08em] truncate">
+                                {hit.brand}
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3 flex flex-col">
+                {items.length === 0 ? (
+                  <p className="text-[12.5px] text-ink-500 py-3 m-0">{t('emptyItems')}</p>
+                ) : (
+                  items.map((it, idx) => (
+                    <div
+                      key={idx}
+                      className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-2 py-3 border-b border-sand-200 last:border-b-0"
+                    >
+                      <div className="min-w-0 self-center">
+                        <span className="block text-[13px] text-ink-900 truncate">{it.product_name}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => removeItem(idx)}
+                        aria-label={t('removeLine')}
+                        className="self-center w-8 h-8 inline-flex items-center justify-center rounded-md text-ink-500 hover:text-brick-600 hover:bg-sand-200 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <label className="inline-flex items-center gap-1.5">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-500">
+                            {t('unitCostLabel')}
+                          </span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={it.unit_cost || ''}
+                            onChange={(e) => updateItem(idx, { unit_cost: parseFloat(e.target.value) || 0 })}
+                            placeholder="0.00"
+                            className="w-[92px] px-2 py-[6px] border border-sand-300 rounded-md text-[12.5px] font-mono text-ink-900 bg-sand-50 focus-visible:outline-none focus-visible:border-clay-700"
+                          />
+                        </label>
+
+                        <div className="inline-flex items-center border border-sand-300 rounded-md overflow-hidden">
+                          <button
+                            type="button"
+                            onClick={() => updateItem(idx, { quantity: Math.max(1, it.quantity - 1) })}
+                            aria-label={t('decreaseQty')}
+                            className="w-7 h-8 inline-flex items-center justify-center text-ink-700 hover:bg-sand-200 transition-colors disabled:opacity-40"
+                            disabled={it.quantity <= 1}
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            value={it.quantity}
+                            onChange={(e) =>
+                              updateItem(idx, { quantity: Math.max(1, parseInt(e.target.value, 10) || 1) })
+                            }
+                            className="w-[44px] h-8 text-center text-[12.5px] font-mono text-ink-900 bg-sand-50 border-x border-sand-300 focus-visible:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updateItem(idx, { quantity: it.quantity + 1 })}
+                            aria-label={t('increaseQty')}
+                            className="w-7 h-8 inline-flex items-center justify-center text-ink-700 hover:bg-sand-200 transition-colors"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <span className="font-mono text-[12.5px] text-ink-900 ml-auto">
+                          {fmt((Number(it.unit_cost) || 0) * it.quantity)} {DEFAULT_CURRENCY}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Datos de compra (606) — repliable */}
+            <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px]">
+              <button
+                type="button"
+                onClick={() => setShow606((v) => !v)}
+                className="w-full flex items-center justify-between text-left"
+                aria-expanded={show606}
+              >
+                <span className="font-serif text-[17px] text-ink-900">{t('section606')}</span>
+                <ChevronDown
+                  className={`w-4 h-4 text-ink-500 transition-transform ${show606 ? 'rotate-180' : ''}`}
+                />
+              </button>
+              {show606 && (
+                <div className="mt-3 flex flex-col gap-[12px]">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-[6px]">
+                      <label htmlFor="se-supplier" className={labelCls}>{t('supplierLabel')}</label>
+                      <input id="se-supplier" type="text" value={supplierName} onChange={(e) => setSupplierName(e.target.value)} className={inputCls} />
+                    </div>
+                    <div className="flex flex-col gap-[6px]">
+                      <label htmlFor="se-rnc" className={labelCls}>{t('rncLabel')}</label>
+                      <input id="se-rnc" type="text" value={supplierRnc} onChange={(e) => setSupplierRnc(e.target.value)} className={inputCls} />
+                    </div>
+                    <div className="flex flex-col gap-[6px]">
+                      <label htmlFor="se-ncf" className={labelCls}>{t('ncfLabel')}</label>
+                      <input id="se-ncf" type="text" value={ncf} onChange={(e) => setNcf(e.target.value)} className={inputCls} />
+                    </div>
+                    <div className="flex flex-col gap-[6px]">
+                      <label htmlFor="se-date" className={labelCls}>{t('invoiceDateLabel')}</label>
+                      <input id="se-date" type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} className={inputCls} />
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-2 text-[12.5px] text-ink-700">
+                    <input
+                      type="checkbox"
+                      checked={itbisIncluded}
+                      onChange={(e) => setItbisIncluded(e.target.checked)}
+                      className="accent-clay-700"
+                    />
+                    {t('itbisIncludedLabel')}
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Note interne */}
+            <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[14px]">
+              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionNote')}</div>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                className={`${inputCls} min-h-[64px] resize-y`}
+                placeholder={t('notePlaceholder')}
+              />
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="px-[22px] py-[14px] pb-[18px] border-t border-sand-200 shrink-0 relative">
+            <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
+            <p className="text-[11.5px] text-ink-500 leading-snug mb-3">{t('hint')}</p>
+            <div className="flex justify-between items-center">
+              <span className="text-[12px] text-ink-700 inline-flex items-baseline gap-2">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-500">{t('total')}</span>
+                <span className="font-mono text-[15px] text-ink-900 font-semibold">
+                  {fmt(totalCost)} {DEFAULT_CURRENCY}
+                </span>
+                {totalUnits > 0 && <span className="text-[11px] text-ink-500">· {totalUnits}</span>}
+              </span>
+              <div className="flex gap-2 items-center">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-[18px] py-[11px] text-[13.5px] font-medium text-ink-700 bg-transparent border border-sand-300 rounded-[10px] hover:bg-sand-100 hover:text-ink-900 transition-colors"
+                >
+                  {tc('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="px-[18px] py-[11px] text-[13.5px] font-medium text-sand-50 bg-ink-900 border-0 rounded-[10px] hover:bg-ink-800 transition-colors inline-flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {submitting ? t('saving') : t('submit')}
+                </button>
+              </div>
+            </div>
+          </footer>
+        </form>
+      </aside>
+    </div>
+  )
+}

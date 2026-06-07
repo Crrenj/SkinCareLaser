@@ -43,7 +43,7 @@ export function StockEditModal({ item, open, onClose, onSave }: Props) {
       >
         <header className="px-6 py-5 border-b border-sand-300">
           <h3 id="stock-modal-title" className="font-serif text-[22px] text-ink-900 leading-tight m-0">
-            {t('editTitle')}
+            {t('adjustTitle')}
           </h3>
           <p className="text-[12.5px] text-ink-500 mt-1">{item.product_name}</p>
         </header>
@@ -61,6 +61,7 @@ export function StockEditModal({ item, open, onClose, onSave }: Props) {
               onChange={(e) => setStock(parseInt(e.target.value) || 0)}
               className="w-full px-3 py-2 bg-sand-50 border border-sand-300 rounded-md font-mono text-[14px] text-ink-900 focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/20"
             />
+            <p className="text-[11.5px] text-ink-500 mt-2">{t('adjustHelp')}</p>
           </div>
           <div className="bg-sand-100 border border-sand-300 rounded-md p-3.5 text-[12.5px] text-ink-700 flex flex-col gap-1">
             <span><b className="text-ink-900 font-medium">{t('modalPriceLabel')}</b> {item.price} {item.currency.toUpperCase()}</span>

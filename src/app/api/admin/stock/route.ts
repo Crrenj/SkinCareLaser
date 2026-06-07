@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
         name,
         stock,
         price,
+        cost_price,
         currency,
         updated_at,
         range:ranges(
@@ -68,6 +69,7 @@ export async function GET(req: NextRequest) {
         brand_name: brand?.name || null,
         range_name: range?.name || null,
         price: product.price,
+        cost_price: product.cost_price ?? null,
         currency: product.currency,
       }
     })

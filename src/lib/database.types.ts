@@ -410,6 +410,7 @@ export type Database = {
       products: {
         Row: {
           benefits: string[] | null
+          cost_price: number | null
           created_at: string | null
           currency: string | null
           description: string | null
@@ -435,6 +436,7 @@ export type Database = {
         }
         Insert: {
           benefits?: string[] | null
+          cost_price?: number | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -460,6 +462,7 @@ export type Database = {
         }
         Update: {
           benefits?: string[] | null
+          cost_price?: number | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -587,6 +590,7 @@ export type Database = {
           product_name: string
           quantity: number
           reservation_id: string
+          unit_cost: number | null
           unit_price: number
         }
         Insert: {
@@ -596,6 +600,7 @@ export type Database = {
           product_name: string
           quantity: number
           reservation_id: string
+          unit_cost?: number | null
           unit_price: number
         }
         Update: {
@@ -605,6 +610,7 @@ export type Database = {
           product_name?: string
           quantity?: number
           reservation_id?: string
+          unit_cost?: number | null
           unit_price?: number
         }
         Relationships: [
@@ -640,7 +646,7 @@ export type Database = {
           confirmed_at: string | null
           contact_email: string | null
           contact_name: string | null
-          contact_phone: string
+          contact_phone: string | null
           created_at: string
           currency: string
           expires_at: string
@@ -661,7 +667,7 @@ export type Database = {
           confirmed_at?: string | null
           contact_email?: string | null
           contact_name?: string | null
-          contact_phone: string
+          contact_phone?: string | null
           created_at?: string
           currency?: string
           expires_at: string
@@ -682,7 +688,7 @@ export type Database = {
           confirmed_at?: string | null
           contact_email?: string | null
           contact_name?: string | null
-          contact_phone?: string
+          contact_phone?: string | null
           created_at?: string
           currency?: string
           expires_at?: string
@@ -816,6 +822,69 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Relationships: []
+      }
+      stock_entries: {
+        Row: {
+          client_token: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          invoice_date: string | null
+          itbis_included: boolean
+          ncf: string | null
+          note: string | null
+          product_id: string
+          quantity: number
+          supplier_name: string | null
+          supplier_rnc: string | null
+          unit_cost: number
+        }
+        Insert: {
+          client_token?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_date?: string | null
+          itbis_included?: boolean
+          ncf?: string | null
+          note?: string | null
+          product_id: string
+          quantity: number
+          supplier_name?: string | null
+          supplier_rnc?: string | null
+          unit_cost: number
+        }
+        Update: {
+          client_token?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          invoice_date?: string | null
+          itbis_included?: boolean
+          ncf?: string | null
+          note?: string | null
+          product_id?: string
+          quantity?: number
+          supplier_name?: string | null
+          supplier_rnc?: string | null
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_entries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_entries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tag_types: {
         Row: {
@@ -963,6 +1032,7 @@ export type Database = {
         }
         Insert: {
           benefits?: string[] | null
+          cost_price?: number | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -988,6 +1058,7 @@ export type Database = {
         }
         Update: {
           benefits?: string[] | null
+          cost_price?: number | null
           created_at?: string | null
           currency?: string | null
           description?: string | null
@@ -1067,6 +1138,23 @@ export type Database = {
       }
       is_user_admin: { Args: { check_user_id: string }; Returns: boolean }
       merge_anon_cart_to_user: { Args: { p_anon_id: string }; Returns: string }
+      recompute_cost_price: {
+        Args: { p_product_id: string }
+        Returns: undefined
+      }
+      record_stock_entries: {
+        Args: {
+          p_client_token: string
+          p_created_by: string
+          p_invoice_date: string | null
+          p_items: Json
+          p_ncf: string | null
+          p_note: string | null
+          p_supplier_name: string | null
+          p_supplier_rnc: string | null
+        }
+        Returns: Json
+      }
       remove_from_cart: {
         Args: { p_anon_id?: string; p_product_id: string; p_user_id?: string }
         Returns: undefined

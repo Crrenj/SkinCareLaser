@@ -68,6 +68,31 @@ export const stockBody = z.object({
   stock: z.number().int().min(0, 'Le stock ne peut pas être négatif'),
 })
 
+// Entrée de stock (réception) : produit + quantité + prix d'achat, alimente le
+// CMP (record_stock_entries). STRICT (pas de .passthrough()) — created_by est
+// dérivé serveur (auth.userId), jamais du body. client_token = idempotence.
+// Champs fiscaux (606) optionnels au niveau du lot (1 réception = 1 facture).
+// Bornes alignées sur les gardes in-RPC. unit_cost .max() rejette Infinity/NaN.
+export const stockEntryBody = z.object({
+  client_token: z.string().uuid('client_token invalide'),
+  supplier_name: z.string().trim().max(200).optional(),
+  supplier_rnc: z.string().trim().max(20).optional(),
+  ncf: z.string().trim().max(30).optional(),
+  invoice_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date invalide (AAAA-MM-JJ)').optional(),
+  items: z
+    .array(
+      z.object({
+        product_id: z.string().uuid('product_id invalide'),
+        quantity: z.number().int().positive('Quantité invalide').max(1_000_000),
+        unit_cost: z.number().nonnegative('Coût invalide').max(10_000_000),
+        itbis_included: z.boolean().optional().default(true),
+      }),
+    )
+    .min(1, 'Ajoutez au moins un produit')
+    .max(100),
+  note: z.string().trim().max(2000).optional(),
+})
+
 // Panier public : POST (incrément) et PATCH (quantité absolue). Borne 1..99
 // = MAX_CART_QUANTITY ; productId doit être un UUID. [C-28]
 export const cartItemBody = z.object({
@@ -159,11 +184,14 @@ export const guestReservationBody = z.object({
     .optional(),
 })
 
-// Création manuelle d'une réservation par l'admin (client walk-in / téléphone
-// sans compte). Le téléphone est requis (WhatsApp), l'email est optionnel.
+// Création manuelle par l'admin (vente comptoir / réservation sans compte).
+// Toutes les coordonnées sont FACULTATIVES → un achat/réservation anonyme est
+// possible (identifié par sa référence #FAR-…). Seuls les produits sont requis.
 export const reservationCreate = z.object({
   contact_name: z.string().trim().max(160).optional(),
-  contact_phone: z.string().trim().min(5, 'Téléphone requis').max(40),
+  // Téléphone facultatif : accepte un numéro valide, une chaîne vide ('') ou
+  // l'absence → normalisé en null côté route (colonne désormais nullable).
+  contact_phone: z.union([z.string().trim().min(5, 'Téléphone trop court').max(40), z.literal('')]).optional(),
   // accepte une chaîne vide ('') depuis le formulaire → traitée comme absente côté route
   contact_email: z.union([z.string().trim().email('Email invalide').max(200), z.literal('')]).optional(),
   admin_notes: z.string().trim().max(2000).optional(),
