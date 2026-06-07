@@ -207,7 +207,7 @@ export default function ReservationsAdminPage() {
   )
 
   const buildWhatsappLink = useCallback((r: Reservation) => {
-    const phone = r.contact_phone.replace(/\D/g, '')
+    const phone = (r.contact_phone ?? '').replace(/\D/g, '')
     const ref = buildReservationRef(r.id, r.created_at)
     const lines = [
       t('whatsappHello', { name: r.contact_name || '' }).trim(),

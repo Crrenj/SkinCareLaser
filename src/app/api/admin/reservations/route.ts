@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       status: sold ? 'collected' : 'pending',
       collected_at: sold ? nowIso : null,
       expires_at: expiresAt,
-      contact_phone: contact_phone.trim(),
+      contact_phone: contact_phone?.trim() ? contact_phone.trim() : null,
       contact_email: contact_email?.trim() ? contact_email.trim() : null,
       contact_name: contact_name?.trim() ? contact_name.trim() : null,
       total_items: totalItems,

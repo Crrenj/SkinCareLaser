@@ -155,8 +155,9 @@ export function NewReservationDrawer({
   )
   const totalItems = useMemo(() => items.reduce((sum, it) => sum + it.quantity, 0), [items])
 
+  // Coordonnées toutes facultatives (vente/réservation anonyme possible) :
+  // seuls les produits sont requis.
   const canSubmit =
-    phone.trim().length >= 5 &&
     items.length > 0 &&
     items.every((it) => it.product_name.trim().length > 0 && it.quantity >= 1 && it.unit_price >= 0) &&
     !submitting
@@ -244,12 +245,11 @@ export function NewReservationDrawer({
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
                 <div className="flex flex-col gap-[6px]">
                   <label htmlFor="nr-phone" className={labelCls}>
-                    {t('phoneLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
+                    {t('phoneLabel')}
                   </label>
                   <input
                     id="nr-phone"
                     type="tel"
-                    required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className={inputCls}

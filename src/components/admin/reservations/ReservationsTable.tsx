@@ -141,7 +141,7 @@ export function ReservationsTable({
                       {displayName(r.contact_name, r.source)}
                     </span>
                     <span className="flex items-center gap-1.5 text-[11.5px] text-ink-500 font-mono min-w-0">
-                      <span className="truncate">{r.contact_phone}</span>
+                      <span className="truncate">{r.contact_phone || '—'}</span>
                       {r.source !== 'account' && (
                         <span
                           className={`shrink-0 px-1.5 py-px rounded-full text-[9px] font-sans font-semibold uppercase tracking-[0.04em] ${ORIGIN_CHIP_CLASS[r.source]}`}

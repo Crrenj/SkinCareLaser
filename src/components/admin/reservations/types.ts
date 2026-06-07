@@ -37,7 +37,7 @@ export type Reservation = {
   updated_at: string
   confirmed_at: string | null
   collected_at: string | null
-  contact_phone: string
+  contact_phone: string | null
   contact_email: string | null
   contact_name: string | null
   total_items: number

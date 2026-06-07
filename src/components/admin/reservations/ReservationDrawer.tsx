@@ -138,7 +138,11 @@ export function ReservationDrawer({
           <Section title={t('drawer.sectionClient')}>
             <CardBlock>
               <Row label={t('drawer.rowName')} value={displayName(r.contact_name, r.source)} />
-              <Row label={t('drawer.rowPhone')} value={r.contact_phone} isLink={`tel:${r.contact_phone}`} />
+              <Row
+                label={t('drawer.rowPhone')}
+                value={r.contact_phone || '—'}
+                isLink={r.contact_phone ? `tel:${r.contact_phone}` : undefined}
+              />
               <Row
                 label={t('drawer.rowEmail')}
                 value={r.contact_email || '—'}
