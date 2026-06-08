@@ -599,6 +599,10 @@
   "ResetPassword": {
     "title": "Nouveau mot de passe",
     "lede": "Choisissez un mot de passe d'au moins 8 caractères.",
+    "setupTitle": "Configurez votre compte",
+    "setupLede": "Choisissez votre email et un mot de passe pour accéder à votre compte FARMAU.",
+    "emailLabel": "Votre email",
+    "emailPlaceholder": "vous@email.com",
     "newPasswordLabel": "Nouveau mot de passe",
     "confirmPasswordLabel": "Confirmer le mot de passe",
     "passwordHintInline": "min. 8 caractères",
@@ -618,7 +622,8 @@
       "mismatch": "Les mots de passe ne correspondent pas.",
       "expired": "Ce lien n'est plus valide.",
       "missingToken": "Lien de récupération invalide ou expiré.",
-      "generic": "Une erreur est survenue. Veuillez réessayer."
+      "generic": "Une erreur est survenue. Veuillez réessayer.",
+      "emailInvalid": "Email invalide."
     }
   },
   "Profile": {
@@ -1923,6 +1928,38 @@
         "body": "Vous allez supprimer cette annonce. Les impressions accumulées seront perdues.",
         "keep": "Conserver",
         "confirm": "Oui, supprimer"
+      }
+    },
+    "customers": {
+      "section": "Client",
+      "modeAccount": "Compte existant",
+      "modeCreate": "Créer un compte",
+      "modeAnonymous": "Anonyme",
+      "modeGuest": "Invité",
+      "searchPlaceholder": "Rechercher un client (nom, téléphone)…",
+      "searchEmpty": "Aucun client trouvé",
+      "change": "Changer",
+      "firstNameLabel": "Prénom",
+      "firstNamePlaceholder": "María",
+      "lastNameLabel": "Nom",
+      "lastNamePlaceholder": "Pérez",
+      "phoneLabel": "Téléphone",
+      "phonePlaceholder": "+1 809 000 0000",
+      "nameLabel": "Nom",
+      "namePlaceholder": "Nom du client",
+      "createHint": "Un lien de configuration sera généré à envoyer au client par WhatsApp (il choisit son mot de passe et son email).",
+      "anonymousHint": "Aucune information client. La vente est identifiée par sa référence #FAR-…",
+      "guestHint": "Réservation sans compte : le téléphone permet de prévenir le client au retrait.",
+      "setup": {
+        "eyebrow": "Compte client",
+        "title": "Compte créé",
+        "body": "Envoie au client son lien de configuration : il choisira son mot de passe et son email pour accéder à son compte (historique, avis).",
+        "sendWhatsapp": "Envoyer par WhatsApp",
+        "copyLink": "Copier le lien",
+        "copied": "Lien copié",
+        "close": "Fermer",
+        "waGreeting": "Bonjour {name} !",
+        "waMessage": "Voici le lien pour configurer votre compte FARMAU (mot de passe + email) : {link}"
       }
     },
     "sales": {

@@ -203,6 +203,16 @@ export const guestReservationBody = z.object({
     .optional(),
 })
 
+// Création de compte « express » par l'admin au comptoir : nom + prénom +
+// téléphone seulement. Le serveur synthétise un email, crée le compte et
+// renvoie un lien de configuration (envoyé au client par WhatsApp).
+export const quickCreateUser = z.object({
+  first_name: z.string().trim().min(1, 'Prénom requis').max(80),
+  last_name: z.string().trim().max(80).optional(),
+  phone: z.string().trim().min(5, 'Téléphone requis').max(40),
+  locale: z.enum(['fr', 'es', 'en']).optional(),
+})
+
 // Création manuelle par l'admin (vente comptoir / réservation sans compte).
 // Toutes les coordonnées sont FACULTATIVES → un achat/réservation anonyme est
 // possible (identifié par sa référence #FAR-…). Seuls les produits sont requis.
@@ -213,6 +223,8 @@ export const reservationCreate = z.object({
   contact_phone: z.union([z.string().trim().min(5, 'Téléphone trop court').max(40), z.literal('')]).optional(),
   // accepte une chaîne vide ('') depuis le formulaire → traitée comme absente côté route
   contact_email: z.union([z.string().trim().email('Email invalide').max(200), z.literal('')]).optional(),
+  // Association à un compte client (vente comptoir liée). null = anonyme/invité.
+  user_id: z.string().uuid('user_id invalide').nullish(),
   admin_notes: z.string().trim().max(2000).optional(),
   // Vente au comptoir déjà finalisée (le client repart avec la marchandise) →
   // la réservation naît directement en statut collected + décrément du stock.

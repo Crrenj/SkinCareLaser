@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
 
   const parsed = parseBody(reservationCreate, raw)
   if (!parsed.ok) return parsed.response
-  const { contact_name, contact_phone, contact_email, admin_notes, items, sold } = parsed.data
+  const { contact_name, contact_phone, contact_email, admin_notes, items, sold, user_id } = parsed.data
 
   const round2 = (n: number) => Math.round(n * 100) / 100
   const totalItems = items.reduce((sum, it) => sum + it.quantity, 0)
@@ -143,7 +143,9 @@ export async function POST(request: NextRequest) {
   const { data: reservation, error: insertError } = await supabaseAdmin
     .from('reservations')
     .insert({
-      user_id: null,
+      // Vente comptoir / réservation : liée à un compte client si fourni
+      // (historique + avis), sinon anonyme/invité. L'origine reste « counter ».
+      user_id: user_id ?? null,
       source: 'counter',
       status: sold ? 'collected' : 'pending',
       collected_at: sold ? nowIso : null,

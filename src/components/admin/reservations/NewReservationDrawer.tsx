@@ -6,6 +6,7 @@ import { Loader2, Minus, Plus, Search, Trash2 } from 'lucide-react'
 import { useModalA11y } from '@/hooks/useModalA11y'
 import { PopClose } from '@/components/ui/PopClose'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { CustomerStep, type CustomerSelection } from '@/components/admin/customers/CustomerStep'
 import { fmtDOP } from './types'
 
 export type NewReservationItem = {
@@ -22,6 +23,8 @@ export type NewReservationPayload = {
   admin_notes: string
   sold: boolean
   items: NewReservationItem[]
+  /** Identité client (mode `sale`) — le parent la résout en user_id / création. */
+  customer?: CustomerSelection
 }
 
 type SearchHit = {
@@ -66,6 +69,8 @@ export function NewReservationDrawer({
   const [email, setEmail] = useState('')
   const [note, setNote] = useState('')
   const [items, setItems] = useState<NewReservationItem[]>([])
+  // Identité client (mode vente) : anonyme par défaut.
+  const [customer, setCustomer] = useState<CustomerSelection>({ mode: 'anonymous' })
 
   const [query, setQuery] = useState('')
   const [hits, setHits] = useState<SearchHit[]>([])
@@ -80,6 +85,7 @@ export function NewReservationDrawer({
     setEmail('')
     setNote('')
     setItems([])
+    setCustomer({ mode: 'anonymous' })
     setQuery('')
     setHits([])
     setSearching(false)
@@ -155,12 +161,20 @@ export function NewReservationDrawer({
   )
   const totalItems = useMemo(() => items.reduce((sum, it) => sum + it.quantity, 0), [items])
 
-  // Coordonnées toutes facultatives (vente/réservation anonyme possible) :
-  // seuls les produits sont requis.
-  const canSubmit =
+  // Produits requis ; en mode vente, l'identité client doit être valide selon
+  // la voie choisie (compte sélectionné / champs de création / anonyme).
+  const itemsOk =
     items.length > 0 &&
-    items.every((it) => it.product_name.trim().length > 0 && it.quantity >= 1 && it.unit_price >= 0) &&
-    !submitting
+    items.every((it) => it.product_name.trim().length > 0 && it.quantity >= 1 && it.unit_price >= 0)
+  const customerOk =
+    !isSale ||
+    customer.mode === 'anonymous' ||
+    (customer.mode === 'account' && !!customer.userId) ||
+    (customer.mode === 'create' &&
+      customer.firstName.trim().length > 0 &&
+      customer.phone.trim().length >= 5) ||
+    (customer.mode === 'guest' && customer.phone.trim().length >= 5)
+  const canSubmit = itemsOk && customerOk && !submitting
 
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -170,10 +184,28 @@ export function NewReservationDrawer({
       if (!canSubmit) return
       setSubmitting(true)
       try {
+        // En mode vente, les coordonnées « snapshot » viennent de l'identité
+        // choisie ; le parent (page) résout customer → user_id / création compte.
+        let contactName = name.trim()
+        let contactPhone = phone.trim()
+        let contactEmail = email.trim()
+        if (isSale) {
+          contactEmail = ''
+          if (customer.mode === 'account') {
+            contactName = customer.name
+            contactPhone = customer.phone
+          } else if (customer.mode === 'create') {
+            contactName = `${customer.firstName} ${customer.lastName}`.trim()
+            contactPhone = customer.phone.trim()
+          } else {
+            contactName = ''
+            contactPhone = ''
+          }
+        }
         await onCreate({
-          contact_name: name.trim(),
-          contact_phone: phone.trim(),
-          contact_email: email.trim(),
+          contact_name: contactName,
+          contact_phone: contactPhone,
+          contact_email: contactEmail,
           admin_notes: note.trim(),
           sold: isSale,
           items: items.map((it) => ({
@@ -182,6 +214,7 @@ export function NewReservationDrawer({
             unit_price: Number(it.unit_price) || 0,
             quantity: it.quantity,
           })),
+          customer: isSale ? customer : undefined,
         })
       } catch {
         // Le parent a déjà affiché un toast d'erreur ; on garde le drawer ouvert
@@ -190,7 +223,7 @@ export function NewReservationDrawer({
         setSubmitting(false)
       }
     },
-    [canSubmit, onCreate, name, phone, email, note, isSale, items],
+    [canSubmit, onCreate, name, phone, email, note, isSale, items, customer],
   )
 
   if (!open) return null
@@ -226,49 +259,53 @@ export function NewReservationDrawer({
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-[22px] py-[18px] flex flex-col gap-[14px]">
-            {/* Client */}
-            <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px]">
-              <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionClient')}</div>
+            {/* Client : sélecteur d'identité (vente) ou champs libres (réservation) */}
+            {isSale ? (
+              <CustomerStep context="sale" value={customer} onChange={setCustomer} />
+            ) : (
+              <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px]">
+                <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionClient')}</div>
 
-              <div className="flex flex-col gap-[6px] mb-[14px]">
-                <label htmlFor="nr-name" className={labelCls}>{t('nameLabel')}</label>
-                <input
-                  id="nr-name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={inputCls}
-                  placeholder={t('namePlaceholder')}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 mb-[14px]">
-                <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="nr-phone" className={labelCls}>
-                    {t('phoneLabel')}
-                  </label>
+                <div className="flex flex-col gap-[6px] mb-[14px]">
+                  <label htmlFor="nr-name" className={labelCls}>{t('nameLabel')}</label>
                   <input
-                    id="nr-phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    id="nr-name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className={inputCls}
-                    placeholder={t('phonePlaceholder')}
+                    placeholder={t('namePlaceholder')}
                   />
                 </div>
-                <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="nr-email" className={labelCls}>{t('emailLabel')}</label>
-                  <input
-                    id="nr-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={inputCls}
-                    placeholder={t('emailPlaceholder')}
-                  />
+
+                <div className="grid grid-cols-2 gap-3 mb-[14px]">
+                  <div className="flex flex-col gap-[6px]">
+                    <label htmlFor="nr-phone" className={labelCls}>
+                      {t('phoneLabel')}
+                    </label>
+                    <input
+                      id="nr-phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className={inputCls}
+                      placeholder={t('phonePlaceholder')}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-[6px]">
+                    <label htmlFor="nr-email" className={labelCls}>{t('emailLabel')}</label>
+                    <input
+                      id="nr-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={inputCls}
+                      placeholder={t('emailPlaceholder')}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Produits */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px]">

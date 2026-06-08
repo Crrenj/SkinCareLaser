@@ -12,17 +12,21 @@ import { PasswordStrength } from '@/components/auth/PasswordStrength'
 const MIN_PASSWORD_LENGTH = 12
 
 type Stage = 'verifying' | 'form' | 'expired' | 'success'
-type ResetErrorKey = 'tooShort' | 'mismatch' | 'expired' | 'missingToken' | 'generic'
+type ResetErrorKey = 'tooShort' | 'mismatch' | 'expired' | 'missingToken' | 'generic' | 'emailInvalid'
 
 function ResetPasswordForm() {
   const t = useTranslations('ResetPassword')
   const tAuth = useTranslations('Auth')
   const router = useRouter()
   const searchParams = useSearchParams()
+  // Mode « configuration de compte » (lien envoyé au client après création
+  // express au comptoir) : on demande aussi un vrai email pour un login propre.
+  const setup = searchParams.get('setup') === '1'
 
   const [stage, setStage] = useState<Stage>('verifying')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [email, setEmail] = useState('')
   const [error, setError] = useState<ResetErrorKey | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -79,9 +83,15 @@ function ResetPasswordForm() {
       setError('mismatch')
       return
     }
+    if (setup && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) {
+      setError('emailInvalid')
+      return
+    }
 
     setLoading(true)
-    const { error: updateError } = await supabase.auth.updateUser({ password })
+    const { error: updateError } = await supabase.auth.updateUser(
+      setup ? { email: email.trim(), password } : { password },
+    )
     setLoading(false)
 
     if (updateError) {
@@ -103,7 +113,8 @@ function ResetPasswordForm() {
   const canSubmit =
     !loading &&
     password.length >= MIN_PASSWORD_LENGTH &&
-    password === confirm
+    password === confirm &&
+    (!setup || email.trim().length > 3)
 
   return (
     <AuthLayout quote={t('aside.quote')}>
@@ -143,11 +154,28 @@ function ResetPasswordForm() {
       {stage === 'form' && (
         <>
           <h1 className="font-serif text-[36px] leading-[1.1] tracking-[-0.01em] text-ink-900">
-            {t('title')}
+            {setup ? t('setupTitle') : t('title')}
           </h1>
-          <p className="text-[14.5px] text-ink-700 -mt-2">{t('lede')}</p>
+          <p className="text-[14.5px] text-ink-700 -mt-2">{setup ? t('setupLede') : t('lede')}</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {setup && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="setup-email" className="text-[13px] text-ink-700 font-medium">
+                  {t('emailLabel')}
+                </label>
+                <input
+                  id="setup-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t('emailPlaceholder')}
+                  className="h-11 px-3 rounded-lg border border-sand-300 bg-sand-50 text-[14.5px] text-ink-900 focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-[3px] focus-visible:ring-clay-700/20 transition-colors"
+                />
+              </div>
+            )}
             <div>
               <PasswordInput
                 id="new-password"

@@ -599,6 +599,10 @@
   "ResetPassword": {
     "title": "New password",
     "lede": "Choose a password of at least 8 characters.",
+    "setupTitle": "Set up your account",
+    "setupLede": "Choose your email and a password to access your FARMAU account.",
+    "emailLabel": "Your email",
+    "emailPlaceholder": "you@email.com",
     "newPasswordLabel": "New password",
     "confirmPasswordLabel": "Confirm password",
     "passwordHintInline": "min. 8 characters",
@@ -618,7 +622,8 @@
       "mismatch": "Passwords do not match.",
       "expired": "This link is no longer valid.",
       "missingToken": "Recovery link invalid or expired.",
-      "generic": "An error occurred. Please try again."
+      "generic": "An error occurred. Please try again.",
+      "emailInvalid": "Invalid email."
     }
   },
   "Profile": {
@@ -1923,6 +1928,38 @@
         "body": "You are about to delete this banner. Accumulated impressions will be lost.",
         "keep": "Keep",
         "confirm": "Yes, delete"
+      }
+    },
+    "customers": {
+      "section": "Customer",
+      "modeAccount": "Existing account",
+      "modeCreate": "Create account",
+      "modeAnonymous": "Anonymous",
+      "modeGuest": "Guest",
+      "searchPlaceholder": "Search a customer (name, phone)…",
+      "searchEmpty": "No customer found",
+      "change": "Change",
+      "firstNameLabel": "First name",
+      "firstNamePlaceholder": "María",
+      "lastNameLabel": "Last name",
+      "lastNamePlaceholder": "Pérez",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "+1 809 000 0000",
+      "nameLabel": "Name",
+      "namePlaceholder": "Customer name",
+      "createHint": "A setup link will be generated to send to the customer via WhatsApp (they choose their password and email).",
+      "anonymousHint": "No customer data. The sale is identified by its reference #FAR-…",
+      "guestHint": "Reservation without an account: the phone lets you notify the customer at pickup.",
+      "setup": {
+        "eyebrow": "Customer account",
+        "title": "Account created",
+        "body": "Send the customer their setup link: they will choose their password and email to access their account (history, reviews).",
+        "sendWhatsapp": "Send via WhatsApp",
+        "copyLink": "Copy link",
+        "copied": "Link copied",
+        "close": "Close",
+        "waGreeting": "Hello {name}!",
+        "waMessage": "Here is the link to set up your FARMAU account (password + email): {link}"
       }
     },
     "sales": {

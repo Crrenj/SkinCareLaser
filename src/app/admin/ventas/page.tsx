@@ -1,9 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import {
+  AccountSetupDialog,
+  type AccountSetupInfo,
+} from '@/components/admin/customers/AccountSetupDialog'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
@@ -38,6 +42,7 @@ function saleTime(r: Reservation): number {
 export default function SalesAdminPage() {
   const t = useTranslations('Admin.sales')
   const tr = useTranslations('Admin.reservations')
+  const locale = useLocale()
 
   const [rows, setRows] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,6 +57,8 @@ export default function SalesAdminPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [showNew, setShowNew] = useState(false)
+  // Lien de configuration à transmettre après création d'un compte express.
+  const [setupInfo, setSetupInfo] = useState<AccountSetupInfo | null>(null)
 
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
@@ -193,10 +200,48 @@ export default function SalesAdminPage() {
 
   const createSale = useCallback(
     async (payload: NewReservationPayload) => {
+      const c = payload.customer
+      let userId: string | null = null
+      let pendingSetup: AccountSetupInfo | null = null
+
+      // 1) Création de compte express si demandé → user_id + lien de config.
+      if (c?.mode === 'create') {
+        const r = await fetch('/api/admin/users/quick-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name: c.firstName,
+            last_name: c.lastName,
+            phone: c.phone,
+            locale,
+          }),
+        })
+        const j = await r.json().catch(() => ({}))
+        if (!r.ok) {
+          toast.error(j.error || t('errorCreate'))
+          throw new Error(j.error || 'quick-create failed')
+        }
+        userId = j.userId ?? null
+        if (j.setupLink) {
+          pendingSetup = { link: j.setupLink, phone: c.phone, name: j.name ?? null }
+        }
+      } else if (c?.mode === 'account') {
+        userId = c.userId
+      }
+
+      // 2) Vente comptoir liée (ou anonyme).
       const res = await fetch('/api/admin/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          contact_name: payload.contact_name,
+          contact_phone: payload.contact_phone,
+          contact_email: payload.contact_email,
+          admin_notes: payload.admin_notes,
+          sold: true,
+          items: payload.items,
+          user_id: userId,
+        }),
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -206,8 +251,10 @@ export default function SalesAdminPage() {
       toast.success(t('createdToast'))
       setShowNew(false)
       await fetchData()
+      // 3) Si un compte vient d'être créé, proposer l'envoi du lien de config.
+      if (pendingSetup) setSetupInfo(pendingSetup)
     },
-    [fetchData, t],
+    [fetchData, t, locale],
   )
 
   const buildWhatsappLink = useCallback((r: Reservation) => {
@@ -381,6 +428,7 @@ export default function SalesAdminPage() {
         onCreate={createSale}
         mode="sale"
       />
+      <AccountSetupDialog info={setupInfo} onClose={() => setSetupInfo(null)} />
       {confirmDialog}
     </>
   )

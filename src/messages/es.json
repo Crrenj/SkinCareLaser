@@ -599,6 +599,10 @@
   "ResetPassword": {
     "title": "Nueva contraseña",
     "lede": "Elige una contraseña de al menos 8 caracteres.",
+    "setupTitle": "Configura tu cuenta",
+    "setupLede": "Elige tu email y una contraseña para acceder a tu cuenta FARMAU.",
+    "emailLabel": "Tu email",
+    "emailPlaceholder": "tu@email.com",
     "newPasswordLabel": "Nueva contraseña",
     "confirmPasswordLabel": "Confirmar contraseña",
     "passwordHintInline": "mínimo 8 caracteres",
@@ -618,7 +622,8 @@
       "mismatch": "Las contraseñas no coinciden.",
       "expired": "Este enlace ya no es válido.",
       "missingToken": "Enlace de recuperación inválido o caducado.",
-      "generic": "Ocurrió un error. Vuelve a intentarlo."
+      "generic": "Ocurrió un error. Vuelve a intentarlo.",
+      "emailInvalid": "Email inválido."
     }
   },
   "Profile": {
@@ -1923,6 +1928,38 @@
         "body": "Vas a eliminar este anuncio. Las impresiones acumuladas se perderán.",
         "keep": "Mantener",
         "confirm": "Sí, eliminar"
+      }
+    },
+    "customers": {
+      "section": "Cliente",
+      "modeAccount": "Cuenta existente",
+      "modeCreate": "Crear cuenta",
+      "modeAnonymous": "Anónimo",
+      "modeGuest": "Invitado",
+      "searchPlaceholder": "Buscar un cliente (nombre, teléfono)…",
+      "searchEmpty": "No se encontró ningún cliente",
+      "change": "Cambiar",
+      "firstNameLabel": "Nombre",
+      "firstNamePlaceholder": "María",
+      "lastNameLabel": "Apellido",
+      "lastNamePlaceholder": "Pérez",
+      "phoneLabel": "Teléfono",
+      "phonePlaceholder": "+1 809 000 0000",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Nombre del cliente",
+      "createHint": "Se generará un enlace de configuración para enviar al cliente por WhatsApp (elige su contraseña y su email).",
+      "anonymousHint": "Sin datos del cliente. La venta se identifica por su referencia #FAR-…",
+      "guestHint": "Reserva sin cuenta: el teléfono permite avisar al cliente al retirar.",
+      "setup": {
+        "eyebrow": "Cuenta cliente",
+        "title": "Cuenta creada",
+        "body": "Envía al cliente su enlace de configuración: elegirá su contraseña y su email para acceder a su cuenta (historial, reseñas).",
+        "sendWhatsapp": "Enviar por WhatsApp",
+        "copyLink": "Copiar enlace",
+        "copied": "Enlace copiado",
+        "close": "Cerrar",
+        "waGreeting": "¡Hola {name}!",
+        "waMessage": "Aquí tienes el enlace para configurar tu cuenta FARMAU (contraseña + email): {link}"
       }
     },
     "sales": {
