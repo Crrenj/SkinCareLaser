@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   Boxes,
   Building2,
+  Calculator,
   CircleUserRound,
   ClipboardList,
   Cog,
@@ -42,6 +43,7 @@ type NavItem = {
   /** Clé i18n dans Admin.sidebar.nav* */
   labelKey:
     | 'navOverview'
+    | 'navAccounting'
     | 'navProducts'
     | 'navBrands'
     | 'navStock'
@@ -77,7 +79,10 @@ type Section = {
 const SECTIONS: Section[] = [
   {
     titleKey: 'sectionGeneral',
-    items: [{ href: '/admin', labelKey: 'navOverview', icon: Home }],
+    items: [
+      { href: '/admin', labelKey: 'navOverview', icon: Home },
+      { href: '/admin/contabilidad', labelKey: 'navAccounting', icon: Calculator },
+    ],
   },
   {
     titleKey: 'sectionCatalog',
