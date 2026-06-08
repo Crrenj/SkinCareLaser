@@ -162,6 +162,11 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (insertError || !reservation) {
+    // Index partiel unique : 1 réservation active par compte client. Survient si
+    // on lie une réservation en attente à un client qui en a déjà une active.
+    if (insertError?.code === '23505') {
+      return NextResponse.json({ error: 'active_reservation_exists' }, { status: 409 })
+    }
     logger.error('[admin/reservations] POST reservation error:', insertError)
     return NextResponse.json(
       { error: insertError?.message ?? 'Erreur lors de la création' },

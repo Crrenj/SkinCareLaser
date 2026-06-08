@@ -2020,6 +2020,7 @@
       "errorUnknown": "Unknown error",
       "errorUpdate": "Update error",
       "errorSaveNote": "Error saving note",
+      "errorActiveExists": "This customer already has an active reservation.",
       "whatsappHello": "Hello {name}!",
       "whatsappIntro": "We are contacting you about your reservation *#{ref}* at FARMAU.",
       "whatsappTotal": "Total to arrange: {amount} {currency}.",

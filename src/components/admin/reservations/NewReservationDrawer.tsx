@@ -50,8 +50,6 @@ type NewReservationDrawerProps = {
 
 const inputCls =
   'w-full px-3 py-[10px] border border-sand-300 rounded-lg text-[13.5px] text-ink-900 bg-sand-50 transition-[border-color,box-shadow] focus-visible:outline-none focus-visible:border-clay-700 focus-visible:shadow-[0_0_0_3px_rgba(142,82,50,.14)]'
-const labelCls =
-  'font-mono text-[10.5px] tracking-[0.12em] uppercase text-ink-700 font-semibold flex justify-between items-center'
 
 export function NewReservationDrawer({
   open,
@@ -64,12 +62,9 @@ export function NewReservationDrawer({
   const dialogRef = useModalA11y(open, onClose)
   const isSale = mode === 'sale'
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
   const [note, setNote] = useState('')
   const [items, setItems] = useState<NewReservationItem[]>([])
-  // Identité client (mode vente) : anonyme par défaut.
+  // Identité client (les deux modes) — défaut posé à l'ouverture selon le mode.
   const [customer, setCustomer] = useState<CustomerSelection>({ mode: 'anonymous' })
 
   const [query, setQuery] = useState('')
@@ -77,20 +72,18 @@ export function NewReservationDrawer({
   const [searching, setSearching] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  // Reset complet à chaque ouverture
+  // Reset complet à chaque ouverture. Vente → anonyme par défaut ;
+  // réservation → invité (téléphone requis, pas d'anonyme).
   useEffect(() => {
     if (!open) return
-    setName('')
-    setPhone('')
-    setEmail('')
     setNote('')
     setItems([])
-    setCustomer({ mode: 'anonymous' })
+    setCustomer(isSale ? { mode: 'anonymous' } : { mode: 'guest', name: '', phone: '' })
     setQuery('')
     setHits([])
     setSearching(false)
     setSubmitting(false)
-  }, [open])
+  }, [open, isSale])
 
   // Recherche produits debounced (réutilise /api/search)
   useEffect(() => {
@@ -161,19 +154,21 @@ export function NewReservationDrawer({
   )
   const totalItems = useMemo(() => items.reduce((sum, it) => sum + it.quantity, 0), [items])
 
-  // Produits requis ; en mode vente, l'identité client doit être valide selon
-  // la voie choisie (compte sélectionné / champs de création / anonyme).
+  // Produits requis ; l'identité client doit être valide selon la voie choisie.
+  // L'anonyme n'est permis qu'en vente ; la réservation exige au moins un tél.
   const itemsOk =
     items.length > 0 &&
     items.every((it) => it.product_name.trim().length > 0 && it.quantity >= 1 && it.unit_price >= 0)
   const customerOk =
-    !isSale ||
-    customer.mode === 'anonymous' ||
-    (customer.mode === 'account' && !!customer.userId) ||
-    (customer.mode === 'create' &&
-      customer.firstName.trim().length > 0 &&
-      customer.phone.trim().length >= 5) ||
-    (customer.mode === 'guest' && customer.phone.trim().length >= 5)
+    customer.mode === 'anonymous'
+      ? isSale
+      : customer.mode === 'account'
+        ? !!customer.userId
+        : customer.mode === 'create'
+          ? customer.firstName.trim().length > 0 && customer.phone.trim().length >= 5
+          : customer.mode === 'guest'
+            ? customer.phone.trim().length >= 5
+            : false
   const canSubmit = itemsOk && customerOk && !submitting
 
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -184,28 +179,24 @@ export function NewReservationDrawer({
       if (!canSubmit) return
       setSubmitting(true)
       try {
-        // En mode vente, les coordonnées « snapshot » viennent de l'identité
-        // choisie ; le parent (page) résout customer → user_id / création compte.
-        let contactName = name.trim()
-        let contactPhone = phone.trim()
-        let contactEmail = email.trim()
-        if (isSale) {
-          contactEmail = ''
-          if (customer.mode === 'account') {
-            contactName = customer.name
-            contactPhone = customer.phone
-          } else if (customer.mode === 'create') {
-            contactName = `${customer.firstName} ${customer.lastName}`.trim()
-            contactPhone = customer.phone.trim()
-          } else {
-            contactName = ''
-            contactPhone = ''
-          }
+        // Coordonnées « snapshot » dérivées de l'identité choisie ; le parent
+        // (page) résout customer → user_id / création de compte.
+        let contactName = ''
+        let contactPhone = ''
+        if (customer.mode === 'account') {
+          contactName = customer.name
+          contactPhone = customer.phone
+        } else if (customer.mode === 'create') {
+          contactName = `${customer.firstName} ${customer.lastName}`.trim()
+          contactPhone = customer.phone.trim()
+        } else if (customer.mode === 'guest') {
+          contactName = customer.name.trim()
+          contactPhone = customer.phone.trim()
         }
         await onCreate({
           contact_name: contactName,
           contact_phone: contactPhone,
-          contact_email: contactEmail,
+          contact_email: '',
           admin_notes: note.trim(),
           sold: isSale,
           items: items.map((it) => ({
@@ -214,7 +205,7 @@ export function NewReservationDrawer({
             unit_price: Number(it.unit_price) || 0,
             quantity: it.quantity,
           })),
-          customer: isSale ? customer : undefined,
+          customer,
         })
       } catch {
         // Le parent a déjà affiché un toast d'erreur ; on garde le drawer ouvert
@@ -223,7 +214,7 @@ export function NewReservationDrawer({
         setSubmitting(false)
       }
     },
-    [canSubmit, onCreate, name, phone, email, note, isSale, items, customer],
+    [canSubmit, onCreate, note, isSale, items, customer],
   )
 
   if (!open) return null
@@ -259,53 +250,13 @@ export function NewReservationDrawer({
 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
           <div className="flex-1 overflow-y-auto px-[22px] py-[18px] flex flex-col gap-[14px]">
-            {/* Client : sélecteur d'identité (vente) ou champs libres (réservation) */}
-            {isSale ? (
-              <CustomerStep context="sale" value={customer} onChange={setCustomer} />
-            ) : (
-              <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px]">
-                <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionClient')}</div>
-
-                <div className="flex flex-col gap-[6px] mb-[14px]">
-                  <label htmlFor="nr-name" className={labelCls}>{t('nameLabel')}</label>
-                  <input
-                    id="nr-name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className={inputCls}
-                    placeholder={t('namePlaceholder')}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mb-[14px]">
-                  <div className="flex flex-col gap-[6px]">
-                    <label htmlFor="nr-phone" className={labelCls}>
-                      {t('phoneLabel')}
-                    </label>
-                    <input
-                      id="nr-phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className={inputCls}
-                      placeholder={t('phonePlaceholder')}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-[6px]">
-                    <label htmlFor="nr-email" className={labelCls}>{t('emailLabel')}</label>
-                    <input
-                      id="nr-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={inputCls}
-                      placeholder={t('emailPlaceholder')}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Client : sélecteur d'identité — compte / création express /
+                anonyme (vente) ou invité tél-requis (réservation). */}
+            <CustomerStep
+              context={isSale ? 'sale' : 'reservation'}
+              value={customer}
+              onChange={setCustomer}
+            />
 
             {/* Produits */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px]">

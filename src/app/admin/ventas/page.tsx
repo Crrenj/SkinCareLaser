@@ -8,6 +8,7 @@ import {
   AccountSetupDialog,
   type AccountSetupInfo,
 } from '@/components/admin/customers/AccountSetupDialog'
+import { resolveCustomer } from '@/components/admin/customers/resolveCustomer'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
@@ -200,33 +201,13 @@ export default function SalesAdminPage() {
 
   const createSale = useCallback(
     async (payload: NewReservationPayload) => {
-      const c = payload.customer
-      let userId: string | null = null
-      let pendingSetup: AccountSetupInfo | null = null
-
-      // 1) Création de compte express si demandé → user_id + lien de config.
-      if (c?.mode === 'create') {
-        const r = await fetch('/api/admin/users/quick-create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            first_name: c.firstName,
-            last_name: c.lastName,
-            phone: c.phone,
-            locale,
-          }),
-        })
-        const j = await r.json().catch(() => ({}))
-        if (!r.ok) {
-          toast.error(j.error || t('errorCreate'))
-          throw new Error(j.error || 'quick-create failed')
-        }
-        userId = j.userId ?? null
-        if (j.setupLink) {
-          pendingSetup = { link: j.setupLink, phone: c.phone, name: j.name ?? null }
-        }
-      } else if (c?.mode === 'account') {
-        userId = c.userId
+      // 1) Résout l'identité client (compte existant / création express / anonyme).
+      let resolved: { userId: string | null; setup: AccountSetupInfo | null }
+      try {
+        resolved = await resolveCustomer(payload.customer, locale)
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : t('errorCreate'))
+        throw e
       }
 
       // 2) Vente comptoir liée (ou anonyme).
@@ -240,7 +221,7 @@ export default function SalesAdminPage() {
           admin_notes: payload.admin_notes,
           sold: true,
           items: payload.items,
-          user_id: userId,
+          user_id: resolved.userId,
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -252,7 +233,7 @@ export default function SalesAdminPage() {
       setShowNew(false)
       await fetchData()
       // 3) Si un compte vient d'être créé, proposer l'envoi du lien de config.
-      if (pendingSetup) setSetupInfo(pendingSetup)
+      if (resolved.setup) setSetupInfo(resolved.setup)
     },
     [fetchData, t, locale],
   )

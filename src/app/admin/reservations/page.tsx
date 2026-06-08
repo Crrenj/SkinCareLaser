@@ -1,12 +1,17 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { Download, Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { useConfirmDialog } from '@/components/admin/ConfirmDialog'
+import {
+  AccountSetupDialog,
+  type AccountSetupInfo,
+} from '@/components/admin/customers/AccountSetupDialog'
+import { resolveCustomer } from '@/components/admin/customers/resolveCustomer'
 import { FilterBar, type SortOption } from '@/components/admin/reservations/FilterBar'
 import { BulkActionBar } from '@/components/admin/reservations/BulkActionBar'
 import { ReservationsTable } from '@/components/admin/reservations/ReservationsTable'
@@ -29,6 +34,7 @@ const PAGE_SIZE = 25
 
 export default function ReservationsAdminPage() {
   const t = useTranslations('Admin.reservations')
+  const locale = useLocale()
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
@@ -43,6 +49,8 @@ export default function ReservationsAdminPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [showNew, setShowNew] = useState(false)
+  // Lien de configuration après création d'un compte client express.
+  const [setupInfo, setSetupInfo] = useState<AccountSetupInfo | null>(null)
 
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
 
@@ -187,14 +195,36 @@ export default function ReservationsAdminPage() {
 
   const createReservation = useCallback(
     async (payload: NewReservationPayload) => {
+      // 1) Résout l'identité client (compte existant / création express / invité).
+      let resolved: { userId: string | null; setup: AccountSetupInfo | null }
+      try {
+        resolved = await resolveCustomer(payload.customer, locale)
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : t('create.errorCreate'))
+        throw e
+      }
+
+      // 2) Crée la réservation (en attente) liée au compte ou en invité.
       const res = await fetch('/api/admin/reservations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          contact_name: payload.contact_name,
+          contact_phone: payload.contact_phone,
+          contact_email: payload.contact_email,
+          admin_notes: payload.admin_notes,
+          sold: false,
+          items: payload.items,
+          user_id: resolved.userId,
+        }),
       })
       const json = await res.json().catch(() => ({}))
       if (!res.ok) {
-        toast.error(json.error || t('create.errorCreate'))
+        toast.error(
+          json.error === 'active_reservation_exists'
+            ? t('errorActiveExists')
+            : json.error || t('create.errorCreate'),
+        )
         throw new Error(json.error || 'create failed')
       }
       toast.success(t('create.successToast'))
@@ -202,8 +232,10 @@ export default function ReservationsAdminPage() {
       // Réservation manuelle (jamais "vendue" ici) → onglet "à contacter".
       setFilter('pending')
       await fetchData()
+      // 3) Compte express créé → proposer l'envoi du lien de configuration.
+      if (resolved.setup) setSetupInfo(resolved.setup)
     },
-    [fetchData, t],
+    [fetchData, t, locale],
   )
 
   const buildWhatsappLink = useCallback((r: Reservation) => {
@@ -406,6 +438,7 @@ export default function ReservationsAdminPage() {
         onCreate={createReservation}
         mode="reservation"
       />
+      <AccountSetupDialog info={setupInfo} onClose={() => setSetupInfo(null)} />
       {confirmDialog}
     </>
   )
