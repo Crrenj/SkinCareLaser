@@ -9,6 +9,7 @@ import {
   UserRound,
   AlertTriangle,
   ArrowRight,
+  Download,
 } from 'lucide-react'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { StatCard } from '@/components/admin/dashboard/StatCard'
@@ -101,6 +102,25 @@ export default async function ContabilidadPage({
             icon={Warehouse}
             accent="ink"
           />
+        </div>
+
+        {/* Exportar para la DGII */}
+        <div className="flex flex-wrap items-center gap-2 -mt-2">
+          <span className="text-[10.5px] uppercase tracking-[0.14em] text-ink-500 font-semibold mr-1">
+            Exportar DGII
+          </span>
+          <a
+            href={`/api/admin/accounting/export?type=606&month=${data.month}`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium text-ink-700 bg-sand-50 border border-sand-300 rounded-md hover:border-clay-700 hover:text-ink-900 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" /> 606 · Compras
+          </a>
+          <a
+            href={`/api/admin/accounting/export?type=607&month=${data.month}`}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[12.5px] font-medium text-ink-700 bg-sand-50 border border-sand-300 rounded-md hover:border-clay-700 hover:text-ink-900 transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" /> 607 · Ventas <span className="text-ink-500">(borrador)</span>
+          </a>
         </div>
 
         {/* 01 · Resultado del mes */}
