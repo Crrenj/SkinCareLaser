@@ -268,6 +268,29 @@ Découpage par scope/page :
 - **Pre-commit hook** (Husky + lint-staged) : `eslint --fix --no-warn-ignored` sur les TS/TSX stagés.
 - **CI** (`.github/workflows/ci.yml`) : lint + tsc + vitest + build + e2e sur PR et push main.
 
+## État du projet (2026-06-08)
+
+### Fait ✅ (session 2026-06-07 → 06-08 — module Comptabilité de bout en bout)
+
+Construction d'un **module comptable complet** adossé au stock et aux ventes : du coût d'achat jusqu'au compte de résultat + exports DGII. **4 commits sur `main`** (`e289169`, `e33dd52`, `8abfb7a`, `8ed87cc`), **2 migrations appliquées prod** (`20260607130000`, `20260608120000`). Plan stock validé par 10 agents (`~/.claude/plans/jaunty-watching-moth.md`). Vérif à chaque lot : tsc 0 · lint 0 · build vert.
+
+**1. Entrées de stock + prix de revient (CMP)** (`e289169`, migration `20260607130000_stock_entries_cost_basis.sql`) — fondation : capture enfin un COÛT par produit.
+- `products.cost_price` = **coût moyen pondéré (CMP)**, cache recalculé UNIQUEMENT par RPC `record_stock_entries` (atomique, idempotente par `client_token`, verrou `FOR UPDATE`, NULL-safe, dé-duplique un produit multi-lignes). `recompute_cost_price` = réconciliation à vie.
+- `reservation_items.unit_cost` = snapshot CMP **write-once** posé par `apply_reservation_collection` à la vente (collected) → marge figée par vente, jumeau de `unit_price`.
+- Table `stock_entries` (réceptions append-only, **606-ready** : `supplier_name`/`supplier_rnc`/`ncf`/`invoice_date` + flag `itbis_included` ; `client_token` idempotence ; ancre future lots/péremption).
+- 🔒 **Sécurité** : `cost_price`/`unit_cost` masqués à anon/authenticated. ⚠️ Un `REVOKE` au niveau **colonne est inopérant** tant qu'un `GRANT` table-level existe → révoquer le SELECT **table** + re-grant une **liste blanche** de colonnes (bloc `DO` dynamique, cf. mémoire `column-revoke-noop-under-table-grant`). Ne JAMAIS ajouter `cost_price` à `v_bestsellers` (SECURITY DEFINER servie à anon). Coût **hors** `productCreate/Update` (test vitest l'impose).
+- UI : `StockEntryDrawer` dans `/admin/stock` (réception multi-lignes + section 606 repliable), colonnes **Coût/Marge %**, `StockEditModal` relabellé « Ajuste de inventario » (**réception ≠ ajustement absolu**). i18n `Admin.stock.entry` FR/ES/EN.
+
+**2. Onglet Comptabilité** (`e33dd52`) — page serveur read-only **`/admin/contabilidad`** (`src/app/admin/contabilidad/_data.ts` `getAccountingData`, sélecteur de mois `?month=YYYY-MM`, **espagnol en dur** convention dashboard, lien sidebar `navAccounting` i18n, primitives dashboard réutilisées). CA, **COGS = Σ(unit_cost·qty) sur collected**, marge, **cobertura de coste** (unit_cost NULL **exclu**, jamais `COALESCE(…,0)` = marge inconnue ≠ 0), ventes par canal, marges par produit, inventario valorizado (coût vs vente), achats 606 du mois.
+
+**3. Export CSV 606/607 DGII** (`8abfb7a`) — **`GET /api/admin/accounting/export?type=606|607&month`** (`src/lib/csv.ts` : anti-injection de formule + BOM/CRLF Excel). **606 réel** groupé par comprobante depuis `stock_entries` (base + ITBIS séparés) ; **607 = journal *borrador*** depuis les réservations collected (NCF vide — FARMAU n'émet pas de comprobante fiscal, couche e-CF différée).
+
+**4. Dépenses + compte de résultat (P&L)** (`8ed87cc`, migration `20260608120000_expenses_table.sql`) — table **`expenses`** admin-only (RLS + service-role, CHECK 8 catégories, aucune surface publique). Routes **`/api/admin/expenses`** (GET ?month / POST) + `[id]` DELETE (Zod `expenseCreate`/`expenseDelete`, `created_by` = `auth.userId`). Page étendue : état de résultat **Ingresos − COGS − Gastos = Resultado neto** + `ExpensesPanel` (client : ajout/liste/suppression, `router.refresh()` recalcule le P&L côté serveur) + répartition par catégorie.
+
+**Honnêteté du calcul** : tant que les coûts ne sont pas saisis (réceptions), marge « sin costes aún » + états vides gracieux (lien vers les entrées de stock) ; le P&L se remplit à l'usage. Le CMP est approximatif si on ajuste le stock en **absolu** (modal/form produit ne touchent pas `cost_price`) → `recompute_cost_price` répare.
+
+**Reste à faire** : facturation **e-CF/NCF sur les ventes** (prérequis d'un vrai 607 + ITBIS ventes — taxabilité par produit, *medicamentos* exonérés) ; **clôture de caisse** journalière ; vue ledger `v_stock_ledger` (entrées ⊎ ventes ⊎ ajustements) ; table fournisseurs structurée ; lots/péremption ; ITBIS per-ligne (actuellement batch-level). **`db/schema.sql` non régénéré** cette session (entrelacé avec une session parallèle vente-comptoir/quick-create non committée — à démêler). Mémoires : `stock-entries-cost-basis-feature`, `column-revoke-noop-under-table-grant`.
+
 ## État du projet (2026-06-06)
 
 ### Fait ✅ (session 2026-06-06 — remédiation V1 post-audit, phases 0-5)
