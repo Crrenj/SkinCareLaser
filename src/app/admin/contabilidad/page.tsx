@@ -90,6 +90,13 @@ export default async function ContabilidadPage({
   const data = await getAccountingData(month)
   const { current: cur, previous: prev, inventory: inv, purchases: pur, gastos, netResult } = data
   const months = recentMonths(12)
+  // Garantit que le mois affiché reste une option même si on a navigué (flèches)
+  // au-delà des 12 mois listés.
+  const monthOptions = months.some((m) => m.value === data.month)
+    ? months
+    : [...months, { value: data.month, label: data.monthLabel }].sort((a, b) =>
+        a.value < b.value ? 1 : -1,
+      )
 
   const hasCost = cur.costedRevenue > 0
 
@@ -98,10 +105,17 @@ export default async function ContabilidadPage({
       <PageHeader
         crumbs={[{ label: 'Admin', href: '/admin' }, { label: 'General' }, { label: 'Contabilidad' }]}
         title="Contabilidad"
-        actions={<MonthSelect value={data.month} options={months} />}
       />
 
       <div className="px-5 lg:px-8 py-6 flex flex-col gap-7">
+        {/* Sélecteur de mois — proéminent (titre du mois + navigateur flèches) */}
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <h2 className="font-serif text-[22px] text-ink-900 capitalize leading-none m-0">
+            {data.monthLabel}
+          </h2>
+          <MonthSelect value={data.month} options={monthOptions} currentMonth={months[0].value} />
+        </div>
+
         {/* Bande KPI */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard
