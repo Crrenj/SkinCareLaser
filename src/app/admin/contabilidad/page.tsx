@@ -2,8 +2,8 @@ import Link from 'next/link'
 import {
   TrendingUp,
   Coins,
-  Percent,
-  Warehouse,
+  Wallet,
+  Scale,
   Store,
   Globe,
   UserRound,
@@ -20,6 +20,8 @@ import { DashboardSectionHeader } from '@/components/admin/dashboard/DashboardSe
 import { formatPrice } from '@/lib/formatPrice'
 import { getAccountingData, recentMonths, type ChannelKey } from './_data'
 import { MonthSelect } from './MonthSelect'
+import { ExpensesPanel } from './ExpensesPanel'
+import { CAT_LABEL } from './expenseCategories'
 
 export const dynamic = 'force-dynamic'
 
@@ -47,6 +49,38 @@ function Delta({ cur, prev }: { cur: number; prev: number }) {
   )
 }
 
+/** Ligne du compte de résultat : libellé + montant (négatif entre parenthèses). */
+function Line({
+  label,
+  value,
+  strong,
+  accent,
+}: {
+  label: string
+  value: number
+  strong?: boolean
+  accent?: boolean
+}) {
+  const neg = value < 0
+  const color = accent
+    ? neg
+      ? 'text-brick-600'
+      : 'text-olive-600'
+    : neg
+      ? 'text-ink-500'
+      : 'text-ink-900'
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <span className={`${strong ? 'text-ink-900 font-medium' : 'text-ink-700'} text-[13px]`}>{label}</span>
+      <span
+        className={`font-mono tabular-nums ${strong ? 'text-[15px] font-semibold' : 'text-[13px]'} ${color}`}
+      >
+        {neg ? `(${money(-value)})` : money(value)}
+      </span>
+    </div>
+  )
+}
+
 export default async function ContabilidadPage({
   searchParams,
 }: {
@@ -54,7 +88,7 @@ export default async function ContabilidadPage({
 }) {
   const { month } = await searchParams
   const data = await getAccountingData(month)
-  const { current: cur, previous: prev, inventory: inv, purchases: pur } = data
+  const { current: cur, previous: prev, inventory: inv, purchases: pur, gastos, netResult } = data
   const months = recentMonths(12)
 
   const hasCost = cur.costedRevenue > 0
@@ -87,20 +121,21 @@ export default async function ContabilidadPage({
             accent="ochre"
           />
           <StatCard
-            label="Margen bruto"
-            value={hasCost ? money(cur.grossMargin) : '—'}
-            unit={hasCost ? 'DOP' : undefined}
-            sub={hasCost ? `${pct(cur.marginPct)} de margen` : 'sin costes aún'}
-            icon={Percent}
-            accent="clay"
+            label="Gastos del mes"
+            value={money(gastos.total)}
+            unit="DOP"
+            sub={`${int(gastos.list.length)} registro(s)`}
+            icon={Wallet}
+            accent="brick"
           />
           <StatCard
-            label="Inventario al coste"
-            value={money(inv.costValue)}
+            label="Resultado neto"
+            value={money(netResult)}
             unit="DOP"
-            sub={`venta: ${money(inv.retailValue)}`}
-            icon={Warehouse}
-            accent="ink"
+            sub={netResult >= 0 ? 'beneficio del mes' : 'pérdida del mes'}
+            icon={Scale}
+            accent={netResult >= 0 ? 'olive' : 'brick'}
+            alert={netResult < 0}
           />
         </div>
 
@@ -128,10 +163,16 @@ export default async function ContabilidadPage({
           <DashboardSectionHeader index="01" title="Resultado del mes" description={data.monthLabel} />
           <div className="grid grid-cols-12 gap-3 lg:gap-4">
             <WidgetCard title="Resultado del mes" className="col-span-12 lg:col-span-7">
-              <div className="grid grid-cols-3 gap-2.5">
-                <MiniStat label="Ingresos" value={money(cur.totalRevenue)} sub="DOP" />
-                <MiniStat label="− Coste de ventas" value={money(cur.cogs)} sub={`${pct(cur.coveragePct)} cubierto`} />
-                <MiniStat label="= Margen bruto" value={hasCost ? money(cur.grossMargin) : '—'} sub={hasCost ? pct(cur.marginPct) : 'sin costes'} />
+              <div className="flex flex-col gap-2">
+                <Line label="Ingresos" value={cur.totalRevenue} />
+                <Line label="− Coste de ventas" value={-cur.cogs} />
+                <div className="border-t border-sand-300 pt-2">
+                  <Line label="= Margen bruto" value={cur.totalRevenue - cur.cogs} strong />
+                </div>
+                <Line label="− Gastos operativos" value={-gastos.total} />
+                <div className="border-t-2 border-sand-300 pt-2">
+                  <Line label="= Resultado neto" value={netResult} strong accent />
+                </div>
               </div>
 
               <MeterBar
@@ -158,7 +199,7 @@ export default async function ContabilidadPage({
                   [
                     ['Ingresos', cur.totalRevenue, prev.totalRevenue],
                     ['Coste de ventas', cur.cogs, prev.cogs],
-                    ['Margen bruto', cur.grossMargin, prev.grossMargin],
+                    ['Margen bruto', cur.totalRevenue - cur.cogs, prev.totalRevenue - prev.cogs],
                   ] as const
                 ).map(([label, c, p]) => (
                   <div key={label} className="flex items-baseline justify-between gap-3 text-[12.5px]">
@@ -197,9 +238,47 @@ export default async function ContabilidadPage({
           </div>
         </section>
 
-        {/* 02 · Márgenes por producto */}
+        {/* 02 · Gastos operativos */}
         <section className="flex flex-col gap-3.5">
-          <DashboardSectionHeader index="02" title="Márgenes por producto" description="Mes seleccionado" />
+          <DashboardSectionHeader index="02" title="Gastos operativos" description={data.monthLabel} />
+          <div className="grid grid-cols-12 gap-3 lg:gap-4">
+            <WidgetCard
+              title="Registrar y revisar gastos"
+              subtitle="Alquiler, salarios, servicios…"
+              className="col-span-12 lg:col-span-7"
+            >
+              <ExpensesPanel expenses={gastos.list} />
+            </WidgetCard>
+            <WidgetCard title="Gastos por categoría" className="col-span-12 lg:col-span-5">
+              {gastos.byCategory.length === 0 ? (
+                <p className="text-[12.5px] text-ink-500 py-2">Sin gastos este mes.</p>
+              ) : (
+                <div className="flex flex-col gap-3 pt-1">
+                  {gastos.byCategory.map((c) => (
+                    <MeterBar
+                      key={c.category}
+                      label={CAT_LABEL[c.category] ?? c.category}
+                      value={c.amount}
+                      total={gastos.total}
+                      accent="brick"
+                      valueText={money(c.amount)}
+                    />
+                  ))}
+                  <div className="border-t border-sand-200 pt-2.5 flex items-baseline justify-between">
+                    <span className="text-[12.5px] text-ink-700 font-medium">Total gastos</span>
+                    <span className="font-mono text-[14px] text-ink-900 font-semibold tabular-nums">
+                      {money(gastos.total)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </WidgetCard>
+          </div>
+        </section>
+
+        {/* 03 · Márgenes por producto */}
+        <section className="flex flex-col gap-3.5">
+          <DashboardSectionHeader index="03" title="Márgenes por producto" description="Mes seleccionado" />
           <WidgetCard title="Márgenes por producto" className="col-span-12">
             {data.topMargin.length === 0 ? (
               <div className="py-6 text-center">
@@ -263,9 +342,9 @@ export default async function ContabilidadPage({
           </WidgetCard>
         </section>
 
-        {/* 03 · Inventario y compras */}
+        {/* 04 · Inventario y compras */}
         <section className="flex flex-col gap-3.5">
-          <DashboardSectionHeader index="03" title="Inventario y compras" description="Base del registro 606 DGII" />
+          <DashboardSectionHeader index="04" title="Inventario y compras" description="Base del registro 606 DGII" />
           <div className="grid grid-cols-12 gap-3 lg:gap-4">
             <WidgetCard title="Inventario valorizado" subtitle="Snapshot actual" className="col-span-12 lg:col-span-5">
               <div className="grid grid-cols-3 gap-2.5">

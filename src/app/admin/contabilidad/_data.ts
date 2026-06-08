@@ -53,6 +53,21 @@ export type PurchasesSummary = {
   topSuppliers: { name: string; total: number }[]
 }
 
+export type ExpenseRow = {
+  id: string
+  amount: number
+  category: string
+  label: string | null
+  expense_date: string
+  note: string | null
+}
+
+export type ExpensesSummary = {
+  total: number
+  byCategory: { category: string; amount: number }[]
+  list: ExpenseRow[]
+}
+
 export type AccountingData = {
   month: string // 'YYYY-MM'
   monthLabel: string // 'junio de 2026'
@@ -62,6 +77,8 @@ export type AccountingData = {
   lowMargin: ProductMargin[]
   inventory: InventoryValuation
   purchases: PurchasesSummary
+  gastos: ExpensesSummary
+  netResult: number // Ingresos − COGS − Gastos
 }
 
 const CHANNELS: ChannelKey[] = ['counter', 'guest', 'account']
@@ -135,11 +152,13 @@ export async function getAccountingData(month?: string): Promise<AccountingData>
       lowMargin: [],
       inventory: { units: 0, retailValue: 0, costValue: 0, productsActive: 0, productsWithCost: 0 },
       purchases: { total: 0, taxBase: 0, itbis: 0, entries: 0, units: 0, withoutNcf: 0, topSuppliers: [] },
+      gastos: { total: 0, byCategory: [], list: [] },
+      netResult: 0,
     }
   }
   const sb = supabaseAdmin
 
-  const [salesRes, invRes, purchRes] = await Promise.all([
+  const [salesRes, invRes, purchRes, expRes] = await Promise.all([
     // Lignes vendues (collected) sur mois courant + précédent. L'embed
     // reservations sert au filtre ET fournit collected_at/source.
     sb
@@ -158,6 +177,13 @@ export async function getAccountingData(month?: string): Promise<AccountingData>
       .select('quantity, unit_cost, itbis_included, supplier_name, ncf')
       .gte('created_at', start.toISOString())
       .lt('created_at', end.toISOString()),
+    // Dépenses du mois (P&L).
+    sb
+      .from('expenses')
+      .select('id, amount, category, label, expense_date, note')
+      .gte('expense_date', start.toISOString().slice(0, 10))
+      .lt('expense_date', end.toISOString().slice(0, 10))
+      .order('expense_date', { ascending: false }),
   ])
 
   // ── Ventes → périodes + marges par produit (mois courant) ──
@@ -324,6 +350,40 @@ export async function getAccountingData(month?: string): Promise<AccountingData>
     .sort((a, b) => b.total - a.total)
     .slice(0, 5)
 
+  // ── Dépenses du mois → compte de résultat ──
+  const expRows = (expRes.data ?? []) as Array<{
+    id: string
+    amount: number | string
+    category: string
+    label: string | null
+    expense_date: string
+    note: string | null
+  }>
+  const catAgg = new Map<string, number>()
+  let gastosTotal = 0
+  const expList: ExpenseRow[] = expRows.map((e) => {
+    const amt = num(e.amount)
+    gastosTotal += amt
+    catAgg.set(e.category, (catAgg.get(e.category) ?? 0) + amt)
+    return {
+      id: e.id,
+      amount: amt,
+      category: e.category,
+      label: e.label,
+      expense_date: e.expense_date,
+      note: e.note,
+    }
+  })
+  const gastos: ExpensesSummary = {
+    total: gastosTotal,
+    byCategory: [...catAgg.entries()]
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount),
+    list: expList,
+  }
+  // P&L : Ingresos − COGS − Gastos. (COGS partiel si cobertura < 100 %.)
+  const netResult = current.totalRevenue - current.cogs - gastosTotal
+
   return {
     month: monthKey,
     monthLabel,
@@ -333,6 +393,8 @@ export async function getAccountingData(month?: string): Promise<AccountingData>
     lowMargin,
     inventory,
     purchases,
+    gastos,
+    netResult,
   }
 }
 

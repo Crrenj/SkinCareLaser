@@ -246,6 +246,39 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          created_by: string | null
+          expense_date: string
+          id: string
+          label: string | null
+          note: string | null
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          label?: string | null
+          note?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          expense_date?: string
+          id?: string
+          label?: string | null
+          note?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           confirmation_token: string | null

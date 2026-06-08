@@ -93,6 +93,25 @@ export const stockEntryBody = z.object({
   note: z.string().trim().max(2000).optional(),
 })
 
+// Dépenses / charges opérationnelles (gastos) → compte de résultat. STRICT.
+// created_by dérivé serveur (auth.userId), jamais du body.
+export const EXPENSE_CATEGORIES = [
+  'alquiler', 'salarios', 'servicios', 'mercadeo',
+  'suministros', 'mantenimiento', 'impuestos', 'otros',
+] as const
+
+export const expenseCreate = z.object({
+  amount: z.number().positive('Monto inválido').max(100_000_000),
+  category: z.enum(EXPENSE_CATEGORIES),
+  label: z.string().trim().max(200).optional(),
+  expense_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida (AAAA-MM-JJ)'),
+  note: z.string().trim().max(2000).optional(),
+})
+
+export const expenseDelete = z.object({
+  id: z.string().uuid('id invalide'),
+})
+
 // Panier public : POST (incrément) et PATCH (quantité absolue). Borne 1..99
 // = MAX_CART_QUANTITY ; productId doit être un UUID. [C-28]
 export const cartItemBody = z.object({
