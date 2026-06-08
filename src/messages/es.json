@@ -1343,7 +1343,7 @@
       "heading": "Mi cuenta",
       "items": {
         "profile": "Perfil",
-        "reservations": "Reservas",
+        "reservations": "Compras",
         "favorites": "Favoritos",
         "security": "Seguridad",
         "preferences": "Preferencias"
@@ -1352,9 +1352,9 @@
       "signOut": "Cerrar sesión"
     },
     "reservations": {
-      "pageTitle": "Mis reservas — FARMAU",
-      "pageDescription": "Historial de sus reservas FARMAU.",
-      "heading": "Mis reservas",
+      "pageTitle": "Historial de compras — FARMAU",
+      "pageDescription": "Tus compras y reservas FARMAU.",
+      "heading": "Historial de compras",
       "subtitle": "{count, plural, =0 {Ninguna reserva por el momento} =1 {1 reserva} other {# reservas}}",
       "emptyTitle": "Aún no ha reservado ningún producto.",
       "emptyDescription": "Explore el catálogo, añada productos al carrito y pulse Reservar. Un farmacéutico le contactará por WhatsApp.",
