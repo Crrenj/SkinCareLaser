@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          diff: Json | null
+          entity: string
+          entity_id: string | null
+          id: string
+          is_high_impact: boolean
+          summary: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          diff?: Json | null
+          entity: string
+          entity_id?: string | null
+          id?: string
+          is_high_impact?: boolean
+          summary?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          diff?: Json | null
+          entity?: string
+          entity_id?: string | null
+          id?: string
+          is_high_impact?: boolean
+          summary?: string | null
+        }
+        Relationships: []
+      }
       banners: {
         Row: {
           attribution_name: string | null
@@ -568,6 +604,77 @@ export type Database = {
         }
         Relationships: []
       }
+      promotion_targets: {
+        Row: {
+          id: string
+          promotion_id: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          id?: string
+          promotion_id: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          id?: string
+          promotion_id?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotion_targets_promotion_id_fkey"
+            columns: ["promotion_id"]
+            isOneToOne: false
+            referencedRelation: "promotions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      promotions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          discount_type: string
+          discount_value: number
+          end_date: string
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          discount_type: string
+          discount_value: number
+          end_date: string
+          id?: string
+          is_active?: boolean
+          name: string
+          priority?: number
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          discount_type?: string
+          discount_value?: number
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: number
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ranges: {
         Row: {
           brand_id: string
@@ -919,6 +1026,67 @@ export type Database = {
           },
         ]
       }
+      stock_losses: {
+        Row: {
+          client_token: string | null
+          created_at: string
+          created_by: string | null
+          expense_id: string | null
+          id: string
+          note: string | null
+          product_id: string
+          quantity: number
+          reason: string
+          unit_cost: number | null
+        }
+        Insert: {
+          client_token?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_id?: string | null
+          id?: string
+          note?: string | null
+          product_id: string
+          quantity: number
+          reason: string
+          unit_cost?: number | null
+        }
+        Update: {
+          client_token?: string | null
+          created_at?: string
+          created_by?: string | null
+          expense_id?: string | null
+          id?: string
+          note?: string | null
+          product_id?: string
+          quantity?: number
+          reason?: string
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_losses_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_bestsellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tag_types: {
         Row: {
           color: string | null
@@ -1117,6 +1285,27 @@ export type Database = {
         }
         Relationships: []
       }
+      v_product_pricing: {
+        Row: {
+          base_price: number | null
+          currency: string | null
+          effective_price: number | null
+          product_id: string | null
+        }
+        Insert: {
+          base_price?: number | null
+          currency?: string | null
+          effective_price?: never
+          product_id?: string | null
+        }
+        Update: {
+          base_price?: number | null
+          currency?: string | null
+          effective_price?: never
+          product_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_to_cart: {
@@ -1163,6 +1352,10 @@ export type Database = {
         }
         Returns: Json
       }
+      effective_price: {
+        Args: { p_at?: string; p_product_id: string }
+        Returns: number
+      }
       expire_stale_reservations: { Args: never; Returns: number }
       get_messages_stats: { Args: never; Returns: Json }
       get_or_create_cart: {
@@ -1188,6 +1381,17 @@ export type Database = {
         }
         Returns: Json
       }
+      record_stock_loss: {
+        Args: {
+          p_client_token: string
+          p_created_by: string
+          p_note: string | null
+          p_product_id: string
+          p_quantity: number
+          p_reason: string
+        }
+        Returns: Json
+      }
       remove_from_cart: {
         Args: { p_anon_id?: string; p_product_id: string; p_user_id?: string }
         Returns: undefined
@@ -1198,6 +1402,10 @@ export type Database = {
       }
       restore_reservation_collection: {
         Args: { p_reservation_id: string }
+        Returns: undefined
+      }
+      set_promotion_targets: {
+        Args: { p_promotion_id: string; p_targets: Json }
         Returns: undefined
       }
     }

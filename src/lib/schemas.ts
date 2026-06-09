@@ -95,6 +95,10 @@ export const stockEntryBody = z.object({
 
 // Dépenses / charges opérationnelles (gastos) → compte de résultat. STRICT.
 // created_by dérivé serveur (auth.userId), jamais du body.
+// NB : 'merma' n'est PAS dans cette enum (catégorie réservée aux pertes de
+// stock, écrites uniquement par la RPC record_stock_loss en service-role).
+// → un POST manuel /api/admin/expenses avec category:'merma' est rejeté (400),
+// ce qui empêche un double-booking. La CHECK DB accepte 9 valeurs (8 + merma).
 export const EXPENSE_CATEGORIES = [
   'alquiler', 'salarios', 'servicios', 'mercadeo',
   'suministros', 'mantenimiento', 'impuestos', 'otros',
@@ -111,6 +115,63 @@ export const expenseCreate = z.object({
 export const expenseDelete = z.object({
   id: z.string().uuid('id invalide'),
 })
+
+// Perte de stock (merma / producto vencido) → décrément + charge au coût.
+// Le coût est lu côté serveur dans la RPC (jamais du body). Bornes alignées
+// sur le garde-fou in-RPC (qty 1..1e6). client_token = idempotence.
+export const STOCK_LOSS_REASONS = ['vencido', 'danado', 'robo', 'ajuste'] as const
+
+export const stockLossBody = z.object({
+  client_token: z.string().uuid('client_token invalide'),
+  product_id: z.string().uuid('product_id invalide'),
+  quantity: z.number().int().positive('Cantidad inválida').max(1_000_000),
+  reason: z.enum(STOCK_LOSS_REASONS),
+  note: z.string().trim().max(2000).optional(),
+})
+
+// Campagnes promo (% ou montant fixe) ciblant produit / marque / gamme / tag.
+// STRICT ; created_by dérivé serveur. Dates ISO (datetime avec offset), passées
+// brutes dans les colonnes timestamptz. Refines : percent ≤ 100 et end > start.
+export const PROMOTION_TARGET_TYPES = ['product', 'brand', 'range', 'tag'] as const
+
+const promotionTarget = z.object({
+  target_type: z.enum(PROMOTION_TARGET_TYPES),
+  target_id: z.string().uuid('target_id invalide'),
+})
+
+const promotionShape = {
+  name: z.string().trim().min(1, 'Nombre requerido').max(120),
+  discount_type: z.enum(['percent', 'fixed']),
+  discount_value: z.number().nonnegative('Valor inválido').max(100_000_000),
+  start_date: z.string().datetime({ offset: true, message: 'Fecha inicio inválida' }),
+  end_date: z.string().datetime({ offset: true, message: 'Fecha fin inválida' }),
+  is_active: z.boolean().optional(),
+  priority: z.number().int().min(0).max(100_000).optional(),
+  targets: z.array(promotionTarget).min(1, 'Añade al menos un objetivo').max(1000),
+}
+
+type PromotionRefineInput = {
+  discount_type: 'percent' | 'fixed'
+  discount_value: number
+  start_date: string
+  end_date: string
+}
+const percentWithinBounds = (p: PromotionRefineInput) =>
+  p.discount_type !== 'percent' || p.discount_value <= 100
+const endAfterStart = (p: PromotionRefineInput) =>
+  new Date(p.end_date) > new Date(p.start_date)
+const PERCENT_MSG = { message: 'Un porcentaje no puede superar 100', path: ['discount_value'] }
+const WINDOW_MSG = { message: 'La fecha fin debe ser posterior al inicio', path: ['end_date'] }
+
+export const promotionCreate = z
+  .object(promotionShape)
+  .refine(percentWithinBounds, PERCENT_MSG)
+  .refine(endAfterStart, WINDOW_MSG)
+
+export const promotionUpdate = z
+  .object({ id: z.string().uuid('id invalide'), ...promotionShape })
+  .refine(percentWithinBounds, PERCENT_MSG)
+  .refine(endAfterStart, WINDOW_MSG)
 
 // Panier public : POST (incrément) et PATCH (quantité absolue). Borne 1..99
 // = MAX_CART_QUANTITY ; productId doit être un UUID. [C-28]

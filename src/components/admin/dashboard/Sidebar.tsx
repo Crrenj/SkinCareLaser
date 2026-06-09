@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
+  BadgePercent,
   Boxes,
   Building2,
   Calculator,
@@ -19,6 +20,7 @@ import {
   Megaphone,
   Palette,
   Receipt,
+  ScrollText,
   ShieldCheck,
   Star,
   Tag,
@@ -48,6 +50,7 @@ type NavItem = {
     | 'navBrands'
     | 'navStock'
     | 'navTags'
+    | 'navPromotions'
     | 'navReservations'
     | 'navSales'
     | 'navMessages'
@@ -58,6 +61,7 @@ type NavItem = {
     | 'navNewsletter'
     | 'navAppearance'
     | 'navAdmins'
+    | 'navLogs'
     | 'navSettings'
   icon: React.ComponentType<{ className?: string }>
   badgeKey?: 'products' | 'low_stock' | 'reservations' | 'messages'
@@ -91,6 +95,7 @@ const SECTIONS: Section[] = [
       { href: '/admin/marques', labelKey: 'navBrands', icon: Building2 },
       { href: '/admin/stock', labelKey: 'navStock', icon: Warehouse, badgeKey: 'low_stock', badgeVariant: 'alert' },
       { href: '/admin/tags', labelKey: 'navTags', icon: Tag },
+      { href: '/admin/promotions', labelKey: 'navPromotions', icon: BadgePercent },
     ],
   },
   {
@@ -126,7 +131,10 @@ const SECTIONS: Section[] = [
   },
   {
     titleKey: 'sectionAccess',
-    items: [{ href: '/admin/admins', labelKey: 'navAdmins', icon: ShieldCheck }],
+    items: [
+      { href: '/admin/admins', labelKey: 'navAdmins', icon: ShieldCheck },
+      { href: '/admin/logs', labelKey: 'navLogs', icon: ScrollText },
+    ],
   },
 ]
 

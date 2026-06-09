@@ -5,7 +5,7 @@
 -- LECTURE régénérable (schema-only) — pratique pour voir tout le schéma d'un
 -- coup. Toute modif doit aussi exister dans une migration.
 --
--- Régénéré le 2026-06-06 via scripts/db-dump.sh (pg_dump natif de l'hôte,
+-- Régénéré le 2026-06-09 via scripts/db-dump.sh (pg_dump natif de l'hôte,
 -- SANS Docker — cf. en-tête du script). Re-dumper : bash scripts/db-dump.sh
 -- ======================================================================
 
@@ -130,6 +130,53 @@ $$;
 ALTER FUNCTION "public"."add_to_cart"("p_cart_id" "uuid", "p_product_id" "uuid", "p_quantity" integer, "p_anon_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."apply_reservation_collection"("p_reservation_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_applied int;
+BEGIN
+  UPDATE public.reservations
+     SET stock_applied = true
+   WHERE id = p_reservation_id
+     AND stock_applied = false
+     AND status = 'collected';
+  GET DIAGNOSTICS v_applied = ROW_COUNT;
+  IF v_applied = 0 THEN
+    RETURN;
+  END IF;
+
+  UPDATE public.products p
+     SET stock = GREATEST(p.stock - agg.qty, 0),
+         updated_at = now()
+    FROM (
+      SELECT product_id, SUM(quantity)::int AS qty
+        FROM public.reservation_items
+       WHERE reservation_id = p_reservation_id
+         AND product_id IS NOT NULL
+       GROUP BY product_id
+    ) agg
+   WHERE p.id = agg.product_id
+     AND p.stock IS NOT NULL;
+
+  UPDATE public.reservation_items ri
+     SET unit_cost = p.cost_price
+    FROM public.products p
+   WHERE ri.reservation_id = p_reservation_id
+     AND ri.product_id = p.id
+     AND ri.unit_cost IS NULL;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."apply_reservation_collection"("p_reservation_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."apply_reservation_collection"("p_reservation_id" "uuid") IS 'Décrémente products.stock pour une réservation collected (idempotent via stock_applied) ET snapshot reservation_items.unit_cost = products.cost_price (write-once). Service-role only.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."check_rate_limit"("p_key" "text", "p_max" integer, "p_window_sec" integer) RETURNS TABLE("allowed" boolean, "retry_after" integer)
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -194,6 +241,73 @@ $$;
 ALTER FUNCTION "public"."cleanup_banner_positions"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."create_guest_reservation"("p_cart_id" "uuid", "p_anon_id" "uuid", "p_name" "text", "p_phone" "text", "p_email" "text" DEFAULT NULL::"text") RETURNS TABLE("id" "uuid", "confirmation_token" "text")
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_reservation_id uuid;
+  v_token          text := replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '');
+  v_total_items    int;
+  v_total_price    numeric(10,2);
+  v_currency       text;
+BEGIN
+  IF p_phone IS NULL OR TRIM(p_phone) = '' THEN
+    RAISE EXCEPTION 'Téléphone requis pour réserver' USING ERRCODE = 'P0002';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM public.carts c
+    WHERE c.id = p_cart_id AND c.anonymous_id = p_anon_id AND c.user_id IS NULL
+  ) THEN
+    RAISE EXCEPTION 'Panier introuvable ou non autorisé' USING ERRCODE = 'P0004';
+  END IF;
+
+  SELECT SUM(ci.quantity), SUM(ci.quantity * public.effective_price(pr.id, now())), MAX(pr.currency)
+    INTO v_total_items, v_total_price, v_currency
+  FROM public.cart_items ci
+  JOIN public.products pr ON pr.id = ci.product_id
+  WHERE ci.cart_id = p_cart_id;
+
+  IF v_total_items IS NULL OR v_total_items = 0 THEN
+    RAISE EXCEPTION 'Le panier est vide' USING ERRCODE = 'P0005';
+  END IF;
+
+  INSERT INTO public.reservations (
+    user_id, source, anonymous_id, confirmation_token, status, expires_at,
+    contact_phone, contact_email, contact_name,
+    total_items, total_price, currency
+  ) VALUES (
+    NULL, 'guest', p_anon_id, v_token, 'pending', NOW() + INTERVAL '24 hours',
+    TRIM(p_phone),
+    NULLIF(TRIM(COALESCE(p_email, '')), ''),
+    NULLIF(TRIM(COALESCE(p_name, '')), ''),
+    v_total_items, v_total_price, COALESCE(v_currency, 'DOP')
+  )
+  RETURNING reservations.id INTO v_reservation_id;
+
+  INSERT INTO public.reservation_items (
+    reservation_id, product_id, product_name, unit_price, quantity
+  )
+  SELECT v_reservation_id, ci.product_id, pr.name, public.effective_price(pr.id, now()), ci.quantity
+  FROM public.cart_items ci
+  JOIN public.products pr ON pr.id = ci.product_id
+  WHERE ci.cart_id = p_cart_id;
+
+  DELETE FROM public.cart_items WHERE cart_id = p_cart_id;
+
+  RETURN QUERY SELECT v_reservation_id, v_token;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."create_guest_reservation"("p_cart_id" "uuid", "p_anon_id" "uuid", "p_name" "text", "p_phone" "text", "p_email" "text") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."create_guest_reservation"("p_cart_id" "uuid", "p_anon_id" "uuid", "p_name" "text", "p_phone" "text", "p_email" "text") IS 'Convertit le panier d''un invité (anonymous_id) en réservation pending (TTL 24h), user_id NULL, source guest. unit_price = prix effectif (promo) au moment de la réservation. Service-role only.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."create_reservation"("p_cart_id" "uuid") RETURNS "uuid"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
@@ -255,7 +369,7 @@ BEGIN
 
   SELECT
     SUM(ci.quantity),
-    SUM(ci.quantity * pr.price),
+    SUM(ci.quantity * public.effective_price(pr.id, now())),
     MAX(pr.currency)
   INTO v_total_items, v_total_price, v_currency
   FROM public.cart_items ci
@@ -284,7 +398,7 @@ BEGIN
     reservation_id, product_id, product_name, unit_price, quantity
   )
   SELECT
-    v_reservation_id, ci.product_id, pr.name, pr.price, ci.quantity
+    v_reservation_id, ci.product_id, pr.name, public.effective_price(pr.id, now()), ci.quantity
   FROM public.cart_items ci
   JOIN public.products pr ON pr.id = ci.product_id
   WHERE ci.cart_id = p_cart_id;
@@ -299,7 +413,7 @@ $$;
 ALTER FUNCTION "public"."create_reservation"("p_cart_id" "uuid") OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."create_reservation"("p_cart_id" "uuid") IS 'Convertit le panier d''un user en réservation pending (TTL 24h). Snapshot du téléphone et des items. Lève une exception si phone manquant, cart vide, ou réservation active déjà existante.';
+COMMENT ON FUNCTION "public"."create_reservation"("p_cart_id" "uuid") IS 'Convertit le panier de l''utilisateur connecté (auth.uid()) en réservation pending (TTL 24h). 1 active par compte (garde P0001). unit_price = prix effectif (promo) au moment de la réservation. authenticated + service_role.';
 
 
 
@@ -329,6 +443,45 @@ $$;
 
 
 ALTER FUNCTION "public"."create_ticket"("p_email" "text", "p_category" "text", "p_subject" "text", "p_message" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone DEFAULT "now"()) RETURNS numeric
+    LANGUAGE "sql" STABLE SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+  WITH base AS (
+    SELECT pr.id, pr.price, pr.range_id, r.brand_id
+    FROM products pr
+    LEFT JOIN ranges r ON r.id = pr.range_id     -- LEFT JOIN : produit sans gamme survit
+    WHERE pr.id = p_product_id
+  ),
+  cand AS (
+    SELECT round(GREATEST(0, CASE
+             WHEN p.discount_type = 'percent' THEN b.price * (1 - p.discount_value / 100.0)
+             ELSE b.price - p.discount_value
+           END), 2) AS eff
+    FROM base b
+    JOIN promotion_targets t ON (
+           (t.target_type = 'product' AND t.target_id = b.id)
+        OR (t.target_type = 'range'   AND t.target_id = b.range_id)
+        OR (t.target_type = 'brand'   AND t.target_id = b.brand_id)
+        OR (t.target_type = 'tag'     AND t.target_id IN (
+              SELECT pt.tag_id FROM product_tags pt WHERE pt.product_id = b.id))
+    )
+    JOIN promotions p ON p.id = t.promotion_id
+      AND p.is_active
+      AND p_at >= p.start_date
+      AND p_at <  p.end_date
+  )
+  SELECT COALESCE(MIN(eff), (SELECT price FROM base)) FROM cand;
+$$;
+
+
+ALTER FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone) OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone) IS 'Prix effectif (DOP) d''un produit a l''instant p_at : meilleur prix client (MIN) sur toutes les promos actives qui le ciblent (produit/marque/gamme/tag), sinon prix de base. round 2 decimales. N''expose jamais le cout.';
+
 
 
 CREATE OR REPLACE FUNCTION "public"."expire_stale_reservations"() RETURNS integer
@@ -498,6 +651,223 @@ $$;
 ALTER FUNCTION "public"."merge_anon_cart_to_user"("p_anon_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."recompute_cost_price"("p_product_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+BEGIN
+  UPDATE public.products p
+     SET cost_price = (
+       SELECT round(SUM(unit_cost * quantity) / NULLIF(SUM(quantity), 0), 2)
+         FROM public.stock_entries WHERE product_id = p_product_id
+     ),
+     updated_at = now()
+   WHERE p.id = p_product_id;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."recompute_cost_price"("p_product_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."recompute_cost_price"("p_product_id" "uuid") IS 'Réconciliation : recalcule cost_price = moyenne pondérée à vie sur stock_entries. Service-role only.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."record_stock_entries"("p_items" "jsonb", "p_supplier_name" "text", "p_supplier_rnc" "text", "p_ncf" "text", "p_invoice_date" "date", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_item     jsonb;
+  v_qty      int;
+  v_cost     numeric;
+  rec        record;
+  v_old_stock int;
+  v_old_cost  numeric(10,2);
+  v_new_cost  numeric(10,2);
+  v_written   jsonb := '[]'::jsonb;
+BEGIN
+  IF p_client_token IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.stock_entries WHERE client_token = p_client_token
+  ) THEN
+    RETURN '[]'::jsonb;
+  END IF;
+
+  FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
+  LOOP
+    v_qty  := (v_item->>'quantity')::int;
+    v_cost := (v_item->>'unit_cost')::numeric;
+    IF (v_item->>'product_id') IS NULL THEN
+      RAISE EXCEPTION 'product_id manquant' USING ERRCODE = 'check_violation';
+    END IF;
+    IF v_qty IS NULL OR v_qty <= 0 OR v_qty > 1000000 THEN
+      RAISE EXCEPTION 'Quantité invalide: %', v_qty USING ERRCODE = 'check_violation';
+    END IF;
+    IF v_cost IS NULL OR v_cost < 0 OR v_cost > 10000000 THEN
+      RAISE EXCEPTION 'Coût invalide: %', v_cost USING ERRCODE = 'check_violation';
+    END IF;
+  END LOOP;
+
+  INSERT INTO public.stock_entries
+    (product_id, quantity, unit_cost, itbis_included, supplier_name, supplier_rnc, ncf, invoice_date, note, created_by, client_token)
+  SELECT
+    (e->>'product_id')::uuid,
+    (e->>'quantity')::int,
+    (e->>'unit_cost')::numeric,
+    COALESCE((e->>'itbis_included')::boolean, true),
+    p_supplier_name, p_supplier_rnc, p_ncf, p_invoice_date, p_note, p_created_by, p_client_token
+  FROM jsonb_array_elements(p_items) e;
+
+  FOR rec IN
+    SELECT (e->>'product_id')::uuid AS product_id,
+           SUM((e->>'quantity')::int)::int AS qty,
+           SUM((e->>'quantity')::int * (e->>'unit_cost')::numeric)
+             / NULLIF(SUM((e->>'quantity')::int), 0) AS batch_cost
+      FROM jsonb_array_elements(p_items) e
+     GROUP BY (e->>'product_id')::uuid
+     ORDER BY (e->>'product_id')::uuid
+  LOOP
+    SELECT stock, cost_price INTO v_old_stock, v_old_cost
+      FROM public.products WHERE id = rec.product_id FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Produit introuvable: %', rec.product_id USING ERRCODE = 'no_data_found';
+    END IF;
+
+    IF v_old_cost IS NULL OR v_old_stock IS NULL OR v_old_stock <= 0 THEN
+      v_new_cost := round(rec.batch_cost, 2);
+    ELSE
+      v_new_cost := round(
+        (v_old_stock::numeric * v_old_cost + rec.qty::numeric * rec.batch_cost)
+        / (v_old_stock + rec.qty), 2);
+    END IF;
+
+    IF v_old_stock IS NULL THEN
+      UPDATE public.products
+         SET cost_price = v_new_cost, updated_at = now()
+       WHERE id = rec.product_id;
+    ELSE
+      IF v_old_stock::bigint + rec.qty::bigint > 2147483647 THEN
+        RAISE EXCEPTION 'Stock maximum dépassé pour le produit %', rec.product_id
+          USING ERRCODE = 'check_violation';
+      END IF;
+      UPDATE public.products
+         SET stock = v_old_stock + rec.qty, cost_price = v_new_cost, updated_at = now()
+       WHERE id = rec.product_id;
+    END IF;
+
+    v_written := v_written || jsonb_build_object(
+      'product_id', rec.product_id,
+      'stock', CASE WHEN v_old_stock IS NULL THEN NULL ELSE v_old_stock + rec.qty END,
+      'cost_price', v_new_cost
+    );
+  END LOOP;
+
+  RETURN v_written;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."record_stock_entries"("p_items" "jsonb", "p_supplier_name" "text", "p_supplier_rnc" "text", "p_ncf" "text", "p_invoice_date" "date", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."record_stock_entries"("p_items" "jsonb", "p_supplier_name" "text", "p_supplier_rnc" "text", "p_ncf" "text", "p_invoice_date" "date", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") IS 'Réception de stock atomique : insère stock_entries + incrémente products.stock + recalcule le CMP (cost_price). Idempotente via client_token. Service-role only.';
+
+
+
+CREATE OR REPLACE FUNCTION "public"."record_stock_loss"("p_product_id" "uuid", "p_quantity" integer, "p_reason" "text", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") RETURNS "jsonb"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_old_stock  int;
+  v_cost       numeric(10,2);
+  v_new_stock  int;
+  v_amount     numeric(12,2);
+  v_expense_id uuid;
+  v_replay     jsonb;
+BEGIN
+  -- Idempotence : un rejeu (meme client_token) ne refait rien.
+  IF p_client_token IS NOT NULL THEN
+    SELECT jsonb_build_object(
+             'replayed', true,
+             'unit_cost', sl.unit_cost,
+             'expense_id', sl.expense_id)
+      INTO v_replay
+    FROM public.stock_losses sl
+    WHERE sl.client_token = p_client_token;
+    IF FOUND THEN
+      RETURN v_replay;
+    END IF;
+  END IF;
+
+  -- Validation (la RPC est appelable hors route Zod).
+  IF p_quantity IS NULL OR p_quantity <= 0 OR p_quantity > 1000000 THEN
+    RAISE EXCEPTION 'Cantidad invalida: %', p_quantity USING ERRCODE = 'check_violation';
+  END IF;
+  IF p_reason IS NULL OR p_reason NOT IN ('vencido', 'danado', 'robo', 'ajuste') THEN
+    RAISE EXCEPTION 'Motivo invalido: %', p_reason USING ERRCODE = 'check_violation';
+  END IF;
+
+  -- Verrou + lecture serveur du coût (jamais de confiance au client pour le coût).
+  SELECT stock, cost_price INTO v_old_stock, v_cost
+  FROM public.products
+  WHERE id = p_product_id
+  FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Producto no encontrado: %', p_product_id USING ERRCODE = 'no_data_found';
+  END IF;
+
+  -- Decrement : stock NULL (illimite) jamais decremente ; sinon clamp >= 0.
+  IF v_old_stock IS NULL THEN
+    v_new_stock := NULL;
+  ELSE
+    v_new_stock := GREATEST(v_old_stock - p_quantity, 0);
+    UPDATE public.products
+    SET stock = v_new_stock, updated_at = now()
+    WHERE id = p_product_id;
+  END IF;
+
+  -- Charge P&L au cout (CMP * quantite DEMANDEE). Cout inconnu => aucune charge
+  -- (NE PAS traiter NULL comme 0 : marge/resultat fictifs sinon).
+  IF v_cost IS NOT NULL THEN
+    v_amount := round(v_cost * p_quantity, 2);
+    -- Garde-fou overflow : aligne sur le plafond des depenses manuelles (100M).
+    IF v_amount > 100000000 THEN
+      RAISE EXCEPTION 'Monto de merma excede el maximo permitido: %', v_amount
+        USING ERRCODE = 'check_violation';
+    END IF;
+    INSERT INTO public.expenses (amount, category, label, expense_date, note, created_by)
+    VALUES (v_amount, 'merma', NULL, (now() AT TIME ZONE 'UTC')::date, p_note, p_created_by)
+    RETURNING id INTO v_expense_id;
+  ELSE
+    v_expense_id := NULL;
+  END IF;
+
+  -- Registre (snapshot cout fige + lien charge + token idempotence).
+  INSERT INTO public.stock_losses
+    (product_id, quantity, unit_cost, reason, note, expense_id, created_by, client_token)
+  VALUES
+    (p_product_id, p_quantity, v_cost, p_reason, p_note, v_expense_id, p_created_by, p_client_token);
+
+  RETURN jsonb_build_object(
+    'replayed', false,
+    'product_id', p_product_id,
+    'stock', v_new_stock,
+    'unit_cost', v_cost,
+    'expense_id', v_expense_id
+  );
+END;
+$$;
+
+
+ALTER FUNCTION "public"."record_stock_loss"("p_product_id" "uuid", "p_quantity" integer, "p_reason" "text", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."record_stock_loss"("p_product_id" "uuid", "p_quantity" integer, "p_reason" "text", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") IS 'Perte de stock atomique : decremente products.stock (clamp >=0, ignore stock NULL) + insere stock_losses + une charge merma au cout (CMP fige, valorisee sur la quantite demandee) dans expenses. Cout inconnu => stock decremente mais aucune charge. Ne touche jamais cost_price ni stock_entries. Idempotente via client_token. Service-role only.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."remove_from_cart"("p_product_id" "uuid", "p_anon_id" "uuid" DEFAULT NULL::"uuid", "p_user_id" "uuid" DEFAULT NULL::"uuid") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
@@ -539,6 +909,45 @@ $$;
 ALTER FUNCTION "public"."reorder_banners"("banner_id" "uuid", "old_position" integer, "new_position" integer) OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."restore_reservation_collection"("p_reservation_id" "uuid") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+DECLARE
+  v_restored int;
+BEGIN
+  UPDATE public.reservations
+     SET stock_applied = false
+   WHERE id = p_reservation_id
+     AND stock_applied = true;
+  GET DIAGNOSTICS v_restored = ROW_COUNT;
+  IF v_restored = 0 THEN
+    RETURN;
+  END IF;
+
+  UPDATE public.products p
+     SET stock = COALESCE(p.stock, 0) + agg.qty,
+         updated_at = now()
+    FROM (
+      SELECT product_id, SUM(quantity)::int AS qty
+        FROM public.reservation_items
+       WHERE reservation_id = p_reservation_id
+         AND product_id IS NOT NULL
+       GROUP BY product_id
+    ) agg
+   WHERE p.id = agg.product_id
+     AND p.stock IS NOT NULL;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."restore_reservation_collection"("p_reservation_id" "uuid") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."restore_reservation_collection"("p_reservation_id" "uuid") IS 'Re-crédite products.stock si une réservation collected est annulée/revertie (idempotent via stock_applied). Service-role only.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."rls_auto_enable"() RETURNS "event_trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'pg_catalog'
@@ -571,6 +980,27 @@ $$;
 ALTER FUNCTION "public"."rls_auto_enable"() OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."set_promotion_targets"("p_promotion_id" "uuid", "p_targets" "jsonb") RETURNS "void"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public', 'pg_temp'
+    AS $$
+BEGIN
+  DELETE FROM public.promotion_targets WHERE promotion_id = p_promotion_id;
+  INSERT INTO public.promotion_targets (promotion_id, target_type, target_id)
+  SELECT p_promotion_id, x->>'target_type', (x->>'target_id')::uuid
+  FROM jsonb_array_elements(p_targets) AS x
+  ON CONFLICT (promotion_id, target_type, target_id) DO NOTHING;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."set_promotion_targets"("p_promotion_id" "uuid", "p_targets" "jsonb") OWNER TO "postgres";
+
+
+COMMENT ON FUNCTION "public"."set_promotion_targets"("p_promotion_id" "uuid", "p_targets" "jsonb") IS 'Remplace atomiquement les cibles d''une promo (DELETE + INSERT). p_targets = jsonb array de {target_type, target_id}. Service-role only.';
+
+
+
 CREATE OR REPLACE FUNCTION "public"."update_updated_at_column"() RETURNS "trigger"
     LANGUAGE "plpgsql"
     SET "search_path" TO 'public', 'pg_temp'
@@ -598,6 +1028,27 @@ CREATE TABLE IF NOT EXISTS "public"."admin_users" (
 
 
 ALTER TABLE "public"."admin_users" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."audit_log" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "actor_id" "uuid",
+    "action" "text" NOT NULL,
+    "entity" "text" NOT NULL,
+    "entity_id" "text",
+    "summary" "text",
+    "diff" "jsonb",
+    "is_high_impact" boolean DEFAULT false NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "audit_log_action_check" CHECK (("action" = ANY (ARRAY['create'::"text", 'update'::"text", 'delete'::"text"])))
+);
+
+
+ALTER TABLE "public"."audit_log" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."audit_log" IS 'Journal d''audit des mutations admin. Écriture service-role only (helper after()), lecture tout admin.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."banners" (
@@ -690,6 +1141,27 @@ CREATE TABLE IF NOT EXISTS "public"."contact_messages" (
 ALTER TABLE "public"."contact_messages" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."expenses" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "amount" numeric(12,2) NOT NULL,
+    "category" "text" NOT NULL,
+    "label" "text",
+    "expense_date" "date" DEFAULT CURRENT_DATE NOT NULL,
+    "note" "text",
+    "created_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "expenses_amount_check" CHECK (("amount" >= (0)::numeric)),
+    CONSTRAINT "expenses_category_check" CHECK (("category" = ANY (ARRAY['alquiler'::"text", 'salarios'::"text", 'servicios'::"text", 'mercadeo'::"text", 'suministros'::"text", 'mantenimiento'::"text", 'impuestos'::"text", 'otros'::"text", 'merma'::"text"])))
+);
+
+
+ALTER TABLE "public"."expenses" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."expenses" IS 'Charges/dépenses opérationnelles (gastos) pour le compte de résultat. Admin-only, écriture service-role.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."newsletter_subscribers" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "email" "text" NOT NULL,
@@ -775,11 +1247,17 @@ CREATE TABLE IF NOT EXISTS "public"."products" (
     "is_new" boolean DEFAULT false,
     "is_featured" boolean DEFAULT false,
     "range_id" "uuid",
+    "cost_price" numeric(10,2),
+    CONSTRAINT "products_cost_price_check" CHECK ((("cost_price" IS NULL) OR ("cost_price" >= (0)::numeric))),
     CONSTRAINT "products_price_check" CHECK (("price" >= (0)::numeric))
 );
 
 
 ALTER TABLE "public"."products" OWNER TO "postgres";
+
+
+COMMENT ON COLUMN "public"."products"."cost_price" IS 'CMP (coût moyen pondéré) — cache dérivé, recalculé UNIQUEMENT par record_stock_entries / recompute_cost_price. Source de vérité = stock_entries. Ne jamais éditer à la main.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."profiles" (
@@ -799,6 +1277,44 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
 
 
 ALTER TABLE "public"."profiles" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."promotion_targets" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "promotion_id" "uuid" NOT NULL,
+    "target_type" "text" NOT NULL,
+    "target_id" "uuid" NOT NULL,
+    CONSTRAINT "promotion_targets_target_type_check" CHECK (("target_type" = ANY (ARRAY['product'::"text", 'brand'::"text", 'range'::"text", 'tag'::"text"])))
+);
+
+
+ALTER TABLE "public"."promotion_targets" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."promotions" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "name" "text" NOT NULL,
+    "discount_type" "text" NOT NULL,
+    "discount_value" numeric(10,2) NOT NULL,
+    "start_date" timestamp with time zone NOT NULL,
+    "end_date" timestamp with time zone NOT NULL,
+    "is_active" boolean DEFAULT true NOT NULL,
+    "priority" integer DEFAULT 0 NOT NULL,
+    "created_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "promotions_discount_type_check" CHECK (("discount_type" = ANY (ARRAY['percent'::"text", 'fixed'::"text"]))),
+    CONSTRAINT "promotions_discount_value_check" CHECK (("discount_value" >= (0)::numeric)),
+    CONSTRAINT "promotions_percent_chk" CHECK ((("discount_type" <> 'percent'::"text") OR ("discount_value" <= (100)::numeric))),
+    CONSTRAINT "promotions_window_chk" CHECK (("end_date" > "start_date"))
+);
+
+
+ALTER TABLE "public"."promotions" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."promotions" IS 'Campagnes promo datees. discount_type percent|fixed. Prive (lecture admin, ecriture service-role). Affichage via v_product_pricing.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."ranges" (
@@ -834,7 +1350,9 @@ CREATE TABLE IF NOT EXISTS "public"."reservation_items" (
     "unit_price" numeric(10,2) NOT NULL,
     "quantity" integer NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "unit_cost" numeric(10,2),
     CONSTRAINT "reservation_items_quantity_check" CHECK (("quantity" > 0)),
+    CONSTRAINT "reservation_items_unit_cost_check" CHECK ((("unit_cost" IS NULL) OR ("unit_cost" >= (0)::numeric))),
     CONSTRAINT "reservation_items_unit_price_check" CHECK (("unit_price" >= (0)::numeric))
 );
 
@@ -846,29 +1364,33 @@ COMMENT ON TABLE "public"."reservation_items" IS 'Items d''une réservation. pro
 
 
 
+COMMENT ON COLUMN "public"."reservation_items"."unit_cost" IS 'Snapshot du CMP au moment de la vente (collected), write-once. NULL = coût inconnu (ligne libre, ou vente antérieure à la 1re entrée de stock) → marge inconnue, NE PAS traiter comme 0.';
+
+
+
 CREATE TABLE IF NOT EXISTS "public"."reservations" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "user_id" "uuid",
     "status" "public"."reservation_status" DEFAULT 'pending'::"public"."reservation_status" NOT NULL,
     "expires_at" timestamp with time zone NOT NULL,
-    "contact_phone" "text" NOT NULL,
+    "contact_phone" "text",
     "contact_email" "text",
     "contact_name" "text",
     "total_items" integer NOT NULL,
     "total_price" numeric(10,2) NOT NULL,
     "currency" "text" DEFAULT 'DOP'::"text" NOT NULL,
     "admin_notes" "text",
-    "source" "text" DEFAULT 'account'::"text" NOT NULL,
-    "confirmation_token" "text",
-    "anonymous_id" "uuid",
-    "stock_applied" boolean DEFAULT false NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
     "confirmed_at" timestamp with time zone,
     "collected_at" timestamp with time zone,
+    "source" "text" DEFAULT 'account'::"text" NOT NULL,
+    "confirmation_token" "text",
+    "anonymous_id" "uuid",
+    "stock_applied" boolean DEFAULT false NOT NULL,
+    CONSTRAINT "reservations_source_check" CHECK (("source" = ANY (ARRAY['account'::"text", 'guest'::"text", 'counter'::"text"]))),
     CONSTRAINT "reservations_total_items_check" CHECK (("total_items" > 0)),
-    CONSTRAINT "reservations_total_price_check" CHECK (("total_price" >= (0)::numeric)),
-    CONSTRAINT "reservations_source_check" CHECK (("source" = ANY (ARRAY['account'::"text", 'guest'::"text", 'counter'::"text"])))
+    CONSTRAINT "reservations_total_price_check" CHECK (("total_price" >= (0)::numeric))
 );
 
 
@@ -885,6 +1407,42 @@ COMMENT ON COLUMN "public"."reservations"."user_id" IS 'Compte client propriéta
 
 COMMENT ON COLUMN "public"."reservations"."contact_email" IS 'Email de contact (snapshot). Peut être NULL pour une réservation manuelle walk-in.';
 
+
+
+COMMENT ON COLUMN "public"."reservations"."source" IS 'Origine : account (client connecté via RPC create_reservation), guest (visiteur web sans compte), counter (vente/réservation comptoir saisie par l''admin).';
+
+
+
+COMMENT ON COLUMN "public"."reservations"."confirmation_token" IS 'Jeton non-devinable pour l''accès invité à sa page de confirmation (sans compte). NULL pour les résas compte (accès via auth.uid()).';
+
+
+
+COMMENT ON COLUMN "public"."reservations"."anonymous_id" IS 'anonymous_id du panier invité à l''origine de la réservation (NULL pour compte/comptoir). Défense en profondeur.';
+
+
+
+COMMENT ON COLUMN "public"."reservations"."stock_applied" IS 'true une fois le décrément de stock appliqué (statut collected). Garde d''idempotence pour apply/restore_reservation_collection.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."reviews" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "product_id" "uuid" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "rating" smallint NOT NULL,
+    "title" "text",
+    "body" "text",
+    "author_name" "text",
+    "status" "text" DEFAULT 'pending'::"text" NOT NULL,
+    "verified_purchase" boolean DEFAULT false NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    CONSTRAINT "reviews_rating_check" CHECK ((("rating" >= 1) AND ("rating" <= 5))),
+    CONSTRAINT "reviews_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text"])))
+);
+
+
+ALTER TABLE "public"."reviews" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."shop_settings" (
@@ -913,6 +1471,63 @@ CREATE TABLE IF NOT EXISTS "public"."shop_settings" (
 
 
 ALTER TABLE "public"."shop_settings" OWNER TO "postgres";
+
+
+CREATE TABLE IF NOT EXISTS "public"."stock_entries" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "product_id" "uuid" NOT NULL,
+    "quantity" integer NOT NULL,
+    "unit_cost" numeric(10,2) NOT NULL,
+    "itbis_included" boolean DEFAULT true NOT NULL,
+    "supplier_name" "text",
+    "supplier_rnc" "text",
+    "ncf" "text",
+    "invoice_date" "date",
+    "note" "text",
+    "created_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "client_token" "uuid",
+    CONSTRAINT "stock_entries_quantity_check" CHECK (("quantity" > 0)),
+    CONSTRAINT "stock_entries_unit_cost_check" CHECK (("unit_cost" >= (0)::numeric))
+);
+
+
+ALTER TABLE "public"."stock_entries" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."stock_entries" IS 'Réceptions / réappro (entrées de stock IN). Append-only : 1 ligne = 1 événement de réception (ancre future lot/péremption FIFO ; ne jamais upserter). Fonde le registre achats 606 DGII. Écriture service-role via record_stock_entries.';
+
+
+
+COMMENT ON COLUMN "public"."stock_entries"."itbis_included" IS 'true = unit_cost TTC (base = cost/1.18, itbis = cost-base au 606). false = produit exonéré ITBIS (base = cost, itbis = 0).';
+
+
+
+COMMENT ON COLUMN "public"."stock_entries"."client_token" IS 'Jeton anti-rejeu (idempotence POST). Un même token ne crée qu''une seule réception.';
+
+
+
+CREATE TABLE IF NOT EXISTS "public"."stock_losses" (
+    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
+    "product_id" "uuid" NOT NULL,
+    "quantity" integer NOT NULL,
+    "unit_cost" numeric(10,2),
+    "reason" "text" NOT NULL,
+    "note" "text",
+    "expense_id" "uuid",
+    "created_by" "uuid",
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "client_token" "uuid",
+    CONSTRAINT "stock_losses_quantity_check" CHECK (("quantity" > 0)),
+    CONSTRAINT "stock_losses_reason_check" CHECK (("reason" = ANY (ARRAY['vencido'::"text", 'danado'::"text", 'robo'::"text", 'ajuste'::"text"])))
+);
+
+
+ALTER TABLE "public"."stock_losses" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."stock_losses" IS 'Pertes de stock (merma : vencido/danado/robo/ajuste). 1 ligne = 1 evenement. unit_cost = snapshot CMP fige. expense_id relie la charge P&L (NULL si cout inconnu). Ecriture service-role via record_stock_loss.';
+
 
 
 CREATE TABLE IF NOT EXISTS "public"."tag_types" (
@@ -958,43 +1573,52 @@ ALTER VIEW "public"."tags_with_types" OWNER TO "postgres";
 
 
 CREATE OR REPLACE VIEW "public"."v_bestsellers" AS
- SELECT "id",
-    "name",
-    "slug",
-    "description",
-    "price",
-    "currency",
-    "stock",
-    "is_active",
-    "created_at",
-    "updated_at",
-    "volume",
-    "pharmacist_advice",
-    "pharmacist_name",
-    "benefits",
-    "usage",
-    "inci",
-    "technical_pdf_url",
-    "skin_type",
-    "texture",
-    "old_price",
-    "is_new",
-    "is_featured",
-    COALESCE("s"."sold_30d", (0)::bigint)::bigint AS "sold_30d"
+ SELECT "p"."id",
+    "p"."name",
+    "p"."slug",
+    "p"."description",
+    "p"."price",
+    "p"."currency",
+    "p"."stock",
+    "p"."is_active",
+    "p"."created_at",
+    "p"."updated_at",
+    "p"."volume",
+    "p"."pharmacist_advice",
+    "p"."pharmacist_name",
+    "p"."benefits",
+    "p"."usage",
+    "p"."inci",
+    "p"."technical_pdf_url",
+    "p"."skin_type",
+    "p"."texture",
+    "p"."old_price",
+    "p"."is_new",
+    "p"."is_featured",
+    COALESCE("s"."sold_30d", (0)::bigint) AS "sold_30d"
    FROM ("public"."products" "p"
      LEFT JOIN ( SELECT "ri"."product_id",
             "sum"("ri"."quantity") AS "sold_30d"
            FROM ("public"."reservation_items" "ri"
              JOIN "public"."reservations" "r" ON (("r"."id" = "ri"."reservation_id")))
-          WHERE (("r"."status" = 'collected'::"public"."reservation_status")
-            AND ("r"."collected_at" > ("now"() - '30 days'::interval))
-            AND ("ri"."product_id" IS NOT NULL))
+          WHERE (("r"."status" = 'collected'::"public"."reservation_status") AND ("r"."collected_at" > ("now"() - '30 days'::interval)) AND ("ri"."product_id" IS NOT NULL))
           GROUP BY "ri"."product_id") "s" ON (("s"."product_id" = "p"."id")))
-  WHERE ("is_active" IS DISTINCT FROM false)
-  ORDER BY COALESCE("s"."sold_30d", (0)::bigint) DESC, "is_featured" DESC NULLS LAST, "created_at" DESC;
+  WHERE ("p"."is_active" IS DISTINCT FROM false)
+  ORDER BY COALESCE("s"."sold_30d", (0)::bigint) DESC, "p"."is_featured" DESC NULLS LAST, "p"."created_at" DESC;
 
 
 ALTER VIEW "public"."v_bestsellers" OWNER TO "postgres";
+
+
+CREATE OR REPLACE VIEW "public"."v_product_pricing" WITH ("security_invoker"='true') AS
+ SELECT "id" AS "product_id",
+    "price" AS "base_price",
+    "public"."effective_price"("id", "now"()) AS "effective_price",
+    "currency"
+   FROM "public"."products" "p";
+
+
+ALTER VIEW "public"."v_product_pricing" OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."wishlists" (
@@ -1009,6 +1633,11 @@ ALTER TABLE "public"."wishlists" OWNER TO "postgres";
 
 ALTER TABLE ONLY "public"."admin_users"
     ADD CONSTRAINT "admin_users_pkey" PRIMARY KEY ("user_id");
+
+
+
+ALTER TABLE ONLY "public"."audit_log"
+    ADD CONSTRAINT "audit_log_pkey" PRIMARY KEY ("id");
 
 
 
@@ -1044,6 +1673,11 @@ ALTER TABLE ONLY "public"."carts"
 
 ALTER TABLE ONLY "public"."contact_messages"
     ADD CONSTRAINT "contact_messages_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."expenses"
+    ADD CONSTRAINT "expenses_pkey" PRIMARY KEY ("id");
 
 
 
@@ -1097,6 +1731,21 @@ ALTER TABLE ONLY "public"."profiles"
 
 
 
+ALTER TABLE ONLY "public"."promotion_targets"
+    ADD CONSTRAINT "promotion_targets_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."promotion_targets"
+    ADD CONSTRAINT "promotion_targets_promotion_id_target_type_target_id_key" UNIQUE ("promotion_id", "target_type", "target_id");
+
+
+
+ALTER TABLE ONLY "public"."promotions"
+    ADD CONSTRAINT "promotions_pkey" PRIMARY KEY ("id");
+
+
+
 ALTER TABLE ONLY "public"."ranges"
     ADD CONSTRAINT "ranges_brand_id_slug_key" UNIQUE ("brand_id", "slug");
 
@@ -1122,8 +1771,28 @@ ALTER TABLE ONLY "public"."reservations"
 
 
 
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_user_id_product_id_key" UNIQUE ("user_id", "product_id");
+
+
+
 ALTER TABLE ONLY "public"."shop_settings"
     ADD CONSTRAINT "shop_settings_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."stock_entries"
+    ADD CONSTRAINT "stock_entries_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."stock_losses"
+    ADD CONSTRAINT "stock_losses_pkey" PRIMARY KEY ("id");
 
 
 
@@ -1172,6 +1841,26 @@ ALTER TABLE ONLY "public"."wishlists"
 
 
 
+CREATE INDEX "idx_audit_log_action" ON "public"."audit_log" USING "btree" ("action");
+
+
+
+CREATE INDEX "idx_audit_log_actor" ON "public"."audit_log" USING "btree" ("actor_id");
+
+
+
+CREATE INDEX "idx_audit_log_created_at" ON "public"."audit_log" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_audit_log_entity" ON "public"."audit_log" USING "btree" ("entity", "entity_id");
+
+
+
+CREATE INDEX "idx_audit_log_high_impact" ON "public"."audit_log" USING "btree" ("is_high_impact") WHERE "is_high_impact";
+
+
+
 CREATE INDEX "idx_banners_active" ON "public"."banners" USING "btree" ("is_active");
 
 
@@ -1216,6 +1905,14 @@ CREATE INDEX "idx_contact_messages_status" ON "public"."contact_messages" USING 
 
 
 
+CREATE INDEX "idx_expenses_created_by" ON "public"."expenses" USING "btree" ("created_by");
+
+
+
+CREATE INDEX "idx_expenses_date" ON "public"."expenses" USING "btree" ("expense_date" DESC);
+
+
+
 CREATE INDEX "idx_newsletter_confirmation_token" ON "public"."newsletter_subscribers" USING "btree" ("confirmation_token") WHERE ("confirmation_token" IS NOT NULL);
 
 
@@ -1256,6 +1953,22 @@ CREATE INDEX "idx_products_range_id" ON "public"."products" USING "btree" ("rang
 
 
 
+CREATE INDEX "idx_promotion_targets_lookup" ON "public"."promotion_targets" USING "btree" ("target_type", "target_id");
+
+
+
+CREATE INDEX "idx_promotion_targets_promo" ON "public"."promotion_targets" USING "btree" ("promotion_id");
+
+
+
+CREATE INDEX "idx_promotions_active_window" ON "public"."promotions" USING "btree" ("is_active", "start_date", "end_date");
+
+
+
+CREATE INDEX "idx_promotions_created_by" ON "public"."promotions" USING "btree" ("created_by");
+
+
+
 CREATE INDEX "idx_reservation_items_reservation_id" ON "public"."reservation_items" USING "btree" ("reservation_id");
 
 
@@ -1269,6 +1982,50 @@ CREATE INDEX "idx_reservations_status_created" ON "public"."reservations" USING 
 
 
 CREATE INDEX "idx_reservations_user_id" ON "public"."reservations" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "idx_reviews_product_status" ON "public"."reviews" USING "btree" ("product_id", "status");
+
+
+
+CREATE INDEX "idx_reviews_status_created" ON "public"."reviews" USING "btree" ("status", "created_at" DESC);
+
+
+
+CREATE INDEX "idx_reviews_user" ON "public"."reviews" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "idx_stock_entries_created" ON "public"."stock_entries" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_stock_entries_created_by" ON "public"."stock_entries" USING "btree" ("created_by");
+
+
+
+CREATE INDEX "idx_stock_entries_invoice" ON "public"."stock_entries" USING "btree" ("invoice_date") WHERE ("invoice_date" IS NOT NULL);
+
+
+
+CREATE INDEX "idx_stock_entries_product" ON "public"."stock_entries" USING "btree" ("product_id");
+
+
+
+CREATE INDEX "idx_stock_losses_created" ON "public"."stock_losses" USING "btree" ("created_at" DESC);
+
+
+
+CREATE INDEX "idx_stock_losses_created_by" ON "public"."stock_losses" USING "btree" ("created_by");
+
+
+
+CREATE INDEX "idx_stock_losses_expense" ON "public"."stock_losses" USING "btree" ("expense_id");
+
+
+
+CREATE INDEX "idx_stock_losses_product" ON "public"."stock_losses" USING "btree" ("product_id");
 
 
 
@@ -1288,7 +2045,23 @@ CREATE UNIQUE INDEX "uniq_active_reservation_per_user" ON "public"."reservations
 
 
 
+CREATE UNIQUE INDEX "uniq_reservation_confirmation_token" ON "public"."reservations" USING "btree" ("confirmation_token") WHERE ("confirmation_token" IS NOT NULL);
+
+
+
+CREATE UNIQUE INDEX "uniq_stock_entries_client_token" ON "public"."stock_entries" USING "btree" ("client_token") WHERE ("client_token" IS NOT NULL);
+
+
+
+CREATE UNIQUE INDEX "uniq_stock_losses_client_token" ON "public"."stock_losses" USING "btree" ("client_token") WHERE ("client_token" IS NOT NULL);
+
+
+
 CREATE OR REPLACE TRIGGER "set_posts_updated_at" BEFORE UPDATE ON "public"."posts" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
+
+
+
+CREATE OR REPLACE TRIGGER "set_reviews_updated_at" BEFORE UPDATE ON "public"."reviews" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
 
 
 
@@ -1333,6 +2106,11 @@ ALTER TABLE ONLY "public"."admin_users"
 
 
 
+ALTER TABLE ONLY "public"."audit_log"
+    ADD CONSTRAINT "audit_log_actor_id_fkey" FOREIGN KEY ("actor_id") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
+
+
+
 ALTER TABLE ONLY "public"."cart_items"
     ADD CONSTRAINT "cart_items_cart_id_fkey" FOREIGN KEY ("cart_id") REFERENCES "public"."carts"("id") ON DELETE CASCADE;
 
@@ -1355,6 +2133,11 @@ ALTER TABLE ONLY "public"."contact_messages"
 
 ALTER TABLE ONLY "public"."contact_messages"
     ADD CONSTRAINT "contact_messages_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."expenses"
+    ADD CONSTRAINT "expenses_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
 
 
 
@@ -1383,6 +2166,16 @@ ALTER TABLE ONLY "public"."profiles"
 
 
 
+ALTER TABLE ONLY "public"."promotion_targets"
+    ADD CONSTRAINT "promotion_targets_promotion_id_fkey" FOREIGN KEY ("promotion_id") REFERENCES "public"."promotions"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."promotions"
+    ADD CONSTRAINT "promotions_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
+
+
+
 ALTER TABLE ONLY "public"."ranges"
     ADD CONSTRAINT "ranges_brand_id_fkey" FOREIGN KEY ("brand_id") REFERENCES "public"."brands"("id") ON DELETE CASCADE;
 
@@ -1403,8 +2196,43 @@ ALTER TABLE ONLY "public"."reservations"
 
 
 
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."reviews"
+    ADD CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
+
+
+
 ALTER TABLE ONLY "public"."shop_settings"
     ADD CONSTRAINT "shop_settings_updated_by_fkey" FOREIGN KEY ("updated_by") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."stock_entries"
+    ADD CONSTRAINT "stock_entries_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."stock_entries"
+    ADD CONSTRAINT "stock_entries_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
+
+
+
+ALTER TABLE ONLY "public"."stock_losses"
+    ADD CONSTRAINT "stock_losses_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "auth"."users"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."stock_losses"
+    ADD CONSTRAINT "stock_losses_expense_id_fkey" FOREIGN KEY ("expense_id") REFERENCES "public"."expenses"("id") ON DELETE SET NULL;
+
+
+
+ALTER TABLE ONLY "public"."stock_losses"
+    ADD CONSTRAINT "stock_losses_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
 
 
 
@@ -1479,6 +2307,34 @@ CREATE POLICY "Admins can manage posts" ON "public"."posts" USING ("public"."is_
 
 
 
+CREATE POLICY "Admins can manage reviews" ON "public"."reviews" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admins read audit_log" ON "public"."audit_log" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admins read expenses" ON "public"."expenses" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admins read promotion_targets" ON "public"."promotion_targets" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admins read promotions" ON "public"."promotions" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admins read stock entries" ON "public"."stock_entries" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admins read stock losses" ON "public"."stock_losses" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
 CREATE POLICY "Create own cart" ON "public"."carts" FOR INSERT WITH CHECK (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text"))));
 
 
@@ -1492,6 +2348,10 @@ CREATE POLICY "Manage own cart items" ON "public"."cart_items" USING ((EXISTS ( 
   WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text"))))))) WITH CHECK ((EXISTS ( SELECT 1
    FROM "public"."carts"
   WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text")))))));
+
+
+
+CREATE POLICY "Public can read approved reviews" ON "public"."reviews" FOR SELECT USING (("status" = 'approved'::"text"));
 
 
 
@@ -1539,6 +2399,10 @@ CREATE POLICY "Update own profile" ON "public"."profiles" FOR UPDATE USING ((( S
 
 
 
+CREATE POLICY "Users can read own reviews" ON "public"."reviews" FOR SELECT USING ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
+
+
+
 CREATE POLICY "Users manage own wishlists" ON "public"."wishlists" USING ((( SELECT "auth"."uid"() AS "uid") = "user_id")) WITH CHECK ((( SELECT "auth"."uid"() AS "uid") = "user_id"));
 
 
@@ -1580,6 +2444,9 @@ CREATE POLICY "View own profile" ON "public"."profiles" FOR SELECT USING ((( SEL
 ALTER TABLE "public"."admin_users" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."audit_log" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."banners" ENABLE ROW LEVEL SECURITY;
 
 
@@ -1593,6 +2460,9 @@ ALTER TABLE "public"."carts" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."contact_messages" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."expenses" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."newsletter_subscribers" ENABLE ROW LEVEL SECURITY;
@@ -1613,6 +2483,12 @@ ALTER TABLE "public"."products" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."profiles" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."promotion_targets" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."promotions" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."ranges" ENABLE ROW LEVEL SECURITY;
 
 
@@ -1625,7 +2501,16 @@ ALTER TABLE "public"."reservation_items" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."reservations" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."reviews" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."shop_settings" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."stock_entries" ENABLE ROW LEVEL SECURITY;
+
+
+ALTER TABLE "public"."stock_losses" ENABLE ROW LEVEL SECURITY;
 
 
 ALTER TABLE "public"."tag_types" ENABLE ROW LEVEL SECURITY;
@@ -1649,6 +2534,11 @@ GRANT ALL ON FUNCTION "public"."add_to_cart"("p_cart_id" "uuid", "p_product_id" 
 
 
 
+REVOKE ALL ON FUNCTION "public"."apply_reservation_collection"("p_reservation_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."apply_reservation_collection"("p_reservation_id" "uuid") TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."check_rate_limit"("p_key" "text", "p_max" integer, "p_window_sec" integer) FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."check_rate_limit"("p_key" "text", "p_max" integer, "p_window_sec" integer) TO "service_role";
 
@@ -1660,6 +2550,11 @@ GRANT ALL ON FUNCTION "public"."cleanup_banner_positions"() TO "service_role";
 
 
 
+REVOKE ALL ON FUNCTION "public"."create_guest_reservation"("p_cart_id" "uuid", "p_anon_id" "uuid", "p_name" "text", "p_phone" "text", "p_email" "text") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."create_guest_reservation"("p_cart_id" "uuid", "p_anon_id" "uuid", "p_name" "text", "p_phone" "text", "p_email" "text") TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."create_reservation"("p_cart_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."create_reservation"("p_cart_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."create_reservation"("p_cart_id" "uuid") TO "service_role";
@@ -1668,6 +2563,13 @@ GRANT ALL ON FUNCTION "public"."create_reservation"("p_cart_id" "uuid") TO "serv
 
 REVOKE ALL ON FUNCTION "public"."create_ticket"("p_email" "text", "p_category" "text", "p_subject" "text", "p_message" "text") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."create_ticket"("p_email" "text", "p_category" "text", "p_subject" "text", "p_message" "text") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone) FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone) TO "service_role";
+GRANT ALL ON FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_at" timestamp with time zone) TO "anon";
 
 
 
@@ -1703,6 +2605,21 @@ GRANT ALL ON FUNCTION "public"."merge_anon_cart_to_user"("p_anon_id" "uuid") TO 
 
 
 
+REVOKE ALL ON FUNCTION "public"."recompute_cost_price"("p_product_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."recompute_cost_price"("p_product_id" "uuid") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."record_stock_entries"("p_items" "jsonb", "p_supplier_name" "text", "p_supplier_rnc" "text", "p_ncf" "text", "p_invoice_date" "date", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."record_stock_entries"("p_items" "jsonb", "p_supplier_name" "text", "p_supplier_rnc" "text", "p_ncf" "text", "p_invoice_date" "date", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."record_stock_loss"("p_product_id" "uuid", "p_quantity" integer, "p_reason" "text", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."record_stock_loss"("p_product_id" "uuid", "p_quantity" integer, "p_reason" "text", "p_note" "text", "p_created_by" "uuid", "p_client_token" "uuid") TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."remove_from_cart"("p_product_id" "uuid", "p_anon_id" "uuid", "p_user_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."remove_from_cart"("p_product_id" "uuid", "p_anon_id" "uuid", "p_user_id" "uuid") TO "service_role";
 
@@ -1714,8 +2631,18 @@ GRANT ALL ON FUNCTION "public"."reorder_banners"("banner_id" "uuid", "old_positi
 
 
 
+REVOKE ALL ON FUNCTION "public"."restore_reservation_collection"("p_reservation_id" "uuid") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."restore_reservation_collection"("p_reservation_id" "uuid") TO "service_role";
+
+
+
 REVOKE ALL ON FUNCTION "public"."rls_auto_enable"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."rls_auto_enable"() TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."set_promotion_targets"("p_promotion_id" "uuid", "p_targets" "jsonb") FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."set_promotion_targets"("p_promotion_id" "uuid", "p_targets" "jsonb") TO "service_role";
 
 
 
@@ -1728,6 +2655,10 @@ GRANT ALL ON FUNCTION "public"."update_updated_at_column"() TO "service_role";
 GRANT ALL ON TABLE "public"."admin_users" TO "anon";
 GRANT ALL ON TABLE "public"."admin_users" TO "authenticated";
 GRANT ALL ON TABLE "public"."admin_users" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."audit_log" TO "service_role";
 
 
 
@@ -1761,6 +2692,10 @@ GRANT ALL ON TABLE "public"."contact_messages" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."expenses" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."newsletter_subscribers" TO "anon";
 GRANT ALL ON TABLE "public"."newsletter_subscribers" TO "authenticated";
 GRANT ALL ON TABLE "public"."newsletter_subscribers" TO "service_role";
@@ -1785,15 +2720,138 @@ GRANT ALL ON TABLE "public"."product_tags" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."products" TO "anon";
-GRANT ALL ON TABLE "public"."products" TO "authenticated";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "public"."products" TO "anon";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "public"."products" TO "authenticated";
 GRANT ALL ON TABLE "public"."products" TO "service_role";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("id") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("name") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("name") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("slug") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("slug") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("description") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("description") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("price") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("price") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("currency") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("currency") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("stock") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("stock") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("is_active") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("is_active") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("created_at") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("updated_at") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("updated_at") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("volume") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("volume") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("pharmacist_advice") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("pharmacist_advice") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("pharmacist_name") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("pharmacist_name") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("benefits") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("benefits") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("usage") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("usage") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("inci") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("inci") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("technical_pdf_url") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("technical_pdf_url") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("skin_type") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("skin_type") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("texture") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("texture") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("old_price") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("old_price") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("is_new") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("is_new") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("is_featured") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("is_featured") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("range_id") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("range_id") ON TABLE "public"."products" TO "authenticated";
 
 
 
 GRANT ALL ON TABLE "public"."profiles" TO "anon";
 GRANT ALL ON TABLE "public"."profiles" TO "authenticated";
 GRANT ALL ON TABLE "public"."profiles" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."promotion_targets" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."promotions" TO "service_role";
 
 
 
@@ -1809,9 +2867,44 @@ GRANT ALL ON TABLE "public"."rate_limit_buckets" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."reservation_items" TO "anon";
-GRANT ALL ON TABLE "public"."reservation_items" TO "authenticated";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "public"."reservation_items" TO "anon";
+GRANT INSERT,REFERENCES,DELETE,TRIGGER,TRUNCATE,MAINTAIN,UPDATE ON TABLE "public"."reservation_items" TO "authenticated";
 GRANT ALL ON TABLE "public"."reservation_items" TO "service_role";
+
+
+
+GRANT SELECT("id") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("id") ON TABLE "public"."reservation_items" TO "authenticated";
+
+
+
+GRANT SELECT("reservation_id") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("reservation_id") ON TABLE "public"."reservation_items" TO "authenticated";
+
+
+
+GRANT SELECT("product_id") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("product_id") ON TABLE "public"."reservation_items" TO "authenticated";
+
+
+
+GRANT SELECT("product_name") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("product_name") ON TABLE "public"."reservation_items" TO "authenticated";
+
+
+
+GRANT SELECT("unit_price") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("unit_price") ON TABLE "public"."reservation_items" TO "authenticated";
+
+
+
+GRANT SELECT("quantity") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("quantity") ON TABLE "public"."reservation_items" TO "authenticated";
+
+
+
+GRANT SELECT("created_at") ON TABLE "public"."reservation_items" TO "anon";
+GRANT SELECT("created_at") ON TABLE "public"."reservation_items" TO "authenticated";
 
 
 
@@ -1821,9 +2914,22 @@ GRANT ALL ON TABLE "public"."reservations" TO "service_role";
 
 
 
+GRANT ALL ON TABLE "public"."reviews" TO "authenticated";
+GRANT ALL ON TABLE "public"."reviews" TO "service_role";
+
+
+
 GRANT ALL ON TABLE "public"."shop_settings" TO "anon";
 GRANT ALL ON TABLE "public"."shop_settings" TO "authenticated";
 GRANT ALL ON TABLE "public"."shop_settings" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."stock_entries" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."stock_losses" TO "service_role";
 
 
 
@@ -1848,6 +2954,12 @@ GRANT ALL ON TABLE "public"."tags_with_types" TO "service_role";
 GRANT ALL ON TABLE "public"."v_bestsellers" TO "anon";
 GRANT ALL ON TABLE "public"."v_bestsellers" TO "authenticated";
 GRANT ALL ON TABLE "public"."v_bestsellers" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."v_product_pricing" TO "authenticated";
+GRANT ALL ON TABLE "public"."v_product_pricing" TO "service_role";
+GRANT SELECT ON TABLE "public"."v_product_pricing" TO "anon";
 
 
 
@@ -1878,49 +2990,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUN
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "postgres";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
 ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
--- ----------------------------------------------------------------------
--- reviews (avis produits) — bloc ajouté à la main (le dump complet via
--- scripts/db-dump.sh régénérera ce fichier proprement).
--- Source de vérité : supabase/migrations/20260606170000_reviews_system.sql
--- ----------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS "public"."reviews" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "product_id" "uuid" NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "rating" smallint NOT NULL,
-    "title" "text",
-    "body" "text",
-    "author_name" "text",
-    "status" "text" DEFAULT 'pending'::"text" NOT NULL,
-    "verified_purchase" boolean DEFAULT false NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "updated_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    CONSTRAINT "reviews_rating_check" CHECK ((("rating" >= 1) AND ("rating" <= 5))),
-    CONSTRAINT "reviews_status_check" CHECK (("status" = ANY (ARRAY['pending'::"text", 'approved'::"text", 'rejected'::"text"])))
-);
-
-ALTER TABLE ONLY "public"."reviews"
-    ADD CONSTRAINT "reviews_pkey" PRIMARY KEY ("id");
-ALTER TABLE ONLY "public"."reviews"
-    ADD CONSTRAINT "reviews_user_id_product_id_key" UNIQUE ("user_id", "product_id");
-ALTER TABLE ONLY "public"."reviews"
-    ADD CONSTRAINT "reviews_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
-ALTER TABLE ONLY "public"."reviews"
-    ADD CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "auth"."users"("id") ON DELETE CASCADE;
-
-CREATE INDEX "idx_reviews_product_status" ON "public"."reviews" USING "btree" ("product_id", "status");
-CREATE INDEX "idx_reviews_status_created" ON "public"."reviews" USING "btree" ("status", "created_at" DESC);
-CREATE INDEX "idx_reviews_user" ON "public"."reviews" USING "btree" ("user_id");
-
-CREATE OR REPLACE TRIGGER "set_reviews_updated_at" BEFORE UPDATE ON "public"."reviews" FOR EACH ROW EXECUTE FUNCTION "public"."update_updated_at_column"();
-
-ALTER TABLE "public"."reviews" ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public can read approved reviews" ON "public"."reviews" FOR SELECT USING (("status" = 'approved'::"text"));
-CREATE POLICY "Users can read own reviews" ON "public"."reviews" FOR SELECT USING ((( SELECT "auth"."uid"()) = "user_id"));
-CREATE POLICY "Admins can manage reviews" ON "public"."reviews" USING ("public"."is_user_admin"(( SELECT "auth"."uid"()))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"())));
 
 
 
