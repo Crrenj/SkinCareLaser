@@ -91,11 +91,12 @@ function ConfirmDialogModal({
         : 'bg-clay-50 text-clay-700'
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
-      onClick={onCancel}
-      aria-hidden="true"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 z-[-1] bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
+        onClick={onCancel}
+        aria-hidden="true"
+      />
       <div
         ref={dialogRef}
         role="dialog"
@@ -103,7 +104,6 @@ function ConfirmDialogModal({
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-message"
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
         className="relative mx-auto w-full max-w-[420px] bg-sand-50 overflow-hidden flex flex-col"
         style={{
           borderRadius: 'var(--pop-radius-modal)',

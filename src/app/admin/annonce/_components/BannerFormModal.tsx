@@ -48,18 +48,18 @@ export function BannerFormModal({
   const hintType = isNewType ? (form.banner_type as 'editorial' | 'hero' | 'quote') : 'editorial'
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
-      onClick={onClose}
-      aria-hidden="true"
-    >
+    <div className="fixed inset-0 z-50">
+      <div
+        className="absolute inset-0 z-[-1] bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <aside
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="annonce-modal-title"
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
         className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] bg-sand-50 flex flex-col overflow-hidden rounded-tl-[--pop-radius-drawer] rounded-bl-[--pop-radius-drawer]"
         style={{ boxShadow: 'var(--pop-shadow-drawer-r)' }}
       >

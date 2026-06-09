@@ -47,18 +47,18 @@ export function AccountSetupDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[60] bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%] flex items-center justify-center p-4"
-      onClick={onClose}
-      aria-hidden="true"
-    >
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 z-[-1] bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="account-setup-title"
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
         className="w-full max-w-[440px] bg-sand-50 rounded-2xl p-[22px] flex flex-col gap-4"
         style={{ boxShadow: 'var(--pop-shadow-drawer-r)' }}
       >

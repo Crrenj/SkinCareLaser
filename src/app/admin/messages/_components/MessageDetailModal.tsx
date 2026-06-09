@@ -55,18 +55,18 @@ export function MessageDetailModal({ message, open, onClose, onChangeStatus, onS
   const statusActions = allActions.filter((a) => a.status !== message.status)
 
   return (
-    <div
-      className="fixed inset-0 bg-ink-900/50 overflow-y-auto h-full w-full z-50 flex items-start justify-center px-4 py-12"
-      onClick={onClose}
-      aria-hidden="true"
-    >
+    <div className="fixed inset-0 overflow-y-auto h-full w-full z-50 flex items-start justify-center px-4 py-12">
+      <div
+        className="absolute inset-0 z-[-1] bg-ink-900/50"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="messages-modal-title"
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
         className="w-full max-w-2xl bg-sand-50 border border-sand-300 rounded-xl shadow-[0_24px_60px_-12px_rgba(31,27,22,0.35)] overflow-hidden text-ink-900"
       >
         <header className="px-6 py-5 border-b border-sand-300 flex items-start justify-between gap-4">

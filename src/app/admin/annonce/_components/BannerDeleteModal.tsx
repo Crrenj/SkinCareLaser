@@ -20,18 +20,18 @@ export function BannerDeleteModal({
   if (!bannerId) return null
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
-      onClick={onCancel}
-      aria-hidden="true"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 z-[-1] bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
+        onClick={onCancel}
+        aria-hidden="true"
+      />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="annonce-delete-modal-title"
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
         className="relative mx-auto w-full max-w-[420px] bg-sand-50 flex flex-col overflow-hidden"
         style={{
           borderRadius: 'var(--pop-radius-modal)',
