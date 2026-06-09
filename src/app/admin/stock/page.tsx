@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Plus, PackagePlus, Search, AlertTriangle, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Pencil, Plus, PackagePlus, PackageMinus, Search, AlertTriangle, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { formatPrice } from '@/lib/formatPrice'
@@ -11,6 +11,7 @@ import { STATUS_TABS, type StockItem } from './_lib/types'
 import { Kpi, StockPill, ThSort } from './_components/StockHelpers'
 import { StockEditModal } from './_components/StockEditModal'
 import { StockEntryDrawer } from './_components/StockEntryDrawer'
+import { StockLossDrawer } from './_components/StockLossDrawer'
 
 export default function StockPage() {
   const t = useTranslations('Admin.stock')
@@ -24,12 +25,13 @@ export default function StockPage() {
     searchTerm, setSearchTerm,
     filterStatus, setFilterStatus,
     sortColumn, sortOrder, handleSort,
-    updateStock, recordStockEntry,
+    updateStock, recordStockEntry, recordStockLoss,
   } = useStockData()
 
   const [editingItem, setEditingItem] = useState<StockItem | null>(null)
   const [entryOpen, setEntryOpen] = useState(false)
   const [entryProduct, setEntryProduct] = useState<{ id: string; name: string } | null>(null)
+  const [lossItem, setLossItem] = useState<StockItem | null>(null)
 
   const marginPct = new Intl.NumberFormat(toLocaleTag(locale), {
     style: 'percent',
@@ -125,7 +127,7 @@ export default function StockPage() {
                     <th className="px-4 py-2.5 text-[11px] font-semibold tracking-[0.12em] uppercase whitespace-nowrap text-ink-500 text-right">{t('columnMargin')}</th>
                     <ThSort column="status" current={sortColumn} order={sortOrder} onSort={handleSort}>{t('columnStatus')}</ThSort>
                     <ThSort column="last_updated" current={sortColumn} order={sortOrder} onSort={handleSort}>{t('columnUpdated')}</ThSort>
-                    <th className="w-[90px]" />
+                    <th className="w-[120px]" />
                   </tr>
                 </thead>
                 <tbody>
@@ -188,6 +190,15 @@ export default function StockPage() {
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => setLossItem(item)}
+                              title={t('loss.rowTitle')}
+                              aria-label={t('loss.rowAria', { name: item.product_name })}
+                              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-sand-200 hover:text-brick-600 transition-colors"
+                            >
+                              <PackageMinus className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -224,6 +235,22 @@ export default function StockPage() {
           if (!ok) throw new Error('keep-drawer-open')
           setEntryOpen(false)
           setEntryProduct(null)
+        }}
+      />
+
+      {/* Drawer de perte (merma) — rendu en frère racine (cf. backdrop-filter). */}
+      <StockLossDrawer
+        open={!!lossItem}
+        product={
+          lossItem
+            ? { id: lossItem.product_id, name: lossItem.product_name, cost_price: lossItem.cost_price }
+            : null
+        }
+        onClose={() => setLossItem(null)}
+        onSubmit={async (payload) => {
+          const ok = await recordStockLoss(payload)
+          if (!ok) throw new Error('keep-drawer-open')
+          setLossItem(null)
         }}
       />
     </>

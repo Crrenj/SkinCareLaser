@@ -12,6 +12,11 @@ export const CATEGORIES: { value: string; label: string }[] = [
   { value: 'otros', label: 'Otros' },
 ]
 
-export const CAT_LABEL: Record<string, string> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.value, c.label]),
-)
+// CAT_LABEL couvre les catégories du formulaire manuel (CATEGORIES) PLUS la
+// catégorie 'merma' (écrite uniquement par la RPC record_stock_loss, jamais
+// proposée dans le <select> d'ajout manuel) → la ventilation P&L et la liste
+// des dépenses libellent « Mermas y pérdidas » au lieu du slug brut.
+export const CAT_LABEL: Record<string, string> = {
+  ...Object.fromEntries(CATEGORIES.map((c) => [c.value, c.label])),
+  merma: 'Mermas y pérdidas',
+}

@@ -4,7 +4,7 @@ import { logger } from '@/lib/logger'
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import type { StockItem, StockStats, SortColumn, SortOrder, StockEntryPayload } from '../_lib/types'
+import type { StockItem, StockStats, SortColumn, SortOrder, StockEntryPayload, StockLossPayload } from '../_lib/types'
 
 export function useStockData() {
   const tCommon = useTranslations('Admin.common')
@@ -86,6 +86,24 @@ export function useStockData() {
     }
   }
 
+  const recordStockLoss = async (payload: StockLossPayload): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/admin/stock/loss', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!response.ok) throw new Error('loss_failed')
+      await fetchStockData()
+      toast.success(tStock('loss.saved'))
+      return true
+    } catch (error) {
+      logger.error('Erreur merma:', error)
+      toast.error(tStock('loss.error'))
+      return false
+    }
+  }
+
   return {
     stockItems, stats, loading,
     searchTerm, setSearchTerm,
@@ -93,5 +111,6 @@ export function useStockData() {
     sortColumn, sortOrder, handleSort,
     updateStock,
     recordStockEntry,
+    recordStockLoss,
   }
 }

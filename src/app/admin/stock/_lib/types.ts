@@ -42,6 +42,15 @@ export interface StockEntryPayload {
   items: { product_id: string; quantity: number; unit_cost: number; itbis_included: boolean }[]
 }
 
+/** Payload POST /api/admin/stock/loss (perte de stock / merma). */
+export interface StockLossPayload {
+  client_token: string
+  product_id: string
+  quantity: number
+  reason: 'vencido' | 'danado' | 'robo' | 'ajuste'
+  note?: string
+}
+
 export const STATUS_TABS: Array<{
   value: string
   labelKey: 'tabsAll' | 'tabsOk' | 'tabsLow' | 'tabsOut'
