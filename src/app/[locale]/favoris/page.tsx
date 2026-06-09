@@ -8,6 +8,7 @@ import ProductCard from '@/components/ProductCard'
 import { Link } from '@/i18n/navigation'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 
 export const dynamic = 'force-dynamic' // favoris dépend de l'user connecté
 
@@ -93,6 +94,7 @@ export default async function FavorisPage({
   const ordered = productIds
     .map((id) => productById.get(id))
     .filter((p): p is RawProduct => p !== undefined)
+  const priceMap = await fetchEffectivePrices(supabase, ordered.map((p) => p.id))
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-50" lang={locale}>
@@ -114,6 +116,7 @@ export default async function FavorisPage({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {ordered.map((p) => {
               const firstRange = p.range
+              const { price, oldPrice } = applyPromo(Number(p.price), null, priceMap.get(p.id))
               return (
                 <ProductCard
                   key={p.id}
@@ -122,7 +125,8 @@ export default async function FavorisPage({
                     slug: p.slug ?? p.id,
                     name: p.name,
                     description: p.description ?? undefined,
-                    price: Number(p.price),
+                    price,
+                    oldPrice,
                     currency: p.currency ?? DEFAULT_CURRENCY,
                     images: (p.product_images ?? []).map((img) => ({
                       url: img.url,

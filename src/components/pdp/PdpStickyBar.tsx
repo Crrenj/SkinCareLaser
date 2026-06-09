@@ -8,6 +8,7 @@ interface PdpStickyBarProps {
   buyRowRef: RefObject<HTMLElement | null>
   productName: string
   price: number
+  oldPrice?: number
   currency: string
   disabled?: boolean
   onAdd: () => void
@@ -23,6 +24,7 @@ export function PdpStickyBar({
   buyRowRef,
   productName,
   price,
+  oldPrice,
   currency,
   disabled,
   onAdd,
@@ -55,6 +57,11 @@ export function PdpStickyBar({
           <span className="font-sans text-[11px] text-ink-500 ml-1">
             {currency.toUpperCase()}
           </span>
+          {oldPrice != null && oldPrice > price && (
+            <span className="font-sans text-[12px] text-ink-400 line-through ml-2">
+              {oldPrice.toFixed(0)}
+            </span>
+          )}
         </div>
       </div>
       <button

@@ -8,7 +8,10 @@ export interface CartItem {
   product?: {
     id: string
     name: string
+    /** Prix effectif (remisé si promo active). */
     price: number
+    /** Prix barré (compare-at) quand une promo est active ; sinon absent. */
+    oldPrice?: number
     currency: string
     stock: number
     /** Volume product (ml/g) ou null si non saisi. */

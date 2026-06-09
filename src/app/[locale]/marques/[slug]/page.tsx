@@ -6,8 +6,11 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 
-export const revalidate = 300
+// 60s (aligné catalogue/PDP/home) : limite l'écart carte-stale vs panier-live
+// quand une promo démarre/expire.
+export const revalidate = 60
 
 type Brand = { id: string; name: string; slug: string }
 
@@ -109,6 +112,7 @@ export default async function BrandPage({
   if (!brand) notFound()
 
   const rawProducts = await fetchBrandProducts(supabase, brand.id)
+  const priceMap = await fetchEffectivePrices(supabase, rawProducts.map((p) => p.id))
   const t = await getTranslations('BrandPage')
 
   return (
@@ -131,14 +135,17 @@ export default async function BrandPage({
           <p className="text-ink-500">{t('empty')}</p>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {rawProducts.map((p) => (
+            {rawProducts.map((p) => {
+              const { price, oldPrice } = applyPromo(Number(p.price), null, priceMap.get(p.id))
+              return (
               <ProductCard
                 key={p.id}
                 product={{
                   id: p.id,
                   slug: p.slug,
                   name: p.name,
-                  price: Number(p.price),
+                  price,
+                  oldPrice,
                   currency: p.currency,
                   images: (p.product_images ?? []).map((img) => ({
                     url: img.url,
@@ -147,7 +154,8 @@ export default async function BrandPage({
                   brand: brand.name,
                 }}
               />
-            ))}
+              )
+            })}
           </div>
         )}
       </main>

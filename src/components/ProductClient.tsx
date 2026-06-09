@@ -20,6 +20,7 @@ export type MappedProduct = {
   name: string
   description?: string
   price: number
+  oldPrice?: number
   currency: string
   images: { url: string; alt: string | null }[]
   brand: string
@@ -52,6 +53,7 @@ export default function ProductClient({
   reviewCount,
 }: ProductClientProps) {
   const t = useTranslations('Product')
+  const tCat = useTranslations('Catalogue')
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
   const buyRowRef = useRef<HTMLDivElement | null>(null)
@@ -73,6 +75,8 @@ export default function ProductClient({
   }
 
   const outOfStock = product.stock === 0
+  const isPromo = product.oldPrice != null && product.oldPrice > product.price
+  const promoPct = isPromo ? Math.round((1 - product.price / product.oldPrice!) * 100) : 0
 
   // Accordéons recadrés sur la fiche modernisée : on garde uniquement
   // Description et Composition · INCI (décision actée — pas de Bénéfices,
@@ -139,6 +143,16 @@ export default function ProductClient({
                 {product.currency.toUpperCase()}
               </span>
             </div>
+            {isPromo && (
+              <span className="font-sans text-[20px] text-ink-400 line-through">
+                {product.oldPrice!.toFixed(0)}
+              </span>
+            )}
+            {isPromo && (
+              <span className="text-[12px] font-semibold text-clay-700 bg-clay-100 px-2 py-0.5 rounded-full">
+                {tCat('flagPromo', { percent: promoPct })}
+              </span>
+            )}
             {product.volume && (
               <span className="text-[13px] text-ink-500">· {product.volume}</span>
             )}
@@ -213,6 +227,7 @@ export default function ProductClient({
                   name: p.name,
                   description: p.description,
                   price: p.price,
+                  oldPrice: p.oldPrice,
                   currency: p.currency,
                   images: p.images.map((img) => ({ url: img.url, alt: img.alt || '' })),
                   brand: p.brand,
@@ -229,6 +244,7 @@ export default function ProductClient({
         buyRowRef={buyRowRef}
         productName={product.name}
         price={product.price}
+        oldPrice={product.oldPrice}
         currency={product.currency}
         disabled={outOfStock}
         onAdd={handleAddToCart}

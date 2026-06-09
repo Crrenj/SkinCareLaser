@@ -35,6 +35,7 @@ export function CartLineItem({
   const p = item.product
   const unitPrice = p.price
   const lineTotal = unitPrice * item.quantity
+  const isPromo = p.oldPrice != null && p.oldPrice > unitPrice
   const slug = p.id // pas de slug exposé dans le CartItem actuel — fallback id
 
   const handleDec = () => {
@@ -150,6 +151,9 @@ export function CartLineItem({
               <>
                 {p.volume} <span aria-hidden>·</span>{' '}
               </>
+            )}
+            {isPromo && (
+              <span className="line-through text-ink-400 mr-1.5">{format(p.oldPrice!)}</span>
             )}
             {format(unitPrice)} DOP
           </p>

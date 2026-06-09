@@ -9,6 +9,8 @@ interface MappedProduct {
   slug?: string
   name: string
   price: number
+  /** Prix barré (compare-at) quand une promo est active. */
+  oldPrice?: number
   currency: string
   images: { url: string; alt: string | null }[]
   brand?: string
@@ -26,6 +28,7 @@ interface HomeBestsellersProps {
  */
 export async function HomeBestsellers({ products }: HomeBestsellersProps) {
   const t = await getTranslations('Home.bestsellers')
+  const tCat = await getTranslations('Catalogue')
   const locale = await getLocale()
   if (products.length === 0) return null
 
@@ -46,8 +49,11 @@ export async function HomeBestsellers({ products }: HomeBestsellersProps) {
           {items.map((p, i) => {
             const href = p.slug ? `/product/${p.slug}` : '/catalogue'
             const img = p.images?.[0]
-            const tag =
-              i === 0
+            const isPromo = p.oldPrice != null && p.oldPrice > p.price
+            const promoPct = isPromo ? Math.round((1 - p.price / p.oldPrice!) * 100) : 0
+            const tag = isPromo
+              ? { label: tCat('flagPromo', { percent: promoPct }), hot: true }
+              : i === 0
                 ? { label: t('tagHot'), hot: true }
                 : p.isNew
                   ? { label: t('tagNew'), hot: false }
@@ -95,6 +101,11 @@ export async function HomeBestsellers({ products }: HomeBestsellersProps) {
                   <span className="font-serif text-[25px] -tracking-[0.01em] text-ink-900">
                     {nf.format(p.price)}
                     <span className="font-mono text-[12px] text-ink-500 ml-1.5">{p.currency}</span>
+                    {isPromo && (
+                      <span className="font-mono text-[12px] text-ink-400 line-through ml-2">
+                        {nf.format(p.oldPrice!)}
+                      </span>
+                    )}
                   </span>
                   <Link
                     href={href}

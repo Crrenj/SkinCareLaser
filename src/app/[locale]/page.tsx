@@ -8,6 +8,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import { HomeHero } from '@/components/home/HomeHero'
 import { HomeBestsellers } from '@/components/home/HomeBestsellers'
+import { fetchEffectivePrices, applyPromo, type EffectivePrice } from '@/lib/pricing'
 import { HomeByNeed } from '@/components/home/HomeByNeed'
 import { HomeBrands } from '@/components/home/HomeBrands'
 import { HomeExpertise } from '@/components/home/HomeExpertise'
@@ -88,6 +89,7 @@ interface MappedBestseller {
   name: string
   description?: string
   price: number
+  oldPrice?: number
   currency: string
   images: { url: string; alt: string | null }[]
   brand?: string
@@ -207,13 +209,15 @@ export default async function LocaleHome({
   )
 }
 
-function mapBestseller(p: RawBestseller): MappedBestseller {
+function mapBestseller(p: RawBestseller, pricing?: EffectivePrice): MappedBestseller {
+  const { price, oldPrice } = applyPromo(Number(p.price), null, pricing)
   return {
     id: p.id,
     slug: p.slug ?? undefined,
     name: p.name,
     description: p.description ?? undefined,
-    price: Number(p.price),
+    price,
+    oldPrice,
     currency: p.currency,
     images: p.product_images ?? [],
     brand: p.range?.brand?.name ?? undefined,
@@ -246,7 +250,8 @@ async function fetchBestsellers(
       `)
       .limit(4)
       .returns<RawBestseller[]>()
-    return (data ?? []).map(mapBestseller)
+    const fbPrices = await fetchEffectivePrices(supabase, (data ?? []).map((p) => p.id))
+    return (data ?? []).map((p) => mapBestseller(p, fbPrices.get(p.id)))
   }
 
   const ids = idRows.map((r) => r.id).filter((id): id is string => !!id)
@@ -263,11 +268,12 @@ async function fetchBestsellers(
     .returns<RawBestseller[]>()
 
   // Preserve l'ordre de la vue (sold_30d desc).
+  const priceMap = await fetchEffectivePrices(supabase, ids)
   const byId = new Map((data ?? []).map((p) => [p.id, p]))
   return ids
     .map((id) => byId.get(id))
     .filter((p): p is RawBestseller => p !== undefined)
-    .map(mapBestseller)
+    .map((p) => mapBestseller(p, priceMap.get(p.id)))
 }
 
 /**

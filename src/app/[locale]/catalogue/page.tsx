@@ -25,6 +25,7 @@ import {
   computeFacetedCounts,
   type CatalogueProduct,
 } from '@/lib/catalogueFilters'
+import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 
 export const revalidate = 60
 
@@ -125,6 +126,9 @@ export default async function Catalogue({
     return <p className="p-6">{t('loadError')}</p>
   }
 
+  // Prix effectifs (promo) en batch → swap prix/old_price discount-aware.
+  const priceMap = await fetchEffectivePrices(supabase, (products ?? []).map((p) => p.id))
+
   const itemsByType: Record<string, string[]> = {}
   tags?.forEach(tg => {
     itemsByType[tg.tag_type] ??= []
@@ -134,12 +138,18 @@ export default async function Catalogue({
     itemsByType[tagType].sort()
   })
 
-  const allProducts: CatalogueProduct[] = (products ?? []).map((p) => ({
+  const allProducts: CatalogueProduct[] = (products ?? []).map((p) => {
+    const { price, oldPrice } = applyPromo(
+      Number(p.price),
+      p.old_price != null ? Number(p.old_price) : undefined,
+      priceMap.get(p.id),
+    )
+    return {
     id: p.id,
     slug: p.slug,
     name: p.name,
-    price: Number(p.price),
-    oldPrice: p.old_price !== null && p.old_price !== undefined ? Number(p.old_price) : undefined,
+    price,
+    oldPrice,
     currency: p.currency,
     stock: p.stock ?? undefined,
     isNew: p.is_new ?? false,
@@ -151,7 +161,8 @@ export default async function Catalogue({
     tags: (p.product_tags ?? []).flatMap((pt) =>
       pt.tag ? [{ label: pt.tag.name, category: pt.tag.tag_type }] : [],
     ),
-  }))
+    }
+  })
 
   const allBrands = Array.from(
     new Set(allProducts.map((p) => p.brand).filter(Boolean)),

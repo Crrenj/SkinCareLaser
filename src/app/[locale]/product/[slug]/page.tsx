@@ -19,6 +19,7 @@ const ProductClient = dynamic(() => import('@/components/ProductClient'), {
   ),
 })
 import { ProductJsonLd } from '@/components/pdp/ProductJsonLd'
+import { fetchEffectivePrices, applyPromo, type EffectivePrice } from '@/lib/pricing'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { JSX } from 'react'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
@@ -121,6 +122,7 @@ type MappedProduct = {
   name: string
   description: string
   price: number
+  oldPrice?: number
   currency: string
   slug: string
   stock: number | null
@@ -158,12 +160,14 @@ function buildTagMap(rawTags: TagJoin[] | null): Record<string, string[]> {
   }, {})
 }
 
-function mapProduct(raw: RawProduct): MappedProduct {
+function mapProduct(raw: RawProduct, pricing?: EffectivePrice): MappedProduct {
+  const { price, oldPrice } = applyPromo(Number(raw.price), null, pricing)
   return {
     id: raw.id,
     name: raw.name,
     description: raw.description ?? '',
-    price: Number(raw.price),
+    price,
+    oldPrice,
     currency: raw.currency,
     slug: raw.slug,
     stock: raw.stock,
@@ -196,8 +200,8 @@ export default async function ProductPage({
     notFound()
   }
 
-  const mainProduct = mapProduct(prodRaw)
   const rangeId = prodRaw.range?.id
+  const mainTagsByCategory = buildTagMap(prodRaw.product_tags)
 
   // Avis approuvés — liste affichée + agrégat (résumé PDP + aggregateRating JSON-LD).
   const { data: reviewRows } = await supabase
@@ -234,7 +238,7 @@ export default async function ProductPage({
     .returns<RawProduct[]>()
 
   const wantCats = ['skin_type', 'category', 'need']
-  const mainTags = mainProduct.tagsByCategory
+  const mainTags = mainTagsByCategory
 
   const stepB = (candidates ?? [])
     .filter(p => {
@@ -248,7 +252,11 @@ export default async function ProductPage({
     })
     .slice(0, 2)
 
-  const similarProducts: MappedProduct[] = [...(sameRange ?? []), ...stepB].map(mapProduct)
+  const similarRaw = [...(sameRange ?? []), ...stepB]
+  // Prix effectifs (promo) en batch pour le produit principal + similaires.
+  const priceMap = await fetchEffectivePrices(supabase, [prodRaw.id, ...similarRaw.map((p) => p.id)])
+  const mainProduct = mapProduct(prodRaw, priceMap.get(prodRaw.id))
+  const similarProducts: MappedProduct[] = similarRaw.map((p) => mapProduct(p, priceMap.get(p.id)))
 
   return (
     <div className="flex flex-col min-h-screen bg-sand-50">

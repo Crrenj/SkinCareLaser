@@ -6,8 +6,10 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 
-export const revalidate = 300
+// 60s (aligné catalogue/PDP/home) : limite l'écart carte-stale vs panier-live.
+export const revalidate = 60
 
 type Tag = { id: string; name: string; slug: string }
 
@@ -116,6 +118,7 @@ export default async function NeedPage({
   if (!tag) notFound()
 
   const rawProducts = await fetchProductsByTag(supabase, tag.id)
+  const priceMap = await fetchEffectivePrices(supabase, rawProducts.map((p) => p.id))
   const t = await getTranslations('NeedPage')
 
   return (
@@ -140,6 +143,7 @@ export default async function NeedPage({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {rawProducts.map((p) => {
               const brand = p.range?.brand?.name ?? undefined
+              const { price, oldPrice } = applyPromo(Number(p.price), null, priceMap.get(p.id))
               return (
                 <ProductCard
                   key={p.id}
@@ -147,7 +151,8 @@ export default async function NeedPage({
                     id: p.id,
                     slug: p.slug,
                     name: p.name,
-                    price: Number(p.price),
+                    price,
+                    oldPrice,
                     currency: p.currency,
                     images: (p.product_images ?? []).map((img) => ({
                       url: img.url,

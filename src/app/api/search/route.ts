@@ -2,6 +2,7 @@ import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { fetchEffectivePrices } from '@/lib/pricing'
 
 /**
  * GET /api/search?q=<query>&limit=<n>
@@ -108,6 +109,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ q, hits: [], error: 'search_failed' }, { status: 500 })
   }
 
+  // Prix effectif (promo) → défaut cohérent pour la vente comptoir + l'overlay.
+  const priceMap = await fetchEffectivePrices(supabase, (data ?? []).map((p) => p.id))
+
   const hits: SearchHit[] = (data ?? []).map((p) => {
     const brand = p.range?.brand?.name ?? ''
     const image = p.product_images?.[0] ?? null
@@ -116,7 +120,7 @@ export async function GET(request: NextRequest) {
       slug: p.slug,
       name: p.name,
       brand,
-      price: Number(p.price),
+      price: priceMap.get(p.id)?.effective ?? Number(p.price),
       currency: p.currency,
       image,
     }

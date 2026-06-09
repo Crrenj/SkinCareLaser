@@ -6,6 +6,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { CartResponse } from '@/types/cart'
 import { guardMutation } from '@/lib/csrf'
 import { parseBody, cartItemBody } from '@/lib/schemas'
+import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 
 /**
  * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
@@ -115,8 +116,17 @@ export async function GET() {
       } | null
     }
 
-    const items = ((cartItems ?? []) as unknown as CartItemRow[]).map((item) => {
+    const rows = (cartItems ?? []) as unknown as CartItemRow[]
+    // Prix effectifs (promo) en batch → le panier facture et affiche le remisé.
+    const priceMap = await fetchEffectivePrices(supabase, rows.map((r) => r.product_id))
+
+    const items = rows.map((item) => {
       const brandName = item.products?.range?.brand?.name ?? null
+      const { price, oldPrice } = applyPromo(
+        item.products?.price ?? 0,
+        null,
+        priceMap.get(item.product_id),
+      )
       return {
         id: item.id,
         cart_id: item.cart_id,
@@ -126,7 +136,8 @@ export async function GET() {
           ? {
               id: item.products.id,
               name: item.products.name,
-              price: item.products.price,
+              price,
+              oldPrice,
               currency: item.products.currency,
               stock: item.products.stock ?? 0,
               volume: item.products.volume ?? null,
