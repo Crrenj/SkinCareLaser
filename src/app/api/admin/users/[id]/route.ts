@@ -4,6 +4,7 @@ import { requireSuperAdmin, getAdminRole } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { z } from 'zod'
 import { parseBody } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 const userAdminPatch = z
   .object({
@@ -72,6 +73,14 @@ export async function PATCH(
       logger.error('[/api/admin/users/[id]] delete error', error)
       return NextResponse.json({ error: 'delete_failed' }, { status: 500 })
     }
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'admin_user',
+      entityId: id,
+      summary: `Acceso admin revocado (${id.slice(0, 8)})`,
+      diff: { isAdmin: false },
+    })
     return NextResponse.json({ ok: true, isAdmin: false })
   }
 
@@ -85,6 +94,15 @@ export async function PATCH(
     logger.error('[/api/admin/users/[id]] upsert error', error)
     return NextResponse.json({ error: 'upsert_failed' }, { status: 500 })
   }
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'update',
+    entity: 'admin_user',
+    entityId: id,
+    summary: `Rol admin asignado: ${nextRole} (${id.slice(0, 8)})`,
+    diff: { role: nextRole },
+  })
 
   return NextResponse.json({ ok: true, isAdmin: true, role: nextRole })
 }

@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { parseBody, productCreate } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 // GET /api/admin/products -> liste des produits avec pagination
 export async function GET(req: NextRequest) {
@@ -169,6 +170,15 @@ export async function POST(req: NextRequest) {
         .from('product_tags')
         .insert(productTagsData)
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'product',
+      entityId: product?.id ?? null,
+      summary: `Producto creado: ${productData.name}`,
+      diff: { ...productData, range_id: effectiveRangeId, tags: selectedTags?.length ?? 0 },
+    })
 
     return NextResponse.json(product, { status: 201 })
   } catch (error) {

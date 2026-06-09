@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, stockBody } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 function getStockStatus(currentStock: number, minStock = 10): 'ok' | 'low' | 'out' {
   if (currentStock === 0) return 'out'
@@ -116,6 +117,16 @@ export async function PUT(req: NextRequest) {
       .single()
 
     if (error) throw error
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'stock',
+      entityId: product_id,
+      summary: `Stock ajustado: ${data?.name ?? product_id.slice(0, 8)} → ${stock}`,
+      diff: { product_id, stock },
+    })
+
     return NextResponse.json({ success: true, product: data })
   } catch (error) {
     return apiError('Erreur lors de la mise à jour du stock', error, 500)

@@ -3,8 +3,9 @@ import { revalidateTag } from 'next/cache'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 import { SHOP_SETTINGS_TAG } from '@/lib/getShopSettings'
-import type { Database } from '@/lib/database.types'
+import type { Database, Json } from '@/lib/database.types'
 
 type SettingsUpdate = Database['public']['Tables']['shop_settings']['Update']
 
@@ -114,6 +115,16 @@ export async function PATCH(req: NextRequest) {
 
     if (error) throw error
     revalidateTag(SHOP_SETTINGS_TAG)
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'setting',
+      entityId: '1',
+      summary: `Ajustes de tienda actualizados (${Object.keys(patch).join(', ')})`,
+      diff: patch as unknown as Json,
+    })
+
     return NextResponse.json(data)
   } catch (error) {
     return apiError('Erreur lors de la sauvegarde des paramètres', error, 500)

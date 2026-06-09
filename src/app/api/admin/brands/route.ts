@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, brandBody } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -52,6 +53,15 @@ export async function POST(req: NextRequest) {
       }
       throw error
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'brand',
+      entityId: brand?.id ?? null,
+      summary: `Marca creada: ${name.trim()}`,
+      diff: { name: name.trim(), slug: slug.trim().toLowerCase() },
+    })
 
     return NextResponse.json(brand, { status: 201 })
   } catch (error) {

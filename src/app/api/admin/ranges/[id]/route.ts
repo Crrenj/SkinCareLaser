@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, rangeBody } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   req: NextRequest,
@@ -58,6 +59,15 @@ export async function PATCH(
       throw error
     }
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'range',
+      entityId: id,
+      summary: `Gama actualizada: ${name.trim()}`,
+      diff: { name: name.trim(), slug: slug.trim().toLowerCase(), brand_id },
+    })
+
     return NextResponse.json(range)
   } catch (error) {
     return apiError('Erreur lors de la modification de la gamme', error, 500)
@@ -104,6 +114,15 @@ export async function DELETE(
 
     const { error } = await supabaseAdmin.from('ranges').delete().eq('id', id)
     if (error) throw error
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'range',
+      entityId: id,
+      summary: `Gama eliminada: ${existingRange.name}`,
+      diff: { id, name: existingRange.name },
+    })
 
     return NextResponse.json({
       success: true,

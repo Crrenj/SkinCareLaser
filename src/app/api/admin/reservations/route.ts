@@ -5,6 +5,7 @@ import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, reservationCreate, reservationPatch } from '@/lib/schemas'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
+import { recordAuditLog } from '@/lib/audit'
 
 // TTL généreux pour une réservation manuelle (l'admin la gère activement,
 // elle ne doit pas s'auto-expirer dès le lendemain comme le flux client 24h).
@@ -204,6 +205,15 @@ export async function POST(request: NextRequest) {
     if (stockErr) logger.error('[admin/reservations] counter sale stock error:', stockErr)
   }
 
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'create',
+    entity: 'reservation',
+    entityId: reservation.id,
+    summary: `${sold ? 'Venta mostrador' : 'Reserva creada'}: ${totalItems} art. · ${totalPrice}`,
+    diff: { sold: !!sold, totalItems, totalPrice, user_id: user_id ?? null },
+  })
+
   return NextResponse.json({ id: reservation.id }, { status: 201 })
 }
 
@@ -292,6 +302,17 @@ export async function PATCH(request: NextRequest) {
       if (stockErr) logger.error('[admin/reservations] restore stock error:', stockErr)
     }
   }
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'update',
+    entity: 'reservation',
+    entityId: id,
+    summary: status
+      ? `Reserva ${id.slice(0, 8)}: ${previousStatus ?? '?'} → ${status}`
+      : `Reserva ${id.slice(0, 8)}: notas actualizadas`,
+    diff: { ...updateData, previousStatus },
+  })
 
   return NextResponse.json({ reservation: data })
 }

@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagPatch } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   request: NextRequest,
@@ -37,6 +38,15 @@ export async function PATCH(
       return apiError('Erreur serveur', error, 500)
     }
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'tag',
+      entityId: id,
+      summary: `Etiqueta actualizada: ${name ?? id.slice(0, 8)}`,
+      diff: { name, slug },
+    })
+
     return NextResponse.json(data)
   } catch (error) {
     logger.error('Erreur API mise à jour tag:', error)
@@ -63,6 +73,15 @@ export async function DELETE(
       logger.error('Erreur suppression tag:', error)
       return apiError('Erreur serveur', error, 500)
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'tag',
+      entityId: id,
+      summary: `Etiqueta eliminada (${id.slice(0, 8)})`,
+      diff: { id },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

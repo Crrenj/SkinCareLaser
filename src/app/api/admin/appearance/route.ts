@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { appearanceBody, parseBody } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 import { THEME_CONFIG_TAG } from '@/lib/getThemeConfig'
 
 const SELECT = 'theme, default_mode, allow_visitor_mode, updated_at' as const
@@ -64,6 +65,15 @@ export async function PATCH(req: NextRequest) {
 
     // Le thème public est lu via getThemeConfig (unstable_cache) : on invalide.
     revalidateTag(THEME_CONFIG_TAG)
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'appearance',
+      entityId: '1',
+      summary: `Apariencia actualizada${parsed.data.theme ? ': ' + parsed.data.theme : ''}`,
+      diff: parsed.data,
+    })
 
     return NextResponse.json(data)
   } catch (error) {

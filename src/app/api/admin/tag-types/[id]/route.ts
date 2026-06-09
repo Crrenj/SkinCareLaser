@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagTypePatch } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   request: NextRequest,
@@ -36,6 +37,15 @@ export async function PATCH(
       }
       return apiError('Erreur serveur', error, 500)
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'tag_type',
+      entityId: id,
+      summary: `Tipo de etiqueta actualizado: ${name ?? id.slice(0, 8)}`,
+      diff: { name, slug, icon, color },
+    })
 
     return NextResponse.json(data)
   } catch (error) {
@@ -81,6 +91,15 @@ export async function DELETE(
       logger.error('Erreur suppression type de tag:', error)
       return apiError('Erreur serveur', error, 500)
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'tag_type',
+      entityId: id,
+      summary: `Tipo de etiqueta eliminado (${id.slice(0, 8)})`,
+      diff: { id },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

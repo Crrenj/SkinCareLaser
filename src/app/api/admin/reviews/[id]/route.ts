@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { reviewModerate } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 /**
  * PATCH /api/admin/reviews/[id]  { status }
@@ -46,6 +47,15 @@ export async function PATCH(
     return NextResponse.json({ error: 'update_failed' }, { status: 500 })
   }
 
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'update',
+    entity: 'review',
+    entityId: id,
+    summary: `Reseña ${id.slice(0, 8)} → ${parsed.data.status}`,
+    diff: { status: parsed.data.status },
+  })
+
   return NextResponse.json({ ok: true })
 }
 
@@ -66,6 +76,15 @@ export async function DELETE(
     logger.error('[/api/admin/reviews/[id] DELETE]', error)
     return NextResponse.json({ error: 'delete_failed' }, { status: 500 })
   }
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'delete',
+    entity: 'review',
+    entityId: id,
+    summary: `Reseña eliminada (${id.slice(0, 8)})`,
+    diff: { id },
+  })
 
   return NextResponse.json({ ok: true })
 }

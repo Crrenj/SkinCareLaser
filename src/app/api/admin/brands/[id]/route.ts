@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, brandBody } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   req: NextRequest,
@@ -47,6 +48,15 @@ export async function PATCH(
       }
       throw error
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'brand',
+      entityId: id,
+      summary: `Marca actualizada: ${name.trim()}`,
+      diff: { name: name.trim(), slug: slug.trim().toLowerCase() },
+    })
 
     return NextResponse.json(brand)
   } catch (error) {
@@ -123,6 +133,15 @@ export async function DELETE(
 
     const { error } = await supabaseAdmin.from('brands').delete().eq('id', id)
     if (error) throw error
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'brand',
+      entityId: id,
+      summary: `Marca eliminada: ${existingBrand.name}`,
+      diff: { id, name: existingBrand.name },
+    })
 
     return NextResponse.json({
       success: true,

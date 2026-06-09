@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, expenseDelete } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 /** DELETE — supprime une dépense par id. */
 export async function DELETE(
@@ -25,5 +26,15 @@ export async function DELETE(
     logger.error('[admin/expenses] DELETE error:', error)
     return apiError('Erreur lors de la suppression', error, 500)
   }
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'delete',
+    entity: 'expense',
+    entityId: parsed.data.id,
+    summary: `Gasto eliminado (${parsed.data.id.slice(0, 8)})`,
+    diff: { id: parsed.data.id },
+  })
+
   return NextResponse.json({ ok: true })
 }

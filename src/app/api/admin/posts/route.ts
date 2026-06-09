@@ -4,6 +4,7 @@ import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, postCreate, postUpdate, postDelete } from '@/lib/schemas'
 import { logger } from '@/lib/logger'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin()
@@ -62,6 +63,20 @@ export async function POST(req: NextRequest) {
     return apiError('Erreur serveur', error, 500)
   }
 
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'create',
+    entity: 'post',
+    entityId: data?.id ?? null,
+    summary: `Artículo creado: ${parsed.data.title}`,
+    diff: {
+      title: parsed.data.title,
+      slug: parsed.data.slug,
+      locale: parsed.data.locale,
+      is_published: parsed.data.is_published,
+    },
+  })
+
   return NextResponse.json(data, { status: 201 })
 }
 
@@ -103,6 +118,15 @@ export async function PATCH(req: NextRequest) {
     return apiError('Erreur serveur', error, 500)
   }
 
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'update',
+    entity: 'post',
+    entityId: id,
+    summary: `Artículo actualizado: ${fields.title ?? id.slice(0, 8)}`,
+    diff: { title: fields.title, slug: fields.slug, is_published: fields.is_published },
+  })
+
   return NextResponse.json(data)
 }
 
@@ -122,6 +146,15 @@ export async function DELETE(req: NextRequest) {
     logger.error('DELETE /api/admin/posts:', error)
     return apiError('Erreur serveur', error, 500)
   }
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'delete',
+    entity: 'post',
+    entityId: id,
+    summary: `Artículo eliminado (${id.slice(0, 8)})`,
+    diff: { id },
+  })
 
   return NextResponse.json({ ok: true })
 }

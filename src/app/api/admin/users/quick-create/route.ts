@@ -5,6 +5,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { parseBody, quickCreateUser } from '@/lib/schemas'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { getSiteUrl } from '@/lib/csrf'
+import { recordAuditLog } from '@/lib/audit'
 
 /**
  * POST /api/admin/users/quick-create
@@ -97,6 +98,15 @@ export async function POST(request: NextRequest) {
   })
   if (linkErr) logger.error('[admin/users/quick-create] generateLink error:', linkErr)
   else setupLink = link.properties?.action_link ?? null
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'create',
+    entity: 'user',
+    entityId: userId,
+    summary: `Cliente creado (mostrador): ${fullName || phone}`,
+    diff: { first_name, last_name: last_name ?? null }, // pas de téléphone (PII) dans le journal
+  })
 
   return NextResponse.json(
     { userId, name: fullName || null, phone, setupLink, created: true },

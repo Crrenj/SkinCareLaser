@@ -6,7 +6,8 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, homeLayoutBody } from '@/lib/schemas'
 import { resolveHomeLayout } from '@/lib/homeSections'
 import { logger } from '@/lib/logger'
-import type { Database } from '@/lib/database.types'
+import { recordAuditLog } from '@/lib/audit'
+import type { Database, Json } from '@/lib/database.types'
 
 type ShopSettingsUpdate = Database['public']['Tables']['shop_settings']['Update']
 
@@ -63,6 +64,15 @@ export async function PATCH(req: NextRequest) {
   }
 
   for (const locale of ['fr', 'es', 'en']) revalidatePath(`/${locale}`)
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'update',
+    entity: 'home_layout',
+    entityId: '1',
+    summary: 'Disposición de inicio actualizada',
+    diff: layout as unknown as Json,
+  })
 
   return NextResponse.json({ ok: true, layout })
 }

@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, productUpdate } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function PATCH(
   req: NextRequest,
@@ -108,6 +109,15 @@ export async function PATCH(
       }
     }
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'product',
+      entityId: id,
+      summary: `Producto actualizado: ${updateFields.name ?? id.slice(0, 8)}`,
+      diff: { ...updateFields, ...(range_id ? { range_id } : {}) },
+    })
+
     return NextResponse.json(data)
   } catch (error) {
     return apiError('Erreur lors de la mise à jour', error, 500)
@@ -127,6 +137,13 @@ export async function DELETE(
   try {
     const { id } = await params
 
+    // Pré-lecture du nom (PK lookup bon marché) pour un résumé d'audit lisible.
+    const { data: existing } = await supabaseAdmin
+      .from('products')
+      .select('name')
+      .eq('id', id)
+      .single()
+
     const { data: existingImages } = await supabaseAdmin
       .from('product_images')
       .select('url')
@@ -142,6 +159,15 @@ export async function DELETE(
 
     const { error } = await supabaseAdmin.from('products').delete().eq('id', id)
     if (error) throw error
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'product',
+      entityId: id,
+      summary: `Producto eliminado: ${existing?.name ?? id.slice(0, 8)}`,
+      diff: { id, name: existing?.name ?? null },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

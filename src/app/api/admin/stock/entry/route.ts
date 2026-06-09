@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, stockEntryBody } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 /**
  * POST — enregistre une entrée de stock (réception fournisseur).
@@ -49,6 +50,15 @@ export async function POST(request: NextRequest) {
     logger.error('[admin/stock/entry] RPC error:', error)
     return apiError("Erreur lors de l'enregistrement de l'entrée de stock", error, 500)
   }
+
+  recordAuditLog({
+    actorId: auth.userId,
+    action: 'create',
+    entity: 'stock',
+    entityId: client_token,
+    summary: `Entrada de stock: ${items.length} línea(s)${supplier_name ? ' · ' + supplier_name : ''}`,
+    diff: { items, supplier_name, supplier_rnc, ncf, invoice_date },
+  })
 
   return NextResponse.json({ ok: true }, { status: 201 })
 }

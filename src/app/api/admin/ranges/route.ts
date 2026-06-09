@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, rangeBody } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin()
@@ -67,6 +68,15 @@ export async function POST(req: NextRequest) {
       }
       throw error
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'range',
+      entityId: range?.id ?? null,
+      summary: `Gama creada: ${name.trim()}`,
+      diff: { name: name.trim(), slug: slug.trim().toLowerCase(), brand_id },
+    })
 
     return NextResponse.json(range, { status: 201 })
   } catch (error) {

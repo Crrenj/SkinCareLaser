@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, uploadBody } from '@/lib/schemas'
 import { apiError } from '@/lib/apiError'
+import { recordAuditLog } from '@/lib/audit'
 
 const BUCKET = 'product-image'
 // Doit rester aligné avec allowed_mime_types du bucket Storage.
@@ -85,6 +86,15 @@ export async function POST(req: NextRequest) {
       .from(BUCKET)
       .getPublicUrl(data.path)
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'upload',
+      entityId: data.path,
+      summary: `Imagen subida: ${data.path}`,
+      diff: { path: data.path, contentType, folder },
+    })
+
     return NextResponse.json({ url: publicUrl, path: data.path })
   } catch (error) {
     return apiError("Erreur lors de l'upload", error, 500)
@@ -109,6 +119,15 @@ export async function DELETE(req: NextRequest) {
 
     const { error } = await supabaseAdmin.storage.from(BUCKET).remove([path])
     if (error) throw error
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'upload',
+      entityId: path,
+      summary: `Imagen eliminada: ${path}`,
+      diff: { path },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, bannerCreate, bannerUpdate } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin()
@@ -97,6 +98,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Erreur lors de la création' }, { status: 500 })
     }
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'banner',
+      entityId: banner?.id ?? null,
+      summary: `Banner creado: ${title}`,
+      diff: { title, banner_type, is_active: is_active ?? true, position: finalPosition },
+    })
+
     return NextResponse.json({ banner }, { status: 201 })
   } catch (error) {
     logger.error('Erreur dans POST /api/admin/banners:', error)
@@ -156,6 +166,15 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 })
     }
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'banner',
+      entityId: id,
+      summary: `Banner actualizado: ${title ?? id.slice(0, 8)}`,
+      diff: { title, banner_type, is_active, position },
+    })
+
     return NextResponse.json({ banner })
   } catch (error) {
     logger.error('Erreur dans PUT /api/admin/banners:', error)
@@ -184,6 +203,15 @@ export async function DELETE(request: NextRequest) {
       logger.error('Erreur lors de la suppression de la bannière:', error)
       return NextResponse.json({ error: 'Erreur lors de la suppression' }, { status: 500 })
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'banner',
+      entityId: id,
+      summary: `Banner eliminado (${id.slice(0, 8)})`,
+      diff: { id },
+    })
 
     return NextResponse.json({ message: 'Bannière supprimée avec succès' })
   } catch (error) {

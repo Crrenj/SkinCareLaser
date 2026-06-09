@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, messagePatch } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin()
@@ -100,6 +101,15 @@ export async function PATCH(request: NextRequest) {
       return apiError('Erreur serveur', error, 500)
     }
 
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'message',
+      entityId: id,
+      summary: `Ticket ${id.slice(0, 8)} actualizado${status ? ' → ' + status : ''}`,
+      diff: updateData,
+    })
+
     return NextResponse.json({ message: data })
   } catch (error) {
     logger.error('Erreur API PATCH messages:', error)
@@ -128,6 +138,15 @@ export async function DELETE(request: NextRequest) {
       logger.error('Erreur suppression message:', error)
       return apiError('Erreur serveur', error, 500)
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'delete',
+      entity: 'message',
+      entityId: id,
+      summary: `Ticket eliminado (${id.slice(0, 8)})`,
+      diff: { id },
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

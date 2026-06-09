@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagBody } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -57,6 +58,15 @@ export async function POST(request: NextRequest) {
       }
       return apiError('Erreur serveur', error, 500)
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'tag',
+      entityId: data?.id ?? null,
+      summary: `Etiqueta creada: ${name}`,
+      diff: { name, slug, tag_type_id },
+    })
 
     return NextResponse.json(data)
   } catch (error) {

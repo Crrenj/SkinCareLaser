@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { apiError } from '@/lib/apiError'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, tagTypeBody } from '@/lib/schemas'
+import { recordAuditLog } from '@/lib/audit'
 
 export async function GET() {
   const auth = await requireAdmin()
@@ -74,6 +75,15 @@ export async function POST(request: NextRequest) {
         // On ne retourne pas d'erreur car le type a été créé avec succès
       }
     }
+
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'create',
+      entity: 'tag_type',
+      entityId: tagType?.id ?? null,
+      summary: `Tipo de etiqueta creado: ${name}`,
+      diff: { name, slug, icon, color },
+    })
 
     return NextResponse.json(tagType)
   } catch (error) {
