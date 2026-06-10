@@ -168,11 +168,7 @@ export async function POST(request: NextRequest) {
     if (insertError?.code === '23505') {
       return NextResponse.json({ error: 'active_reservation_exists' }, { status: 409 })
     }
-    logger.error('[admin/reservations] POST reservation error:', insertError)
-    return NextResponse.json(
-      { error: insertError?.message ?? 'Erreur lors de la création' },
-      { status: 500 },
-    )
+    return apiError('Erreur lors de la création de la réservation', insertError, 500)
   }
 
   const { error: itemsError } = await supabaseAdmin
@@ -190,9 +186,8 @@ export async function POST(request: NextRequest) {
   if (itemsError) {
     // Rollback best-effort : pas de transaction multi-statements via PostgREST,
     // on supprime la réservation orpheline (le cascade nettoie d'éventuels items).
-    logger.error('[admin/reservations] POST items error:', itemsError)
     await supabaseAdmin.from('reservations').delete().eq('id', reservation.id)
-    return NextResponse.json({ error: itemsError.message }, { status: 500 })
+    return apiError('Erreur lors de la création des lignes de réservation', itemsError, 500)
   }
 
   // Vente finalisée : décrémente le stock maintenant que les items existent.

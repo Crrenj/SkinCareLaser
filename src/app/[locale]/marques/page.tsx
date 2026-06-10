@@ -7,6 +7,7 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
+import { safeJsonLd } from '@/lib/jsonLd'
 
 export const revalidate = 300
 
@@ -155,7 +156,7 @@ export default async function MarquesIndexPage({
       <main id="main-content" className="flex-grow px-6 lg:px-14 py-12 max-w-7xl mx-auto w-full">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
         <header className="mb-12 pb-8 border-b border-sand-300">
           <div className="font-mono text-[11px] uppercase tracking-[0.16em] text-clay-700 font-semibold mb-3">

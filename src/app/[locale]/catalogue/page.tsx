@@ -26,6 +26,7 @@ import {
   type CatalogueProduct,
 } from '@/lib/catalogueFilters'
 import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
+import { safeJsonLd } from '@/lib/jsonLd'
 
 export const revalidate = 60
 
@@ -203,7 +204,7 @@ export default async function Catalogue({
       <main id="main-content" className="flex-grow">
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
         <CatalogueClient
           products={pageProducts}

@@ -31,6 +31,7 @@ async function resolveCartContext(): Promise<{
       maxAge: 60 * 60 * 24 * 30,
       sameSite: 'lax',
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
     })
   }
   return { userId: null, anonId }

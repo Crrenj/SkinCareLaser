@@ -78,18 +78,29 @@ const nextConfig: NextConfig = {
   
   // Optimisations d'images
   images: {
-    /** 
-     * Déclare chaque domaine externe autorisé par <Image>.
-     * Ajoute-en d'autres si tu sers les photos depuis Supabase Storage,
-     * Cloudinary, etc.
+    /**
+     * Allowlist stricte des hôtes servis par <Image> (l'optimiseur Next est
+     * sinon un proxy ouvert : n'importe quelle URL externe passerait par
+     * /_next/image). Conséquence : les champs URL libres de l'admin
+     * (banners.image_url, banners.attribution_photo_url, posts.cover_image_url)
+     * sont contraints à ces hôtes — ajouter une entrée ici avant d'utiliser
+     * un nouveau CDN. Hôtes vérifiés en DB (2026-06-10) : Supabase Storage
+     * (images produit) + Unsplash (bannières + covers blog).
      */
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
-        pathname: '/**',
+        hostname: 'adxpoxcynrpnbbxnncsk.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
+    // Photos produit quasi immuables (re-upload = nouvelle URL Storage) :
+    // 30 j de cache optimiseur au lieu des 60 s par défaut.
+    minimumCacheTTL: 2592000,
     // Optimisations de performance pour les images
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

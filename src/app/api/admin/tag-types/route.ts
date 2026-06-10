@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       if (typeError.code === '23505') {
         return NextResponse.json({ error: 'Ce type existe déjà' }, { status: 409 })
       }
-      return NextResponse.json({ error: typeError.message }, { status: 500 })
+      return apiError('Erreur serveur', typeError, 500)
     }
 
     if (initial_tag && tagType) {

@@ -5,6 +5,8 @@
  * Doc : https://developers.google.com/search/docs/appearance/structured-data/article
  */
 
+import { safeJsonLd } from '@/lib/jsonLd'
+
 interface BlogPostJsonLdProps {
   locale: string
   slug: string
@@ -51,8 +53,7 @@ export function BlogPostJsonLd({
   return (
     <script
       type="application/ld+json"
-      // Valeurs issues de la DB ; JSON.stringify échappe correctement.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }}
     />
   )
 }

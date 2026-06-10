@@ -7,6 +7,8 @@
  * Doc : https://developers.google.com/search/docs/appearance/structured-data/product
  */
 
+import { safeJsonLd } from '@/lib/jsonLd'
+
 interface ProductJsonLdProps {
   locale: string
   slug: string
@@ -89,9 +91,7 @@ export function ProductJsonLd({
   return (
     <script
       type="application/ld+json"
-      // JSON.stringify est suffisant ici (pas d'input utilisateur arbitraire,
-      // toutes les valeurs viennent de la DB et passent par .toFixed/string).
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(data) }}
     />
   )
 }

@@ -69,8 +69,13 @@ export async function POST(request: NextRequest) {
         { status: 200 },
       )
     }
+    // Erreur Supabase Auth (4xx attendu : email synthétisé déjà pris, etc.) —
+    // message assaini, jamais le message brut du provider.
     logger.error('[admin/users/quick-create] createUser error:', createErr)
-    return NextResponse.json({ error: createErr.message }, { status: 409 })
+    return NextResponse.json(
+      { error: 'Impossible de créer le compte (téléphone déjà associé à un compte ?)' },
+      { status: 409 },
+    )
   }
 
   const userId = created.user.id

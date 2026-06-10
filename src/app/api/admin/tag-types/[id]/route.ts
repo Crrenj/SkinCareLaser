@@ -75,7 +75,7 @@ export async function DELETE(
 
     if (checkError) {
       logger.error('Erreur vérification tags:', checkError)
-      return NextResponse.json({ error: checkError.message }, { status: 500 })
+      return apiError('Erreur serveur', checkError, 500)
     }
 
     if (tags && tags.length > 0) {
