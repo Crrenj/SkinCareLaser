@@ -1,17 +1,32 @@
+import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { AdminShell } from './_AdminShell'
+import { AppHtmlShell } from '@/components/AppHtmlShell'
 
 /**
- * Wrap les pages /admin/* avec un `NextIntlClientProvider` alimenté par
- * `getMessages()`. La locale est résolue dans `i18n/request.ts` :
+ * ROOT layout de la branche `/admin/*` (plus de layout racine commun — cf.
+ * AppHtmlShell). La locale est résolue dans `i18n/request.ts` :
  *   - cookie `farmau_admin_locale` si défini
  *   - sinon `routing.defaultLocale`
+ * → lecture de cookies = rendu dynamique, ASSUMÉ ici (l'admin est gated et
+ * n'a aucun intérêt ISR ; seules les pages publiques devaient être libérées).
  *
- * Le bouton FR/ES/EN dans la sidebar pose ce cookie via
+ * Le bouton FR/ES/EN du header admin pose ce cookie via
  * `/api/admin/set-locale` puis `router.refresh()` pour recharger les
  * messages serveur sans changer d'URL.
  */
+
+export const metadata: Metadata = {
+  title: 'FARMAU — Admin',
+  robots: { index: false, follow: false },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
+
 export default async function AdminLayout({
   children,
 }: {
@@ -21,8 +36,10 @@ export default async function AdminLayout({
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <AdminShell>{children}</AdminShell>
-    </NextIntlClientProvider>
+    <AppHtmlShell lang={locale}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        <AdminShell>{children}</AdminShell>
+      </NextIntlClientProvider>
+    </AppHtmlShell>
   )
 }

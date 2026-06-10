@@ -1,15 +1,36 @@
+import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider, hasLocale } from 'next-intl'
 import { setRequestLocale, getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { CookieBanner } from '@/components/CookieBanner'
+import { AppHtmlShell } from '@/components/AppHtmlShell'
 
 /**
- * Layout par locale : injecte les messages dans le contexte de la branche
- * `/[locale]/*`. Délègue le `<html>`/`<body>` au root layout (qui reste
- * tel quel pour le moment — la page admin et les pages publiques pas
- * encore migrées continuent d'en hériter).
+ * ROOT layout de la branche publique `/(fr|es|en)/*` (plus de layout racine
+ * commun — cf. AppHtmlShell). La locale vient du segment URL, donc le
+ * `<html lang>` est exact ET statique : c'est ce qui rend le SSG/ISR
+ * possible sur les pages publiques (l'ancien root layout `getLocale()`
+ * forçait tout en dynamique).
  */
+
+// siteName en dur (pas via getShopSettings) : lire shop_settings ici avec le
+// client cookies forcerait le rendu dynamique. La valeur 'FARMAU' correspond
+// au shop_name réel.
+export const metadata: Metadata = {
+  title: "FARMAU — Dermo-cosmétique d'expert pharmacien",
+  description: "Sélection dermo-cosmétique curatée par des pharmaciens. Click & collect en République Dominicaine.",
+  metadataBase: new URL('https://farmau.do'),
+  openGraph: {
+    siteName: 'FARMAU',
+    type: 'website',
+  },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -32,9 +53,11 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
-      <CookieBanner />
-    </NextIntlClientProvider>
+    <AppHtmlShell lang={locale}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
+        {children}
+        <CookieBanner />
+      </NextIntlClientProvider>
+    </AppHtmlShell>
   )
 }
