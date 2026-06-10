@@ -3,7 +3,7 @@ import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import Banner from '@/components/Banner'
 import { IframeHeightReporter } from '@/components/IframeHeightReporter'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import { HomeHero } from '@/components/home/HomeHero'
@@ -123,7 +123,7 @@ export default async function LocaleHome({
   const { locale } = await params
   setRequestLocale(locale)
 
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   // Fetch en parallèle : bannières CMS + bestsellers + marques + quote + featured needs.
   const [bannersRes, bestsellers, brandsRes, quoteRes, featuredNeeds, settings, productCountRes] = await Promise.all([
@@ -231,7 +231,7 @@ function mapBestseller(p: RawBestseller, pricing?: EffectivePrice): MappedBestse
  * En 2 requêtes : 4 IDs de la vue, puis détails produits avec joins brand/range.
  */
 async function fetchBestsellers(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: Awaited<ReturnType<typeof createSupabasePublicClient>>,
 ): Promise<MappedBestseller[]> {
   const { data: idRows, error: viewErr } = await supabase
     .from('v_bestsellers')
@@ -282,7 +282,7 @@ async function fetchBestsellers(
  * encore ou si rien ne matche, on retourne null (le bloc disparaît).
  */
 async function fetchHomeQuote(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: Awaited<ReturnType<typeof createSupabasePublicClient>>,
 ): Promise<{ quote: string; name: string } | null> {
   const { data, error } = await supabase
     .from('products')
@@ -313,7 +313,7 @@ interface FeaturedTagRow {
 }
 
 async function fetchFeaturedNeeds(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: Awaited<ReturnType<typeof createSupabasePublicClient>>,
 ): Promise<FeaturedNeedTag[]> {
   const { data: tagRows, error } = await supabase
     .from('tags')

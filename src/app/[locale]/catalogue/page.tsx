@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger'
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import dynamic from 'next/dynamic'
@@ -88,7 +88,7 @@ export default async function Catalogue({
   const sp = await searchParams
   setRequestLocale(locale)
   const t = await getTranslations('Catalogue')
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   const { data: products, error: pErr } = await supabase
     .from('products')

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
@@ -11,6 +11,15 @@ import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 // 60s (aligné catalogue/PDP/home) : limite l'écart carte-stale vs panier-live
 // quand une promo démarre/expire.
 export const revalidate = 60
+
+/**
+ * Aucun slug prérendu au build (catalogue volumineux) : generateStaticParams
+ * vide → la route reste statique-éligible, chaque slug est généré à la
+ * demande puis mis en cache ISR (revalidate ci-dessus).
+ */
+export function generateStaticParams() {
+  return []
+}
 
 type Brand = { id: string; name: string; slug: string }
 
@@ -24,7 +33,7 @@ type RawProduct = {
 }
 
 async function fetchBrand(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ReturnType<typeof createSupabasePublicClient>,
   slug: string,
 ): Promise<Brand | null> {
   const { data } = await supabase
@@ -36,7 +45,7 @@ async function fetchBrand(
 }
 
 async function fetchBrandProducts(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ReturnType<typeof createSupabasePublicClient>,
   brandId: string,
 ): Promise<RawProduct[]> {
   // 1. Ranges de la marque
@@ -66,7 +75,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   const { locale, slug } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
   const brand = await fetchBrand(supabase, slug)
   const t = await getTranslations({ locale, namespace: 'PageMeta.brand' })
 
@@ -106,7 +115,7 @@ export default async function BrandPage({
 }) {
   const { locale, slug } = await params
   setRequestLocale(locale)
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   const brand = await fetchBrand(supabase, slug)
   if (!brand) notFound()

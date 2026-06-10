@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
@@ -10,6 +10,15 @@ import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
 
 // 60s (aligné catalogue/PDP/home) : limite l'écart carte-stale vs panier-live.
 export const revalidate = 60
+
+/**
+ * Aucun slug prérendu au build (catalogue volumineux) : generateStaticParams
+ * vide → la route reste statique-éligible, chaque slug est généré à la
+ * demande puis mis en cache ISR (revalidate ci-dessus).
+ */
+export function generateStaticParams() {
+  return []
+}
 
 type Tag = { id: string; name: string; slug: string }
 
@@ -24,7 +33,7 @@ type RawProduct = {
 }
 
 async function fetchNeedTag(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ReturnType<typeof createSupabasePublicClient>,
   slug: string,
 ): Promise<Tag | null> {
   const { data } = await supabase
@@ -37,7 +46,7 @@ async function fetchNeedTag(
 }
 
 async function fetchProductsByTag(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ReturnType<typeof createSupabasePublicClient>,
   tagId: string,
 ): Promise<RawProduct[]> {
   const { data: links } = await supabase
@@ -72,7 +81,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   const { locale, slug } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
   const tag = await fetchNeedTag(supabase, slug)
   const t = await getTranslations({ locale, namespace: 'PageMeta.need' })
 
@@ -112,7 +121,7 @@ export default async function NeedPage({
 }) {
   const { locale, slug } = await params
   setRequestLocale(locale)
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   const tag = await fetchNeedTag(supabase, slug)
   if (!tag) notFound()

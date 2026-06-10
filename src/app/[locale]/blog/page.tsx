@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
@@ -34,7 +34,7 @@ export default async function BlogPage({
   const { locale } = await params
   setRequestLocale(locale)
   const t = await getTranslations('Blog')
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   const { data: posts } = await supabase
     .from('posts')

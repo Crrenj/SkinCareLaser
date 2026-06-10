@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import { routing } from '@/i18n/routing'
 
 const BASE_URL = 'https://farmau.do'
@@ -13,7 +13,7 @@ const BASE_URL = 'https://farmau.do'
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   // Routes statiques publiques (sans le préfixe locale)
   const staticPaths: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] }[] = [

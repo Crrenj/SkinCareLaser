@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
@@ -45,7 +45,7 @@ export async function generateMetadata({
 }
 
 async function fetchBrandCards(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ReturnType<typeof createSupabasePublicClient>,
 ): Promise<BrandCard[]> {
   const { data: brands } = await supabase
     .from('brands')
@@ -132,7 +132,7 @@ export default async function MarquesIndexPage({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   const [cards, t] = await Promise.all([
     fetchBrandCards(supabase),

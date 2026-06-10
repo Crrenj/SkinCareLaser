@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { setRequestLocale } from 'next-intl/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
 import { Link } from '@/i18n/navigation'
@@ -12,13 +12,22 @@ import { BlogPostJsonLd } from '@/components/blog/BlogPostJsonLd'
 
 export const revalidate = 60
 
+/**
+ * Aucun slug prérendu au build (catalogue volumineux) : generateStaticParams
+ * vide → la route reste statique-éligible, chaque slug est généré à la
+ * demande puis mis en cache ISR (revalidate ci-dessus).
+ */
+export function generateStaticParams() {
+  return []
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   const { locale, slug } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
   const { data: post } = await supabase
     .from('posts')
     .select('title, excerpt, locale')
@@ -50,7 +59,7 @@ export default async function BlogPostPage({
 }) {
   const { locale, slug } = await params
   setRequestLocale(locale)
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   const { data: post } = await supabase
     .from('posts')

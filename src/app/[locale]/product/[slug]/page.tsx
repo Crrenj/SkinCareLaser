@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger'
 import type { Metadata } from 'next'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
+import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
 import Footer from '@/components/Footer'
@@ -26,10 +26,19 @@ import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 
 export const revalidate = 60
 
+/**
+ * Aucun slug prérendu au build (catalogue volumineux) : generateStaticParams
+ * vide → la route reste statique-éligible, chaque slug est généré à la
+ * demande puis mis en cache ISR (revalidate ci-dessus).
+ */
+export function generateStaticParams() {
+  return []
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 async function redirectIfUuid(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ReturnType<typeof createSupabasePublicClient>,
   locale: string,
   handle: string,
 ): Promise<void> {
@@ -50,7 +59,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>
 }): Promise<Metadata> {
   const { locale, slug } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
   await redirectIfUuid(supabase, locale, slug)
 
   const { data: prod } = await supabase
@@ -184,7 +193,7 @@ export default async function ProductPage({
   params: Promise<{ locale: string; slug: string }>
 }): Promise<JSX.Element> {
   const { locale, slug } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = createSupabasePublicClient()
 
   await redirectIfUuid(supabase, locale, slug)
 
