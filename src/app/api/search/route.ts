@@ -8,9 +8,12 @@ import { fetchEffectivePrices } from '@/lib/pricing'
  * GET /api/search?q=<query>&limit=<n>
  * GET /api/search?bestsellers=1&limit=<n>
  *
- * Recherche full-text basique sur le nom (ilike). Sinon, mode bestsellers
- * pour fallback "aucun résultat" → on retourne les meilleurs vendeurs
- * via la vue v_bestsellers (sold_30d desc + is_featured fallback).
+ * Recherche basique accent-insensible sur le nom : ilike sur la colonne
+ * générée products.name_search (= lower(unaccent(name)), migration
+ * 20260610211000, D-4) avec la requête normalisée pareil côté JS — « creme »
+ * trouve « Crème » et inversement. Sinon, mode bestsellers pour fallback
+ * "aucun résultat" → on retourne les meilleurs vendeurs via la vue
+ * v_bestsellers (sold_30d desc + is_featured fallback).
  *
  * Usage : appelé par SearchOverlay en client component, debounced 200ms.
  */
@@ -84,10 +87,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ q, hits: [] satisfies SearchHit[] })
   }
 
-  // Échappe les métacaractères LIKE (%, _, \) : l'input public ne doit pas
-  // injecter de wildcards (DoS requête / scraping). PostgREST couvre déjà
-  // l'injection SQL ; seuls les wildcards LIKE sont à neutraliser.
-  const safe = q.replace(/[\\%_]/g, (c) => `\\${c}`)
+  // Normalisation accent-insensible : même transformation que la colonne
+  // générée name_search (lower + suppression des diacritiques — NFD ≈
+  // unaccent pour es/fr). Puis échappe les métacaractères LIKE (%, _, \) :
+  // l'input public ne doit pas injecter de wildcards (DoS requête /
+  // scraping). PostgREST couvre déjà l'injection SQL.
+  const normalized = q.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  const safe = normalized.replace(/[\\%_]/g, (c) => `\\${c}`)
 
   const { data, error } = await supabase
     .from('products')
@@ -100,7 +106,7 @@ export async function GET(request: NextRequest) {
       product_images ( url, alt ),
       range:ranges ( brand:brands ( name ) )
     `)
-    .ilike('name', `%${safe}%`)
+    .ilike('name_search', `%${safe}%`)
     .limit(limit)
     .returns<RawHit[]>()
 

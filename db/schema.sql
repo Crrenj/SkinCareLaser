@@ -473,7 +473,16 @@ CREATE OR REPLACE FUNCTION "public"."effective_price"("p_product_id" "uuid", "p_
       AND p_at >= p.start_date
       AND p_at <  p.end_date
   )
-  SELECT COALESCE(MIN(eff), (SELECT price FROM base)) FROM cand;
+  -- Early-return : le CASE n'évalue la branche cand QUE s'il existe au moins
+  -- une promotion active à p_at (probe EXISTS sur une table minuscule).
+  SELECT CASE
+    WHEN EXISTS (
+      SELECT 1 FROM promotions p
+      WHERE p.is_active AND p_at >= p.start_date AND p_at < p.end_date
+    )
+    THEN COALESCE((SELECT MIN(eff) FROM cand), (SELECT price FROM base))
+    ELSE (SELECT price FROM base)
+  END;
 $$;
 
 
@@ -596,6 +605,15 @@ $$;
 
 
 ALTER FUNCTION "public"."handle_new_user"() OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."immutable_unaccent"("p_text" "text") RETURNS "text"
+    LANGUAGE "sql" IMMUTABLE STRICT PARALLEL SAFE
+    SET "search_path" TO ''
+    AS $$ SELECT extensions.unaccent('extensions.unaccent'::regdictionary, p_text) $$;
+
+
+ALTER FUNCTION "public"."immutable_unaccent"("p_text" "text") OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."is_user_admin"("check_user_id" "uuid") RETURNS boolean
@@ -1108,7 +1126,8 @@ CREATE TABLE IF NOT EXISTS "public"."cart_items" (
     "created_at" timestamp with time zone DEFAULT "now"(),
     "updated_at" timestamp with time zone DEFAULT "now"(),
     CONSTRAINT "cart_items_quantity_check" CHECK (("quantity" > 0))
-);
+)
+WITH ("autovacuum_vacuum_scale_factor"='0.05');
 
 
 ALTER TABLE "public"."cart_items" OWNER TO "postgres";
@@ -1120,7 +1139,8 @@ CREATE TABLE IF NOT EXISTS "public"."carts" (
     "anonymous_id" "uuid",
     "created_at" timestamp with time zone DEFAULT "now"(),
     "updated_at" timestamp with time zone DEFAULT "now"()
-);
+)
+WITH ("autovacuum_vacuum_scale_factor"='0.05');
 
 
 ALTER TABLE "public"."carts" OWNER TO "postgres";
@@ -1266,6 +1286,7 @@ CREATE TABLE IF NOT EXISTS "public"."products" (
     "is_featured" boolean DEFAULT false,
     "range_id" "uuid",
     "cost_price" numeric(10,2),
+    "name_search" "text" GENERATED ALWAYS AS ("public"."immutable_unaccent"("lower"("name"))) STORED,
     CONSTRAINT "products_cost_price_check" CHECK ((("cost_price" IS NULL) OR ("cost_price" >= (0)::numeric))),
     CONSTRAINT "products_price_check" CHECK (("price" >= (0)::numeric))
 );
@@ -1291,7 +1312,8 @@ CREATE TABLE IF NOT EXISTS "public"."profiles" (
     "preferred_locale" "text",
     CONSTRAINT "profiles_preferred_locale_check" CHECK ((("preferred_locale" IS NULL) OR ("preferred_locale" = ANY (ARRAY['fr'::"text", 'en'::"text", 'es'::"text"])))),
     CONSTRAINT "profiles_role_check" CHECK (("role" = ANY (ARRAY['user'::"text", 'admin'::"text", 'customer'::"text"])))
-);
+)
+WITH ("autovacuum_vacuum_scale_factor"='0.05');
 
 
 ALTER TABLE "public"."profiles" OWNER TO "postgres";
@@ -1409,7 +1431,8 @@ CREATE TABLE IF NOT EXISTS "public"."reservations" (
     CONSTRAINT "reservations_source_check" CHECK (("source" = ANY (ARRAY['account'::"text", 'guest'::"text", 'counter'::"text"]))),
     CONSTRAINT "reservations_total_items_check" CHECK (("total_items" > 0)),
     CONSTRAINT "reservations_total_price_check" CHECK (("total_price" >= (0)::numeric))
-);
+)
+WITH ("autovacuum_vacuum_scale_factor"='0.05');
 
 
 ALTER TABLE "public"."reservations" OWNER TO "postgres";
@@ -1574,7 +1597,7 @@ CREATE TABLE IF NOT EXISTS "public"."tags" (
 ALTER TABLE "public"."tags" OWNER TO "postgres";
 
 
-CREATE OR REPLACE VIEW "public"."tags_with_types" AS
+CREATE OR REPLACE VIEW "public"."tags_with_types" WITH ("security_invoker"='true') AS
  SELECT "t"."id",
     "t"."name",
     "t"."slug",
@@ -1626,6 +1649,10 @@ CREATE OR REPLACE VIEW "public"."v_bestsellers" AS
 
 
 ALTER VIEW "public"."v_bestsellers" OWNER TO "postgres";
+
+
+COMMENT ON VIEW "public"."v_bestsellers" IS 'SECURITY DEFINER assumé + documenté (plan remédiation 2026-06-10, D-10) : la vue agrège reservation_items (RLS user-only) pour sold_30d — en security_invoker, sold_30d retomberait à 0 pour anon et casserait les bestsellers (home + recherche). Ne JAMAIS exposer de colonne de coût ici (vue servie à anon).';
+
 
 
 CREATE OR REPLACE VIEW "public"."v_product_pricing" WITH ("security_invoker"='true') AS
@@ -1884,10 +1911,6 @@ CREATE INDEX "idx_audit_log_high_impact" ON "public"."audit_log" USING "btree" (
 
 
 
-CREATE INDEX "idx_banners_active" ON "public"."banners" USING "btree" ("is_active");
-
-
-
 CREATE INDEX "idx_banners_active_position" ON "public"."banners" USING "btree" ("is_active", "position");
 
 
@@ -1896,19 +1919,7 @@ CREATE INDEX "idx_banners_position" ON "public"."banners" USING "btree" ("positi
 
 
 
-CREATE INDEX "idx_banners_slot" ON "public"."banners" USING "btree" ("slot");
-
-
-
-CREATE INDEX "idx_banners_status" ON "public"."banners" USING "btree" ("status");
-
-
-
 CREATE INDEX "idx_cart_items_cart" ON "public"."cart_items" USING "btree" ("cart_id");
-
-
-
-CREATE INDEX "idx_cart_items_product_id" ON "public"."cart_items" USING "btree" ("product_id");
 
 
 
@@ -1924,7 +1935,15 @@ CREATE INDEX "idx_contact_messages_email" ON "public"."contact_messages" USING "
 
 
 
+CREATE INDEX "idx_contact_messages_replied_by" ON "public"."contact_messages" USING "btree" ("replied_by");
+
+
+
 CREATE INDEX "idx_contact_messages_status" ON "public"."contact_messages" USING "btree" ("status");
+
+
+
+CREATE INDEX "idx_contact_messages_user" ON "public"."contact_messages" USING "btree" ("user_id");
 
 
 
@@ -1956,10 +1975,6 @@ CREATE INDEX "idx_product_images_product" ON "public"."product_images" USING "bt
 
 
 
-CREATE INDEX "idx_product_images_product_id" ON "public"."product_images" USING "btree" ("product_id");
-
-
-
 CREATE INDEX "idx_product_tags_product" ON "public"."product_tags" USING "btree" ("product_id");
 
 
@@ -1968,7 +1983,11 @@ CREATE INDEX "idx_product_tags_tag" ON "public"."product_tags" USING "btree" ("t
 
 
 
-CREATE INDEX "idx_product_tags_tag_id" ON "public"."product_tags" USING "btree" ("tag_id");
+CREATE INDEX "idx_products_is_active" ON "public"."products" USING "btree" ("is_active") WHERE "is_active";
+
+
+
+CREATE INDEX "idx_products_name_search_trgm" ON "public"."products" USING "gin" ("name_search" "extensions"."gin_trgm_ops");
 
 
 
@@ -1989,6 +2008,10 @@ CREATE INDEX "idx_promotions_active_window" ON "public"."promotions" USING "btre
 
 
 CREATE INDEX "idx_promotions_created_by" ON "public"."promotions" USING "btree" ("created_by");
+
+
+
+CREATE INDEX "idx_reservation_items_product" ON "public"."reservation_items" USING "btree" ("product_id");
 
 
 
@@ -2017,6 +2040,10 @@ CREATE INDEX "idx_reviews_status_created" ON "public"."reviews" USING "btree" ("
 
 
 CREATE INDEX "idx_reviews_user" ON "public"."reviews" USING "btree" ("user_id");
+
+
+
+CREATE INDEX "idx_shop_settings_updated_by" ON "public"."shop_settings" USING "btree" ("updated_by");
 
 
 
@@ -2274,47 +2301,151 @@ ALTER TABLE ONLY "public"."wishlists"
 
 
 
-CREATE POLICY "Admin manage all" ON "public"."profiles" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete banners" ON "public"."banners" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage banners" ON "public"."banners" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete brands" ON "public"."brands" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage brands" ON "public"."brands" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete messages" ON "public"."contact_messages" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage messages" ON "public"."contact_messages" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete posts" ON "public"."posts" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage product_images" ON "public"."product_images" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete product_images" ON "public"."product_images" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage product_tags" ON "public"."product_tags" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete product_tags" ON "public"."product_tags" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage products" ON "public"."products" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete products" ON "public"."products" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage ranges" ON "public"."ranges" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete profiles" ON "public"."profiles" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage tag_types" ON "public"."tag_types" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete ranges" ON "public"."ranges" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
-CREATE POLICY "Admin manage tags" ON "public"."tags" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+CREATE POLICY "Admin delete reviews" ON "public"."reviews" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin delete tag_types" ON "public"."tag_types" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin delete tags" ON "public"."tags" FOR DELETE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert banners" ON "public"."banners" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert brands" ON "public"."brands" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert messages" ON "public"."contact_messages" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert posts" ON "public"."posts" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert product_images" ON "public"."product_images" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert product_tags" ON "public"."product_tags" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert products" ON "public"."products" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert profiles" ON "public"."profiles" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert ranges" ON "public"."ranges" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert reviews" ON "public"."reviews" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert tag_types" ON "public"."tag_types" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin insert tags" ON "public"."tags" FOR INSERT WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update banners" ON "public"."banners" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update brands" ON "public"."brands" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update messages" ON "public"."contact_messages" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update posts" ON "public"."posts" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update product_images" ON "public"."product_images" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update product_tags" ON "public"."product_tags" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update products" ON "public"."products" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update profiles" ON "public"."profiles" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update ranges" ON "public"."ranges" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update reviews" ON "public"."reviews" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
 CREATE POLICY "Admin update shop_settings" ON "public"."shop_settings" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update tag_types" ON "public"."tag_types" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
+
+
+
+CREATE POLICY "Admin update tags" ON "public"."tags" FOR UPDATE USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
@@ -2323,14 +2454,6 @@ CREATE POLICY "Admin view all" ON "public"."profiles" FOR SELECT USING ("public"
 
 
 CREATE POLICY "Admin view messages" ON "public"."contact_messages" FOR SELECT USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
-
-
-
-CREATE POLICY "Admins can manage posts" ON "public"."posts" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
-
-
-
-CREATE POLICY "Admins can manage reviews" ON "public"."reviews" USING ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid"))) WITH CHECK ("public"."is_user_admin"(( SELECT "auth"."uid"() AS "uid")));
 
 
 
@@ -2358,7 +2481,7 @@ CREATE POLICY "Admins read stock losses" ON "public"."stock_losses" FOR SELECT U
 
 
 
-CREATE POLICY "Create own cart" ON "public"."carts" FOR INSERT WITH CHECK (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text"))));
+CREATE POLICY "Create own cart" ON "public"."carts" FOR INSERT WITH CHECK (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text"))));
 
 
 
@@ -2366,11 +2489,15 @@ CREATE POLICY "Create own profile" ON "public"."profiles" FOR INSERT WITH CHECK 
 
 
 
-CREATE POLICY "Manage own cart items" ON "public"."cart_items" USING ((EXISTS ( SELECT 1
+CREATE POLICY "Delete own cart items" ON "public"."cart_items" FOR DELETE USING ((EXISTS ( SELECT 1
    FROM "public"."carts"
-  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text"))))))) WITH CHECK ((EXISTS ( SELECT 1
+  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text")))))));
+
+
+
+CREATE POLICY "Insert own cart items" ON "public"."cart_items" FOR INSERT WITH CHECK ((EXISTS ( SELECT 1
    FROM "public"."carts"
-  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text")))))));
+  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text")))))));
 
 
 
@@ -2414,7 +2541,15 @@ CREATE POLICY "Public view active banners" ON "public"."banners" FOR SELECT USIN
 
 
 
-CREATE POLICY "Update own cart" ON "public"."carts" FOR UPDATE USING (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text")))) WITH CHECK (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text"))));
+CREATE POLICY "Update own cart" ON "public"."carts" FOR UPDATE USING (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text")))) WITH CHECK (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text"))));
+
+
+
+CREATE POLICY "Update own cart items" ON "public"."cart_items" FOR UPDATE USING ((EXISTS ( SELECT 1
+   FROM "public"."carts"
+  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text"))))))) WITH CHECK ((EXISTS ( SELECT 1
+   FROM "public"."carts"
+  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text")))))));
 
 
 
@@ -2450,13 +2585,13 @@ CREATE POLICY "View active products" ON "public"."products" FOR SELECT USING (((
 
 
 
-CREATE POLICY "View own cart" ON "public"."carts" FOR SELECT USING (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text"))));
+CREATE POLICY "View own cart" ON "public"."carts" FOR SELECT USING (((( SELECT "auth"."uid"() AS "uid") = "user_id") OR (("anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text"))));
 
 
 
 CREATE POLICY "View own cart items" ON "public"."cart_items" FOR SELECT USING ((EXISTS ( SELECT 1
    FROM "public"."carts"
-  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = ("auth"."jwt"() ->> 'anonymous_id'::"text")))))));
+  WHERE (("carts"."id" = "cart_items"."cart_id") AND (("carts"."user_id" = ( SELECT "auth"."uid"() AS "uid")) OR (("carts"."anonymous_id")::"text" = (( SELECT "auth"."jwt"() AS "jwt") ->> 'anonymous_id'::"text")))))));
 
 
 
@@ -2616,6 +2751,11 @@ GRANT ALL ON FUNCTION "public"."get_or_create_cart"("p_user_id" "uuid", "p_anony
 
 REVOKE ALL ON FUNCTION "public"."handle_new_user"() FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."handle_new_user"() TO "service_role";
+
+
+
+GRANT ALL ON FUNCTION "public"."immutable_unaccent"("p_text" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."immutable_unaccent"("p_text" "text") TO "service_role";
 
 
 
@@ -2868,6 +3008,11 @@ GRANT SELECT("is_featured") ON TABLE "public"."products" TO "authenticated";
 
 GRANT SELECT("range_id") ON TABLE "public"."products" TO "anon";
 GRANT SELECT("range_id") ON TABLE "public"."products" TO "authenticated";
+
+
+
+GRANT SELECT("name_search") ON TABLE "public"."products" TO "anon";
+GRANT SELECT("name_search") ON TABLE "public"."products" TO "authenticated";
 
 
 

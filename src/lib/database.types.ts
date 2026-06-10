@@ -528,6 +528,7 @@ export type Database = {
           is_featured: boolean | null
           is_new: boolean | null
           name: string
+          name_search: string | null
           old_price: number | null
           pharmacist_advice: string | null
           pharmacist_name: string | null
@@ -554,6 +555,7 @@ export type Database = {
           is_featured?: boolean | null
           is_new?: boolean | null
           name: string
+          name_search?: string | null
           old_price?: number | null
           pharmacist_advice?: string | null
           pharmacist_name?: string | null
@@ -580,6 +582,7 @@ export type Database = {
           is_featured?: boolean | null
           is_new?: boolean | null
           name?: string
+          name_search?: string | null
           old_price?: number | null
           pharmacist_advice?: string | null
           pharmacist_name?: string | null
@@ -1384,6 +1387,7 @@ export type Database = {
         Args: { p_anonymous_id?: string; p_user_id?: string }
         Returns: string
       }
+      immutable_unaccent: { Args: { p_text: string }; Returns: string }
       is_user_admin: { Args: { check_user_id: string }; Returns: boolean }
       merge_anon_cart_to_user: { Args: { p_anon_id: string }; Returns: string }
       recompute_cost_price: {
