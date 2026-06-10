@@ -208,6 +208,13 @@ export type Database = {
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
+          },
         ]
       }
       carts: {
@@ -279,6 +286,24 @@ export type Database = {
           updated_at?: string | null
           user_email?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      cron_heartbeats: {
+        Row: {
+          job_name: string
+          last_result: string | null
+          last_run_at: string
+        }
+        Insert: {
+          job_name: string
+          last_result?: string | null
+          last_run_at?: string
+        }
+        Update: {
+          job_name?: string
+          last_result?: string | null
+          last_run_at?: string
         }
         Relationships: []
       }
@@ -430,6 +455,13 @@ export type Database = {
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
+          },
         ]
       }
       product_tags: {
@@ -459,6 +491,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_tags_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
           },
           {
             foreignKeyName: "product_tags_tag_id_fkey"
@@ -769,6 +808,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "reservation_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
+          },
+          {
             foreignKeyName: "reservation_items_reservation_id_fkey"
             columns: ["reservation_id"]
             isOneToOne: false
@@ -898,6 +944,13 @@ export type Database = {
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
+          },
         ]
       }
       shop_settings: {
@@ -1024,6 +1077,13 @@ export type Database = {
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "stock_entries_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
+          },
         ]
       }
       stock_losses: {
@@ -1084,6 +1144,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_losses_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
           },
         ]
       }
@@ -1180,6 +1247,13 @@ export type Database = {
             referencedRelation: "v_bestsellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wishlists_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "v_product_pricing"
+            referencedColumns: ["product_id"]
+          },
         ]
       }
     }
@@ -1230,58 +1304,6 @@ export type Database = {
           updated_at: string | null
           usage: string | null
           volume: string | null
-        }
-        Insert: {
-          benefits?: string[] | null
-          cost_price?: number | null
-          created_at?: string | null
-          currency?: string | null
-          description?: string | null
-          id?: string | null
-          inci?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_new?: boolean | null
-          name?: string | null
-          old_price?: number | null
-          pharmacist_advice?: string | null
-          pharmacist_name?: string | null
-          price?: number | null
-          skin_type?: string[] | null
-          slug?: string | null
-          sold_30d?: never
-          stock?: number | null
-          technical_pdf_url?: string | null
-          texture?: string | null
-          updated_at?: string | null
-          usage?: string | null
-          volume?: string | null
-        }
-        Update: {
-          benefits?: string[] | null
-          cost_price?: number | null
-          created_at?: string | null
-          currency?: string | null
-          description?: string | null
-          id?: string | null
-          inci?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          is_new?: boolean | null
-          name?: string | null
-          old_price?: number | null
-          pharmacist_advice?: string | null
-          pharmacist_name?: string | null
-          price?: number | null
-          skin_type?: string[] | null
-          slug?: string | null
-          sold_30d?: never
-          stock?: number | null
-          technical_pdf_url?: string | null
-          texture?: string | null
-          updated_at?: string | null
-          usage?: string | null
-          volume?: string | null
         }
         Relationships: []
       }
@@ -1338,8 +1360,8 @@ export type Database = {
           p_phone: string
         }
         Returns: {
-          id: string
           confirmation_token: string
+          id: string
         }[]
       }
       create_reservation: { Args: { p_cart_id: string }; Returns: string }
@@ -1372,12 +1394,12 @@ export type Database = {
         Args: {
           p_client_token: string
           p_created_by: string
-          p_invoice_date: string | null
+          p_invoice_date: string
           p_items: Json
-          p_ncf: string | null
-          p_note: string | null
-          p_supplier_name: string | null
-          p_supplier_rnc: string | null
+          p_ncf: string
+          p_note: string
+          p_supplier_name: string
+          p_supplier_rnc: string
         }
         Returns: Json
       }
@@ -1385,7 +1407,7 @@ export type Database = {
         Args: {
           p_client_token: string
           p_created_by: string
-          p_note: string | null
+          p_note: string
           p_product_id: string
           p_quantity: number
           p_reason: string

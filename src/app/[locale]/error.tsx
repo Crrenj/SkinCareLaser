@@ -1,10 +1,18 @@
 'use client'
 
+import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 
-export default function LocaleError({ reset }: { error: Error; reset: () => void }) {
+export default function LocaleError({ error, reset }: { error: Error; reset: () => void }) {
   const t = useTranslations('Error')
+
+  // Les error boundaries React avalent l'erreur — remontée explicite à
+  // Sentry (no-op sans DSN).
+  useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
 
   return (
     <main className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">

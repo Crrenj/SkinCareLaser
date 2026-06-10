@@ -1,9 +1,17 @@
 'use client'
 
+import { useEffect } from 'react'
+import * as Sentry from '@sentry/nextjs'
 import Link from 'next/link'
 import { ADMIN_HOME_PATH } from '@/lib/constants'
 
-export default function AdminError({ reset }: { error: Error; reset: () => void }) {
+export default function AdminError({ error, reset }: { error: Error; reset: () => void }) {
+  // Les error boundaries React avalent l'erreur — remontée explicite à
+  // Sentry (no-op sans DSN).
+  useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   return (
     <main className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
       <h1 className="font-serif text-[48px] leading-[1.05] text-ink-900 mb-4">

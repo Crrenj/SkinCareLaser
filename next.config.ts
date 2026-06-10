@@ -63,7 +63,10 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: blob: https:",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com",
+              // Sentry : un wildcard CSP ne franchit pas les points →
+              // *.sentry.io NE couvre PAS oXXX.ingest.us.sentry.io, il faut
+              // les 3 formes d'ingest (US/EU/legacy).
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://*.ingest.sentry.io",
               "frame-src 'self' https://accounts.google.com https://maps.google.com",
               "frame-ancestors 'self'",
               "object-src 'none'",

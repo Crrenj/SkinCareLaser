@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@sentry/nextjs": "^10.57.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.2",
     "@tiptap/extension-image": "^3.23.6",

@@ -33,14 +33,17 @@ export async function POST(request: NextRequest) {
   if (!parsed.ok) return parsed.response
   const { client_token, supplier_name, supplier_rnc, ncf, invoice_date, items, note } = parsed.data
 
-  const clean = (s: string | undefined) => (s && s.trim() ? s.trim() : null)
+  // Les params text du RPC (sans DEFAULT SQL) acceptent NULL à l'exécution,
+  // mais le générateur de types Supabase les émet `string` stricts → cast.
+  const clean = (s: string | undefined) =>
+    (s && s.trim() ? s.trim() : null) as unknown as string
 
   const { error } = await supabaseAdmin.rpc('record_stock_entries', {
     p_items: items,
     p_supplier_name: clean(supplier_name),
     p_supplier_rnc: clean(supplier_rnc),
     p_ncf: clean(ncf),
-    p_invoice_date: invoice_date ?? null,
+    p_invoice_date: (invoice_date ?? null) as unknown as string,
     p_note: clean(note),
     p_created_by: auth.userId,
     p_client_token: client_token,

@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
 
@@ -17,6 +18,11 @@ export function apiError(
   error?: unknown,
   status = 500,
 ): NextResponse {
-  if (error !== undefined) logger.error(`[api ${status}] ${userMessage}`, error)
+  if (error !== undefined) {
+    logger.error(`[api ${status}] ${userMessage}`, error)
+    // Les 5xx attrapés ne passent pas par onRequestError → capture explicite
+    // (no-op sans DSN).
+    Sentry.captureException(error, { extra: { userMessage, status } })
+  }
   return NextResponse.json({ error: userMessage }, { status })
 }

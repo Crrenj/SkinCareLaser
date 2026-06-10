@@ -36,7 +36,9 @@ export async function POST(request: NextRequest) {
     p_product_id: product_id,
     p_quantity: quantity,
     p_reason: reason,
-    p_note: note?.trim() ? note.trim() : null,
+    // text sans DEFAULT SQL : NULL accepté à l'exécution, typé `string` strict
+    // par le générateur Supabase → cast.
+    p_note: (note?.trim() ? note.trim() : null) as unknown as string,
     p_created_by: auth.userId,
     p_client_token: client_token,
   })

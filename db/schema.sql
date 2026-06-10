@@ -5,7 +5,7 @@
 -- LECTURE régénérable (schema-only) — pratique pour voir tout le schéma d'un
 -- coup. Toute modif doit aussi exister dans une migration.
 --
--- Régénéré le 2026-06-09 via scripts/db-dump.sh (pg_dump natif de l'hôte,
+-- Régénéré le 2026-06-10 via scripts/db-dump.sh (pg_dump natif de l'hôte,
 -- SANS Docker — cf. en-tête du script). Re-dumper : bash scripts/db-dump.sh
 -- ======================================================================
 
@@ -497,6 +497,14 @@ BEGIN
     AND expires_at < NOW();
 
   GET DIAGNOSTICS v_count = ROW_COUNT;
+
+  -- Heartbeat : trace de la dernière exécution (lue par /api/health).
+  INSERT INTO public.cron_heartbeats (job_name, last_run_at, last_result)
+  VALUES ('expire-stale-reservations', now(), v_count::text)
+  ON CONFLICT (job_name) DO UPDATE
+    SET last_run_at = EXCLUDED.last_run_at,
+        last_result = EXCLUDED.last_result;
+
   RETURN v_count;
 END;
 $$;
@@ -1141,6 +1149,16 @@ CREATE TABLE IF NOT EXISTS "public"."contact_messages" (
 ALTER TABLE "public"."contact_messages" OWNER TO "postgres";
 
 
+CREATE TABLE IF NOT EXISTS "public"."cron_heartbeats" (
+    "job_name" "text" NOT NULL,
+    "last_run_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "last_result" "text"
+);
+
+
+ALTER TABLE "public"."cron_heartbeats" OWNER TO "postgres";
+
+
 CREATE TABLE IF NOT EXISTS "public"."expenses" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "amount" numeric(12,2) NOT NULL,
@@ -1673,6 +1691,11 @@ ALTER TABLE ONLY "public"."carts"
 
 ALTER TABLE ONLY "public"."contact_messages"
     ADD CONSTRAINT "contact_messages_pkey" PRIMARY KEY ("id");
+
+
+
+ALTER TABLE ONLY "public"."cron_heartbeats"
+    ADD CONSTRAINT "cron_heartbeats_pkey" PRIMARY KEY ("job_name");
 
 
 
@@ -2462,6 +2485,9 @@ ALTER TABLE "public"."carts" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "public"."contact_messages" ENABLE ROW LEVEL SECURITY;
 
 
+ALTER TABLE "public"."cron_heartbeats" ENABLE ROW LEVEL SECURITY;
+
+
 ALTER TABLE "public"."expenses" ENABLE ROW LEVEL SECURITY;
 
 
@@ -2689,6 +2715,10 @@ GRANT ALL ON TABLE "public"."carts" TO "service_role";
 GRANT ALL ON TABLE "public"."contact_messages" TO "anon";
 GRANT ALL ON TABLE "public"."contact_messages" TO "authenticated";
 GRANT ALL ON TABLE "public"."contact_messages" TO "service_role";
+
+
+
+GRANT ALL ON TABLE "public"."cron_heartbeats" TO "service_role";
 
 
 
