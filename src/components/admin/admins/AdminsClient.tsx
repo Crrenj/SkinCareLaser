@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import {
+  Check,
+  Pencil,
   Search,
   Shield,
   ShieldCheck,
@@ -10,9 +12,11 @@ import {
   Loader2,
   Lock,
   UserPlus,
+  X,
 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
+import { formatAdminName, formatClientName } from '@/lib/userName'
 
 type AdminRole = 'admin' | 'super_admin'
 
@@ -52,6 +56,11 @@ export function AdminsClient() {
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<SearchRow[] | null>(null)
   const [searching, setSearching] = useState(false)
+
+  // Édition inline du pseudo (nom affiché des admins)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [nameDraft, setNameDraft] = useState('')
+  const [savingName, setSavingName] = useState(false)
 
   const isSuper = currentUser?.role === 'super_admin'
 
@@ -158,6 +167,35 @@ export function AdminsClient() {
     [patchUser, t, load],
   )
 
+  const startEditName = useCallback((row: AdminRow) => {
+    setEditingId(row.id)
+    setNameDraft(formatAdminName(row))
+  }, [])
+
+  const handleSaveName = useCallback(async () => {
+    const value = nameDraft.trim()
+    if (!editingId || !value) return
+    setSavingName(true)
+    try {
+      const res = await fetch('/api/admin/admins', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: editingId, displayName: value }),
+      })
+      if (!res.ok) {
+        toast.error(t('errorUpdateFailed'))
+        return
+      }
+      setAdmins((prev) =>
+        prev.map((a) => (a.id === editingId ? { ...a, displayName: value } : a)),
+      )
+      toast.success(t('toastNameSaved'))
+      setEditingId(null)
+    } finally {
+      setSavingName(false)
+    }
+  }, [editingId, nameDraft, t])
+
   const handleRevoke = useCallback(
     async (row: AdminRow) => {
       if (!window.confirm(t('confirmRevoke', { who: row.email ?? '' }))) return
@@ -228,14 +266,67 @@ export function AdminsClient() {
                         className="border-b border-sand-200 last:border-b-0 hover:bg-sand-50 transition-colors"
                       >
                         <td className="px-4 py-3 align-top">
-                          <div className="font-medium text-ink-900 flex items-center gap-2">
-                            {formatName(a) || <span className="text-ink-500 italic">—</span>}
-                            {isSelf && (
-                              <span className="text-[10px] font-semibold uppercase tracking-wider text-clay-700 bg-clay-50 border border-clay-200 rounded px-1.5 py-0.5">
-                                {t('youBadge')}
-                              </span>
-                            )}
-                          </div>
+                          {editingId === a.id ? (
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault()
+                                handleSaveName()
+                              }}
+                              className="flex items-center gap-1.5"
+                            >
+                              <input
+                                type="text"
+                                value={nameDraft}
+                                onChange={(e) => setNameDraft(e.target.value)}
+                                maxLength={60}
+                                autoFocus
+                                placeholder={t('namePlaceholder')}
+                                className="h-8 w-[180px] px-2 rounded-sm border border-sand-400 bg-sand-50 text-[13px] text-ink-900 focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/15"
+                              />
+                              <button
+                                type="submit"
+                                disabled={savingName || !nameDraft.trim()}
+                                title={t('nameSave')}
+                                aria-label={t('nameSave')}
+                                className="w-7 h-7 inline-flex items-center justify-center rounded-sm text-olive-700 hover:bg-sand-200 disabled:opacity-50 transition-colors"
+                              >
+                                {savingName ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Check className="w-3.5 h-3.5" />
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingId(null)}
+                                title={t('nameCancel')}
+                                aria-label={t('nameCancel')}
+                                className="w-7 h-7 inline-flex items-center justify-center rounded-sm text-ink-500 hover:bg-sand-200 transition-colors"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </form>
+                          ) : (
+                            <div className="font-medium text-ink-900 flex items-center gap-2">
+                              {formatAdminName(a) || (
+                                <span className="text-ink-500 italic">—</span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => startEditName(a)}
+                                title={t('editName')}
+                                aria-label={t('editName')}
+                                className="w-6 h-6 inline-flex items-center justify-center rounded-sm text-ink-500 hover:bg-sand-200 hover:text-clay-700 transition-colors"
+                              >
+                                <Pencil className="w-3 h-3" />
+                              </button>
+                              {isSelf && (
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-clay-700 bg-clay-50 border border-clay-200 rounded px-1.5 py-0.5">
+                                  {t('youBadge')}
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <div
                             className="text-[12px] text-ink-500 truncate max-w-[260px]"
                             title={a.email ?? undefined}
@@ -342,9 +433,9 @@ export function AdminsClient() {
                       <UserPlus className="w-4 h-4 text-ink-500 shrink-0" />
                       <div className="min-w-0 flex-1">
                         <div className="text-[13.5px] text-ink-900 truncate">
-                          {formatName(u) || u.email || '—'}
+                          {formatClientName(u) || u.email || '—'}
                         </div>
-                        {formatName(u) && u.email && (
+                        {formatClientName(u) && u.email && (
                           <div className="text-[12px] text-ink-500 truncate">{u.email}</div>
                         )}
                       </div>
@@ -397,14 +488,6 @@ function RoleBadge({
       {isSuper ? t('roleSuperAdmin') : t('roleAdmin')}
     </span>
   )
-}
-
-function formatName(r: {
-  displayName: string | null
-  firstName: string | null
-  lastName: string | null
-}): string {
-  return r.displayName || [r.firstName, r.lastName].filter(Boolean).join(' ') || ''
 }
 
 function formatDate(iso: string): string {

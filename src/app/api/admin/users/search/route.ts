@@ -39,11 +39,13 @@ export async function GET(request: NextRequest) {
     return apiError('Erreur serveur', error, 500)
   }
 
+  // Affichage CLIENT : nom + prénom (le pseudo `display_name` est réservé aux
+  // admins, cf. src/lib/userName.ts) — fallback pseudo si profil sans nom.
   const results = (data ?? []).map((p) => ({
     id: p.id,
     name:
+      [p.last_name, p.first_name].filter(Boolean).join(' ').trim() ||
       p.display_name?.trim() ||
-      [p.first_name, p.last_name].filter(Boolean).join(' ').trim() ||
       '—',
     phone: p.phone ?? null,
   }))
