@@ -4,6 +4,11 @@ import { routing } from '@/i18n/routing'
 
 const BASE_URL = 'https://farmau.do'
 
+// ISR : depuis la bascule cookieless (Phase 1), le sitemap est généré au build
+// — sans revalidate, un nouveau produit/post n'y apparaîtrait qu'au prochain
+// deploy. 1 h = fraîcheur largement suffisante pour les crawlers.
+export const revalidate = 3600
+
 /**
  * Sitemap dynamique : enumerre toutes les pages publiques × 3 locales,
  * plus une entrée par produit actif × 3 locales.

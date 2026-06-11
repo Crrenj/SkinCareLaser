@@ -42,6 +42,21 @@ export interface StockEntryPayload {
   items: { product_id: string; quantity: number; unit_cost: number; itbis_included: boolean }[]
 }
 
+/**
+ * Payload de l'écran unifié « Initialiser l'inventaire » (L-2, lancement).
+ * Aiguillage : `unit_cost` renseigné → RÉCEPTION (record_stock_entries, CMP) ;
+ * vide → AJUSTE (stock absolu). + prix de vente / activation optionnels
+ * (orchestrés séquentiellement par useStockData.initInventory).
+ */
+export interface InitInventoryPayload {
+  client_token: string
+  product_id: string
+  quantity: number
+  unit_cost: number | null
+  price: number | null
+  activate: boolean
+}
+
 /** Payload POST /api/admin/stock/loss (perte de stock / merma). */
 export interface StockLossPayload {
   client_token: string

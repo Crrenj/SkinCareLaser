@@ -250,6 +250,16 @@ export const reservationPatch = z.object({
   id: z.string().uuid('id requis'),
   status: z.enum(['pending', 'confirmed', 'collected', 'expired', 'cancelled']).optional(),
   admin_notes: z.string().optional(),
+  // P-FLEX volet 1 : ajustement admin du prix FACTURÉ d'une ligne (tarif
+  // préférentiel client fidèle). La RPC set_reservation_item_price refuse
+  // hors pending/confirmed et recalcule total_price atomiquement ; tracé en
+  // audit high-impact côté route. Route admin only — jamais exposé au client.
+  item_update: z
+    .object({
+      item_id: z.string().uuid(),
+      unit_price: z.number().min(0).max(100_000_000),
+    })
+    .optional(),
 })
 
 // Réservation INVITÉ depuis la boutique (visiteur sans compte). Les items
@@ -332,6 +342,15 @@ export const productUpdate = z.object({
   range_id: z.string().nullish(),
   imageFile: z.string().optional(),
   selectedTags: z.array(z.string().uuid()).optional(),
+})
+
+// Activation/désactivation EXPLICITE d'un produit (route dédiée
+// /api/admin/products/[id]/active). Volontairement HORS de productUpdate :
+// le strip d'is_active y est un invariant testé anti-mass-assignment
+// (schemas.test.ts) — l'activation est une action délibérée, pas un champ
+// du formulaire produit. C'est le levier de la barrière L-3 du lancement.
+export const productActiveBody = z.object({
+  is_active: z.boolean(),
 })
 
 export const userPatch = z.object({

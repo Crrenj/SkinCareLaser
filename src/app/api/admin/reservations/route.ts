@@ -231,7 +231,60 @@ export async function PATCH(request: NextRequest) {
 
   const parsed = parseBody(reservationPatch, raw)
   if (!parsed.ok) return parsed.response
-  const { id, status, admin_notes } = parsed.data
+  const { id, status, admin_notes, item_update } = parsed.data
+
+  // P-FLEX volet 1 — ajustement du prix FACTURÉ d'une ligne (tarif
+  // préférentiel). RPC atomique : garde statut pending/confirmed + recalcul
+  // total_price dans la même transaction. CHANGEMENT SENSIBLE (argent) →
+  // audit log high-impact avec diff ancien→nouveau.
+  if (item_update) {
+    const { data: priceDiff, error: priceErr } = await supabaseAdmin.rpc(
+      'set_reservation_item_price',
+      {
+        p_reservation_id: id,
+        p_item_id: item_update.item_id,
+        p_unit_price: item_update.unit_price,
+      },
+    )
+    if (priceErr) {
+      if (priceErr.message.includes('price_locked')) {
+        return NextResponse.json({ error: 'price_locked' }, { status: 409 })
+      }
+      if (
+        priceErr.message.includes('item_not_found') ||
+        priceErr.message.includes('reservation_not_found')
+      ) {
+        return NextResponse.json({ error: 'not_found' }, { status: 404 })
+      }
+      if (priceErr.message.includes('invalid_price')) {
+        return NextResponse.json({ error: 'invalid_price' }, { status: 400 })
+      }
+      return apiError("Erreur lors de l'ajustement du prix", priceErr, 500)
+    }
+
+    const d = priceDiff as {
+      product_name: string
+      quantity: number
+      old_unit_price: number
+      new_unit_price: number
+      old_total: number
+      new_total: number
+    }
+    recordAuditLog({
+      actorId: auth.userId,
+      action: 'update',
+      entity: 'reservation',
+      entityId: id,
+      summary: `Precio ajustado: ${d.product_name} ${d.old_unit_price} → ${d.new_unit_price} (total ${d.old_total} → ${d.new_total})`,
+      diff: {
+        item_id: item_update.item_id,
+        product_name: d.product_name,
+        quantity: d.quantity,
+        unit_price: { old: d.old_unit_price, new: d.new_unit_price },
+        total_price: { old: d.old_total, new: d.new_total },
+      },
+    })
+  }
 
   type ReservationStatusEnum = 'pending' | 'confirmed' | 'collected' | 'expired' | 'cancelled'
   const updateData: {
@@ -252,7 +305,18 @@ export async function PATCH(request: NextRequest) {
   }
 
   if (Object.keys(updateData).length === 0) {
-    return NextResponse.json({ error: 'Aucun champ à mettre à jour' }, { status: 400 })
+    if (!item_update) {
+      return NextResponse.json({ error: 'Aucun champ à mettre à jour' }, { status: 400 })
+    }
+    // item_update seul : la RPC a déjà tout fait — renvoyer la réservation
+    // fraîche (total_price recalculé).
+    const { data: fresh, error: freshErr } = await supabaseAdmin
+      .from('reservations')
+      .select()
+      .eq('id', id)
+      .single()
+    if (freshErr) return apiError('Erreur serveur', freshErr, 500)
+    return NextResponse.json({ reservation: fresh })
   }
 
   // Capture l'ancien statut AVANT l'update pour piloter le stock (décrément à

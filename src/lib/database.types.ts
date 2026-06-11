@@ -1449,6 +1449,14 @@ export type Database = {
         Args: { p_promotion_id: string; p_targets: Json }
         Returns: undefined
       }
+      set_reservation_item_price: {
+        Args: {
+          p_item_id: string
+          p_reservation_id: string
+          p_unit_price: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       banner_slot: "hero" | "banner" | "card" | "modal"

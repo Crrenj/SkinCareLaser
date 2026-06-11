@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { ArrowRight, Check, Loader2, Pencil, X } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
 import type { Reservation } from './types'
 import {
@@ -21,6 +21,12 @@ type ReservationDrawerProps = {
   onAdvance: (r: Reservation) => Promise<void> | void
   onCancel: (r: Reservation) => Promise<void> | void
   onUpdateNote: (id: string, value: string) => Promise<void>
+  /**
+   * P-FLEX : ajustement admin du prix facturé d'une ligne (pending/confirmed).
+   * Optionnelle : /admin/ventas (journal collected-only) ne la fournit pas —
+   * l'édition y est interdite par design (vente déjà comptabilisée).
+   */
+  onUpdateItemPrice?: (id: string, itemId: string, unitPrice: number) => Promise<void>
   busy?: boolean
 }
 
@@ -31,9 +37,11 @@ export function ReservationDrawer({
   onAdvance,
   onCancel,
   onUpdateNote,
+  onUpdateItemPrice,
   busy = false,
 }: ReservationDrawerProps) {
   const t = useTranslations('Admin.reservations')
+  const tc = useTranslations('Admin.common')
   const { statusLabel, nextStatusLabel, relativeAndAbsolute, originLabel, displayName } =
     useReservationFormat()
   const r = reservation
@@ -46,6 +54,35 @@ export function ReservationDrawer({
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
   const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const noteSnapshot = useRef(r.admin_notes ?? '')
+
+  // P-FLEX : édition inline du prix d'une ligne — UNIQUEMENT tant que la
+  // réservation n'est pas comptabilisée (pending/confirmed). Jamais sur
+  // collected/expired/cancelled (la RPC le re-vérifie côté serveur).
+  const canEditPrice =
+    !!onUpdateItemPrice && (r.status === 'pending' || r.status === 'confirmed')
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const [priceDraft, setPriceDraft] = useState('')
+  const [priceSaving, setPriceSaving] = useState(false)
+
+  const startPriceEdit = useCallback((itemId: string, current: number) => {
+    setEditingItemId(itemId)
+    setPriceDraft(String(current))
+  }, [])
+
+  const commitPriceEdit = useCallback(async () => {
+    if (!editingItemId || !onUpdateItemPrice) return
+    const value = Number(priceDraft)
+    if (!Number.isFinite(value) || value < 0) return
+    setPriceSaving(true)
+    try {
+      await onUpdateItemPrice(r.id, editingItemId, value)
+      setEditingItemId(null)
+    } catch {
+      // l'appelant affiche le toast d'erreur ; on garde l'éditeur ouvert.
+    } finally {
+      setPriceSaving(false)
+    }
+  }, [editingItemId, priceDraft, onUpdateItemPrice, r.id])
 
   useEffect(() => {
     setNote(r.admin_notes ?? '')
@@ -167,9 +204,64 @@ export function ReservationDrawer({
                         {t('drawer.perUnit', { qty: it.quantity, price: fmtDOP(it.unit_price) })}
                       </small>
                     </div>
-                    <span className="font-mono text-[12px] text-ink-900 text-right">
-                      {fmtDOP(it.unit_price * it.quantity)} DOP
-                    </span>
+                    {editingItemId === it.id ? (
+                      <span className="inline-flex items-center gap-1">
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          value={priceDraft}
+                          onChange={(e) => setPriceDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') void commitPriceEdit()
+                            if (e.key === 'Escape') setEditingItemId(null)
+                          }}
+                          disabled={priceSaving}
+                          autoFocus
+                          aria-label={t('drawer.editPrice')}
+                          className="w-[88px] h-7 px-2 rounded-md border border-sand-300 bg-sand-50 font-mono text-[12px] text-ink-900 text-right focus-visible:outline-none focus-visible:border-clay-700 focus-visible:ring-2 focus-visible:ring-clay-700/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => void commitPriceEdit()}
+                          disabled={priceSaving}
+                          aria-label={tc('save')}
+                          className="p-1 rounded text-olive-700 hover:bg-sand-200 disabled:opacity-50 transition-colors"
+                        >
+                          {priceSaving ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Check className="w-3.5 h-3.5" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingItemId(null)}
+                          disabled={priceSaving}
+                          aria-label={tc('cancel')}
+                          className="p-1 rounded text-ink-500 hover:bg-sand-200 disabled:opacity-50 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 justify-end">
+                        <span className="font-mono text-[12px] text-ink-900 text-right">
+                          {fmtDOP(it.unit_price * it.quantity)} DOP
+                        </span>
+                        {canEditPrice && (
+                          <button
+                            type="button"
+                            onClick={() => startPriceEdit(it.id, it.unit_price)}
+                            title={t('drawer.editPrice')}
+                            aria-label={t('drawer.editPrice')}
+                            className="p-1 rounded text-ink-500 hover:text-clay-700 hover:bg-sand-200 transition-colors"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                        )}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

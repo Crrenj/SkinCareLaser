@@ -964,7 +964,7 @@
     },
     "addToCartCta": "Ajouter au panier",
     "wishlistAriaLabel": "Ajouter aux favoris",
-    "priceNote": "Prix indicatif — confirmé à la réservation.",
+    "priceNote": "Prix indicatif — confirmé en pharmacie.",
     "availability": "Disponible en pharmacie · prêt sous 24h",
     "availabilityOut": "Indisponible en pharmacie pour le moment",
     "reservation": {
@@ -1622,7 +1622,9 @@
       "create": "Créer",
       "required": "*",
       "saving": "Enregistrement…",
-      "active": "Actif"
+      "active": "Actif",
+      "decrease": "Diminuer",
+      "increase": "Augmenter"
     },
     "modals": {
       "product": {
@@ -1892,6 +1894,35 @@
         "saving": "Enregistrement…",
         "saved": "Perte enregistrée",
         "error": "Échec de l'enregistrement de la perte"
+      },
+      "init": {
+        "eyebrow": "Initialisation · inventaire d'ouverture",
+        "title": "Initialiser le produit",
+        "rowTitle": "Initialiser ce produit",
+        "rowAria": "Initialiser l'inventaire de {name}",
+        "productLabel": "Produit",
+        "currentStockLabel": "Stock actuel",
+        "currentPriceLabel": "Prix actuel",
+        "placeholderBadge": "placeholder",
+        "qtyLabel": "Quantité comptée",
+        "qtyHelp": "Comptez physiquement les unités en rayon.",
+        "costLabel": "Coût d'achat unitaire",
+        "costOptional": "facultatif",
+        "costPlaceholder": "0.00",
+        "costHelp": "Facture sous la main ? Saisissez le coût pour avoir la marge dès la 1re vente. Sinon, laissez vide.",
+        "priceLabel": "Prix de vente",
+        "priceOptional": "facultatif",
+        "pricePlaceholder": "0.00",
+        "priceHelp": "Remplace le prix actuel sur le site.",
+        "activateLabel": "Activer le produit",
+        "activateHelp": "Rendre le produit visible sur le site une fois initialisé.",
+        "modeReception": "Réception : stock {result}, coût enregistré (marge dès la 1re vente).",
+        "modeAdjust": "Ajuste : stock fixé à {result}, sans coût (marge au 1er réappro).",
+        "resultingStockLabel": "Stock après initialisation",
+        "submit": "Initialiser",
+        "saving": "Initialisation…",
+        "saved": "Produit initialisé",
+        "error": "Échec de l'initialisation"
       }
     },
     "promotions": {
@@ -2261,7 +2292,10 @@
         "saved": "Enregistré",
         "openWhatsapp": "Ouvrir WhatsApp",
         "noNextAction": "Aucune action suivante",
-        "cancelReservation": "Annuler la réservation"
+        "cancelReservation": "Annuler la réservation",
+        "editPrice": "Ajuster le prix",
+        "priceUpdated": "Prix ajusté — total recalculé",
+        "priceLocked": "Prix verrouillé : la réservation est déjà comptabilisée ou clôturée"
       }
     },
     "users": {
