@@ -210,16 +210,54 @@ export default async function ProductPage({
   }
 
   const rangeId = prodRaw.range?.id
-  const mainTagsByCategory = buildTagMap(prodRaw.product_tags)
 
-  // Avis approuvés — liste affichée + agrégat (résumé PDP + aggregateRating JSON-LD).
-  const { data: reviewRows } = await supabase
-    .from('reviews')
-    .select('id, rating, title, body, author_name, verified_purchase, created_at')
-    .eq('product_id', prodRaw.id)
-    .eq('status', 'approved')
-    .order('created_at', { ascending: false })
-    .limit(50)
+  // Combien de produits similaires au total (priorité : même gamme d'abord,
+  // puis un complément ciblé). Inchangé : jusqu'à 3 même-gamme + 2 complément.
+  const SAME_RANGE_LIMIT = 3
+  const COMPLEMENT_LIMIT = 2
+  const SIMILAR_LIMIT = SAME_RANGE_LIMIT + COMPLEMENT_LIMIT
+
+  // 2. Tout ce qui ne dépend que du produit principal en parallèle :
+  //    avis approuvés + produits actifs de la même gamme + un pool ciblé
+  //    d'autres produits actifs (pour combler le complément). Plus de
+  //    « charger 50 produits puis filtrer en JS » : chaque requête est bornée
+  //    et explicitement filtrée sur is_active = true.
+  const [
+    { data: reviewRows },
+    { data: sameRangeRaw },
+    { data: complementPoolRaw },
+  ] = await Promise.all([
+    // Avis approuvés — liste affichée + agrégat (résumé PDP + aggregateRating JSON-LD).
+    supabase
+      .from('reviews')
+      .select('id, rating, title, body, author_name, verified_purchase, created_at')
+      .eq('product_id', prodRaw.id)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    // Similaires — priorité 1 : produits actifs de la même gamme (requête ciblée).
+    rangeId
+      ? supabase
+          .from('products')
+          .select(PRODUCT_SELECT)
+          .eq('range_id', rangeId)
+          .neq('id', prodRaw.id)
+          .eq('is_active', true)
+          .limit(SAME_RANGE_LIMIT)
+          .returns<RawProduct[]>()
+      : Promise.resolve({ data: null as RawProduct[] | null }),
+    // Similaires — priorité 2 : pool ciblé d'autres produits actifs pour combler
+    // le complément. On sur-récupère légèrement (+ même-gamme) pour pouvoir
+    // dédupliquer ce qui chevauche la même gamme avant de couper au manque réel.
+    supabase
+      .from('products')
+      .select(PRODUCT_SELECT)
+      .neq('id', prodRaw.id)
+      .eq('is_active', true)
+      .limit(SIMILAR_LIMIT + SAME_RANGE_LIMIT)
+      .returns<RawProduct[]>(),
+  ])
+
   const reviews = reviewRows ?? []
   const reviewCount = reviews.length
   const reviewAverage =
@@ -227,41 +265,13 @@ export default async function ProductPage({
       ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount) * 10) / 10
       : 0
 
-  // 2. Produits similaires — étape A (même gamme)
-  const { data: sameRange } = rangeId
-    ? await supabase
-        .from('products')
-        .select(PRODUCT_SELECT)
-        .eq('range_id', rangeId)
-        .neq('id', prodRaw.id)
-        .limit(3)
-        .returns<RawProduct[]>()
-    : { data: null }
+  const sameRange = sameRangeRaw ?? []
+  const seen = new Set<string>(sameRange.map((p) => p.id))
+  const complement = (complementPoolRaw ?? [])
+    .filter((p) => !seen.has(p.id))
+    .slice(0, SIMILAR_LIMIT - sameRange.length)
 
-  // 3. Produits similaires — étape B (tags communs par catégorie)
-  const { data: candidates } = await supabase
-    .from('products')
-    .select(PRODUCT_SELECT)
-    .neq('id', prodRaw.id)
-    .limit(50)
-    .returns<RawProduct[]>()
-
-  const wantCats = ['skin_type', 'category', 'need']
-  const mainTags = mainTagsByCategory
-
-  const stepB = (candidates ?? [])
-    .filter(p => {
-      const mapB = buildTagMap(p.product_tags)
-      return wantCats.every(
-        cat =>
-          Array.isArray(mainTags[cat]) &&
-          Array.isArray(mapB[cat]) &&
-          mainTags[cat].some(v => mapB[cat].includes(v))
-      )
-    })
-    .slice(0, 2)
-
-  const similarRaw = [...(sameRange ?? []), ...stepB]
+  const similarRaw = [...sameRange, ...complement]
   // Prix effectifs (promo) en batch pour le produit principal + similaires.
   const priceMap = await fetchEffectivePrices(supabase, [prodRaw.id, ...similarRaw.map((p) => p.id)])
   const mainProduct = mapProduct(prodRaw, priceMap.get(prodRaw.id))

@@ -1382,6 +1382,18 @@ export type Database = {
         Returns: number
       }
       expire_stale_reservations: { Args: never; Returns: number }
+      get_catalogue_page: {
+        Args: {
+          p_brands?: string[]
+          p_page?: number
+          p_page_size?: number
+          p_q?: string
+          p_ranges?: string[]
+          p_sort?: string
+          p_tags?: Json
+        }
+        Returns: Json
+      }
       get_messages_stats: { Args: never; Returns: Json }
       get_or_create_cart: {
         Args: { p_anonymous_id?: string; p_user_id?: string }

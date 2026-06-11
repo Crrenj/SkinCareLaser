@@ -21,11 +21,10 @@ const CatalogueClient = dynamic(() => import('@/components/CatalogueClient'), {
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import {
   parseFilters,
-  filterProducts,
-  computeFacetedCounts,
   type CatalogueProduct,
+  type FacetedCounts,
 } from '@/lib/catalogueFilters'
-import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
+import { applyPromo } from '@/lib/pricing'
 import { safeJsonLd } from '@/lib/jsonLd'
 
 export const revalidate = 60
@@ -56,12 +55,14 @@ export async function generateMetadata({
 }
 
 type TagItem = { name: string; tag_type: string }
-type RangeJoin = {
-  id: string
+type RangeVocabRow = {
   name: string
-  brand: { id: string; name: string } | null
+  brand: { name: string } | null
+  products: { id: string }[] | null
 }
-type RawProduct = {
+
+/** Forme des items renvoyés par la RPC get_catalogue_page (jsonb). */
+type RpcItem = {
   id: string
   slug: string
   name: string
@@ -72,9 +73,23 @@ type RawProduct = {
   is_new: boolean | null
   is_featured: boolean | null
   volume: string | null
-  product_images: { url: string; alt: string | null }[] | null
-  range: RangeJoin | null
-  product_tags: { tag: TagItem | null }[] | null
+  effective_price: string | number | null
+  brand: string
+  range: string
+  images: { url: string; alt: string | null }[]
+  tags: { label: string; category: string }[]
+}
+
+type RpcResult = {
+  total: number
+  total_all: number
+  page: number
+  items: RpcItem[]
+  facets: {
+    brands: Record<string, number>
+    ranges: Record<string, number>
+    tags: Record<string, Record<string, number>>
+  }
 }
 
 export default async function Catalogue({
@@ -90,104 +105,108 @@ export default async function Catalogue({
   const t = await getTranslations('Catalogue')
   const supabase = createSupabasePublicClient()
 
-  const { data: products, error: pErr } = await supabase
-    .from('products')
-    .select(`
-      id,
-      slug,
-      name,
-      price,
-      old_price,
-      currency,
-      stock,
-      is_new,
-      is_featured,
-      volume,
-      product_images ( url, alt ),
-      range:ranges (
-        id,
-        name,
-        brand:brands ( id, name )
-      ),
-      product_tags (
-        tag:tags_with_types ( name, tag_type )
-      )
-    `)
-    .eq('is_active', true)
-    .limit(500)
-    .returns<RawProduct[]>()
+  // 1) Vocabulaire de filtres (léger) : gammes + marques ayant ≥ 1 produit
+  //    actif, et tous les tags par type. Indispensable AVANT la RPC :
+  //    parseFilters résout les params URL (nom exact OU slug accentué) contre
+  //    ces listes — contrat figé par catalogueFilters.test.ts (G-3a).
+  const [{ data: rangeRows, error: rErr }, { data: tags, error: tErr }] = await Promise.all([
+    supabase
+      .from('ranges')
+      .select('name, brand:brands!inner(name), products!inner(id)')
+      .eq('products.is_active', true)
+      .limit(1, { referencedTable: 'products' })
+      .returns<RangeVocabRow[]>(),
+    supabase
+      .from('tags_with_types')
+      .select('name, tag_type')
+      .returns<TagItem[]>(),
+  ])
 
-  const { data: tags, error: tErr } = await supabase
-    .from('tags_with_types')
-    .select('name, tag_type')
-    .returns<TagItem[]>()
-
-  if (pErr || tErr) {
-    logger.error(pErr || tErr)
+  if (rErr || tErr) {
+    logger.error(rErr || tErr)
     return <p className="p-6">{t('loadError')}</p>
   }
 
-  // Prix effectifs (promo) en batch → swap prix/old_price discount-aware.
-  const priceMap = await fetchEffectivePrices(supabase, (products ?? []).map((p) => p.id))
-
   const itemsByType: Record<string, string[]> = {}
-  tags?.forEach(tg => {
+  tags?.forEach((tg) => {
     itemsByType[tg.tag_type] ??= []
     itemsByType[tg.tag_type].push(tg.name)
   })
-  Object.keys(itemsByType).forEach(tagType => {
+  Object.keys(itemsByType).forEach((tagType) => {
     itemsByType[tagType].sort()
   })
 
-  const allProducts: CatalogueProduct[] = (products ?? []).map((p) => {
-    const { price, oldPrice } = applyPromo(
-      Number(p.price),
-      p.old_price != null ? Number(p.old_price) : undefined,
-      priceMap.get(p.id),
-    )
-    return {
-    id: p.id,
-    slug: p.slug,
-    name: p.name,
-    price,
-    oldPrice,
-    currency: p.currency,
-    stock: p.stock ?? undefined,
-    isNew: p.is_new ?? false,
-    isFeatured: p.is_featured ?? false,
-    volume: p.volume,
-    images: p.product_images ?? [],
-    brand: p.range?.brand?.name ?? '',
-    range: p.range?.name ?? '',
-    tags: (p.product_tags ?? []).flatMap((pt) =>
-      pt.tag ? [{ label: pt.tag.name, category: pt.tag.tag_type }] : [],
-    ),
-    }
-  })
-
-  const allBrands = Array.from(
-    new Set(allProducts.map((p) => p.brand).filter(Boolean)),
-  ).sort()
-
   const rangesByBrand: Record<string, string[]> = {}
-  allProducts.forEach((p) => {
-    if (p.brand && p.range) {
-      rangesByBrand[p.brand] ??= []
-      if (!rangesByBrand[p.brand].includes(p.range)) rangesByBrand[p.brand].push(p.range)
-    }
-  })
+  for (const row of rangeRows ?? []) {
+    const brandName = row.brand?.name
+    if (!brandName) continue
+    rangesByBrand[brandName] ??= []
+    if (!rangesByBrand[brandName].includes(row.name)) rangesByBrand[brandName].push(row.name)
+  }
   Object.keys(rangesByBrand).forEach((b) => rangesByBrand[b].sort())
 
+  const allBrands = Object.keys(rangesByBrand).sort()
   const allRanges = Object.values(rangesByBrand).flat()
+
   const filters = parseFilters(sp, allBrands, allRanges, itemsByType)
 
-  const filtered = filterProducts(allProducts, filters)
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_PER_PAGE))
-  const page = Math.min(filters.page, totalPages)
-  const startIndex = (page - 1) * PRODUCTS_PER_PAGE
-  const pageProducts = filtered.slice(startIndex, startIndex + PRODUCTS_PER_PAGE)
+  // 2) Filtrage + tri + pagination + facettes EN SQL (RPC get_catalogue_page,
+  //    migration 20260611150000) — fini le .limit(500) qui droppait le
+  //    catalogue au-delà de 500 produits. q est normalisé comme la colonne
+  //    générée name_search (minuscules + sans accents) → recherche
+  //    accent-insensible (D-4).
+  const qNormalized = filters.q.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 
-  const counts = computeFacetedCounts(allProducts, filters, allBrands, rangesByBrand, itemsByType)
+  const { data: rpcData, error: rpcErr } = await supabase.rpc('get_catalogue_page', {
+    p_brands: filters.brands,
+    p_ranges: filters.ranges,
+    p_tags: filters.tags,
+    p_q: qNormalized,
+    p_sort: filters.sort,
+    p_page: filters.page,
+    p_page_size: PRODUCTS_PER_PAGE,
+  })
+
+  if (rpcErr || !rpcData) {
+    logger.error(rpcErr)
+    return <p className="p-6">{t('loadError')}</p>
+  }
+
+  const result = rpcData as RpcResult
+
+  // 3) Mapping items → CatalogueProduct + swap prix promo (applyPromo, règle
+  //    unique du barré : oldPrice = max(base, old_price manuel)).
+  const pageProducts: CatalogueProduct[] = (result.items ?? []).map((p) => {
+    const base = Number(p.price)
+    const { price, oldPrice } = applyPromo(
+      base,
+      p.old_price != null ? Number(p.old_price) : undefined,
+      { base, effective: p.effective_price != null ? Number(p.effective_price) : base },
+    )
+    return {
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      price,
+      oldPrice,
+      currency: p.currency,
+      stock: p.stock ?? undefined,
+      isNew: p.is_new ?? false,
+      isFeatured: p.is_featured ?? false,
+      volume: p.volume,
+      images: p.images ?? [],
+      brand: p.brand ?? '',
+      range: p.range ?? '',
+      tags: p.tags ?? [],
+    }
+  })
+
+  const totalPages = Math.max(1, Math.ceil(result.total / PRODUCTS_PER_PAGE))
+  const counts: FacetedCounts = {
+    brands: result.facets?.brands ?? {},
+    ranges: result.facets?.ranges ?? {},
+    tags: result.facets?.tags ?? {},
+  }
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -195,7 +214,7 @@ export default async function Catalogue({
     name: t('jsonLdName'),
     description: t('jsonLdDescription'),
     url: localizedPath(locale, '/catalogue'),
-    numberOfItems: allProducts.length,
+    numberOfItems: result.total_all,
   }
 
   return (
@@ -208,9 +227,9 @@ export default async function Catalogue({
         />
         <CatalogueClient
           products={pageProducts}
-          visibleCount={filtered.length}
-          totalCount={allProducts.length}
-          currentPage={page}
+          visibleCount={result.total}
+          totalCount={result.total_all}
+          currentPage={result.page}
           totalPages={totalPages}
           sortBy={filters.sort}
           availableBrands={allBrands}

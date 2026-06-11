@@ -266,6 +266,7 @@ Découpage par scope/page :
 ## Conventions
 
 - **i18n** : tout texte UI passe par `useTranslations`/`getTranslations`. Pas de string FR dur dans le code. Le contenu BDD (noms produits, marques) reste tel quel.
+- **Colonne vs tag (taxonomie produit)** — modèle hybride endossé. Attributs **stables / d'affichage** = colonnes `products` (`volume`, `texture`, `inci`, `benefits[]` — lus par la PDP). Axes de **filtrage évolutifs** = tags (`tag_types → tags → product_tags`, lus par le filtre catalogue via `itemsByType`/`tagsByCategory`). **Doublon connu** : `skin_type[]` colonne (affichage PDP, prévue) **vs** tag_type **`types-peau`** (filtre catalogue) → la **source de vérité du filtre = le tag** ; la PDP affiche le type de peau via `tagsByCategory['types-peau']`, pas la colonne. ⚠️ État réel (audit 2026-06-10) : les colonnes `skin_type/texture/volume/benefits/inci` sont **vides 0/353**, et `PRODUCT_SELECT` de la PDP ne les fetch même pas — seuls les tags portent la donnée. **Ne PAS créer un nouvel axe à la fois en colonne ET en tag** sans trancher la source de vérité unique (filtre ⇒ tag ; affichage figé ⇒ colonne). `ProductDetailCard.tsx` (lit `skin_type`) est **orphelin** (0 import).
 - Path alias `@/*` → `src/*`.
 - TypeScript `strict: true`, **0 erreur tsc**. Lint : **0 warning**. ESLint config honore `^_` pattern.
 - ESLint warnings non bloquants au build (cf `eslint.config.mjs`). Le fichier `database.types.ts` est ignoré (généré).
