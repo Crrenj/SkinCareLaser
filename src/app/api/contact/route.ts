@@ -16,7 +16,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const ip = getClientIp(request)
-    const rl = await checkRateLimit(`contact:${ip}`, 5, 60)
+    // failClosed (G-5) : écriture sensible (création de ligne + spam possible)
+    // → si le rate-limiter est en panne, on REFUSE plutôt que laisser passer.
+    const rl = await checkRateLimit(`contact:${ip}`, 5, 60, { failClosed: true })
     if (!rl.allowed) {
       return NextResponse.json(
         { success: false, error: 'Trop de requêtes. Réessayez dans quelques instants.' },

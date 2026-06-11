@@ -59,6 +59,7 @@ const HIGH_IMPACT = new Set<`${AuditEntity}:${AuditAction}`>([
   'promotion:delete',
   'admin_user:update',
   'user:create',
+  'user:delete', // effacement de compte self-service (G-2) — destructif + RGPD
   'setting:update',
   'appearance:update',
   'home_layout:update',

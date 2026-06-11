@@ -1,11 +1,81 @@
 import { logger } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import { cookies } from 'next/headers'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { guardMutation } from '@/lib/csrf'
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 import { parseBody, guestReservationBody } from '@/lib/schemas'
+import {
+  sendReservationConfirmationEmail,
+  type ReservationEmailItem,
+} from '@/lib/reservationEmail'
+
+/**
+ * Charge le snapshot d'une réservation (contact + items + total + created_at)
+ * et envoie l'email de confirmation, NON-BLOQUANT (via `after()`). Best-effort
+ * absolu : tout est try/catch + logger.error — un échec ici ne peut jamais
+ * faire échouer la réponse de réservation. No-op si pas de service-role, pas
+ * d'email destinataire, ou pas de RESEND_API_KEY (cf. reservationEmail).
+ *
+ * @param fallbackEmail email à utiliser si la colonne contact_email est vide
+ *   (chemin compte : email de la session auth).
+ * @param locale       locale déjà résolue (profil > body > 'fr').
+ */
+function scheduleReservationEmail(params: {
+  reservationId: string
+  fallbackEmail?: string | null
+  locale?: string | null
+}): void {
+  const sb = supabaseAdmin
+  if (!sb) return
+  after(async () => {
+    try {
+      const { data: reservation, error: resErr } = await sb
+        .from('reservations')
+        .select('contact_email, contact_name, contact_phone, total_price, created_at')
+        .eq('id', params.reservationId)
+        .maybeSingle()
+      if (resErr || !reservation) {
+        if (resErr) logger.error('[reserve email] reservation lookup error:', resErr)
+        return
+      }
+
+      const to = (reservation.contact_email || params.fallbackEmail || '').trim()
+      if (!to) return // Réservation sans email (ex. invité sans email fourni) → pas d'envoi.
+
+      const { data: items, error: itemsErr } = await sb
+        .from('reservation_items')
+        .select('product_name, unit_price, quantity')
+        .eq('reservation_id', params.reservationId)
+      if (itemsErr) {
+        logger.error('[reserve email] items lookup error:', itemsErr)
+        return
+      }
+
+      const emailItems: ReservationEmailItem[] = (items ?? []).map((it) => ({
+        name: it.product_name,
+        unitPrice: Number(it.unit_price),
+        quantity: it.quantity,
+      }))
+      if (emailItems.length === 0) return
+
+      await sendReservationConfirmationEmail({
+        to,
+        reservationId: params.reservationId,
+        createdAt: reservation.created_at,
+        locale: params.locale,
+        contactName: reservation.contact_name,
+        contactPhone: reservation.contact_phone,
+        items: emailItems,
+        total: Number(reservation.total_price),
+      })
+    } catch (e) {
+      logger.error('[reserve email] unexpected error:', e)
+    }
+  })
+}
 
 /**
  * POST /api/cart/reserve
@@ -55,6 +125,18 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // Locale d'envoi de l'email : on lit le `preferred_locale` du profil ; si
+  // absent, on retombe sur la locale éventuellement passée dans le body (le
+  // client peut l'envoyer sans changer le contrat), puis 'fr'. Body lu de façon
+  // tolérante : le chemin compte n'exige aucun body.
+  let bodyLocale: string | null = null
+  try {
+    const raw = (await request.json()) as { locale?: unknown }
+    if (typeof raw?.locale === 'string') bodyLocale = raw.locale
+  } catch {
+    // Pas de body / JSON invalide : ignoré (le chemin compte n'en a pas besoin).
+  }
+
   const { data: reservationId, error: rpcError } = await supabase.rpc(
     'create_reservation',
     { p_cart_id: cart.id },
@@ -101,6 +183,22 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Email de confirmation (trace durable) — non-bloquant. Locale = preferred_locale
+  // du profil > locale du body > 'fr'. fallbackEmail = email de la session auth
+  // (la résa snapshote déjà l'email, mais on garde un filet).
+  if (typeof reservationId === 'string') {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('preferred_locale')
+      .eq('id', user.id)
+      .maybeSingle()
+    scheduleReservationEmail({
+      reservationId,
+      fallbackEmail: user.email ?? null,
+      locale: profile?.preferred_locale ?? bodyLocale,
+    })
+  }
+
   return NextResponse.json({ success: true, reservationId })
 }
 
@@ -143,9 +241,11 @@ async function reserveAsGuest(request: NextRequest) {
   // normalisé (contre la rotation d'IP). On garde le Retry-After le plus long.
   const ip = getClientIp(request)
   const phoneKey = contact_phone.replace(/[^0-9]/g, '')
+  // failClosed (G-5) : création de réservation invité (ligne DB + email) sans
+  // compte — rate-limiter en panne → refus, pas d'ouverture du robinet.
   const [byIp, byPhone] = await Promise.all([
-    checkRateLimit(`guest-reserve:ip:${ip}`, 5, 600),
-    checkRateLimit(`guest-reserve:phone:${phoneKey}`, 3, 3600),
+    checkRateLimit(`guest-reserve:ip:${ip}`, 5, 600, { failClosed: true }),
+    checkRateLimit(`guest-reserve:phone:${phoneKey}`, 3, 3600, { failClosed: true }),
   ])
   if (!byIp.allowed || !byPhone.allowed) {
     const retryAfter = Math.max(byIp.retryAfter, byPhone.retryAfter)
@@ -202,6 +302,19 @@ async function reserveAsGuest(request: NextRequest) {
   }
 
   const row = Array.isArray(data) ? data[0] : data
+
+  // Email de confirmation (trace durable) — uniquement si l'invité a fourni un
+  // email. Non-bloquant. Locale = celle passée dans le body (optionnelle) > 'fr'.
+  if (row?.id && contact_email) {
+    const rawBody = raw as { locale?: unknown }
+    const bodyLocale = typeof rawBody?.locale === 'string' ? rawBody.locale : null
+    scheduleReservationEmail({
+      reservationId: row.id,
+      fallbackEmail: contact_email,
+      locale: bodyLocale,
+    })
+  }
+
   return NextResponse.json({
     success: true,
     reservationId: row?.id,

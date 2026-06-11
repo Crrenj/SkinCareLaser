@@ -1384,8 +1384,12 @@
       "sessionDescription": "Está conectado desde este navegador. Para cerrar sesión, utilice el botón de la barra lateral.",
       "lastSignIn": "Último inicio de sesión:",
       "dangerHeading": "Eliminar mi cuenta",
-      "dangerDescription": "Conforme a su derecho al olvido (Ley 172-13 RD), puede solicitar la eliminación definitiva de su cuenta. La solicitud se tratará en un plazo de 30 días.",
-      "dangerCta": "Solicitar la eliminación"
+      "dangerDescription": "Conforme a su derecho al olvido (Ley 172-13 RD), puede eliminar definitivamente su cuenta. Esta acción es inmediata e irreversible: perfil, cesta, favoritos y reseñas se borran. El historial de sus retiros se conserva de forma anonimizada para nuestra contabilidad.",
+      "dangerCta": "Eliminar definitivamente",
+      "deleting": "Eliminando…",
+      "deleteConfirmLabel": "Para confirmar, escriba {word} a continuación.",
+      "deleteError": "La eliminación ha fallado. Vuelva a intentarlo o contacte con soporte.",
+      "deleteErrorAdmin": "Su cuenta tiene permisos de administrador. Un superadministrador debe retirarlos antes de poder eliminarla."
     },
     "preferences": {
       "pageTitle": "Preferencias — FARMAU",

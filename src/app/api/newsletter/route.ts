@@ -53,7 +53,11 @@ export async function POST(request: NextRequest) {
   // Rate-limit appliqué uniquement sur le flow public (body.email fourni)
   if (body.email) {
     const ip = getClientIp(request)
-    const { allowed, retryAfter } = await checkRateLimit(`newsletter:${ip}`, 3, 60)
+    // failClosed (G-5) : écriture publique qui déclenche un EMAIL (Resend) —
+    // rate-limiter en panne → on refuse plutôt que d'ouvrir le robinet.
+    const { allowed, retryAfter } = await checkRateLimit(`newsletter:${ip}`, 3, 60, {
+      failClosed: true,
+    })
     if (!allowed) {
       return NextResponse.json(
         { error: 'rate_limited', retryAfter },
@@ -89,31 +93,74 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'insert_failed' }, { status: 500 })
   }
 
-  if (useDoubleOptIn && resend && confirmationToken && error?.code !== '23505') {
+  // Email déjà présent (23505). Deux cas :
+  //  - déjà confirmé → idempotent, on ne renvoie rien (comportement actuel).
+  //  - inscrit mais JAMAIS confirmé → l'email de confirmation a pu se perdre :
+  //    on régénère un token (+ expiration) et on RENVOIE le mail de confirmation.
+  // Sans le double opt-in (pas de RESEND_API_KEY ou flow auth), rien à faire.
+  let resentToken: string | null = null
+  let resentLang: 'fr' | 'es' | 'en' = lang
+  if (error?.code === '23505' && useDoubleOptIn && resend) {
+    const { data: existing, error: selErr } = await supabaseAdmin
+      .from('newsletter_subscribers')
+      .select('id, lang, confirmed_at')
+      .eq('email', email)
+      .maybeSingle()
+    if (selErr) {
+      logger.error('[/api/newsletter] re-subscribe lookup', selErr)
+    } else if (existing && !existing.confirmed_at) {
+      const freshToken = randomBytes(32).toString('hex')
+      const { error: updErr } = await supabaseAdmin
+        .from('newsletter_subscribers')
+        .update({
+          confirmation_token: freshToken,
+          token_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        })
+        .eq('id', existing.id)
+        .is('confirmed_at', null)
+      if (updErr) {
+        logger.error('[/api/newsletter] re-subscribe token refresh', updErr)
+      } else {
+        resentToken = freshToken
+        // On respecte la langue d'origine de l'abonné pour le mail renvoyé.
+        resentLang =
+          existing.lang === 'es' || existing.lang === 'en' ? existing.lang : 'fr'
+      }
+    }
+  }
+
+  // Envoi du mail de confirmation : première inscription OU renvoi (re-subscribe
+  // d'un email non confirmé). On factorise les deux cas via tokenToSend/langToSend.
+  const tokenToSend = error?.code === '23505' ? resentToken : confirmationToken
+  const langToSend = error?.code === '23505' ? resentLang : lang
+
+  if (useDoubleOptIn && resend && tokenToSend) {
+    const sendLang = langToSend
+    const sendToken = tokenToSend
     const baseUrl = getSiteUrl()
-    const confirmUrl = `${baseUrl}/api/newsletter/confirm?token=${confirmationToken}`
+    const confirmUrl = `${baseUrl}/api/newsletter/confirm?token=${sendToken}`
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: email,
-        subject: lang === 'es'
+        subject: sendLang === 'es'
           ? 'Confirma tu suscripción · FARMAU'
-          : lang === 'en'
+          : sendLang === 'en'
             ? 'Confirm your subscription · FARMAU'
             : 'Confirmez votre inscription · FARMAU',
         html: `
           <div style="font-family: Georgia, serif; max-width: 480px; margin: 0 auto; padding: 40px 20px;">
             <h1 style="font-size: 24px; margin-bottom: 16px;">FARMAU</h1>
             <p style="font-size: 16px; line-height: 1.6; color: #333;">
-              ${lang === 'es'
+              ${sendLang === 'es'
                 ? 'Haz clic abajo para confirmar tu suscripción a nuestra newsletter.'
-                : lang === 'en'
+                : sendLang === 'en'
                   ? 'Click below to confirm your newsletter subscription.'
                   : 'Cliquez ci-dessous pour confirmer votre inscription à notre newsletter.'}
             </p>
             <a href="${confirmUrl}"
                style="display: inline-block; margin-top: 16px; padding: 12px 24px; background: #6B5B4F; color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px;">
-              ${lang === 'es' ? 'Confirmar' : lang === 'en' ? 'Confirm' : 'Confirmer'}
+              ${sendLang === 'es' ? 'Confirmar' : sendLang === 'en' ? 'Confirm' : 'Confirmer'}
             </a>
           </div>
         `,

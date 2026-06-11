@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { DEFAULT_CURRENCY } from '@/lib/constants'
 import { fetchEffectivePrices } from '@/lib/pricing'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 /**
  * GET /api/search?q=<query>&limit=<n>
@@ -51,6 +52,24 @@ export async function GET(request: NextRequest) {
   const q = (params.get('q') ?? '').trim()
   const rawLimit = Number(params.get('limit') ?? '8')
   const limit = Number.isFinite(rawLimit) ? Math.min(Math.max(1, rawLimit), 20) : 8
+
+  // Rate-limit par IP. Endpoint public appelé en live par SearchOverlay
+  // (debounce 200ms → au pire ~5 req/s en frappe continue, mais le debounce
+  // n'émet qu'à l'arrêt de frappe). 30/min/IP couvre une session de recherche
+  // active (plusieurs requêtes + bestsellers fallback) tout en coupant le
+  // scraping en boucle du catalogue. failClosed:false : sur incident DB on
+  // laisse chercher (trace `[rate-limit] fail-open` émise). Le contrat de
+  // succès { q, hits } reste inchangé ; en cas de 429 on renvoie le shape
+  // d'erreur existant ({ q, hits: [], error }) → le fetcher SWR du client
+  // throw proprement (pas de crash, garde les résultats précédents).
+  const ip = getClientIp(request)
+  const rl = await checkRateLimit(`search:${ip}`, 30, 60, { failClosed: false })
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { q, hits: [] satisfies SearchHit[], error: 'rate_limited' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+    )
+  }
 
   const supabase = await createSupabaseServerClient()
 

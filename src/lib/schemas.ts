@@ -342,6 +342,14 @@ export const setLocaleBody = z.object({
   locale: z.enum(['fr', 'es', 'en']),
 })
 
+// Effacement de compte (droit à l'oubli, Ley 172-13 RD). Le client doit saisir
+// le mot exact 'ELIMINAR' (confirmation explicite, anti clic accidentel /
+// anti-CSRF de fond). La valeur est figée — pas de localisation côté serveur
+// pour garder la confirmation déterministe (l'UI affiche le mot à recopier).
+export const accountDeleteBody = z.object({
+  confirm: z.literal('ELIMINAR'),
+})
+
 export const bannerStatsBody = z.object({
   bannerId: z.string().uuid('bannerId requis'),
   type: z.enum(['view', 'click']),

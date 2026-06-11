@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Key, Trash2, ShieldCheck } from 'lucide-react'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { SecurityActions } from '@/components/account/SecurityActions'
+import { DeleteAccountSection } from '@/components/account/DeleteAccountSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,17 +109,7 @@ export default async function AccountSecurityPage({
               </p>
             </div>
           </div>
-          <a
-            href={`mailto:contact@farmau.do?subject=${encodeURIComponent(
-              `[FARMAU] Suppression du compte ${email}`,
-            )}&body=${encodeURIComponent(
-              `Bonjour,\n\nJe souhaite supprimer mon compte FARMAU associé à l'adresse ${email}, conformément à mon droit à l'oubli (Ley 172-13 RD).\n\nMerci de bien vouloir confirmer la suppression.\n\nCordialement,`,
-            )}`}
-            className="inline-flex items-center gap-2.5 px-5 py-3 rounded-sm bg-brick-600 hover:bg-brick-700 text-white text-[12.5px] font-semibold uppercase tracking-wider transition-colors"
-          >
-            <Trash2 size={15} strokeWidth={1.8} />
-            {t('dangerCta')}
-          </a>
+          <DeleteAccountSection />
         </section>
       </div>
     </div>

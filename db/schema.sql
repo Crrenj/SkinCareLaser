@@ -1215,6 +1215,54 @@ $$;
 ALTER FUNCTION "public"."merge_anon_cart_to_user"("p_anon_id" "uuid") OWNER TO "postgres";
 
 
+CREATE OR REPLACE FUNCTION "public"."purge_expired_data"() RETURNS integer
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+  v_newsletter INT := 0;
+  v_messages   INT := 0;
+  v_total      INT := 0;
+BEGIN
+  -- (a) Inscriptions newsletter jamais confirmées, token expiré depuis > 30j.
+  --     confirmed_at IS NULL → l'email n'a jamais validé le double opt-in.
+  --     token_expires_at < now() - 30j → fenêtre de confirmation largement
+  --     dépassée (le lien de confirmation ne marche plus depuis longtemps).
+  DELETE FROM public.newsletter_subscribers
+  WHERE confirmed_at IS NULL
+    AND token_expires_at IS NOT NULL
+    AND token_expires_at < (now() - interval '30 days');
+  GET DIAGNOSTICS v_newsletter = ROW_COUNT;
+
+  -- (b) Tickets support terminés (clos/résolus) de plus de 24 mois.
+  DELETE FROM public.contact_messages
+  WHERE status IN ('closed', 'resolved')
+    AND created_at < (now() - interval '24 months');
+  GET DIAGNOSTICS v_messages = ROW_COUNT;
+
+  v_total := v_newsletter + v_messages;
+
+  -- Heartbeat : trace de la dernière exécution (même pattern que
+  -- expire_stale_reservations / migration 20260610190000). Détail dans
+  -- last_result pour le debug (newsletter + messages purgés).
+  INSERT INTO public.cron_heartbeats (job_name, last_run_at, last_result)
+  VALUES (
+    'purge-expired-data',
+    now(),
+    format('newsletter=%s messages=%s', v_newsletter, v_messages)
+  )
+  ON CONFLICT (job_name) DO UPDATE
+    SET last_run_at = EXCLUDED.last_run_at,
+        last_result = EXCLUDED.last_result;
+
+  RETURN v_total;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."purge_expired_data"() OWNER TO "postgres";
+
+
 CREATE OR REPLACE FUNCTION "public"."recompute_cost_price"("p_product_id" "uuid") RETURNS "void"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public', 'pg_temp'
@@ -3322,6 +3370,11 @@ GRANT ALL ON FUNCTION "public"."is_user_admin"("check_user_id" "uuid") TO "servi
 REVOKE ALL ON FUNCTION "public"."merge_anon_cart_to_user"("p_anon_id" "uuid") FROM PUBLIC;
 GRANT ALL ON FUNCTION "public"."merge_anon_cart_to_user"("p_anon_id" "uuid") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."merge_anon_cart_to_user"("p_anon_id" "uuid") TO "service_role";
+
+
+
+REVOKE ALL ON FUNCTION "public"."purge_expired_data"() FROM PUBLIC;
+GRANT ALL ON FUNCTION "public"."purge_expired_data"() TO "service_role";
 
 
 

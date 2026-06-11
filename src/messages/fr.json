@@ -1384,8 +1384,12 @@
       "sessionDescription": "Vous êtes connecté depuis ce navigateur. Pour vous déconnecter, utilisez le bouton de la barre latérale.",
       "lastSignIn": "Dernière connexion :",
       "dangerHeading": "Supprimer mon compte",
-      "dangerDescription": "Conformément à votre droit à l'oubli (Ley 172-13 RD), vous pouvez demander la suppression définitive de votre compte. La demande sera traitée sous 30 jours.",
-      "dangerCta": "Demander la suppression"
+      "dangerDescription": "Conformément à votre droit à l'oubli (Ley 172-13 RD), vous pouvez supprimer définitivement votre compte. Cette action est immédiate et irréversible : profil, panier, favoris et avis sont effacés. L'historique de vos retraits est conservé de façon anonymisée pour notre comptabilité.",
+      "dangerCta": "Supprimer définitivement",
+      "deleting": "Suppression…",
+      "deleteConfirmLabel": "Pour confirmer, saisissez {word} ci-dessous.",
+      "deleteError": "La suppression a échoué. Réessayez dans un instant ou contactez le support.",
+      "deleteErrorAdmin": "Votre compte dispose de droits d'administrateur. Un super-administrateur doit d'abord retirer ces droits avant la suppression."
     },
     "preferences": {
       "pageTitle": "Préférences — FARMAU",

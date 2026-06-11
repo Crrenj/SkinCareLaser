@@ -1384,8 +1384,12 @@
       "sessionDescription": "You're signed in from this browser. Use the sidebar button to sign out.",
       "lastSignIn": "Last sign-in:",
       "dangerHeading": "Delete my account",
-      "dangerDescription": "Under your right to be forgotten (Ley 172-13 DR), you can request a permanent deletion of your account. Request will be handled within 30 days.",
-      "dangerCta": "Request deletion"
+      "dangerDescription": "Under your right to be forgotten (Ley 172-13 DR), you can permanently delete your account. This action is immediate and irreversible: profile, cart, favourites and reviews are erased. Your pickup history is kept in anonymised form for our accounting.",
+      "dangerCta": "Delete permanently",
+      "deleting": "Deleting…",
+      "deleteConfirmLabel": "To confirm, type {word} below.",
+      "deleteError": "Deletion failed. Try again in a moment or contact support.",
+      "deleteErrorAdmin": "Your account has administrator rights. A super-admin must remove them before it can be deleted."
     },
     "preferences": {
       "pageTitle": "Preferences — FARMAU",

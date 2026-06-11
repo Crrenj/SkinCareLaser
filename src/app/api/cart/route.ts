@@ -7,6 +7,32 @@ import { CartResponse } from '@/types/cart'
 import { guardMutation } from '@/lib/csrf'
 import { parseBody, cartItemBody } from '@/lib/schemas'
 import { fetchEffectivePrices, applyPromo } from '@/lib/pricing'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
+
+/**
+ * Rate-limit des ÉCRITURES panier (POST/PATCH/DELETE — JAMAIS GET) par IP.
+ *
+ * Fenêtre généreuse (60/min/IP) : le panier est une UX critique et certaines
+ * opérations rafalent légitimement — le stepper +/- enchaîne des PATCH et
+ * surtout `clearCart()` côté client tire N DELETE EN PARALLÈLE (un par ligne,
+ * `Promise.all`). 60/min absorbe un vidage de gros panier + un usage normal
+ * derrière, tout en coupant l'abus en boucle (création de lignes en masse).
+ *
+ * `failClosed:false` (fail-open assumé) : sur incident DB, on ne bloque pas le
+ * panier d'un client légitime — la trace `[rate-limit] fail-open` reste émise.
+ * Retourne une réponse 429 prête à renvoyer, ou `null` si la requête passe.
+ */
+async function enforceCartWriteRateLimit(
+  request: NextRequest,
+): Promise<NextResponse | null> {
+  const ip = getClientIp(request)
+  const rl = await checkRateLimit(`cart:${ip}`, 60, 60, { failClosed: false })
+  if (rl.allowed) return null
+  return NextResponse.json(
+    { error: 'Trop de requêtes. Réessayez dans quelques instants.' },
+    { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } },
+  )
+}
 
 /**
  * Résout l'identifiant du panier courant. Si l'utilisateur est authentifié,
@@ -182,6 +208,9 @@ export async function POST(request: NextRequest) {
   const guard = guardMutation(request, { json: true })
   if (guard) return guard
 
+  const limited = await enforceCartWriteRateLimit(request)
+  if (limited) return limited
+
   try {
     const parsed = parseBody(cartItemBody, await request.json())
     if (!parsed.ok) return parsed.response
@@ -257,6 +286,9 @@ export async function PATCH(request: NextRequest) {
   const guard = guardMutation(request, { json: true })
   if (guard) return guard
 
+  const limited = await enforceCartWriteRateLimit(request)
+  if (limited) return limited
+
   try {
     const parsed = parseBody(cartItemBody, await request.json())
     if (!parsed.ok) return parsed.response
@@ -330,6 +362,9 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const guard = guardMutation(request, { json: false })
   if (guard) return guard
+
+  const limited = await enforceCartWriteRateLimit(request)
+  if (limited) return limited
 
   try {
     const { searchParams } = new URL(request.url)

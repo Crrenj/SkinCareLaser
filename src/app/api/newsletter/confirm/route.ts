@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
     .eq('confirmation_token', token)
     .is('confirmed_at', null)
     .gt('token_expires_at', new Date().toISOString())
-    .select('id, email')
+    .select('id, email, lang')
     .maybeSingle()
 
   if (error) {
@@ -40,8 +40,12 @@ export async function GET(request: NextRequest) {
   }
 
   if (!data) {
+    // Token déjà consommé / expiré : la langue de l'abonné n'est plus accessible
+    // (token nullifié à la confirmation) → on retombe sur 'fr'.
     return NextResponse.redirect(new URL('/fr?newsletter=already', request.url))
   }
 
-  return NextResponse.redirect(new URL('/fr?newsletter=confirmed', request.url))
+  // Redirige vers la home dans la langue choisie par l'abonné (fallback fr).
+  const lang = data.lang === 'es' || data.lang === 'en' ? data.lang : 'fr'
+  return NextResponse.redirect(new URL(`/${lang}?newsletter=confirmed`, request.url))
 }

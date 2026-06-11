@@ -1404,6 +1404,7 @@ export type Database = {
       immutable_unaccent: { Args: { p_text: string }; Returns: string }
       is_user_admin: { Args: { check_user_id: string }; Returns: boolean }
       merge_anon_cart_to_user: { Args: { p_anon_id: string }; Returns: string }
+      purge_expired_data: { Args: never; Returns: number }
       recompute_cost_price: {
         Args: { p_product_id: string }
         Returns: undefined
