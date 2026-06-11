@@ -14,61 +14,185 @@ import type { CustomerStats } from '@/components/admin/dashboard/CustomersWidget
 import type { EngagementStats } from '@/components/admin/dashboard/EngagementWidget'
 import type { ContentStats } from '@/components/admin/dashboard/ContentWidget'
 
+// ────────────────────────────────────────────────────────────────────────────
+// Données du tableau de bord admin. Les AGRÉGATS (chiffres, sommes, group-by)
+// sont calculés EN BASE par la RPC service-role `get_dashboard_stats()` (un seul
+// aller-retour), au lieu de ramener des tables entières dans Node pour les
+// agréger en JS — cf. migration 20260611190000_dashboard_stats_rpc.sql. Seules
+// les LISTES de lignes ordonnées (stock critique, top produits, réservations /
+// messages récents) restent des requêtes PostgREST distinctes : elles ont
+// besoin d'embeds marque ou de lignes triées. Total : 5 requêtes par chargement
+// (1 RPC + 4 listes), contre ~28 auparavant.
+//
+// ⚠️ get_dashboard_stats agrège products.cost_price (valorisation au coût) :
+// elle est verrouillée service-role et n'est appelable que via supabaseAdmin.
+// ────────────────────────────────────────────────────────────────────────────
+
 const DAY_MS = 24 * 60 * 60 * 1000
 
-function startOfDayUTC(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+const EMPTY_RESERVATION_STATUS: ReservationStatusStats = {
+  byStatus: {
+    pending: { n: 0, revenue: 0, items: 0 },
+    confirmed: { n: 0, revenue: 0, items: 0 },
+    collected: { n: 0, revenue: 0, items: 0 },
+    expired: { n: 0, revenue: 0, items: 0 },
+    cancelled: { n: 0, revenue: 0, items: 0 },
+  },
+  totalReservations: 0,
+  activeCount: 0,
+  confirmedRevenue: 0,
+  avgBasket: 0,
 }
 
-function dateKey(d: Date): string {
-  return d.toISOString().slice(0, 10)
+const EMPTY_CATALOGUE: {
+  readiness: CatalogueReadiness
+  inventory: InventoryStats
+  brandBars: BrandBar[]
+} = {
+  readiness: {
+    score: 0,
+    activeProducts: 0,
+    brands: 0,
+    ranges: 0,
+    featured: 0,
+    isNew: 0,
+    promo: 0,
+    metrics: [],
+  },
+  inventory: {
+    units: 0,
+    stockValue: 0,
+    activeProducts: 0,
+    placeholderPriced: 0,
+    distribution: { inStock: 0, low: 0, oos: 0 },
+  },
+  brandBars: [],
 }
 
-// ───────────────────────── Reservas (chart 14 j) ─────────────────────────
+const EMPTY_CUSTOMERS: CustomerStats = {
+  total: 0,
+  withPhone: 0,
+  new7d: 0,
+  new30d: 0,
+  byLocale: [],
+}
 
-async function fetchRevenue(): Promise<{ current: DailyPoint[]; previous: DailyPoint[] }> {
-  if (!supabaseAdmin) return { current: [], previous: [] }
-  const today = startOfDayUTC(new Date())
-  const start = new Date(today.getTime() - 13 * DAY_MS) // 14 jours (current + previous)
+const EMPTY_ENGAGEMENT: EngagementStats = {
+  activeCarts: 0,
+  totalCarts: 0,
+  cartUnits: 0,
+  userCarts: 0,
+  wishlists: 0,
+  wishlistProducts: 0,
+  newsletter: 0,
+  newsletterConfirmed: 0,
+}
 
-  const { data, error } = await supabaseAdmin
-    .from('reservations')
-    .select('total_price, status, created_at')
-    .gte('created_at', start.toISOString())
-    .neq('status', 'cancelled')
+const EMPTY_CONTENT: ContentStats = {
+  posts: 0,
+  postsPublished: 0,
+  banners: 0,
+  bannersActive: 0,
+  tags: 0,
+  tagTypes: 0,
+  productTags: 0,
+}
 
-  if (error || !data) return { current: [], previous: [] }
+// ───────────────────────── Agrégats SQL (RPC) ─────────────────────────
 
-  const buckets = new Map<string, { reserved: number; confirmed: number }>()
-  for (let i = 0; i < 14; i += 1) {
-    const d = new Date(start.getTime() + i * DAY_MS)
-    buckets.set(dateKey(d), { reserved: 0, confirmed: 0 })
+// Forme brute du jsonb renvoyé par get_dashboard_stats(). Les valeurs numériques
+// arrivent déjà en Number (jsonb → JSON.parse) ; on borne le typage défensivement.
+type DashboardStatsRaw = {
+  revenue: { current: DailyPoint[]; previous: DailyPoint[] }
+  inventory: {
+    productsActive: number
+    units: number
+    retailValue: number
+    costValue: number
+    productsWithCost: number
+    placeholderPriced: number
+    inStock: number
+    low: number
+    oos: number
   }
-
-  for (const row of data as Array<{
-    total_price: number | string | null
-    status: string | null
-    created_at: string | null
-  }>) {
-    if (!row.created_at) continue
-    const k = dateKey(startOfDayUTC(new Date(row.created_at)))
-    const bucket = buckets.get(k)
-    if (!bucket) continue
-    const value = Number(row.total_price ?? 0)
-    bucket.reserved += value
-    if (row.status === 'confirmed' || row.status === 'collected') {
-      bucket.confirmed += value
-    }
-  }
-
-  const ordered = [...buckets.entries()]
-    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
-    .map(([date, v]) => ({ date, reserved: v.reserved, confirmed: v.confirmed }))
-
-  return { previous: ordered.slice(0, 7), current: ordered.slice(7, 14) }
+  readiness: CatalogueReadiness
+  brandBars: BrandBar[]
+  reservationStatus: ReservationStatusStats
+  customers: CustomerStats
+  engagement: EngagementStats
+  content: ContentStats
+  inbox: { total: number; unread: number }
 }
 
-// ───────────────────────── Stock crítico ─────────────────────────
+type DashboardStats = {
+  revenue: { current: DailyPoint[]; previous: DailyPoint[] }
+  readiness: CatalogueReadiness
+  inventory: InventoryStats
+  brandBars: BrandBar[]
+  reservationStatus: ReservationStatusStats
+  customers: CustomerStats
+  engagement: EngagementStats
+  content: ContentStats
+  inbox: { unread: number; total: number }
+}
+
+function emptyStats(): DashboardStats {
+  return {
+    revenue: { current: [], previous: [] },
+    readiness: EMPTY_CATALOGUE.readiness,
+    inventory: EMPTY_CATALOGUE.inventory,
+    brandBars: EMPTY_CATALOGUE.brandBars,
+    reservationStatus: EMPTY_RESERVATION_STATUS,
+    customers: EMPTY_CUSTOMERS,
+    engagement: EMPTY_ENGAGEMENT,
+    content: EMPTY_CONTENT,
+    inbox: { unread: 0, total: 0 },
+  }
+}
+
+/**
+ * Tous les agrégats du dashboard en UN appel RPC (service-role). On remappe la
+ * forme SQL vers les shapes des widgets (InventoryStats remappe inventory.* ;
+ * inbox.total/unread inversés). En cas d'erreur/null → zéros gracieux.
+ */
+async function fetchStats(): Promise<DashboardStats> {
+  if (!supabaseAdmin) return emptyStats()
+
+  const { data, error } = await supabaseAdmin.rpc('get_dashboard_stats')
+  if (error || !data) return emptyStats()
+
+  const raw = data as DashboardStatsRaw
+
+  return {
+    revenue: {
+      current: raw.revenue?.current ?? [],
+      previous: raw.revenue?.previous ?? [],
+    },
+    readiness: raw.readiness ?? EMPTY_CATALOGUE.readiness,
+    inventory: {
+      units: raw.inventory?.units ?? 0,
+      stockValue: raw.inventory?.retailValue ?? 0,
+      activeProducts: raw.inventory?.productsActive ?? 0,
+      placeholderPriced: raw.inventory?.placeholderPriced ?? 0,
+      distribution: {
+        inStock: raw.inventory?.inStock ?? 0,
+        low: raw.inventory?.low ?? 0,
+        oos: raw.inventory?.oos ?? 0,
+      },
+    },
+    brandBars: raw.brandBars ?? [],
+    reservationStatus: raw.reservationStatus ?? EMPTY_RESERVATION_STATUS,
+    customers: raw.customers ?? EMPTY_CUSTOMERS,
+    engagement: raw.engagement ?? EMPTY_ENGAGEMENT,
+    content: raw.content ?? EMPTY_CONTENT,
+    inbox: {
+      unread: raw.inbox?.unread ?? 0,
+      total: raw.inbox?.total ?? 0,
+    },
+  }
+}
+
+// ───────────────────────── Stock crítico (liste) ─────────────────────────
 
 async function fetchLowStock(): Promise<LowStockItem[]> {
   if (!supabaseAdmin) return []
@@ -101,7 +225,7 @@ async function fetchLowStock(): Promise<LowStockItem[]> {
   }))
 }
 
-// ───────────────────────── Top productos (30 j) ─────────────────────────
+// ───────────────────────── Top productos (30 j, liste) ─────────────────────
 
 async function fetchTopProducts(): Promise<TopProductRow[]> {
   if (!supabaseAdmin) return []
@@ -158,7 +282,7 @@ async function fetchTopProducts(): Promise<TopProductRow[]> {
     }))
 }
 
-// ───────────────────────── Reservas recientes ─────────────────────────
+// ───────────────────────── Reservas recientes (liste) ─────────────────────
 
 async function fetchRecentReservations(): Promise<ReservationRow[]> {
   if (!supabaseAdmin) return []
@@ -188,7 +312,7 @@ async function fetchRecentReservations(): Promise<ReservationRow[]> {
   }))
 }
 
-// ───────────────────────── Mensajes recientes ─────────────────────────
+// ───────────────────────── Mensajes recientes (liste) ─────────────────────
 
 async function fetchRecentMessages(): Promise<MessageRow[]> {
   if (!supabaseAdmin) return []
@@ -217,339 +341,6 @@ async function fetchRecentMessages(): Promise<MessageRow[]> {
   }))
 }
 
-// ───────────────────────── Catálogo (completitud + inventario + marcas) ──
-
-type CatalogueBundle = {
-  readiness: CatalogueReadiness
-  inventory: InventoryStats
-  brandBars: BrandBar[]
-}
-
-function emptyCatalogue(): CatalogueBundle {
-  return {
-    readiness: {
-      score: 0,
-      activeProducts: 0,
-      brands: 0,
-      ranges: 0,
-      featured: 0,
-      isNew: 0,
-      promo: 0,
-      metrics: [],
-    },
-    inventory: {
-      units: 0,
-      stockValue: 0,
-      activeProducts: 0,
-      placeholderPriced: 0,
-      distribution: { inStock: 0, low: 0, oos: 0 },
-    },
-    brandBars: [],
-  }
-}
-
-async function fetchCatalogue(): Promise<CatalogueBundle> {
-  if (!supabaseAdmin) return emptyCatalogue()
-  const sb = supabaseAdmin
-
-  const [productsRes, imagesRes, brandsRes, rangesRes, volRes, inciRes, advRes, pdfRes, benRes] =
-    await Promise.all([
-      sb.from('products').select('id, is_active, stock, price, range_id, is_featured, is_new, old_price'),
-      sb.from('product_images').select('product_id'),
-      sb.from('brands').select('id, name'),
-      sb.from('ranges').select('id, brand_id'),
-      sb.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true).not('volume', 'is', null),
-      sb.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true).not('inci', 'is', null),
-      sb.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true).not('pharmacist_advice', 'is', null),
-      sb.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true).not('technical_pdf_url', 'is', null),
-      sb.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true).not('benefits', 'is', null),
-    ])
-
-  const products = (productsRes.data ?? []) as Array<{
-    id: string
-    is_active: boolean | null
-    stock: number | null
-    price: number | string | null
-    range_id: string | null
-    is_featured: boolean | null
-    is_new: boolean | null
-    old_price: number | string | null
-  }>
-  const imageSet = new Set((imagesRes.data ?? []).map((r) => (r as { product_id: string }).product_id))
-  const rangeToBrand = new Map(
-    ((rangesRes.data ?? []) as Array<{ id: string; brand_id: string | null }>).map((r) => [
-      r.id,
-      r.brand_id,
-    ]),
-  )
-
-  const active = products.filter((p) => p.is_active)
-  const activeCount = active.length
-  const withImage = active.filter((p) => imageSet.has(p.id)).length
-
-  let units = 0
-  let stockValue = 0
-  let inStock = 0
-  let low = 0
-  let oos = 0
-  let placeholder = 0
-  let featured = 0
-  let isNew = 0
-  let promo = 0
-  const perBrand = new Map<string, { products: number; units: number }>()
-
-  for (const p of active) {
-    const s = p.stock ?? 0
-    units += s
-    stockValue += Number(p.price ?? 0) * s
-    if (s === 0) oos += 1
-    else if (s < 5) low += 1
-    else inStock += 1
-    if (Number(p.price) === 100) placeholder += 1
-    if (p.is_featured) featured += 1
-    if (p.is_new) isNew += 1
-    if (p.old_price != null) promo += 1
-    const bId = p.range_id ? rangeToBrand.get(p.range_id) ?? undefined : undefined
-    if (bId) {
-      const e = perBrand.get(bId) ?? { products: 0, units: 0 }
-      e.products += 1
-      e.units += s
-      perBrand.set(bId, e)
-    }
-  }
-
-  const brandBars: BrandBar[] = ((brandsRes.data ?? []) as Array<{ id: string; name: string }>)
-    .map((b) => ({
-      name: b.name,
-      products: perBrand.get(b.id)?.products ?? 0,
-      units: perBrand.get(b.id)?.units ?? 0,
-    }))
-    .filter((b) => b.products > 0)
-    .sort((a, b) => b.products - a.products)
-
-  const metrics = [
-    { label: 'Imagen', covered: withImage, total: activeCount },
-    { label: 'Precio configurado', covered: activeCount - placeholder, total: activeCount },
-    { label: 'Volumen', covered: volRes.count ?? 0, total: activeCount },
-    { label: 'Beneficios', covered: benRes.count ?? 0, total: activeCount },
-    { label: 'Consejo farmacéutico', covered: advRes.count ?? 0, total: activeCount },
-    { label: 'INCI', covered: inciRes.count ?? 0, total: activeCount },
-    { label: 'Ficha técnica PDF', covered: pdfRes.count ?? 0, total: activeCount },
-  ]
-  const score =
-    activeCount === 0
-      ? 0
-      : Math.round(
-          (metrics.reduce((a, m) => a + (m.total ? m.covered / m.total : 0), 0) / metrics.length) *
-            100,
-        )
-
-  return {
-    readiness: {
-      score,
-      activeProducts: activeCount,
-      brands: brandBars.length,
-      ranges: (rangesRes.data ?? []).length,
-      featured,
-      isNew,
-      promo,
-      metrics,
-    },
-    inventory: {
-      units,
-      stockValue,
-      activeProducts: activeCount,
-      placeholderPriced: placeholder,
-      distribution: { inStock, low, oos },
-    },
-    brandBars,
-  }
-}
-
-// ───────────────────────── Reservas por estado ─────────────────────────
-
-async function fetchReservationStatus(): Promise<ReservationStatusStats> {
-  const byStatus: Record<ReservationStatus, { n: number; revenue: number; items: number }> = {
-    pending: { n: 0, revenue: 0, items: 0 },
-    confirmed: { n: 0, revenue: 0, items: 0 },
-    collected: { n: 0, revenue: 0, items: 0 },
-    expired: { n: 0, revenue: 0, items: 0 },
-    cancelled: { n: 0, revenue: 0, items: 0 },
-  }
-  const empty: ReservationStatusStats = {
-    byStatus,
-    totalReservations: 0,
-    activeCount: 0,
-    confirmedRevenue: 0,
-    avgBasket: 0,
-  }
-  if (!supabaseAdmin) return empty
-
-  const { data } = await supabaseAdmin
-    .from('reservations')
-    .select('status, total_price, total_items')
-  const rows = (data ?? []) as Array<{
-    status: ReservationStatus
-    total_price: number | string | null
-    total_items: number | null
-  }>
-
-  let nonCancelledRevenue = 0
-  let nonCancelledCount = 0
-  for (const r of rows) {
-    const bucket = byStatus[r.status]
-    if (!bucket) continue
-    const rev = Number(r.total_price ?? 0)
-    bucket.n += 1
-    bucket.revenue += rev
-    bucket.items += r.total_items ?? 0
-    if (r.status !== 'cancelled') {
-      nonCancelledRevenue += rev
-      nonCancelledCount += 1
-    }
-  }
-
-  return {
-    byStatus,
-    totalReservations: rows.length,
-    activeCount: byStatus.pending.n + byStatus.confirmed.n,
-    confirmedRevenue: byStatus.confirmed.revenue + byStatus.collected.revenue,
-    avgBasket: nonCancelledCount > 0 ? Math.round(nonCancelledRevenue / nonCancelledCount) : 0,
-  }
-}
-
-// ───────────────────────── Clientes ─────────────────────────
-
-async function fetchCustomers(): Promise<CustomerStats> {
-  const empty: CustomerStats = { total: 0, withPhone: 0, new7d: 0, new30d: 0, byLocale: [] }
-  if (!supabaseAdmin) return empty
-
-  const { data } = await supabaseAdmin
-    .from('profiles')
-    .select('id, phone, preferred_locale, created_at')
-  const rows = (data ?? []) as Array<{
-    id: string
-    phone: string | null
-    preferred_locale: string | null
-    created_at: string | null
-  }>
-
-  const now = Date.now()
-  let withPhone = 0
-  let new7d = 0
-  let new30d = 0
-  const localeMap = new Map<string, number>()
-  for (const r of rows) {
-    if (r.phone && r.phone.trim().length > 0) withPhone += 1
-    if (r.created_at) {
-      const age = now - new Date(r.created_at).getTime()
-      if (age <= 7 * DAY_MS) new7d += 1
-      if (age <= 30 * DAY_MS) new30d += 1
-    }
-    const loc = r.preferred_locale ?? '—'
-    localeMap.set(loc, (localeMap.get(loc) ?? 0) + 1)
-  }
-
-  return {
-    total: rows.length,
-    withPhone,
-    new7d,
-    new30d,
-    byLocale: [...localeMap.entries()]
-      .map(([locale, n]) => ({ locale, n }))
-      .sort((a, b) => b.n - a.n),
-  }
-}
-
-// ───────────────────────── Engagement (carritos, wishlist, newsletter) ──
-
-async function fetchEngagement(): Promise<EngagementStats> {
-  const empty: EngagementStats = {
-    activeCarts: 0,
-    totalCarts: 0,
-    cartUnits: 0,
-    userCarts: 0,
-    wishlists: 0,
-    wishlistProducts: 0,
-    newsletter: 0,
-    newsletterConfirmed: 0,
-  }
-  if (!supabaseAdmin) return empty
-  const sb = supabaseAdmin
-
-  const [cartsRes, itemsRes, wishRes, nlTotalRes, nlConfRes] = await Promise.all([
-    sb.from('carts').select('id, user_id'),
-    sb.from('cart_items').select('cart_id, quantity'),
-    sb.from('wishlists').select('product_id'),
-    sb.from('newsletter_subscribers').select('*', { count: 'exact', head: true }),
-    sb.from('newsletter_subscribers').select('*', { count: 'exact', head: true }).not('confirmed_at', 'is', null),
-  ])
-
-  const carts = (cartsRes.data ?? []) as Array<{ id: string; user_id: string | null }>
-  const items = (itemsRes.data ?? []) as Array<{ cart_id: string; quantity: number | null }>
-  const wish = (wishRes.data ?? []) as Array<{ product_id: string }>
-
-  return {
-    activeCarts: new Set(items.map((i) => i.cart_id)).size,
-    totalCarts: carts.length,
-    cartUnits: items.reduce((a, i) => a + (i.quantity ?? 0), 0),
-    userCarts: carts.filter((c) => c.user_id).length,
-    wishlists: wish.length,
-    wishlistProducts: new Set(wish.map((w) => w.product_id)).size,
-    newsletter: nlTotalRes.count ?? 0,
-    newsletterConfirmed: nlConfRes.count ?? 0,
-  }
-}
-
-// ───────────────────────── Contenido y taxonomía ─────────────────────────
-
-async function fetchContent(): Promise<ContentStats> {
-  const empty: ContentStats = {
-    posts: 0,
-    postsPublished: 0,
-    banners: 0,
-    bannersActive: 0,
-    tags: 0,
-    tagTypes: 0,
-    productTags: 0,
-  }
-  if (!supabaseAdmin) return empty
-  const sb = supabaseAdmin
-
-  const [postsRes, bannersRes, tagsRes, tagTypesRes, ptRes] = await Promise.all([
-    sb.from('posts').select('is_published'),
-    sb.from('banners').select('is_active'),
-    sb.from('tags').select('*', { count: 'exact', head: true }),
-    sb.from('tag_types').select('*', { count: 'exact', head: true }),
-    sb.from('product_tags').select('*', { count: 'exact', head: true }),
-  ])
-
-  const posts = (postsRes.data ?? []) as Array<{ is_published: boolean | null }>
-  const banners = (bannersRes.data ?? []) as Array<{ is_active: boolean | null }>
-
-  return {
-    posts: posts.length,
-    postsPublished: posts.filter((p) => p.is_published).length,
-    banners: banners.length,
-    bannersActive: banners.filter((b) => b.is_active).length,
-    tags: tagsRes.count ?? 0,
-    tagTypes: tagTypesRes.count ?? 0,
-    productTags: ptRes.count ?? 0,
-  }
-}
-
-// ───────────────────────── Bandeja (mensajes) ─────────────────────────
-
-async function fetchInbox(): Promise<{ unread: number; total: number }> {
-  if (!supabaseAdmin) return { unread: 0, total: 0 }
-  const sb = supabaseAdmin
-  const [totalRes, unreadRes] = await Promise.all([
-    sb.from('contact_messages').select('*', { count: 'exact', head: true }),
-    sb.from('contact_messages').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-  ])
-  return { unread: unreadRes.count ?? 0, total: totalRes.count ?? 0 }
-}
-
 // ───────────────────────── Agrégat ─────────────────────────
 
 export type DashboardData = {
@@ -568,47 +359,29 @@ export type DashboardData = {
   inbox: { unread: number; total: number }
 }
 
-/** Charge toutes les données du dashboard en parallèle. */
+/** Charge toutes les données du dashboard en parallèle (1 RPC + 4 listes). */
 export async function getDashboardData(): Promise<DashboardData> {
-  const [
-    revenue,
-    lowStock,
-    topProducts,
-    recentReservations,
-    recentMessages,
-    catalogue,
-    reservationStatus,
-    customers,
-    engagement,
-    content,
-    inbox,
-  ] = await Promise.all([
-    fetchRevenue(),
+  const [stats, lowStock, topProducts, recentReservations, recentMessages] = await Promise.all([
+    fetchStats(),
     fetchLowStock(),
     fetchTopProducts(),
     fetchRecentReservations(),
     fetchRecentMessages(),
-    fetchCatalogue(),
-    fetchReservationStatus(),
-    fetchCustomers(),
-    fetchEngagement(),
-    fetchContent(),
-    fetchInbox(),
   ])
 
   return {
-    revenue,
+    revenue: stats.revenue,
     lowStock,
     topProducts,
     recentReservations,
     recentMessages,
-    readiness: catalogue.readiness,
-    inventory: catalogue.inventory,
-    brandBars: catalogue.brandBars,
-    reservationStatus,
-    customers,
-    engagement,
-    content,
-    inbox,
+    readiness: stats.readiness,
+    inventory: stats.inventory,
+    brandBars: stats.brandBars,
+    reservationStatus: stats.reservationStatus,
+    customers: stats.customers,
+    engagement: stats.engagement,
+    content: stats.content,
+    inbox: stats.inbox,
   }
 }

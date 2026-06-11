@@ -1394,6 +1394,8 @@ export type Database = {
         }
         Returns: Json
       }
+      get_dashboard_stats: { Args: never; Returns: Json }
+      get_inventory_valuation: { Args: never; Returns: Json }
       get_messages_stats: { Args: never; Returns: Json }
       get_or_create_cart: {
         Args: { p_anonymous_id?: string; p_user_id?: string }

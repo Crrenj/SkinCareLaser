@@ -169,8 +169,11 @@ export async function getAccountingData(month?: string): Promise<AccountingData>
       .eq('reservations.status', 'collected')
       .gte('reservations.collected_at', prevStart.toISOString())
       .lt('reservations.collected_at', end.toISOString()),
-    // Inventaire valorisé (snapshot courant, hors période).
-    sb.from('products').select('stock, price, cost_price').eq('is_active', true),
+    // Inventaire valorisé (snapshot courant, hors période). Agrégé EN BASE par
+    // la RPC service-role get_inventory_valuation() : remplace l'ancien scan
+    // NON BORNÉ qui chargeait TOUS les produits actifs pour sommer coût×stock /
+    // prix×stock en JS (cf. migration 20260611190000). Renvoie un seul jsonb.
+    sb.rpc('get_inventory_valuation'),
     // Achats du mois (606) depuis stock_entries.
     sb
       .from('stock_entries')
@@ -292,27 +295,23 @@ export async function getAccountingData(month?: string): Promise<AccountingData>
     .sort((a, b) => (a.marginPct ?? 0) - (b.marginPct ?? 0))
     .slice(0, 5)
 
-  // ── Inventaire valorisé ──
-  const invRows = (invRes.data ?? []) as Array<{
-    stock: number | null
-    price: number | string | null
-    cost_price: number | string | null
-  }>
+  // ── Inventaire valorisé (agrégé en base par get_inventory_valuation) ──
+  // La RPC renvoie un superset de InventoryValuation ; on n'en garde que les 5
+  // champs utiles. Les sommes coût/détail sont déjà calculées côté Postgres
+  // (lignes sans cost_price exclues du coût, jamais traitées comme 0).
+  const invRaw = (invRes.data ?? null) as {
+    units?: number
+    retailValue?: number
+    costValue?: number
+    productsActive?: number
+    productsWithCost?: number
+  } | null
   const inventory: InventoryValuation = {
-    units: 0,
-    retailValue: 0,
-    costValue: 0,
-    productsActive: invRows.length,
-    productsWithCost: 0,
-  }
-  for (const p of invRows) {
-    const s = p.stock ?? 0
-    inventory.units += s
-    inventory.retailValue += num(p.price) * s
-    if (p.cost_price !== null && p.cost_price !== undefined) {
-      inventory.costValue += num(p.cost_price) * s
-      inventory.productsWithCost += 1
-    }
+    units: num(invRaw?.units),
+    retailValue: num(invRaw?.retailValue),
+    costValue: num(invRaw?.costValue),
+    productsActive: num(invRaw?.productsActive),
+    productsWithCost: num(invRaw?.productsWithCost),
   }
 
   // ── Achats du mois (606) ──
