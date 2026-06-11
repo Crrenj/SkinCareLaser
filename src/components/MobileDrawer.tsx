@@ -118,13 +118,6 @@ export function MobileDrawer({
               {t('drawer.serviceHeading')}
             </div>
             <Link
-              href="/livraison"
-              onClick={onClose}
-              className="block px-[14px] py-2 text-[13.5px] text-ink-700 rounded-lg hover:bg-sand-100 hover:text-ink-900"
-            >
-              {t('utility.delivery')}
-            </Link>
-            <Link
               href="/pharmacie"
               onClick={onClose}
               className="block px-[14px] py-2 text-[13.5px] text-ink-700 rounded-lg hover:bg-sand-100 hover:text-ink-900"

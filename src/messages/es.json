@@ -125,7 +125,6 @@
     "mainNavAriaLabel": "Navegación principal",
     "skipToMain": "Ir al contenido principal",
     "utility": {
-      "delivery": "Envío y devoluciones",
       "pharmacists": "Nuestros farmacéuticos",
       "help": "Ayuda"
     },
@@ -251,7 +250,6 @@
     },
     "service": {
       "contact": "Contacto",
-      "delivery": "Envío y devoluciones",
       "pharmacists": "Nuestros farmacéuticos",
       "faq": "FAQ",
       "help": "Centro de ayuda"

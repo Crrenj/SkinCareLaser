@@ -125,7 +125,6 @@
     "mainNavAriaLabel": "Main navigation",
     "skipToMain": "Skip to main content",
     "utility": {
-      "delivery": "Shipping & returns",
       "pharmacists": "Our pharmacists",
       "help": "Help"
     },
@@ -251,7 +250,6 @@
     },
     "service": {
       "contact": "Contact",
-      "delivery": "Shipping & returns",
       "pharmacists": "Our pharmacists",
       "faq": "FAQ",
       "help": "Help center"

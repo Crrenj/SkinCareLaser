@@ -12,7 +12,6 @@ import {
   Check,
   Heart,
   CalendarCheck,
-  Truck,
   HelpCircle,
   Shield,
   LogIn,
@@ -367,7 +366,6 @@ export default function NavBar() {
                     <AccountLink href={ADMIN_HOME_PATH} localized={false} icon={<Shield size={16} strokeWidth={1.7} />} label={t('adminDashboardAriaLabel')} />
                   )}
                   <div className="mx-2 my-1.5 h-px bg-sand-200" />
-                  <AccountLink href="/livraison" icon={<Truck size={16} strokeWidth={1.7} />} label={t('utility.delivery')} />
                   <AccountLink href="/contact" icon={<HelpCircle size={16} strokeWidth={1.7} />} label={t('account.help')} />
                   <div className="mx-2 my-1.5 h-px bg-sand-200" />
                   <button
@@ -388,7 +386,6 @@ export default function NavBar() {
                     </p>
                   </div>
                   <AccountLink href="/favoris" icon={<Heart size={16} strokeWidth={1.7} />} label={t('account.favorites')} />
-                  <AccountLink href="/livraison" icon={<Truck size={16} strokeWidth={1.7} />} label={t('utility.delivery')} />
                   <AccountLink href="/contact" icon={<HelpCircle size={16} strokeWidth={1.7} />} label={t('account.help')} />
                   <div className="p-2 pt-1.5">
                     <Link
