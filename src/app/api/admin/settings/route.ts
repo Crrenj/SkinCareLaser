@@ -114,7 +114,9 @@ export async function PATCH(req: NextRequest) {
       .single()
 
     if (error) throw error
-    revalidateTag(SHOP_SETTINGS_TAG)
+    // Next 16 : revalidateTag exige un 2e arg (profil de cache-life).
+    // { expire: 0 } = expiration immediate (semantique de l'ancien appel mono-arg).
+    revalidateTag(SHOP_SETTINGS_TAG, { expire: 0 })
 
     recordAuditLog({
       actorId: auth.userId,
