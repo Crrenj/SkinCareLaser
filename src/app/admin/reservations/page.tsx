@@ -193,6 +193,29 @@ export default function ReservationsAdminPage() {
     )
   }, [t])
 
+  // P-FLEX volet 1 : ajustement du prix facturé d'une ligne (tarif
+  // préférentiel) — la route refuse hors pending/confirmed (409 price_locked)
+  // et trace en audit high-impact. Re-fetch pour refléter le total recalculé.
+  const updateItemPrice = useCallback(
+    async (id: string, itemId: string, unitPrice: number) => {
+      const res = await fetch('/api/admin/reservations', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, item_update: { item_id: itemId, unit_price: unitPrice } }),
+      })
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}))
+        const msg =
+          json.error === 'price_locked' ? t('drawer.priceLocked') : json.error || t('errorUpdate')
+        toast.error(msg)
+        throw new Error(msg)
+      }
+      toast.success(t('drawer.priceUpdated'))
+      await fetchData()
+    },
+    [fetchData, t],
+  )
+
   const createReservation = useCallback(
     async (payload: NewReservationPayload) => {
       // 1) Résout l'identité client (compte existant / création express / invité).
@@ -428,6 +451,7 @@ export default function ReservationsAdminPage() {
           onAdvance={advance}
           onCancel={cancelReservation}
           onUpdateNote={updateNote}
+          onUpdateItemPrice={updateItemPrice}
           busy={busyId === expandedReservation.id}
         />
       )}

@@ -250,6 +250,16 @@ export const reservationPatch = z.object({
   id: z.string().uuid('id requis'),
   status: z.enum(['pending', 'confirmed', 'collected', 'expired', 'cancelled']).optional(),
   admin_notes: z.string().optional(),
+  // P-FLEX volet 1 : ajustement admin du prix FACTURÉ d'une ligne (tarif
+  // préférentiel client fidèle). La RPC set_reservation_item_price refuse
+  // hors pending/confirmed et recalcule total_price atomiquement ; tracé en
+  // audit high-impact côté route. Route admin only — jamais exposé au client.
+  item_update: z
+    .object({
+      item_id: z.string().uuid(),
+      unit_price: z.number().min(0).max(100_000_000),
+    })
+    .optional(),
 })
 
 // Réservation INVITÉ depuis la boutique (visiteur sans compte). Les items

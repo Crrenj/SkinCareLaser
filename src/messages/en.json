@@ -964,7 +964,7 @@
     },
     "addToCartCta": "Add to cart",
     "wishlistAriaLabel": "Add to favorites",
-    "priceNote": "Indicative price — confirmed at reservation.",
+    "priceNote": "Indicative price — confirmed in pharmacy.",
     "availability": "Available in pharmacy · ready within 24h",
     "availabilityOut": "Currently unavailable in pharmacy",
     "reservation": {
@@ -2261,7 +2261,10 @@
         "saved": "Saved",
         "openWhatsapp": "Open WhatsApp",
         "noNextAction": "No next action",
-        "cancelReservation": "Cancel reservation"
+        "cancelReservation": "Cancel reservation",
+        "editPrice": "Adjust price",
+        "priceUpdated": "Price adjusted — total recalculated",
+        "priceLocked": "Price locked: the reservation is already recorded or closed"
       }
     },
     "users": {

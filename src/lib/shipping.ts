@@ -1,4 +1,12 @@
 /**
+ * ⚠️ LEGACY VOLONTAIRE (Phase 9, audit 2026-06-10) — FARMAU est CLICK & COLLECT
+ * UNIQUEMENT : le tunnel ne propose plus de zones payantes (remédiation P2,
+ * 2026-06-06) et ces tarifs ne sont plus jamais facturés. Ce module est
+ * conservé parce que d'anciennes réservations `kind:'delivery'` peuvent encore
+ * référencer ses libellés à l'AFFICHAGE (historique). Ne PAS re-exposer ces
+ * tarifs dans le tunnel (mémoire click-and-collect-only) ; suppression
+ * possible quand plus aucune réservation historique n'y fait appel.
+ *
  * Tarifs et zones d'expédition FARMAU (République Dominicaine).
  *
  * - Santo Domingo (DN + Gran Santo Domingo)   : 300 DOP · 24-48h
