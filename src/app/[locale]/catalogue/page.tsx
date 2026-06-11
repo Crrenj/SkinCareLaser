@@ -10,9 +10,9 @@ const CatalogueClient = dynamic(() => import('@/components/CatalogueClient'), {
   loading: () => (
     <div className="mx-auto max-w-7xl px-4 py-12">
       <div className="h-10 w-48 rounded bg-sand-200 animate-pulse mb-8" />
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="aspect-[4/5] rounded bg-sand-200 animate-pulse" />
+          <div key={i} className="aspect-square rounded bg-sand-200 animate-pulse" />
         ))}
       </div>
     </div>
@@ -21,6 +21,8 @@ const CatalogueClient = dynamic(() => import('@/components/CatalogueClient'), {
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 import {
   parseFilters,
+  deriveBrandTreeModel,
+  buildSelectionFromModel,
   type CatalogueProduct,
   type FacetedCounts,
 } from '@/lib/catalogueFilters'
@@ -148,7 +150,17 @@ export default async function Catalogue({
   const allBrands = Object.keys(rangesByBrand).sort()
   const allRanges = Object.values(rangesByBrand).flat()
 
-  const filters = parseFilters(sp, allBrands, allRanges, itemsByType)
+  const parsed = parseFilters(sp, allBrands, allRanges, itemsByType, rangesByBrand)
+
+  // Normalisation arbre Marque → Gammes : derive + rebuild produit la forme
+  // canonique (marques pleines dans brands, sélections partielles dans pairs,
+  // jamais de noms de gammes nus). Les MÊMES valeurs normalisées alimentent
+  // la RPC ET les props client — l'arbre affiché correspond toujours au
+  // résultat filtré, y compris pour un deep-link dégénéré ?brand=X&range=Y.
+  const treeSelection = buildSelectionFromModel(
+    deriveBrandTreeModel(parsed.brands, parsed.ranges, parsed.pairs, rangesByBrand),
+  )
+  const filters = { ...parsed, ...treeSelection }
 
   // 2) Filtrage + tri + pagination + facettes EN SQL (RPC get_catalogue_page,
   //    migration 20260611150000) — fini le .limit(500) qui droppait le
@@ -160,6 +172,7 @@ export default async function Catalogue({
   const { data: rpcData, error: rpcErr } = await supabase.rpc('get_catalogue_page', {
     p_brands: filters.brands,
     p_ranges: filters.ranges,
+    p_pairs: filters.pairs,
     p_tags: filters.tags,
     p_q: qNormalized,
     p_sort: filters.sort,
@@ -237,6 +250,7 @@ export default async function Catalogue({
           itemsByType={itemsByType}
           selectedBrands={filters.brands}
           selectedRanges={filters.ranges}
+          selectedPairs={filters.pairs}
           selectedTags={filters.tags}
           searchTerm={filters.q}
           productCounts={counts}

@@ -1387,6 +1387,7 @@ export type Database = {
           p_brands?: string[]
           p_page?: number
           p_page_size?: number
+          p_pairs?: Json
           p_q?: string
           p_ranges?: string[]
           p_sort?: string

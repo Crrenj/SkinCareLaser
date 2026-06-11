@@ -526,21 +526,46 @@ COMMENT ON FUNCTION "public"."expire_stale_reservations"() IS 'Passe les réserv
 
 
 
-CREATE OR REPLACE FUNCTION "public"."get_catalogue_page"("p_brands" "text"[] DEFAULT '{}'::"text"[], "p_ranges" "text"[] DEFAULT '{}'::"text"[], "p_tags" "jsonb" DEFAULT '{}'::"jsonb", "p_q" "text" DEFAULT ''::"text", "p_sort" "text" DEFAULT 'bestsellers'::"text", "p_page" integer DEFAULT 1, "p_page_size" integer DEFAULT 24) RETURNS "jsonb"
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public'
-    AS $$
+CREATE OR REPLACE FUNCTION public.get_catalogue_page(
+  p_brands    text[]  DEFAULT '{}',
+  p_ranges    text[]  DEFAULT '{}',
+  p_pairs     jsonb   DEFAULT '{}'::jsonb,
+  p_tags      jsonb   DEFAULT '{}'::jsonb,
+  p_q         text    DEFAULT '',
+  p_sort      text    DEFAULT 'bestsellers',
+  p_page      int     DEFAULT 1,
+  p_page_size int     DEFAULT 24
+)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY INVOKER
+SET search_path = public
+AS $$
 DECLARE
   v_q_like    text;   -- motif ILIKE échappé (NULL si q vide → pas de filtre)
   v_sort      text;
   v_page_size int;
+  v_tree      boolean; -- mode arbre : au moins une paire (marque, gammes[]) valide
 BEGIN
   -- Normalisation des entrées (la fonction est exposée à anon : tout doit
   -- être défensif).
   p_brands := COALESCE(p_brands, '{}');
   p_ranges := COALESCE(p_ranges, '{}');
+  p_pairs  := CASE WHEN jsonb_typeof(COALESCE(p_pairs, '{}'::jsonb)) = 'object'
+                   THEN p_pairs ELSE '{}'::jsonb END;
   p_tags   := CASE WHEN jsonb_typeof(COALESCE(p_tags, '{}'::jsonb)) = 'object'
                    THEN p_tags ELSE '{}'::jsonb END;
+
+  -- ⚠️ Pas de `jsonb_typeof = 'array' AND jsonb_array_length(...)` ici : le
+  -- AND ne court-circuite pas forcément, une valeur scalaire ferait crasher.
+  v_tree := EXISTS (
+    SELECT 1 FROM jsonb_each(p_pairs) AS f(brand_name, ranges)
+    WHERE jsonb_array_length(
+            CASE WHEN jsonb_typeof(f.ranges) = 'array'
+                 THEN f.ranges ELSE '[]'::jsonb END
+          ) > 0
+  );
 
   v_sort := CASE
     WHEN p_sort IN ('bestsellers', 'az', 'za', 'price-asc', 'price-desc') THEN p_sort
@@ -576,14 +601,30 @@ BEGIN
         AND (v_q_like IS NULL OR p.name_search ILIKE v_q_like ESCAPE '\')
     ),
     -- ------------------------------------------------------------------
-    -- filtered : base + marque (OR) + gamme (OR) + tags (OR intra-type /
+    -- filtered : base + groupe marque·gamme + tags (OR intra-type /
     -- AND inter-types via double NOT EXISTS).
+    -- Groupe marque·gamme :
+    --   mode arbre (v_tree)  → OR : marque pleine OU gamme nue OU paire ;
+    --   mode hérité          → AND brand×range, à l'identique de la v1.
     -- ------------------------------------------------------------------
     filtered AS (
       SELECT cb.*
       FROM base cb
-      WHERE (cardinality(p_brands) = 0 OR cb.brand_name = ANY(p_brands))
-        AND (cardinality(p_ranges) = 0 OR cb.range_name = ANY(p_ranges))
+      WHERE (
+          CASE WHEN v_tree THEN
+            cb.brand_name = ANY(p_brands)
+            OR (cardinality(p_ranges) > 0 AND cb.range_name = ANY(p_ranges))
+            OR EXISTS (
+              SELECT 1 FROM jsonb_each(p_pairs) AS pr(pair_brand, pair_ranges)
+              WHERE pr.pair_brand = cb.brand_name
+                AND jsonb_typeof(pr.pair_ranges) = 'array'
+                AND cb.range_name IN (SELECT jsonb_array_elements_text(pr.pair_ranges))
+            )
+          ELSE
+            (cardinality(p_brands) = 0 OR cb.brand_name = ANY(p_brands))
+            AND (cardinality(p_ranges) = 0 OR cb.range_name = ANY(p_ranges))
+          END
+        )
         AND NOT EXISTS (
           -- Un type sélectionné (tableau non vide) que le produit ne
           -- satisfait PAS → produit exclu.
@@ -674,9 +715,10 @@ BEGIN
       FROM page_slice ps
     ),
     -- ------------------------------------------------------------------
-    -- FACETTES — sémantique computeFacetedCounts : chaque famille exclut
-    -- SON propre filtre, applique tous les autres (q déjà dans base).
-    -- Vocabulaires complets → les entrées sans match obtiennent 0.
+    -- FACETTES.
+    -- Marques & gammes = facettes du groupe marque·gamme → excluent le
+    -- groupe ENTIER (brand + range + pairs), n'appliquent que tags (+ q,
+    -- déjà dans base). Vocabulaires complets → entrées sans match = 0.
     -- ------------------------------------------------------------------
     -- 1) Marques : vocabulaire = marques avec ≥1 produit actif.
     brand_vocab AS (
@@ -685,11 +727,10 @@ BEGIN
       JOIN ranges r   ON r.brand_id = b.id
       JOIN products p ON p.range_id = r.id AND p.is_active = true
     ),
-    brand_pool AS (  -- [ranges + tags + q], SANS le filtre brand.
-      SELECT cb.brand_name
+    group_pool AS (  -- [tags + q], SANS le groupe marque·gamme — partagé
+      SELECT cb.brand_name, cb.range_name
       FROM base cb
-      WHERE (cardinality(p_ranges) = 0 OR cb.range_name = ANY(p_ranges))
-        AND NOT EXISTS (
+      WHERE NOT EXISTS (
           SELECT 1 FROM jsonb_each(p_tags) AS f(type_slug, names)
           WHERE jsonb_typeof(f.names) = 'array'
             AND jsonb_array_length(f.names) > 0
@@ -706,7 +747,7 @@ BEGIN
       SELECT COALESCE(jsonb_object_agg(bv.brand_name, COALESCE(bp.n, 0)), '{}'::jsonb) AS j
       FROM brand_vocab bv
       LEFT JOIN (
-        SELECT brand_name, count(*) AS n FROM brand_pool GROUP BY brand_name
+        SELECT brand_name, count(*) AS n FROM group_pool GROUP BY brand_name
       ) bp ON bp.brand_name = bv.brand_name
     ),
     -- 2) Gammes : vocabulaire = gammes avec ≥1 produit actif.
@@ -715,42 +756,40 @@ BEGIN
       FROM ranges r
       JOIN products p ON p.range_id = r.id AND p.is_active = true
     ),
-    range_pool AS (  -- [brands + tags + q], SANS le filtre range.
-      SELECT cb.range_name
-      FROM base cb
-      WHERE (cardinality(p_brands) = 0 OR cb.brand_name = ANY(p_brands))
-        AND NOT EXISTS (
-          SELECT 1 FROM jsonb_each(p_tags) AS f(type_slug, names)
-          WHERE jsonb_typeof(f.names) = 'array'
-            AND jsonb_array_length(f.names) > 0
-            AND NOT EXISTS (
-              SELECT 1 FROM product_tags pt
-              JOIN tags t       ON t.id = pt.tag_id
-              JOIN tag_types tt ON tt.id = t.tag_type_id
-              WHERE pt.product_id = cb.id AND tt.slug = f.type_slug
-                AND t.name IN (SELECT jsonb_array_elements_text(f.names))
-            )
-        )
-    ),
     ranges_facet AS (
       SELECT COALESCE(jsonb_object_agg(rv.range_name, COALESCE(rp.n, 0)), '{}'::jsonb) AS j
       FROM range_vocab rv
       LEFT JOIN (
-        SELECT range_name, count(*) AS n FROM range_pool GROUP BY range_name
+        SELECT range_name, count(*) AS n FROM group_pool GROUP BY range_name
       ) rp ON rp.range_name = rv.range_name
     ),
     -- 3) Tags : vocabulaire = TOUS les tags (même non utilisés → 0), groupés
     --    par tag_types.slug. Count d'un tag du type X = produits matchant
-    --    [brands + ranges + q + les AUTRES types] ET portant ce tag.
+    --    [groupe marque·gamme + q + les AUTRES types] ET portant ce tag.
+    --    ⚠️ tag_base_pool applique le groupe marque·gamme EN ENTIER (mode
+    --    arbre compris) : les tags sont une autre famille → AND voulu.
     tag_vocab AS (
       SELECT tt.slug AS type_slug, t.id AS tag_id, t.name AS tag_name
       FROM tags t JOIN tag_types tt ON tt.id = t.tag_type_id
     ),
-    tag_base_pool AS (  -- base + brands + ranges (+ q via base).
+    tag_base_pool AS (  -- base + groupe marque·gamme (+ q via base).
       SELECT cb.id
       FROM base cb
-      WHERE (cardinality(p_brands) = 0 OR cb.brand_name = ANY(p_brands))
-        AND (cardinality(p_ranges) = 0 OR cb.range_name = ANY(p_ranges))
+      WHERE (
+        CASE WHEN v_tree THEN
+          cb.brand_name = ANY(p_brands)
+          OR (cardinality(p_ranges) > 0 AND cb.range_name = ANY(p_ranges))
+          OR EXISTS (
+            SELECT 1 FROM jsonb_each(p_pairs) AS pr(pair_brand, pair_ranges)
+            WHERE pr.pair_brand = cb.brand_name
+              AND jsonb_typeof(pr.pair_ranges) = 'array'
+              AND cb.range_name IN (SELECT jsonb_array_elements_text(pr.pair_ranges))
+          )
+        ELSE
+          (cardinality(p_brands) = 0 OR cb.brand_name = ANY(p_brands))
+          AND (cardinality(p_ranges) = 0 OR cb.range_name = ANY(p_ranges))
+        END
+      )
     ),
     tag_counts AS (
       SELECT tv.type_slug, tv.tag_name, count(*) AS n
@@ -800,10 +839,10 @@ END;
 $$;
 
 
-ALTER FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) OWNER TO "postgres";
+ALTER FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_pairs" "jsonb", "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) IS 'Catalogue server-side : filtrage (marque OR / gamme OR / tags OR-intra AND-inter / q accent-insensible) + tri + pagination + total + facettes (chaque famille exclut son propre filtre). SECURITY INVOKER, is_active reaffirme, aucun cout expose. Phase 3 remediation 2026-06-10.';
+COMMENT ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_pairs" "jsonb", "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) IS 'Catalogue server-side v2 : groupe marque·gamme en OR quand p_pairs (paires marque:gamme qualifiees) est non vide, sinon AND herite ; tags OR-intra AND-inter ; q accent-insensible ; tri ; pagination ; facettes (marques/gammes excluent le groupe entier, tags excluent leur type). SECURITY INVOKER, is_active reaffirme, aucun cout expose. Redesign rail editorial 2026-06-11.';
 
 
 
@@ -3394,9 +3433,9 @@ GRANT ALL ON FUNCTION "public"."expire_stale_reservations"() TO "service_role";
 
 
 
-GRANT ALL ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) TO "service_role";
-GRANT ALL ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_pairs" "jsonb", "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_pairs" "jsonb", "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) TO "service_role";
+GRANT ALL ON FUNCTION "public"."get_catalogue_page"("p_brands" "text"[], "p_ranges" "text"[], "p_pairs" "jsonb", "p_tags" "jsonb", "p_q" "text", "p_sort" "text", "p_page" integer, "p_page_size" integer) TO "anon";
 
 
 

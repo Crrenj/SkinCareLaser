@@ -20,6 +20,16 @@ export interface CatalogueProduct {
 export interface FilterState {
   brands: string[]
   ranges: string[]
+  /**
+   * Sélections de gammes QUALIFIÉES par marque : { marque: [gammes] }.
+   * Encodées dans le param `range` en `marque-slug:gamme-slug` (même motif
+   * que `tag=type:slug`). Les noms de gammes ne sont PAS uniques entre
+   * marques (ex. « Protectores Solares » chez Avène ET Babe) — la paire
+   * lève l'ambiguïté que `ranges` (noms nus, hérité des deep-links) ne peut
+   * pas exprimer. Quand `pairs` est non vide, le groupe marque·gamme passe
+   * en sémantique UNION : marque cochée OU paire cochée (cf. RPC).
+   */
+  pairs: Record<string, string[]>
   tags: Record<string, string[]>
   q: string
   sort: SortKey
@@ -61,14 +71,34 @@ export function parseFilters(
   allBrands: string[],
   allRanges: string[],
   itemsByType: Record<string, string[]>,
+  rangesByBrand?: Record<string, string[]>,
 ): FilterState {
   const brands = readMultiParam(sp, 'brand')
     .map((v) => matchName(allBrands, v))
     .filter((v): v is string => !!v)
 
-  const ranges = readMultiParam(sp, 'range')
-    .map((v) => matchName(allRanges, v))
-    .filter((v): v is string => !!v)
+  // `range` accepte deux formes d'entrée :
+  //  - nue (`hydrance`, nom ou slug) → ranges, sémantique héritée ;
+  //  - qualifiée (`avene:hydrance`) → pairs, résolue contre rangesByBrand.
+  // Une entrée qualifiée irrésoluble (marque/gamme inconnue, ou
+  // rangesByBrand absent) est droppée silencieusement, comme les nues.
+  const ranges: string[] = []
+  const pairs: Record<string, string[]> = {}
+  for (const entry of readMultiParam(sp, 'range')) {
+    const sep = entry.indexOf(':')
+    if (sep === -1) {
+      const matched = matchName(allRanges, entry)
+      if (matched) ranges.push(matched)
+      continue
+    }
+    if (!rangesByBrand) continue
+    const brand = matchName(Object.keys(rangesByBrand), entry.slice(0, sep))
+    if (!brand) continue
+    const range = matchName(rangesByBrand[brand] ?? [], entry.slice(sep + 1))
+    if (!range) continue
+    pairs[brand] ??= []
+    if (!pairs[brand].includes(range)) pairs[brand].push(range)
+  }
 
   const tags: Record<string, string[]> = {}
   for (const type of Object.keys(itemsByType)) {
@@ -99,19 +129,105 @@ export function parseFilters(
     : 'bestsellers'
   const page = Math.max(1, parseInt(typeof sp.page === 'string' ? sp.page : '1', 10) || 1)
 
-  return { brands, ranges, tags, q, sort, page }
+  return { brands, ranges, pairs, tags, q, sort, page }
 }
 
+// ---------------------------------------------------------------------------
+// Arbre Marque → Gammes (rail catalogue, redesign v2)
+// ---------------------------------------------------------------------------
+
+/**
+ * Modèle de sélection de l'arbre : par marque, soit `'full'` (la marque
+ * entière est cochée), soit le sous-ensemble NON VIDE de ses gammes cochées.
+ * Une marque absente du modèle n'a rien de coché.
+ */
+export type BrandTreeModel = Record<string, 'full' | string[]>
+
+/**
+ * Dérive le modèle d'arbre depuis l'état URL parsé.
+ * Règles :
+ *  - les paires qualifiées et les gammes nues (attribuées à TOUTES les
+ *    marques qui portent ce nom — un nom nu est intrinsèquement ambigu)
+ *    forment le sous-ensemble coché d'une marque ;
+ *  - sous-ensemble == toutes les gammes de la marque → promu `'full'` ;
+ *  - une marque de `selectedBrands` sans gamme cochée → `'full'` ;
+ *  - une marque de `selectedBrands` AVEC un sous-ensemble → le sous-ensemble
+ *    gagne (préserve la sémantique AND des deep-links `?brand=X&range=Y`).
+ * Itère dans l'ordre des clés de rangesByBrand (stable, alphabétique).
+ */
+export function deriveBrandTreeModel(
+  selectedBrands: string[],
+  selectedRanges: string[],
+  pairs: Record<string, string[]>,
+  rangesByBrand: Record<string, string[]>,
+): BrandTreeModel {
+  const model: BrandTreeModel = {}
+  for (const [brand, allRanges] of Object.entries(rangesByBrand)) {
+    const subset = allRanges.filter(
+      (r) => selectedRanges.includes(r) || (pairs[brand] ?? []).includes(r),
+    )
+    if (subset.length === 0) continue
+    model[brand] = subset.length === allRanges.length ? 'full' : subset
+  }
+  for (const brand of selectedBrands) {
+    if (!(brand in model) && brand in rangesByBrand) model[brand] = 'full'
+  }
+  return model
+}
+
+/**
+ * Reconstruit la sélection canonique depuis le modèle :
+ *  - brands = marques `'full'` uniquement ;
+ *  - pairs  = sous-ensembles partiels, qualifiés par marque ;
+ *  - ranges = [] TOUJOURS (jamais d'expansion en noms nus — c'est ce qui
+ *    évite les fuites entre marques partageant un nom de gamme).
+ * build(derive(x)) est un point fixe pour toute URL produite par l'UI.
+ */
+export function buildSelectionFromModel(model: BrandTreeModel): {
+  brands: string[]
+  ranges: string[]
+  pairs: Record<string, string[]>
+} {
+  const brands: string[] = []
+  const pairs: Record<string, string[]> = {}
+  for (const [brand, value] of Object.entries(model)) {
+    if (value === 'full') brands.push(brand)
+    else if (value.length > 0) pairs[brand] = value
+  }
+  return { brands, ranges: [], pairs }
+}
+
+/**
+ * ⚠️ matchesFilters / filterProducts / computeFacetedCounts ne sont PLUS
+ * appelés par l'app (le filtrage runtime vit dans la RPC `get_catalogue_page`,
+ * migration 20260611235000). Ils restent comme SPEC EXÉCUTABLE de la RPC,
+ * exercée par catalogueFilters.test.ts — toute évolution de la sémantique SQL
+ * (mode arbre/paires, facettes de groupe) doit être répliquée ici et testée.
+ */
 function matchesFilters(
   p: CatalogueProduct,
   filters: FilterState,
   excludeTagType?: string,
-  excludeBrand?: boolean,
-  excludeRange?: boolean,
+  excludeBrandRangeGroup?: boolean,
 ): boolean {
   if (filters.q && !p.name.toLowerCase().includes(filters.q.toLowerCase())) return false
-  if (!excludeBrand && filters.brands.length > 0 && !filters.brands.includes(p.brand)) return false
-  if (!excludeRange && filters.ranges.length > 0 && !filters.ranges.includes(p.range)) return false
+  if (!excludeBrandRangeGroup) {
+    const pairs = filters.pairs ?? {}
+    const hasPairs = Object.values(pairs).some((a) => a.length > 0)
+    if (hasPairs) {
+      // Mode arbre : le groupe marque·gamme est une UNION — marque cochée
+      // en entier OU paire (marque, gamme) cochée OU gamme nue héritée.
+      const ok =
+        filters.brands.includes(p.brand) ||
+        (filters.ranges.length > 0 && filters.ranges.includes(p.range)) ||
+        (pairs[p.brand] ?? []).includes(p.range)
+      if (!ok) return false
+    } else {
+      // Mode hérité (aucune paire) : AND entre familles, inchangé.
+      if (filters.brands.length > 0 && !filters.brands.includes(p.brand)) return false
+      if (filters.ranges.length > 0 && !filters.ranges.includes(p.range)) return false
+    }
+  }
   for (const [tagType, selected] of Object.entries(filters.tags)) {
     if (tagType === excludeTagType || selected.length === 0) continue
     const labels = p.tags.filter((t) => t.category === tagType).map((t) => t.label)
@@ -152,6 +268,9 @@ export function computeFacetedCounts(
 ): FacetedCounts {
   const counts: FacetedCounts = { brands: {}, ranges: {}, tags: {} }
 
+  // L'arbre fait du groupe marque·gamme UN seul groupe à sémantique OR →
+  // ses deux facettes excluent le groupe ENTIER (marques + gammes + paires)
+  // et n'appliquent que les autres familles (tags, q).
   for (const brand of allBrands) {
     counts.brands[brand] = products.filter(
       (p) => matchesFilters(p, filters, undefined, true) && p.brand === brand,
@@ -161,7 +280,7 @@ export function computeFacetedCounts(
   for (const ranges of Object.values(rangesByBrand)) {
     for (const range of ranges) {
       counts.ranges[range] = products.filter(
-        (p) => matchesFilters(p, filters, undefined, false, true) && p.range === range,
+        (p) => matchesFilters(p, filters, undefined, true) && p.range === range,
       ).length
     }
   }
@@ -189,7 +308,15 @@ export function buildCatalogueUrl(
   const params = new URLSearchParams()
   if (f.q) params.set('q', f.q)
   if (f.brands.length) params.set('brand', f.brands.join(','))
-  if (f.ranges.length) params.set('range', f.ranges.join(','))
+  // Gammes : entrées nues héritées (noms) + paires qualifiées en
+  // `marque-slug:gamme-slug`, dans le même param `range`.
+  const rangeEntries = [
+    ...f.ranges,
+    ...Object.entries(f.pairs ?? {}).flatMap(([brand, ranges]) =>
+      ranges.map((r) => `${nameToSlug(brand)}:${nameToSlug(r)}`),
+    ),
+  ]
+  if (rangeEntries.length) params.set('range', rangeEntries.join(','))
   if (f.tags['besoins']?.length) params.set('need', f.tags['besoins'].map(nameToSlug).join(','))
   for (const [type, names] of Object.entries(f.tags)) {
     if (type === 'besoins' || !names.length) continue

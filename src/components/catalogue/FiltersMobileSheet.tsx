@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import type { FilterState } from '@/lib/catalogueFilters'
 
 type TagTypeKey = 'categories' | 'besoins' | 'typesPeau' | 'ingredients'
 
@@ -10,12 +11,6 @@ const TAG_TYPE_TRANSLATION: Record<string, TagTypeKey> = {
   besoins: 'besoins',
   'types-peau': 'typesPeau',
   ingredients: 'ingredients',
-}
-
-type FiltersSnapshot = {
-  sort: string
-  brands: Set<string>
-  tags: Record<string, Set<string>>
 }
 
 type Props = {
@@ -39,6 +34,15 @@ type Props = {
   onBrandToggle: (brand: string) => void
   onTagToggle: (tagType: string, tagName: string) => void
   onClearAll: () => void
+
+  /**
+   * Snapshot/restore de l'état COMPLET des filtres pour le Cancel : restaurer
+   * en un seul navigate préserve les sélections partielles de l'arbre
+   * marque→gammes (un replay de toggles par marque les élargirait en marque
+   * entière) et évite les rafales de navigations.
+   */
+  captureFilters: () => FilterState
+  onRestoreFilters: (snapshot: FilterState) => void
 
   /** Comptes optionnels affichés à droite des options. */
   productCounts?: {
@@ -74,6 +78,8 @@ export function FiltersMobileSheet({
   onBrandToggle,
   onTagToggle,
   onClearAll,
+  captureFilters,
+  onRestoreFilters,
   productCounts,
 }: Props) {
   const t = useTranslations('MobileFilters')
@@ -82,20 +88,14 @@ export function FiltersMobileSheet({
   const dialogRef = useRef<HTMLDialogElement | null>(null)
 
   // Snapshot des sélections à l'ouverture pour pouvoir restaurer au Cancel
-  const [snapshot, setSnapshot] = useState<FiltersSnapshot | null>(null)
+  const [snapshot, setSnapshot] = useState<FilterState | null>(null)
 
   // Synchronise l'état open ↔ <dialog>
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog) return
     if (open && !dialog.open) {
-      setSnapshot({
-        sort,
-        brands: new Set(selectedBrands),
-        tags: Object.fromEntries(
-          Object.entries(selectedTags).map(([k, v]) => [k, new Set(v)]),
-        ),
-      })
+      setSnapshot(captureFilters())
       dialog.showModal()
     } else if (!open && dialog.open) {
       dialog.close()
@@ -105,27 +105,7 @@ export function FiltersMobileSheet({
 
   // Restaure le snapshot quand l'utilisateur fait Cancel ou ferme via Esc / clic backdrop
   const revertToSnapshot = () => {
-    if (!snapshot) return
-    if (snapshot.sort !== sort) onSortChange(snapshot.sort)
-    // Revert brands
-    const targetBrands = snapshot.brands
-    selectedBrands.forEach((b) => {
-      if (!targetBrands.has(b)) onBrandToggle(b)
-    })
-    targetBrands.forEach((b) => {
-      if (!selectedBrands.has(b)) onBrandToggle(b)
-    })
-    // Revert tags
-    for (const tagType of Object.keys({ ...selectedTags, ...snapshot.tags })) {
-      const current = selectedTags[tagType] ?? new Set<string>()
-      const previous = snapshot.tags[tagType] ?? new Set<string>()
-      current.forEach((name) => {
-        if (!previous.has(name)) onTagToggle(tagType, name)
-      })
-      previous.forEach((name) => {
-        if (!current.has(name)) onTagToggle(tagType, name)
-      })
-    }
+    if (snapshot) onRestoreFilters(snapshot)
   }
 
   const handleCancel = () => {

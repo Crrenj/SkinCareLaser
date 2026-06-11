@@ -9,21 +9,26 @@ type Props = {
   activeCount: number
 }
 
+/**
+ * En-tête compact éditorial (redesign « Rail editorial » 2026-06-11) :
+ * titre serif ~38px sur UNE ligne (fini le 88px), sous-titre serif court,
+ * méta chiffrée à droite (compteur serif 30px + filtres actifs).
+ */
 export function CatalogueHeader({ visible, total, activeCount }: Props) {
   const t = useTranslations('Catalogue')
 
   return (
     <section
-      className="px-5 lg:px-10 pt-12 lg:pt-16 pb-9 border-b border-sand-300"
+      className="px-5 lg:px-10 pt-6 lg:pt-7 pb-[22px] border-b border-sand-300"
       style={{
         background:
-          'radial-gradient(ellipse at 88% 18%, rgba(216,154,117,.13), transparent 55%), linear-gradient(180deg, var(--color-sand-100), var(--color-sand-50))',
+          'radial-gradient(ellipse at 92% 10%, rgba(216,154,117,.10), transparent 60%), linear-gradient(180deg, var(--color-sand-100), var(--color-sand-50))',
       }}
     >
       <div className="max-w-[1480px] mx-auto">
         <nav
           aria-label={t('breadcrumbAriaLabel')}
-          className="font-mono text-[11px] tracking-[0.14em] uppercase text-ink-500 flex gap-2.5 items-center mb-7"
+          className="font-mono text-[10.5px] tracking-[0.14em] uppercase text-ink-500 flex gap-2 items-center mb-3.5"
         >
           <Link href="/" className="hover:text-clay-700 transition-colors">
             {t('breadcrumbHome')}
@@ -34,23 +39,23 @@ export function CatalogueHeader({ visible, total, activeCount }: Props) {
           <span className="text-clay-700">{t('breadcrumbCurrent')}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_auto] gap-6 lg:gap-8 items-end">
+        <div className="flex justify-between items-end gap-7 flex-wrap">
           <div>
             <h1
-              className="font-serif text-[48px] sm:text-[64px] lg:text-[88px] leading-none -tracking-[0.02em] text-ink-900 [&_em]:not-italic [&_em]:italic [&_em]:text-clay-700"
+              className="font-serif text-[30px] lg:text-[38px] leading-[1.04] -tracking-[0.015em] text-ink-900 [&_em]:italic [&_em]:text-clay-700"
               dangerouslySetInnerHTML={{ __html: t.raw('headerTitle') as string }}
             />
-            <p className="font-serif text-[19px] lg:text-[21px] leading-[1.45] text-ink-700 mt-5 max-w-[580px]">
-              {t('headerSubtitle', { count: total })}
+            <p className="font-serif text-[17px] leading-[1.4] text-ink-700 mt-[7px] max-w-[520px]">
+              {t('headerSubtitle')}
             </p>
           </div>
-          <div className="font-mono text-[11px] tracking-[0.12em] uppercase text-ink-500 text-left lg:text-right leading-[1.7]">
-            <span className="font-serif text-[44px] lg:text-[60px] leading-none -tracking-[0.02em] text-ink-900 block mb-1.5">
+          <div className="font-mono text-[11px] tracking-[0.04em] text-ink-500 text-right leading-[1.7] whitespace-nowrap">
+            <span className="font-serif text-[30px] leading-none -tracking-[0.02em] text-ink-900">
               {visible}
             </span>
-            <b className="text-ink-800 font-medium">{t('headerMetaProducts')}</b>
             <br />
-            {t('headerMetaOf', { total })}
+            <b className="text-ink-800 font-medium">{t('headerMetaProducts')}</b>{' '}
+            · {t('headerMetaOf', { total })}
             {activeCount > 0 && (
               <>
                 <br />

@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl'
 type Props = {
   currentPage: number
   totalPages: number
+  /** Taille de page — affichée en libellé « {n} par page » (desktop). */
+  perPage?: number
   onPageChange: (page: number) => void
   onPrevious: () => void
   onNext: () => void
@@ -33,6 +35,7 @@ function buildPageRange(
 export function CataloguePagination({
   currentPage,
   totalPages,
+  perPage,
   onPageChange,
   onPrevious,
   onNext,
@@ -92,6 +95,9 @@ export function CataloguePagination({
           {t('nextPage')} ›
         </button>
       </div>
+      {perPage !== undefined && (
+        <span className="hidden sm:inline">{t('pagerPerPage', { count: perPage })}</span>
+      )}
     </nav>
   )
 }

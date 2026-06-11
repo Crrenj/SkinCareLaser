@@ -4,6 +4,9 @@ import {
   filterProducts,
   computeFacetedCounts,
   buildCatalogueUrl,
+  deriveBrandTreeModel,
+  buildSelectionFromModel,
+  type BrandTreeModel,
   type CatalogueProduct,
   type FilterState,
 } from '@/lib/catalogueFilters'
@@ -135,6 +138,7 @@ function emptyFilters(overrides: Partial<FilterState> = {}): FilterState {
   return {
     brands: [],
     ranges: [],
+    pairs: {},
     tags: { besoins: [], 'types-peau': [] },
     q: '',
     sort: 'bestsellers',
@@ -443,7 +447,7 @@ describe('buildCatalogueUrl — round-trip', () => {
 
   function roundTrip(state: FilterState): FilterState {
     const url = buildCatalogueUrl('/fr/catalogue', state)
-    return parseFilters(urlToSearchParams(url), ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE)
+    return parseFilters(urlToSearchParams(url), ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND)
   }
 
   it('marques accentuées', () => {
@@ -526,5 +530,226 @@ describe('buildCatalogueUrl — omission des champs vides/par défaut', () => {
   it('overrides est appliqué par-dessus l\'état', () => {
     const url = buildCatalogueUrl('/fr/catalogue', emptyFilters({ page: 5 }), { page: 1 })
     expect(url).toBe('/fr/catalogue')
+  })
+})
+
+// ===========================================================================
+// 9. Paires marque:gamme (arbre Marque → Gammes, redesign 2026-06-11)
+// ===========================================================================
+
+// Fixture avec COLLISION de nom : « Solar » existe chez Avène ET Babe.
+// (Cas réel en prod : « Protectores Solares » Avène+Babe, « Général »
+// Filorga+Levissime.) C'est ce qui impose les paires qualifiées.
+const COLLIDING_RANGES_BY_BRAND: Record<string, string[]> = {
+  'Avène': ['Hydrance', 'Solar'],
+  'Babe': ['Aloe Vera', 'Solar'],
+}
+const COLLIDING_ALL_RANGES = ['Hydrance', 'Solar', 'Aloe Vera']
+
+const COLLIDING_PRODUCTS: CatalogueProduct[] = [
+  makeProduct({ id: 'a1', name: 'Avène Hydrance Gel', brand: 'Avène', range: 'Hydrance' }),
+  makeProduct({ id: 'a2', name: 'Avène Solar SPF50', brand: 'Avène', range: 'Solar' }),
+  makeProduct({ id: 'b1', name: 'Babe Aloe Crema', brand: 'Babe', range: 'Aloe Vera' }),
+  makeProduct({ id: 'b2', name: 'Babe Solar Pediatric', brand: 'Babe', range: 'Solar' }),
+]
+
+describe('parseFilters — entrées range qualifiées (marque:gamme)', () => {
+  it('résout une paire qualifiée par slugs', () => {
+    const f = parseFilters({ range: 'avene:hydrance' }, ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND)
+    expect(f.pairs).toEqual({ 'Avène': ['Hydrance'] })
+    expect(f.ranges).toEqual([])
+  })
+
+  it('mélange entrées nues et qualifiées dans le même param', () => {
+    const f = parseFilters(
+      { range: 'solaire,babe:aloe-vera' },
+      ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND,
+    )
+    expect(f.ranges).toEqual(['Solaire'])
+    expect(f.pairs).toEqual({ 'Babe': ['Aloe Vera'] })
+  })
+
+  it('droppe une paire dont la marque ou la gamme est inconnue', () => {
+    const f = parseFilters(
+      { range: 'inconnue:hydrance,avene:inconnue' },
+      ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND,
+    )
+    expect(f.pairs).toEqual({})
+  })
+
+  it('droppe la gamme qualifiée appartenant à une AUTRE marque', () => {
+    // Aloe Vera est chez Babe, pas chez Avène.
+    const f = parseFilters({ range: 'avene:aloe-vera' }, ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND)
+    expect(f.pairs).toEqual({})
+  })
+
+  it('sans rangesByBrand (signature historique), les paires sont droppées', () => {
+    const f = parseFilters({ range: 'avene:hydrance' }, ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE)
+    expect(f.pairs).toEqual({})
+    expect(f.ranges).toEqual([])
+  })
+
+  it('déduplique une paire répétée', () => {
+    const f = parseFilters(
+      { range: 'avene:hydrance,avene:hydrance' },
+      ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND,
+    )
+    expect(f.pairs).toEqual({ 'Avène': ['Hydrance'] })
+  })
+})
+
+describe('filterProducts — mode arbre (pairs ⇒ union du groupe marque·gamme)', () => {
+  it('paires seules : seuls les produits de la paire exacte matchent (pas de fuite par nom)', () => {
+    const out = filterProducts(
+      COLLIDING_PRODUCTS,
+      emptyFilters({ pairs: { 'Babe': ['Solar'] } }),
+    )
+    // « Solar » existe aussi chez Avène — la paire ne doit PAS le ramener.
+    expect(ids(out)).toEqual(['b2'])
+  })
+
+  it('marque pleine + paire d\'une autre marque = UNION (et pas AND vide)', () => {
+    const out = filterProducts(
+      COLLIDING_PRODUCTS,
+      emptyFilters({ brands: ['Avène'], pairs: { 'Babe': ['Aloe Vera'] } }),
+    )
+    expect(ids(out).sort()).toEqual(['a1', 'a2', 'b1'])
+  })
+
+  it('marque pleine + paire : pas de fuite des gammes homonymes de la marque pleine', () => {
+    // Avène pleine inclut son « Solar » ; la sélection partielle Babe se
+    // limite à Aloe Vera → Babe/Solar (b2) ne doit PAS apparaître.
+    const out = filterProducts(
+      COLLIDING_PRODUCTS,
+      emptyFilters({ brands: ['Avène'], pairs: { 'Babe': ['Aloe Vera'] } }),
+    )
+    expect(ids(out)).not.toContain('b2')
+  })
+
+  it('sans paire, la sémantique héritée AND est inchangée', () => {
+    const out = filterProducts(
+      COLLIDING_PRODUCTS,
+      emptyFilters({ brands: ['Avène'], ranges: ['Aloe Vera'] }),
+    )
+    expect(out).toHaveLength(0)
+  })
+
+  it('gammes nues héritées restent des termes OR en mode arbre', () => {
+    const out = filterProducts(
+      COLLIDING_PRODUCTS,
+      emptyFilters({ ranges: ['Hydrance'], pairs: { 'Babe': ['Aloe Vera'] } }),
+    )
+    expect(ids(out).sort()).toEqual(['a1', 'b1'])
+  })
+})
+
+describe('deriveBrandTreeModel / buildSelectionFromModel', () => {
+  it('marque de selectedBrands sans gamme cochée → full', () => {
+    const m = deriveBrandTreeModel(['Avène'], [], {}, RANGES_BY_BRAND)
+    expect(m).toEqual({ 'Avène': 'full' })
+  })
+
+  it('sous-ensemble == toutes les gammes → promu full', () => {
+    const m = deriveBrandTreeModel([], [], { 'Avène': ['Hydrance', 'Solaire'] }, RANGES_BY_BRAND)
+    expect(m).toEqual({ 'Avène': 'full' })
+  })
+
+  it('le sous-ensemble gagne sur selectedBrands (deep-link ?brand=X&range=Y)', () => {
+    const m = deriveBrandTreeModel(['Avène'], ['Hydrance'], {}, RANGES_BY_BRAND)
+    expect(m).toEqual({ 'Avène': ['Hydrance'] })
+  })
+
+  it('une gamme NUE ambiguë est attribuée à toutes les marques qui la portent', () => {
+    const m = deriveBrandTreeModel([], ['Solar'], {}, COLLIDING_RANGES_BY_BRAND)
+    expect(m).toEqual({ 'Avène': ['Solar'], 'Babe': ['Solar'] })
+  })
+
+  it('une paire qualifiée ne touche QUE sa marque (pas la marque homonyme)', () => {
+    const m = deriveBrandTreeModel([], [], { 'Babe': ['Solar'] }, COLLIDING_RANGES_BY_BRAND)
+    expect(m).toEqual({ 'Babe': ['Solar'] })
+  })
+
+  it('une marque inconnue de selectedBrands est ignorée', () => {
+    const m = deriveBrandTreeModel(['Fantôme'], [], {}, RANGES_BY_BRAND)
+    expect(m).toEqual({})
+  })
+
+  it('buildSelectionFromModel : fulls → brands, partiels → pairs, ranges toujours []', () => {
+    const model: BrandTreeModel = { 'Avène': 'full', 'Babe': ['Aloe Vera'] }
+    expect(buildSelectionFromModel(model)).toEqual({
+      brands: ['Avène'],
+      ranges: [],
+      pairs: { 'Babe': ['Aloe Vera'] },
+    })
+  })
+
+  it('point fixe : derive(build(model)) == model, y compris avec collision de nom', () => {
+    const model: BrandTreeModel = { 'Avène': 'full', 'Babe': ['Solar'] }
+    const sel = buildSelectionFromModel(model)
+    const rederived = deriveBrandTreeModel(sel.brands, sel.ranges, sel.pairs, COLLIDING_RANGES_BY_BRAND)
+    expect(rederived).toEqual(model)
+  })
+
+  it('point fixe via URL : build → buildCatalogueUrl → parseFilters → derive', () => {
+    const model: BrandTreeModel = { 'Avène': 'full', 'Babe': ['Solar'] }
+    const sel = buildSelectionFromModel(model)
+    const url = buildCatalogueUrl('/fr/catalogue', emptyFilters({ ...sel }))
+    const sp = new URLSearchParams(url.slice(url.indexOf('?') + 1))
+    const parsed = parseFilters(
+      Object.fromEntries(sp.entries()),
+      Object.keys(COLLIDING_RANGES_BY_BRAND),
+      COLLIDING_ALL_RANGES,
+      ITEMS_BY_TYPE,
+      COLLIDING_RANGES_BY_BRAND,
+    )
+    const rederived = deriveBrandTreeModel(parsed.brands, parsed.ranges, parsed.pairs, COLLIDING_RANGES_BY_BRAND)
+    expect(rederived).toEqual(model)
+  })
+})
+
+describe('computeFacetedCounts — le groupe marque·gamme exclut le groupe ENTIER', () => {
+  it('compteur de marque : ignore le filtre range (groupe OR)', () => {
+    const filters = emptyFilters({ brands: ['Avène'], ranges: ['Hydrance'] })
+    const counts = computeFacetedCounts(PRODUCTS, filters, ALL_BRANDS, RANGES_BY_BRAND, ITEMS_BY_TYPE)
+    // Avant (facette croisée) Babe serait 0 ; en groupe OR il garde 4.
+    expect(counts.brands['Babe']).toBe(4)
+  })
+
+  it('compteur de gamme : ignore le filtre brand (groupe OR)', () => {
+    const filters = emptyFilters({ brands: ['Avène'] })
+    const counts = computeFacetedCounts(PRODUCTS, filters, ALL_BRANDS, RANGES_BY_BRAND, ITEMS_BY_TYPE)
+    // La gamme d'une AUTRE marque doit montrer son vrai compteur (pas 0)
+    // pour que l'arbre soit explorable sous une marque non cochée.
+    expect(counts.ranges['Aloe Vera']).toBe(4)
+  })
+
+  it('compteur de gamme : ignore aussi les paires', () => {
+    const filters = emptyFilters({ pairs: { 'Avène': ['Hydrance'] } })
+    const counts = computeFacetedCounts(PRODUCTS, filters, ALL_BRANDS, RANGES_BY_BRAND, ITEMS_BY_TYPE)
+    expect(counts.ranges['Solaire']).toBe(2)
+    expect(counts.ranges['Aloe Vera']).toBe(4)
+  })
+
+  it('compteurs de tags : appliquent le groupe marque·gamme (union)', () => {
+    const filters = emptyFilters({ brands: ['Avène'], pairs: { 'Babe': ['Aloe Vera'] } })
+    const counts = computeFacetedCounts(PRODUCTS, filters, ALL_BRANDS, RANGES_BY_BRAND, ITEMS_BY_TYPE)
+    // Union = p1..p4 (Avène) + p5..p8 (Babe/Aloe Vera) = tous les produits.
+    // Hydratation porte sur p1, p2, p5, p6 → 4.
+    expect(counts.tags['besoins']['Hydratation']).toBe(4)
+  })
+})
+
+describe('buildCatalogueUrl — round-trip des paires', () => {
+  it('les paires s\'écrivent en marque-slug:gamme-slug et se relisent', () => {
+    const state = emptyFilters({ brands: ['Babe'], pairs: { 'Avène': ['Hydrance'] } })
+    const url = buildCatalogueUrl('/fr/catalogue', state)
+    expect(url).toContain('range=avene%3Ahydrance')
+    const sp = new URLSearchParams(url.slice(url.indexOf('?') + 1))
+    const parsed = parseFilters(
+      Object.fromEntries(sp.entries()),
+      ALL_BRANDS, ALL_RANGES, ITEMS_BY_TYPE, RANGES_BY_BRAND,
+    )
+    expect(parsed.brands).toEqual(['Babe'])
+    expect(parsed.pairs).toEqual({ 'Avène': ['Hydrance'] })
   })
 })

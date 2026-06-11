@@ -62,7 +62,7 @@ export default function ProductCard({ product }: Props) {
   return (
     <article
       data-testid="product-card"
-      className={`group relative flex flex-col bg-sand-50 border border-sand-200 transition-[border-color,transform] duration-150 hover:border-ink-900 hover:-translate-y-0.5 overflow-hidden ${
+      className={`group relative flex flex-col bg-sand-50 border border-sand-200 transition-[border-color,transform,box-shadow] duration-150 hover:border-ink-900 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_-18px_rgba(31,27,22,0.4)] overflow-hidden ${
         outOfStock ? 'opacity-60' : ''
       }`}
     >
@@ -73,7 +73,14 @@ export default function ProductCard({ product }: Props) {
         className="absolute inset-0 z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-clay-700"
       />
 
-      <div className="relative aspect-[4/5] bg-gradient-to-br from-sand-100 to-sand-200 overflow-hidden flex items-center justify-center">
+      {/* Média carré, visuel agrandi (~82 % de la carte — redesign rail). */}
+      <div
+        className="relative aspect-square overflow-hidden flex items-center justify-center"
+        style={{
+          background:
+            'radial-gradient(ellipse at 50% 30%, var(--color-sand-50), var(--color-sand-100) 70%, var(--color-sand-200))',
+        }}
+      >
         {badge && <ProductBadge kind={badge} promoPct={promoPct} />}
         <ProductCardHeart
           productId={product.id}
@@ -82,28 +89,28 @@ export default function ProductCard({ product }: Props) {
         <Image
           src={product.images?.[0]?.url ?? '/placeholder.png'}
           alt={product.images?.[0]?.alt ?? product.name}
-          width={400}
-          height={500}
-          className="w-3/5 h-4/5 object-contain"
+          width={480}
+          height={480}
+          className="w-[82%] h-[84%] object-contain"
         />
         {!outOfStock && (
           <AddToCartButton
             productId={product.id}
             variant="card-cta-quick"
-            className="absolute left-3.5 right-3.5 bottom-3.5 z-20 opacity-0 translate-y-3.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+            className="absolute left-3 right-3 bottom-3 z-20 opacity-0 translate-y-3.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
             label={`+ ${t('addToCart')}`}
           />
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5 flex-1 px-5 pt-5 pb-5.5">
+      <div className="flex flex-col gap-1 flex-1 px-4 pt-4 pb-4">
         {product.brand && (
-          <div className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-clay-700 truncate">
+          <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-clay-700 truncate">
             {product.brand}
             {product.range ? ` · ${product.range}` : ''}
           </div>
         )}
-        <h3 className="font-serif text-[22px] leading-[1.15] -tracking-[0.012em] text-ink-900 line-clamp-2 min-h-[2.3em]">
+        <h3 className="font-serif text-[20px] leading-[1.12] -tracking-[0.012em] text-ink-900 line-clamp-2 min-h-[2.24em]">
           {product.name}
         </h3>
         {product.description && (
@@ -111,15 +118,15 @@ export default function ProductCard({ product }: Props) {
             {product.description}
           </p>
         )}
-        <div className="flex justify-between items-baseline pt-3 mt-1.5 border-t border-sand-200">
-          <div className="font-serif text-[24px] leading-none -tracking-[0.01em] text-ink-900">
+        <div className="flex justify-between items-baseline pt-2.5 mt-auto border-t border-sand-200">
+          <div className="font-serif text-[21px] leading-none -tracking-[0.01em] text-ink-900">
             {isPromo && (
-              <span className="block font-mono text-[12px] text-ink-500 line-through mb-0.5">
+              <span className="block font-mono text-[11px] text-ink-500 line-through mb-0.5">
                 {product.oldPrice!.toFixed(0)} {product.currency.toUpperCase()}
               </span>
             )}
             {product.price.toFixed(0)}
-            <small className="font-mono text-[11px] text-ink-500 tracking-[0.06em] ml-1">
+            <small className="font-mono text-[10px] text-ink-500 tracking-[0.04em] ml-1">
               {product.currency.toUpperCase()}
               {product.volume ? ` / ${product.volume}` : ''}
             </small>
