@@ -52,9 +52,19 @@ export default async function LocaleLayout({
   setRequestLocale(locale)
   const messages = await getMessages()
 
+  // Phase 4 (remédiation 2026-06-10) : le namespace `Admin` (~33 ko minifiés,
+  // 35 % du payload i18n) n'est JAMAIS consommé côté public (0 usage vérifié)
+  // — l'admin a son propre provider (admin/layout.tsx) qui garde les messages
+  // complets. On le retire du payload sérialisé vers le client public.
+  // `getTranslations` serveur lit la config request (pas ce provider) → intact.
+  const { Admin: _admin, ...publicMessages } = messages as Record<string, unknown>
+
   return (
     <AppHtmlShell lang={locale}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider
+        locale={locale}
+        messages={publicMessages as Parameters<typeof NextIntlClientProvider>[0]['messages']}
+      >
         {children}
         <CookieBanner />
       </NextIntlClientProvider>
