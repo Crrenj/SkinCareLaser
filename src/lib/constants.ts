@@ -14,6 +14,14 @@ export const LOW_STOCK_THRESHOLD = 10
 /** Quantité maximale autorisée par ligne panier. */
 export const MAX_CART_QUANTITY = 99
 
+/**
+ * Prix « bouchon » posé par le seed initial (353 produits à 100 DOP).
+ * Sert d'indicateur « prix non configuré » (dashboard readiness, écran
+ * d'initialisation d'inventaire L-2). À ne PAS reconduire lors de la
+ * saisie des vrais prix.
+ */
+export const PLACEHOLDER_PRICE = 100
+
 /** Tableau de bord admin (landing post-login, avec les stats). */
 export const ADMIN_HOME_PATH = '/admin'
 

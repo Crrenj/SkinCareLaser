@@ -1622,7 +1622,9 @@
       "create": "Crear",
       "required": "*",
       "saving": "Guardando…",
-      "active": "Activo"
+      "active": "Activo",
+      "decrease": "Disminuir",
+      "increase": "Aumentar"
     },
     "modals": {
       "product": {
@@ -1892,6 +1894,35 @@
         "saving": "Registrando…",
         "saved": "Merma registrada",
         "error": "No se pudo registrar la merma"
+      },
+      "init": {
+        "eyebrow": "Inicialización · inventario de apertura",
+        "title": "Inicializar producto",
+        "rowTitle": "Inicializar este producto",
+        "rowAria": "Inicializar el inventario de {name}",
+        "productLabel": "Producto",
+        "currentStockLabel": "Stock actual",
+        "currentPriceLabel": "Precio actual",
+        "placeholderBadge": "provisional",
+        "qtyLabel": "Cantidad contada",
+        "qtyHelp": "Cuenta físicamente las unidades en el estante.",
+        "costLabel": "Costo de compra unitario",
+        "costOptional": "opcional",
+        "costPlaceholder": "0.00",
+        "costHelp": "¿Tienes la factura? Ingresa el costo para tener margen desde la 1.ª venta. Si no, déjalo vacío.",
+        "priceLabel": "Precio de venta",
+        "priceOptional": "opcional",
+        "pricePlaceholder": "0.00",
+        "priceHelp": "Reemplaza el precio actual en el sitio.",
+        "activateLabel": "Activar producto",
+        "activateHelp": "Hacer visible el producto en el sitio una vez inicializado.",
+        "modeReception": "Recepción: stock {result}, costo registrado (margen desde la 1.ª venta).",
+        "modeAdjust": "Ajuste: stock fijado en {result}, sin costo (margen al 1.er reabasto).",
+        "resultingStockLabel": "Stock tras la inicialización",
+        "submit": "Inicializar",
+        "saving": "Inicializando…",
+        "saved": "Producto inicializado",
+        "error": "Error al inicializar"
       }
     },
     "promotions": {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, Plus, PackagePlus, PackageMinus, Search, AlertTriangle, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { ClipboardCheck, Pencil, Plus, PackagePlus, PackageMinus, Search, AlertTriangle, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
 import { formatPrice } from '@/lib/formatPrice'
@@ -12,6 +12,7 @@ import { Kpi, StockPill, ThSort } from './_components/StockHelpers'
 import { StockEditModal } from './_components/StockEditModal'
 import { StockEntryDrawer } from './_components/StockEntryDrawer'
 import { StockLossDrawer } from './_components/StockLossDrawer'
+import { InitInventoryDrawer } from './_components/InitInventoryDrawer'
 
 export default function StockPage() {
   const t = useTranslations('Admin.stock')
@@ -25,13 +26,14 @@ export default function StockPage() {
     searchTerm, setSearchTerm,
     filterStatus, setFilterStatus,
     sortColumn, sortOrder, handleSort,
-    updateStock, recordStockEntry, recordStockLoss,
+    updateStock, recordStockEntry, recordStockLoss, initInventory,
   } = useStockData()
 
   const [editingItem, setEditingItem] = useState<StockItem | null>(null)
   const [entryOpen, setEntryOpen] = useState(false)
   const [entryProduct, setEntryProduct] = useState<{ id: string; name: string } | null>(null)
   const [lossItem, setLossItem] = useState<StockItem | null>(null)
+  const [initItem, setInitItem] = useState<StockItem | null>(null)
 
   const marginPct = new Intl.NumberFormat(toLocaleTag(locale), {
     style: 'percent',
@@ -171,6 +173,15 @@ export default function StockPage() {
                           <div className="flex justify-end gap-1">
                             <button
                               type="button"
+                              onClick={() => setInitItem(item)}
+                              title={t('init.rowTitle')}
+                              aria-label={t('init.rowAria', { name: item.product_name })}
+                              className="w-7 h-7 inline-flex items-center justify-center rounded-md text-ink-500 hover:bg-sand-200 hover:text-clay-700 transition-colors"
+                            >
+                              <ClipboardCheck className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => {
                                 setEntryProduct({ id: item.product_id, name: item.product_name })
                                 setEntryOpen(true)
@@ -235,6 +246,28 @@ export default function StockPage() {
           if (!ok) throw new Error('keep-drawer-open')
           setEntryOpen(false)
           setEntryProduct(null)
+        }}
+      />
+
+      {/* Drawer « Initialiser l'inventaire » (L-2, lancement) — frère racine
+          (cf. backdrop-filter). Aiguillage réception/ajuste + prix + activation
+          orchestré par useStockData.initInventory ; throw = drawer ouvert. */}
+      <InitInventoryDrawer
+        open={!!initItem}
+        product={
+          initItem
+            ? {
+                id: initItem.product_id,
+                name: initItem.product_name,
+                current_stock: initItem.current_stock,
+                price: initItem.price ?? null,
+              }
+            : null
+        }
+        onClose={() => setInitItem(null)}
+        onSubmit={async (payload) => {
+          await initInventory(payload)
+          setInitItem(null)
         }}
       />
 

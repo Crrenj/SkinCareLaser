@@ -344,6 +344,15 @@ export const productUpdate = z.object({
   selectedTags: z.array(z.string().uuid()).optional(),
 })
 
+// Activation/désactivation EXPLICITE d'un produit (route dédiée
+// /api/admin/products/[id]/active). Volontairement HORS de productUpdate :
+// le strip d'is_active y est un invariant testé anti-mass-assignment
+// (schemas.test.ts) — l'activation est une action délibérée, pas un champ
+// du formulaire produit. C'est le levier de la barrière L-3 du lancement.
+export const productActiveBody = z.object({
+  is_active: z.boolean(),
+})
+
 export const userPatch = z.object({
   is_admin: z.boolean().optional(),
 })

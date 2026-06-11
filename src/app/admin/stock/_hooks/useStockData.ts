@@ -4,7 +4,15 @@ import { logger } from '@/lib/logger'
 import { useState, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
-import type { StockItem, StockStats, SortColumn, SortOrder, StockEntryPayload, StockLossPayload } from '../_lib/types'
+import type {
+  InitInventoryPayload,
+  SortColumn,
+  SortOrder,
+  StockEntryPayload,
+  StockItem,
+  StockLossPayload,
+  StockStats,
+} from '../_lib/types'
 
 export function useStockData() {
   const tCommon = useTranslations('Admin.common')
@@ -104,6 +112,74 @@ export function useStockData() {
     }
   }
 
+  /**
+   * Écran unifié « Initialiser l'inventaire » (L-2, lancement) — orchestre
+   * séquentiellement les back-ends EXISTANTS :
+   *   1. stock — coût renseigné → RÉCEPTION (/stock/entry : CMP + 606,
+   *      ADDITIONNE) ; coût vide → AJUSTE (/stock PUT : valeur ABSOLUE) ;
+   *   2. prix de vente → PATCH produit (champ price seul) ;
+   *   3. activation → route dédiée /products/[id]/active (barrière L-3).
+   * Le coût ne s'écrit JAMAIS directement (toujours via une réception).
+   * Throw en cas d'échec d'étape → le drawer reste ouvert.
+   */
+  const initInventory = async (payload: InitInventoryPayload): Promise<void> => {
+    try {
+      if (payload.unit_cost != null && payload.quantity > 0) {
+        const response = await fetch('/api/admin/stock/entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_token: payload.client_token,
+            items: [
+              {
+                product_id: payload.product_id,
+                quantity: payload.quantity,
+                unit_cost: payload.unit_cost,
+                itbis_included: true,
+              },
+            ],
+          }),
+        })
+        if (!response.ok) throw new Error('init_stock_failed')
+      } else if (payload.unit_cost == null) {
+        // Ajuste : écrase le stock à la quantité comptée (y compris 0 — le
+        // drawer affiche explicitement « stock fixé à N » avant validation).
+        const response = await fetch('/api/admin/stock', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id: payload.product_id, stock: payload.quantity }),
+        })
+        if (!response.ok) throw new Error('init_stock_failed')
+      }
+      // coût renseigné mais quantité 0 : rien à recevoir, on saute l'étape stock.
+
+      if (payload.price != null) {
+        const response = await fetch(`/api/admin/products/${payload.product_id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ price: payload.price }),
+        })
+        if (!response.ok) throw new Error('init_price_failed')
+      }
+
+      if (payload.activate) {
+        const response = await fetch(`/api/admin/products/${payload.product_id}/active`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_active: true }),
+        })
+        if (!response.ok) throw new Error('init_activate_failed')
+      }
+
+      await fetchStockData()
+      toast.success(tStock('init.saved'))
+    } catch (error) {
+      logger.error("Erreur initialisation d'inventaire:", error)
+      toast.error(tStock('init.error'))
+      throw error
+    }
+  }
+
   return {
     stockItems, stats, loading,
     searchTerm, setSearchTerm,
@@ -112,5 +188,6 @@ export function useStockData() {
     updateStock,
     recordStockEntry,
     recordStockLoss,
+    initInventory,
   }
 }
