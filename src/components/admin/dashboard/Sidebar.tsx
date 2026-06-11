@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BadgePercent,
+  BookOpen,
   Boxes,
   Building2,
   Calculator,
@@ -46,6 +47,7 @@ type NavItem = {
   labelKey:
     | 'navOverview'
     | 'navAccounting'
+    | 'navTuto'
     | 'navProducts'
     | 'navBrands'
     | 'navStock'
@@ -86,6 +88,7 @@ const SECTIONS: Section[] = [
     items: [
       { href: '/admin', labelKey: 'navOverview', icon: Home },
       { href: '/admin/contabilidad', labelKey: 'navAccounting', icon: Calculator },
+      { href: '/admin/tuto', labelKey: 'navTuto', icon: BookOpen },
     ],
   },
   {

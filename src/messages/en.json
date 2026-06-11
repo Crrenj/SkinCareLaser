@@ -1540,6 +1540,7 @@
       "sectionAccess": "Access",
       "navOverview": "Overview",
       "navAccounting": "Accounting",
+      "navTuto": "User guide",
       "navProducts": "Products",
       "navBrands": "Brands",
       "navStock": "Stock",
@@ -2331,6 +2332,24 @@
       "pagePrev": "Previous",
       "pageNext": "Next",
       "pageLabel": "Page {page}"
+    },
+    "tuto": {
+      "title": "User guide",
+      "crumb": "Guide",
+      "tocTitle": "Contents",
+      "openScreen": "Open the screen",
+      "legend": "Legend",
+      "workflowsHeading": "How-tos",
+      "actionsHeading": "Actions & consequences",
+      "gotchasHeading": "Pitfalls to know",
+      "severitySafe": "Safe",
+      "severityCaution": "Caution",
+      "severityDanger": "Danger",
+      "undoLabel": "To undo:",
+      "noUndo": "No way back",
+      "auditedBadge": "Logged",
+      "publicBadge": "Public site",
+      "accountingBadge": "Accounting"
     },
     "admins": {
       "title": "Administrators",

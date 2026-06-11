@@ -1540,6 +1540,7 @@
       "sectionAccess": "Accès",
       "navOverview": "Vue d'ensemble",
       "navAccounting": "Comptabilité",
+      "navTuto": "Guide d'utilisation",
       "navProducts": "Produits",
       "navBrands": "Marques",
       "navStock": "Stock",
@@ -2331,6 +2332,24 @@
       "pagePrev": "Précédent",
       "pageNext": "Suivant",
       "pageLabel": "Page {page}"
+    },
+    "tuto": {
+      "title": "Guide d'utilisation",
+      "crumb": "Guide",
+      "tocTitle": "Sommaire",
+      "openScreen": "Ouvrir l'écran",
+      "legend": "Légende",
+      "workflowsHeading": "Modes opératoires",
+      "actionsHeading": "Actions & conséquences",
+      "gotchasHeading": "Pièges à connaître",
+      "severitySafe": "Sans risque",
+      "severityCaution": "Attention",
+      "severityDanger": "Danger",
+      "undoLabel": "Pour annuler :",
+      "noUndo": "Pas de retour en arrière possible",
+      "auditedBadge": "Journalisé",
+      "publicBadge": "Site public",
+      "accountingBadge": "Compta"
     },
     "admins": {
       "title": "Administrateurs",
