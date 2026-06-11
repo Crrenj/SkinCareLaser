@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Search, Shield, ShieldCheck, ShieldOff, Mail, Phone, Globe, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
+import { formatAdminName, formatClientName } from '@/lib/userName'
 
 type AdminRole = 'admin' | 'super_admin'
 
@@ -270,12 +271,9 @@ export function UsersClient() {
   )
 }
 
+// Règle d'affichage : admin → pseudo, client → nom + prénom (src/lib/userName).
 function formatName(r: Row): string {
-  return (
-    r.displayName ||
-    [r.firstName, r.lastName].filter(Boolean).join(' ') ||
-    ''
-  )
+  return r.isAdmin ? formatAdminName(r) : formatClientName(r)
 }
 
 function formatDate(iso: string): string {

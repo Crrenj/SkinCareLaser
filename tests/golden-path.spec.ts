@@ -21,8 +21,10 @@ test.describe('Golden path', () => {
     await page.goto('/fr/', { waitUntil: 'domcontentloaded' })
     await expect(page).toHaveTitle(/FARMAU/i)
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
+    // Titre de la section bestsellers — « Les plus recherchés » depuis la
+    // refonte home-moderna (2026-06 ; l'ancien titre était « Best-sellers »).
     await expect(
-      page.getByRole('heading', { name: /best-sellers/i }),
+      page.getByRole('heading', { name: /les plus recherchés/i }),
     ).toBeVisible({ timeout: 30_000 })
   })
 

@@ -7,8 +7,9 @@ import { test, expect } from '@playwright/test'
 test('Heart non connecté redirige vers /login', async ({ page }) => {
   test.setTimeout(90_000)
 
-  await page.goto('/fr/', { waitUntil: 'domcontentloaded' })
-  // Le 1er heart d'une ProductCard sur la home (section Bestsellers).
+  // Catalogue (plus la home) : depuis home-moderna (2026-06) la home n'a plus
+  // de ProductCard — les hearts vivent sur les cartes du catalogue.
+  await page.goto('/fr/catalogue', { waitUntil: 'domcontentloaded' })
   const heart = page.locator('[data-testid="product-card"]').first().locator('button[aria-label]').first()
   await heart.waitFor({ state: 'visible', timeout: 30_000 })
 

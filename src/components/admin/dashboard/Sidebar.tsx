@@ -31,13 +31,13 @@ import { PopClose } from '@/components/ui/PopClose'
 import { useLocale, useTranslations } from 'next-intl'
 import { supabase } from '@/lib/supabaseClient'
 
-/** Initiales pour l'avatar du compte, dérivées de l'email (local-part). */
-function initialsFromEmail(email?: string): string {
-  if (!email) return 'FA'
-  const local = email.split('@')[0]
-  const parts = local.split(/[._-]+/).filter(Boolean)
+/** Initiales pour l'avatar du compte — pseudo d'abord, sinon email (local-part). */
+function initials(displayName?: string, email?: string): string {
+  const source = displayName?.trim() || email?.split('@')[0]
+  if (!source) return 'FA'
+  const parts = source.split(/[\s._-]+/).filter(Boolean)
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return local.slice(0, 2).toUpperCase()
+  return source.slice(0, 2).toUpperCase()
 }
 
 type NavItem = {
@@ -149,9 +149,11 @@ type SidebarProps = {
   mobileOpen: boolean
   onCloseMobile: () => void
   email?: string
+  /** Pseudo de l'admin connecté (`profiles.display_name`) — nom affiché. */
+  displayName?: string
 }
 
-export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
+export function Sidebar({ mobileOpen, onCloseMobile, email, displayName }: SidebarProps) {
   const pathname = usePathname()
   const locale = useLocale()
   const dialogId = useId()
@@ -265,11 +267,11 @@ export function Sidebar({ mobileOpen, onCloseMobile, email }: SidebarProps) {
             aria-hidden
             className="w-[34px] h-[34px] shrink-0 rounded-full bg-clay-700 text-on-accent text-[12.5px] font-semibold tracking-[0.02em] inline-flex items-center justify-center"
           >
-            {initialsFromEmail(email)}
+            {initials(displayName, email)}
           </span>
           <span className="flex flex-col min-w-0 leading-[1.35]">
             <b className="text-[13px] text-ink-900 font-semibold truncate" title={email}>
-              {email ? email.split('@')[0] : 'FARMAU'}
+              {displayName?.trim() || (email ? email.split('@')[0] : 'FARMAU')}
             </b>
             <small className="text-[11px] text-ink-500">{tChrome('adminBadge')}</small>
           </span>

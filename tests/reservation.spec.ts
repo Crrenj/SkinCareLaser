@@ -41,7 +41,9 @@ test.describe('Réservation E2E', () => {
       (r) => r.url().endsWith('/api/cart') && r.request().method() === 'GET',
       { timeout: 30_000 },
     )
-    await page.goto('/fr/', { waitUntil: 'domcontentloaded' })
+    // Catalogue (plus la home) : home-moderna (2026-06) n'a plus de ProductCard
+    // sur /fr/ — les cartes (et leur quick-add) vivent sur le catalogue.
+    await page.goto('/fr/catalogue', { waitUntil: 'domcontentloaded' })
     await page.waitForSelector('[data-testid="product-card"]', { timeout: 60_000 })
     await cartReady
 

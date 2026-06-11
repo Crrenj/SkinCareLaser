@@ -7,6 +7,7 @@ import { Toaster } from 'sonner'
 import { useTranslations } from 'next-intl'
 import useSWR from 'swr'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { supabase } from '@/lib/supabaseClient'
 import { Sidebar } from '@/components/admin/dashboard/Sidebar'
 import { AdminModeProvider } from '@/components/admin/dashboard/AdminModeContext'
 import { isThemeName, type ThemeName } from '@/lib/themes'
@@ -28,6 +29,26 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [mode, setMode] = useState<'light' | 'dark'>('light')
   const tChrome = useTranslations('Admin.chrome')
+
+  // Pseudo de l'admin connecté (nom affiché dans la carte identité du
+  // sidebar). Lecture de SON propre profil — couverte par la RLS.
+  const userId = user?.id
+  const [displayName, setDisplayName] = useState<string | undefined>()
+  useEffect(() => {
+    if (!userId) return
+    let cancelled = false
+    supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!cancelled) setDisplayName(data?.display_name ?? undefined)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
 
   // Thème d'apparence (choisi dans /admin/apariencia, live via /api/theme).
   // L'admin reflète la même palette que le site public ; seul le mode
@@ -111,6 +132,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           mobileOpen={drawerOpen}
           onCloseMobile={() => setDrawerOpen(false)}
           email={user.email ?? undefined}
+          displayName={displayName}
         />
 
         <div className="flex-1 flex flex-col min-w-0">
