@@ -11,17 +11,18 @@ import { test, expect, type Page } from '@playwright/test'
  * réponse avant de cliquer pour éviter les faux négatifs flaky.
  */
 async function gotoCatalogueReady(page: Page) {
-  // On va sur la home (et pas le catalogue) parce que la section "Bestsellers"
-  // expose les 4 produits `is_featured` qui ont du stock — les 349 autres en
-  // catalogue ont stock=0 et /api/cart renvoie 400. .first() touche donc
-  // forcément un produit ajoutable au panier.
+  // Catalogue (et plus la home) : depuis la refonte home-moderna (2026-06),
+  // la section Bestsellers de la home n'utilise plus ProductCard (grille
+  // éditoriale <h3>) → plus AUCUN data-testid="product-card" sur /fr/.
+  // Le catalogue les a, et tous les produits actifs ont du stock (l'ancienne
+  // raison de passer par la home — 349 produits à stock 0 — n'existe plus).
   // On attend aussi le GET /api/cart : useCart.addToCart return silencieusement
   // si data?.cart n'est pas encore hydraté.
   const cartReady = page.waitForResponse(
     (r) => r.url().endsWith('/api/cart') && r.request().method() === 'GET',
     { timeout: 60_000 },
   )
-  await page.goto('/fr/', { waitUntil: 'domcontentloaded' })
+  await page.goto('/fr/catalogue', { waitUntil: 'domcontentloaded' })
   await page.waitForSelector('[data-testid="product-card"]', { timeout: 60_000 })
   await cartReady
 }
