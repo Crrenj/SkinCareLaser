@@ -26,7 +26,10 @@ const eslintConfig = defineConfig([
     "src/lib/database.types.ts",
     "scripts/**",
     "tests/**",
-    ".next/**",
+    // .next ET ses variantes déplacées (.next-stale-* — piège CLAUDE.md :
+    // un cache déplacé DANS le repo serait sinon scanné par `eslint .`,
+    // contrairement à l'ancien `next lint` limité à src/).
+    ".next*/**",
   ]),
   ...nextVitals,
   ...nextTs,
