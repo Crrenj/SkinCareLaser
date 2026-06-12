@@ -650,7 +650,8 @@
     "redirecting": "Redirigiendo…"
   },
   "Contact": {
-    "headerTitle": "Contáctenos",
+    "eyebrow": "Contacto",
+    "titleHtml": "¿Una pregunta? <em>Escríbenos.</em>",
     "headerSubtitle": "Nuestro equipo responde a tus preguntas sobre productos y pedidos",
     "contactInfoHeading": "Nuestros datos",
     "addressHeading": "Dirección",
@@ -985,7 +986,6 @@
       "coordinateHeading": "A coordinar juntos",
       "chipCash": "Efectivo",
       "chipTransfer": "Transferencia",
-      "chipAzul": "Azul",
       "chipPickup": "Retiro en farmacia",
       "assureVerifiedTitle": "Reserva verificada",
       "assureVerifiedBody": "Antes de cualquier preparación.",
