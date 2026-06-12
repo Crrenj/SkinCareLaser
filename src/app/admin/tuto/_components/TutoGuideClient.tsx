@@ -164,7 +164,7 @@ export function TutoGuideClient({ content }: { content: TutoContent }) {
           {/* Sommaire */}
           <nav
             aria-label={t('tocTitle')}
-            className="lg:sticky lg:top-[102px] lg:max-h-[calc(100vh-126px)] lg:overflow-y-auto lg:pb-4 lg:pr-1.5"
+            className="lg:sticky lg:top-[102px] lg:max-h-[calc(100vh-126px)] lg:overflow-y-auto lg:pb-4 lg:pr-1.5 lg:[scrollbar-width:thin]"
           >
             <div className="relative mb-1.5">
               <Search

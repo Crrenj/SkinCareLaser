@@ -199,7 +199,11 @@ export function Sidebar({ mobileOpen, onCloseMobile, email, displayName }: Sideb
   }, [mobileOpen, onCloseMobile])
 
   const content = (
-    <nav className="flex flex-col gap-2 h-full">
+    // w-full : l'aside desktop est display:flex (row) — sans largeur explicite,
+    // ce nav unique se dimensionne à son max-content (~180px) au lieu des 216px
+    // utiles → bande vide à droite + scrollbar « au milieu ». No-op dans le
+    // drawer mobile (conteneur block).
+    <nav className="flex flex-col gap-2 h-full w-full">
       <div className="flex items-center gap-2 px-3 pt-1 pb-4 mb-1.5 border-b border-sand-300">
         <Link
           href="/admin"
@@ -214,7 +218,7 @@ export function Sidebar({ mobileOpen, onCloseMobile, email, displayName }: Sideb
         <PopClose onClick={onCloseMobile} className="lg:hidden" label={tChrome('openMenu')} />
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
+      <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 [scrollbar-width:thin]">
         {SECTIONS.map((section) => (
           <div key={section.titleKey}>
             <p className="px-3 pt-3.5 pb-1.5 text-[10.5px] tracking-[0.18em] uppercase text-ink-500 font-semibold">
