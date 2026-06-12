@@ -63,7 +63,7 @@ export const sections: TutoSection[] = [
       {
         n: 4,
         label: "The 4 status tiles",
-        desc: "The numbers at a glance: total number of products, with normal stock (more than 10 units), low stock (10 units or fewer) and out of stock (0 units). These thresholds are fixed.",
+        desc: "The numbers at a glance: total number of products, with normal stock (above the low-stock threshold), low stock (at or below the threshold, excluding out of stock) and out of stock (0 units). The threshold is set in Shop & reservations → Inventory (default 10).",
       },
       {
         n: 5,
@@ -230,12 +230,12 @@ export const sections: TutoSection[] = [
             {
               label: "Normal",
               tone: "ok",
-              note: "More than 10 units.",
+              note: "Above the low-stock threshold.",
             },
             {
               label: "Low stock",
               tone: "warn",
-              note: "10 units or fewer — the row is shaded yellow. Think about restocking.",
+              note: "At or below the low-stock threshold — the row is shaded yellow. Think about restocking.",
             },
             {
               label: "Out of stock",
@@ -295,7 +295,7 @@ export const sections: TutoSection[] = [
       "The stock figure does not move when a customer reserves: it only drops when the reservation is marked “Collected” in the pharmacy (Reservations screen).",
       "The cost entered at receipt is the price paid to the supplier PER UNIT, taxes included by default (“Prices include ITBIS” box) — not the selling price.",
       "The Cost and Margin columns are only visible in the admin panel, never on the public site. A red margin means the product sells for less than its purchase cost.",
-      "The list search is accent-sensitive (“creme” will not find “crème”) and the “Low stock” threshold is fixed at 10 units, with no way to change it.",
+      "The list search is accent-sensitive (“creme” will not find “crème”) and the “Low stock” threshold is set in Shop & reservations → Inventory (default 10, minimum 2).",
     ],
   },
 ]

@@ -2,6 +2,7 @@ import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
+import { LOW_STOCK_THRESHOLD } from './constants'
 import { logger } from './logger'
 
 export type ShopSettings = Database['public']['Tables']['shop_settings']['Row']
@@ -31,6 +32,7 @@ const FALLBACK: ShopSettings = {
   default_mode: 'light',
   allow_visitor_mode: true,
   home_layout: null,
+  low_stock_threshold: LOW_STOCK_THRESHOLD,
   updated_at: new Date(0).toISOString(),
   updated_by: null,
 }

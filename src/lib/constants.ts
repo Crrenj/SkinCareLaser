@@ -8,7 +8,12 @@ export const DEFAULT_CURRENCY = 'DOP' as const
 /** Tag BCP-47 par défaut pour Intl.NumberFormat / DateTimeFormat. */
 export const DEFAULT_LOCALE_TAG = 'es-DO'
 
-/** Seuil sous lequel un produit est considéré "stock bas" dans l'admin. */
+/**
+ * Seuil « stock bas » PAR DÉFAUT (fallback). La vraie valeur est configurable
+ * par la pharmacie via `shop_settings.low_stock_threshold` (> 1, éditée dans
+ * /admin/settings) — cette constante ne sert que de secours quand la ligne
+ * settings est illisible. Sémantique : low = 0 < stock ≤ seuil.
+ */
 export const LOW_STOCK_THRESHOLD = 10
 
 /** Quantité maximale autorisée par ligne panier. */

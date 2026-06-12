@@ -964,6 +964,7 @@ export type Database = {
           default_mode: string
           home_layout: Json | null
           id: number
+          low_stock_threshold: number
           pickup_address: string | null
           pickup_hours: string | null
           pickup_name: string | null
@@ -984,6 +985,7 @@ export type Database = {
           default_mode?: string
           home_layout?: Json | null
           id?: number
+          low_stock_threshold?: number
           pickup_address?: string | null
           pickup_hours?: string | null
           pickup_name?: string | null
@@ -1004,6 +1006,7 @@ export type Database = {
           default_mode?: string
           home_layout?: Json | null
           id?: number
+          low_stock_threshold?: number
           pickup_address?: string | null
           pickup_hours?: string | null
           pickup_name?: string | null

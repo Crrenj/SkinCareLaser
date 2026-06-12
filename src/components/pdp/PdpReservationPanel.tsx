@@ -6,6 +6,7 @@ import {
   Check,
   Banknote,
   Landmark,
+  MessageCircle,
   Store,
   ShieldCheck,
   Clock,
@@ -20,6 +21,8 @@ interface PdpReservationPanelProps {
   onReserve: () => void
   maxQuantity?: number
   outOfStock?: boolean
+  /** Lien wa.me pré-rempli « réassort ? » — remplace le CTA quand épuisé. */
+  restockLink?: string | null
 }
 
 /**
@@ -35,6 +38,7 @@ export function PdpReservationPanel({
   onReserve,
   maxQuantity,
   outOfStock = false,
+  restockLink,
 }: PdpReservationPanelProps) {
   const t = useTranslations('Product.reservation')
 
@@ -69,17 +73,36 @@ export function PdpReservationPanel({
         <div className="p-[22px]">
           <div className="grid grid-cols-[104px_1fr_52px] gap-2.5 mb-3">
             <PdpQuantity value={quantity} onChange={onQuantityChange} max={maxQuantity} />
-            <button
-              type="button"
-              onClick={onReserve}
-              disabled={outOfStock}
-              className="h-[52px] bg-clay-700 text-on-accent rounded-sm font-semibold text-[14px] tracking-[0.02em] flex items-center justify-center gap-2.5 hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Check size={18} strokeWidth={1.8} />
-              {t('cta')}
-            </button>
+            {outOfStock && restockLink ? (
+              // Épuisé : à la place d'un bouton mort, un CTA actionnable —
+              // demander la disponibilité sur WhatsApp (message pré-rempli
+              // avec le nom du produit ; fallback /contact sans numéro).
+              <a
+                href={restockLink}
+                {...(restockLink.startsWith('http')
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : {})}
+                className="h-[52px] bg-[#25D366] hover:bg-[#1ebd5a] text-white rounded-sm font-semibold text-[14px] tracking-[0.02em] flex items-center justify-center gap-2.5 no-underline transition-colors"
+              >
+                <MessageCircle size={18} strokeWidth={1.8} />
+                {t('restockCta')}
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={onReserve}
+                disabled={outOfStock}
+                className="h-[52px] bg-clay-700 text-on-accent rounded-sm font-semibold text-[14px] tracking-[0.02em] flex items-center justify-center gap-2.5 hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Check size={18} strokeWidth={1.8} />
+                {t('cta')}
+              </button>
+            )}
             <PdpWishlistButton productId={productId} />
           </div>
+          {outOfStock && restockLink && (
+            <p className="mb-3 text-[12.5px] leading-[1.5] text-ink-500">{t('restockHint')}</p>
+          )}
 
           {/* Comment ça marche — 3 étapes */}
           <ul className="list-none p-0 m-0 mt-5">

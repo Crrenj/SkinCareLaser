@@ -1078,6 +1078,12 @@ CREATE OR REPLACE FUNCTION "public"."get_inventory_valuation"() RETURNS "jsonb"
     LANGUAGE "sql" STABLE
     SET "search_path" TO 'public'
     AS $$
+  WITH cfg AS (
+    SELECT COALESCE(
+      (SELECT low_stock_threshold FROM shop_settings WHERE id = 1),
+      10
+    ) AS thr
+  )
   SELECT jsonb_build_object(
     'productsActive',    count(*),
     'units',             COALESCE(sum(COALESCE(stock, 0)), 0),
@@ -1085,11 +1091,14 @@ CREATE OR REPLACE FUNCTION "public"."get_inventory_valuation"() RETURNS "jsonb"
     'costValue',         COALESCE(sum(cost_price * COALESCE(stock, 0)) FILTER (WHERE cost_price IS NOT NULL), 0),
     'productsWithCost',  count(*) FILTER (WHERE cost_price IS NOT NULL),
     'placeholderPriced', count(*) FILTER (WHERE price = 100),
-    -- Distribution (seuils IDENTIQUES au JS : s=0 → oos ; 0<s<5 → low ; sinon
-    -- inStock). stock NULL = 0 côté JS (p.stock ?? 0) → COALESCE(stock,0).
-    'inStock',           count(*) FILTER (WHERE COALESCE(stock, 0) >= 5),
-    'low',               count(*) FILTER (WHERE COALESCE(stock, 0) > 0 AND COALESCE(stock, 0) < 5),
-    'oos',               count(*) FILTER (WHERE COALESCE(stock, 0) = 0)
+    -- Distribution (sémantique unifiée, seuil configurable via sous-requête
+    -- scalaire — un cfg.thr nu serait rejeté en requête agrégée, 42803) :
+    -- oos = 0 · low = 0 < s ≤ thr · inStock = s > thr. stock NULL = 0.
+    'inStock',           count(*) FILTER (WHERE COALESCE(stock, 0) > (SELECT thr FROM cfg)),
+    'low',               count(*) FILTER (WHERE COALESCE(stock, 0) > 0 AND COALESCE(stock, 0) <= (SELECT thr FROM cfg)),
+    'oos',               count(*) FILTER (WHERE COALESCE(stock, 0) = 0),
+    -- Seuil utilisé (affiché par le widget Inventario du dashboard).
+    'lowThreshold',      (SELECT thr FROM cfg)
   )
   FROM products
   WHERE is_active = true;
@@ -1099,7 +1108,7 @@ $$;
 ALTER FUNCTION "public"."get_inventory_valuation"() OWNER TO "postgres";
 
 
-COMMENT ON FUNCTION "public"."get_inventory_valuation"() IS 'Valorisation inventaire courant (détail + coût + distribution stock). SERVICE-ROLE ONLY (expose cost_price). Phase 6 remediation 2026-06-10.';
+COMMENT ON FUNCTION "public"."get_inventory_valuation"() IS 'Valorisation inventaire courant (détail + coût + distribution stock, seuil low configurable via shop_settings.low_stock_threshold). SERVICE-ROLE ONLY (expose cost_price). Phase 6 remediation 2026-06-10, seuil configurable 2026-06-12.';
 
 
 
@@ -2199,8 +2208,10 @@ CREATE TABLE IF NOT EXISTS "public"."shop_settings" (
     "default_mode" "text" DEFAULT 'light'::"text" NOT NULL,
     "allow_visitor_mode" boolean DEFAULT true NOT NULL,
     "home_layout" "jsonb",
+    "low_stock_threshold" integer DEFAULT 10 NOT NULL,
     CONSTRAINT "shop_settings_default_mode_check" CHECK (("default_mode" = ANY (ARRAY['light'::"text", 'dark'::"text", 'system'::"text"]))),
     CONSTRAINT "shop_settings_id_check" CHECK (("id" = 1)),
+    CONSTRAINT "shop_settings_low_stock_threshold_check" CHECK (("low_stock_threshold" > 1)),
     CONSTRAINT "shop_settings_theme_check" CHECK (("theme" = ANY (ARRAY['terra'::"text", 'noir'::"text", 'botanico'::"text", 'coral'::"text", 'marino'::"text", 'ambar'::"text"])))
 );
 

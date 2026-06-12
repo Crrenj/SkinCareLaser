@@ -990,7 +990,10 @@
       "assureVerifiedTitle": "Reserva verificada",
       "assureVerifiedBody": "Antes de cualquier preparación.",
       "assureHoldTitle": "Guardado para ti",
-      "assureHoldBody": "El tiempo de confirmar juntos."
+      "assureHoldBody": "El tiempo de confirmar juntos.",
+      "restockCta": "Preguntar disponibilidad por WhatsApp",
+      "restockCtaShort": "Preguntar por WhatsApp",
+      "restockHint": "Producto agotado — escríbenos por WhatsApp y te decimos cuándo vuelve a estar disponible."
     },
     "trust": {
       "deliveryTitle": "Envío gratuito · 1500 DOP+",
@@ -2488,7 +2491,11 @@
       "saveSuccess": "Configuración guardada",
       "saveError": "Error al guardar",
       "networkError": "Error de red",
-      "loadError": "No se pudo cargar la configuración de la tienda."
+      "loadError": "No se pudo cargar la configuración de la tienda.",
+      "inventoryTitle": "Inventario",
+      "inventoryHint": "Reglas de gestión de stock aplicadas a todo el panel (página Stock, tablero, insignias).",
+      "lowStockThreshold": "Umbral de stock bajo",
+      "lowStockThresholdHint": "Con esta cantidad de unidades o menos, un producto se marca como « stock bajo » (mínimo 2). El agotado sigue siendo 0."
     },
     "setup": {
       "title": "Configuración del sistema admin",

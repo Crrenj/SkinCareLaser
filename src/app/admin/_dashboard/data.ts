@@ -1,4 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { getShopSettings } from '@/lib/getShopSettings'
+import { LOW_STOCK_THRESHOLD } from '@/lib/constants'
 import { buildReservationReferenceCompact } from '@/lib/reservation'
 import type { DailyPoint } from '@/components/admin/dashboard/RevenueWidget'
 import type { LowStockItem } from '@/components/admin/dashboard/LowStockWidget'
@@ -65,6 +67,7 @@ const EMPTY_CATALOGUE: {
     activeProducts: 0,
     placeholderPriced: 0,
     distribution: { inStock: 0, low: 0, oos: 0 },
+    lowThreshold: LOW_STOCK_THRESHOLD,
   },
   brandBars: [],
 }
@@ -114,6 +117,8 @@ type DashboardStatsRaw = {
     inStock: number
     low: number
     oos: number
+    /** Seuil configurable renvoyé par get_inventory_valuation (2026-06-12). */
+    lowThreshold?: number
   }
   readiness: CatalogueReadiness
   brandBars: BrandBar[]
@@ -179,6 +184,7 @@ async function fetchStats(): Promise<DashboardStats> {
         low: raw.inventory?.low ?? 0,
         oos: raw.inventory?.oos ?? 0,
       },
+      lowThreshold: raw.inventory?.lowThreshold ?? LOW_STOCK_THRESHOLD,
     },
     brandBars: raw.brandBars ?? [],
     reservationStatus: raw.reservationStatus ?? EMPTY_RESERVATION_STATUS,
@@ -194,7 +200,9 @@ async function fetchStats(): Promise<DashboardStats> {
 
 // ───────────────────────── Stock crítico (liste) ─────────────────────────
 
-async function fetchLowStock(): Promise<LowStockItem[]> {
+// Seuil configurable (shop_settings.low_stock_threshold) — rupture (0) incluse
+// dans la liste « attention requise », comme avant.
+async function fetchLowStock(threshold: number): Promise<LowStockItem[]> {
   if (!supabaseAdmin) return []
   const { data, error } = await supabaseAdmin
     .from('products')
@@ -203,7 +211,7 @@ async function fetchLowStock(): Promise<LowStockItem[]> {
        range:ranges ( brand:brands (name) )`,
     )
     .eq('is_active', true)
-    .lt('stock', 5)
+    .lte('stock', threshold)
     .order('stock', { ascending: true })
     .limit(5)
 
@@ -361,9 +369,13 @@ export type DashboardData = {
 
 /** Charge toutes les données du dashboard en parallèle (1 RPC + 4 listes). */
 export async function getDashboardData(): Promise<DashboardData> {
+  // Seuil « stock bajo » configuré — lu d'abord (cache unstable_cache partagé,
+  // invalidé par le save de /admin/settings), requis par fetchLowStock.
+  const { low_stock_threshold: threshold } = await getShopSettings()
+
   const [stats, lowStock, topProducts, recentReservations, recentMessages] = await Promise.all([
     fetchStats(),
-    fetchLowStock(),
+    fetchLowStock(threshold),
     fetchTopProducts(),
     fetchRecentReservations(),
     fetchRecentMessages(),

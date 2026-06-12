@@ -12,6 +12,8 @@ interface PdpStickyBarProps {
   currency: string
   disabled?: boolean
   onAdd: () => void
+  /** Lien wa.me « réassort ? » — remplace le bouton quand épuisé. */
+  restockLink?: string | null
 }
 
 /**
@@ -28,6 +30,7 @@ export function PdpStickyBar({
   currency,
   disabled,
   onAdd,
+  restockLink,
 }: PdpStickyBarProps) {
   const t = useTranslations('Product.reservation')
   const [visible, setVisible] = useState(false)
@@ -64,14 +67,27 @@ export function PdpStickyBar({
           )}
         </div>
       </div>
-      <button
-        type="button"
-        onClick={onAdd}
-        disabled={disabled}
-        className="px-5 bg-clay-700 text-on-accent rounded-sm font-semibold text-[13px] tracking-[0.02em] hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {t('ctaShort')}
-      </button>
+      {disabled && restockLink ? (
+        // Épuisé : CTA WhatsApp réassort au lieu d'un bouton désactivé mort.
+        <a
+          href={restockLink}
+          {...(restockLink.startsWith('http')
+            ? { target: '_blank', rel: 'noopener noreferrer' }
+            : {})}
+          className="px-5 bg-[#25D366] hover:bg-[#1ebd5a] text-white rounded-sm font-semibold text-[13px] tracking-[0.02em] no-underline transition-colors flex items-center"
+        >
+          {t('restockCtaShort')}
+        </a>
+      ) : (
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={disabled}
+          className="px-5 bg-clay-700 text-on-accent rounded-sm font-semibold text-[13px] tracking-[0.02em] hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {t('ctaShort')}
+        </button>
+      )}
     </div>
   )
 }

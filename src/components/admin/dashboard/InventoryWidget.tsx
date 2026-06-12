@@ -9,6 +9,8 @@ export type InventoryStats = {
   /** Produits encore au prix placeholder (100 DOP). */
   placeholderPriced: number
   distribution: { inStock: number; low: number; oos: number }
+  /** Seuil « stock bajo » configuré (shop_settings.low_stock_threshold). */
+  lowThreshold: number
 }
 
 const fmt = (n: number) => formatPrice(n, { fractionDigits: 0 })
@@ -100,7 +102,7 @@ export function InventoryWidget({
           bar="bg-olive-600"
         />
         <Segment
-          label="Stock bajo (< 5)"
+          label={`Stock bajo (≤ ${data.lowThreshold})`}
           value={d.low}
           total={data.activeProducts}
           color="bg-ochre-600"

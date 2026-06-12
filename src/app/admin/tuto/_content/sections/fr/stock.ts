@@ -63,7 +63,7 @@ export const sections: TutoSection[] = [
       {
         n: 4,
         label: "Les 4 tuiles d'état",
-        desc: "Le résumé chiffré : nombre total de produits, en stock normal (plus de 10 unités), en stock bas (10 unités ou moins) et en rupture (0 unité). Ces seuils sont fixes.",
+        desc: "Le résumé chiffré : nombre total de produits, en stock normal (au-dessus du seuil de stock faible), en stock bas (au seuil ou moins, hors rupture) et en rupture (0 unité). Le seuil se règle dans Boutique & réservation → Inventaire (10 par défaut).",
       },
       {
         n: 5,
@@ -230,12 +230,12 @@ export const sections: TutoSection[] = [
             {
               label: "Normal",
               tone: "ok",
-              note: "Plus de 10 unités.",
+              note: "Au-dessus du seuil de stock faible.",
             },
             {
               label: "Stock bas",
               tone: "warn",
-              note: "10 unités ou moins — la ligne se teinte en jaune. Pensez au réapprovisionnement.",
+              note: "Au seuil de stock faible ou moins — la ligne se teinte en jaune. Pensez au réapprovisionnement.",
             },
             {
               label: "Rupture",
@@ -295,7 +295,7 @@ export const sections: TutoSection[] = [
       "Le chiffre de stock ne bouge pas quand un client réserve : il baisse seulement quand la réservation est marquée « retirée » en pharmacie (écran Réservations).",
       "Le coût saisi à la réception est le prix payé au fournisseur PAR UNITÉ, taxes comprises par défaut (case « Prix avec ITBIS inclus ») — pas le prix de vente.",
       "Les colonnes Coût et Marge ne sont visibles que dans le panneau d'administration, jamais sur le site public. Une marge en rouge signifie que le produit est vendu moins cher que son coût d'achat.",
-      "La recherche de la liste est sensible aux accents (« creme » ne trouve pas « crème ») et le seuil « Stock bas » est fixé à 10 unités, sans réglage possible.",
+      "La recherche de la liste est sensible aux accents (« creme » ne trouve pas « crème »). Le seuil « Stock bas » se règle dans Boutique & réservation → Inventaire (10 par défaut, minimum 2).",
     ],
   },
 ]

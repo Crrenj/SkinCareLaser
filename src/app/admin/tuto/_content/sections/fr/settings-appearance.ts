@@ -116,7 +116,7 @@ export const sections: TutoSection[] = [
       {
         label: "Enregistrer",
         where: "Barre sombre en bas de l'écran (elle n'apparaît que si un champ a été modifié)",
-        does: "Enregistre d'un coup les neuf champs de l'écran : nom, accroche, email, téléphone, numéro WhatsApp, et les quatre informations du point de retrait.",
+        does: "Enregistre d'un coup les dix champs de l'écran : nom, accroche, email, téléphone, numéro WhatsApp, les quatre informations du point de retrait et le seuil de stock faible.",
         effects: [
           "Toutes les valeurs sont enregistrées ensemble dans la base de données (il n'existe qu'une seule fiche boutique).",
           "Le site public reprend les nouvelles valeurs en quelques minutes au plus : pied de page, page Contact, page Pharmacie, page À propos, page de confirmation.",

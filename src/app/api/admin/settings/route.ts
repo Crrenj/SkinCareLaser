@@ -102,6 +102,20 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    // Champ numérique : seuil « stock faible » (entier > 1 — CHECK en DB,
+    // demande propriétaire). Sémantique : low = 0 < stock ≤ seuil.
+    if (Object.prototype.hasOwnProperty.call(body, 'low_stock_threshold')) {
+      const raw = body.low_stock_threshold
+      const value = typeof raw === 'number' ? raw : Number(raw)
+      if (!Number.isInteger(value) || value < 2 || value > 9999) {
+        return NextResponse.json(
+          { error: 'low_stock_threshold doit être un entier entre 2 et 9999' },
+          { status: 400 },
+        )
+      }
+      patch.low_stock_threshold = value
+    }
+
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({ error: 'Aucun champ à mettre à jour' }, { status: 400 })
     }

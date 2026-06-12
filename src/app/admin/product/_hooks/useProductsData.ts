@@ -3,6 +3,7 @@
 import { logger } from '@/lib/logger'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { LOW_STOCK_THRESHOLD } from '@/lib/constants'
 import type { Brand, Product, Tag, TagType } from '../_lib/types'
 
 type Args = {
@@ -23,6 +24,9 @@ export function useProductsData({ page, search }: Args) {
   const [tagTypes, setTagTypes] = useState<TagType[]>([])
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(1)
+  // Seuil « stock faible » configuré (shop_settings.low_stock_threshold),
+  // renvoyé par la route with-tags — fallback constant tant que pas chargé.
+  const [lowStockThreshold, setLowStockThreshold] = useState<number>(LOW_STOCK_THRESHOLD)
 
   const refreshProducts = useCallback(async () => {
     setLoading(true)
@@ -34,6 +38,9 @@ export function useProductsData({ page, search }: Args) {
       if (res.ok && data.products) {
         setProducts(data.products)
         setTotalPages(data.totalPages || 1)
+        if (typeof data.lowStockThreshold === 'number') {
+          setLowStockThreshold(data.lowStockThreshold)
+        }
       } else {
         setProducts([])
         setTotalPages(1)
@@ -80,5 +87,5 @@ export function useProductsData({ page, search }: Args) {
     refreshProducts()
   }, [refreshProducts])
 
-  return { products, brands, tags, tagTypes, loading, totalPages, refreshProducts }
+  return { products, brands, tags, tagTypes, loading, totalPages, lowStockThreshold, refreshProducts }
 }

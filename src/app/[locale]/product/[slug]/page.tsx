@@ -18,6 +18,7 @@ const ProductClient = dynamic(() => import('@/components/ProductClient'), {
   ),
 })
 import { ProductJsonLd } from '@/components/pdp/ProductJsonLd'
+import { getShopSettings } from '@/lib/getShopSettings'
 import { fetchEffectivePrices, applyPromo, type EffectivePrice } from '@/lib/pricing'
 import { notFound, permanentRedirect } from 'next/navigation'
 import { JSX } from 'react'
@@ -272,7 +273,13 @@ export default async function ProductPage({
 
   const similarRaw = [...sameRange, ...complement]
   // Prix effectifs (promo) en batch pour le produit principal + similaires.
-  const priceMap = await fetchEffectivePrices(supabase, [prodRaw.id, ...similarRaw.map((p) => p.id)])
+  // Prix effectifs + settings boutique (numéro WhatsApp pour le CTA réassort
+  // d'un produit épuisé) — getShopSettings est cookieless + unstable_cache,
+  // ne casse pas l'éligibilité statique de la route.
+  const [priceMap, shopSettings] = await Promise.all([
+    fetchEffectivePrices(supabase, [prodRaw.id, ...similarRaw.map((p) => p.id)]),
+    getShopSettings(),
+  ])
   const mainProduct = mapProduct(prodRaw, priceMap.get(prodRaw.id))
   const similarProducts: MappedProduct[] = similarRaw.map((p) => mapProduct(p, priceMap.get(p.id)))
 
@@ -299,6 +306,7 @@ export default async function ProductPage({
           reviews={reviews}
           reviewAverage={reviewAverage}
           reviewCount={reviewCount}
+          whatsappNumber={shopSettings.whatsapp_number}
         />
       </main>
     </div>

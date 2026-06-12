@@ -15,6 +15,8 @@ type ProductsTableProps = {
   page: number
   totalPages: number
   onPageChange: (page: number) => void
+  /** Seuil « stock faible » configuré (shop_settings.low_stock_threshold). */
+  lowStockThreshold: number
 }
 
 export function ProductsTable({
@@ -26,6 +28,7 @@ export function ProductsTable({
   page,
   totalPages,
   onPageChange,
+  lowStockThreshold,
 }: ProductsTableProps) {
   const t = useTranslations('Admin.product')
   const tCommon = useTranslations('Admin.common')
@@ -72,7 +75,7 @@ export function ProductsTable({
                 | Tag[]
               const tagList = productTags.map((t) => ('tag' in t ? t.tag : (t as Tag)))
               const stockState =
-                product.stock > 10 ? 'ok' : product.stock > 0 ? 'low' : 'out'
+                product.stock > lowStockThreshold ? 'ok' : product.stock > 0 ? 'low' : 'out'
               return (
                 <tr
                   key={product.id}

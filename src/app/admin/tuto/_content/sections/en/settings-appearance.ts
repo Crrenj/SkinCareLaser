@@ -116,7 +116,7 @@ export const sections: TutoSection[] = [
       {
         label: "Save",
         where: "Dark bar at the bottom of the screen (it only appears if a field has been changed)",
-        does: "Saves the screen's nine fields at once: name, tagline, email, phone, WhatsApp number, and the four pickup point details.",
+        does: "Saves the screen's ten fields at once: name, tagline, email, phone, WhatsApp number, the four pickup point details and the low-stock threshold.",
         effects: [
           "All values are saved together in the database (there is only one shop record).",
           "The public site picks up the new values within a few minutes at most: footer, Contact page, Pharmacy page, About page, confirmation page.",

@@ -78,7 +78,7 @@ export const sections: TutoSection[] = [
       {
         n: 3,
         label: "Anillo de alerta",
-        desc: "Cuando algo requiere una acción, el borde de la tarjeta toma un color de alerta rojizo. Dos tarjetas pueden encenderse: «Stock crítico» (al menos un producto activo por debajo de 5 unidades, agotados incluidos) y «Mensajes sin leer» (al menos un mensaje abierto).",
+        desc: "Cuando algo requiere una acción, el borde de la tarjeta toma un color de alerta rojizo. Dos tarjetas pueden encenderse: «Stock crítico» (al menos un producto activo en el umbral de stock bajo o menos, agotados incluidos) y «Mensajes sin leer» (al menos un mensaje abierto).",
       },
       {
         n: 4,
@@ -103,7 +103,7 @@ export const sections: TutoSection[] = [
       {
         n: 8,
         label: "Inventario",
-        desc: "Unidades totales en stock, valor del stock a precio de venta y distribución de los productos: en stock (5 unidades o más), stock bajo (1 a 4) y agotado (0). Un aviso naranja señala los productos que siguen con el precio provisional de 100 DOP, nunca configurado.",
+        desc: "Unidades totales en stock, valor del stock a precio de venta y distribución de los productos: en stock (por encima del umbral de stock bajo), stock bajo (en el umbral o menos) y agotado (0) — umbral ajustable en Tienda y reservas → Inventario. Un aviso naranja señala los productos que siguen con el precio provisional de 100 DOP, nunca configurado.",
       },
       {
         n: 9,

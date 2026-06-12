@@ -116,7 +116,7 @@ export const sections: TutoSection[] = [
       {
         label: "Guardar",
         where: "Barra oscura en la parte inferior de la pantalla (solo aparece si un campo fue modificado)",
-        does: "Guarda de una vez los nueve campos de la pantalla: nombre, lema, email, teléfono, número de WhatsApp y los cuatro datos del punto de retiro.",
+        does: "Guarda de una vez los diez campos de la pantalla: nombre, lema, email, teléfono, número de WhatsApp, los cuatro datos del punto de retiro y el umbral de stock bajo.",
         effects: [
           "Todos los valores se guardan juntos en la base de datos (solo existe una ficha de tienda).",
           "El sitio público adopta los nuevos valores en unos minutos como máximo: pie de página, página Contacto, página Farmacia, página « Acerca de », página de confirmación.",

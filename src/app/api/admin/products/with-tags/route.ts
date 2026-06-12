@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { apiError } from '@/lib/apiError'
+import { getShopSettings } from '@/lib/getShopSettings'
 
 export async function GET(req: NextRequest) {
   const auth = await requireAdmin()
@@ -76,11 +77,16 @@ export async function GET(req: NextRequest) {
       }
     })
 
+    // Seuil « stock faible » configuré — la table produits colore ses lignes
+    // et pastilles avec (fini le littéral 10 côté client).
+    const { low_stock_threshold: lowStockThreshold } = await getShopSettings()
+
     return NextResponse.json({
       products: productsWithTags,
       totalCount: count || 0,
       currentPage: page,
       totalPages: Math.ceil((count || 0) / limit),
+      lowStockThreshold,
     })
   } catch (error) {
     return apiError('Erreur lors de la récupération des produits', error, 500)

@@ -9,15 +9,20 @@ export type LowStockItem = {
   stock: number
 }
 
-type Props = { items: LowStockItem[]; className?: string }
+type Props = {
+  items: LowStockItem[]
+  /** Seuil « stock bajo » configuré (shop_settings.low_stock_threshold). */
+  threshold: number
+  className?: string
+}
 
-export function LowStockWidget({ items, className = 'col-span-12' }: Props) {
+export function LowStockWidget({ items, threshold, className = 'col-span-12' }: Props) {
   return (
     <article className={`bg-sand-50 border border-sand-300 rounded-xl p-5 lg:p-6 flex flex-col gap-3.5 ${className}`}>
       <div className="flex justify-between items-baseline">
         <div>
           <h3 className="font-serif text-[20px] text-ink-900 m-0 mb-0.5">Stock crítico</h3>
-          <small className="text-[11.5px] text-ink-500">Menos de 5 unidades</small>
+          <small className="text-[11.5px] text-ink-500">{threshold} unidades o menos</small>
         </div>
         <Link
           href="/admin/stock"

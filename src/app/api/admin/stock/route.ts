@@ -4,8 +4,11 @@ import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { parseBody, stockBody } from '@/lib/schemas'
 import { recordAuditLog } from '@/lib/audit'
+import { getShopSettings } from '@/lib/getShopSettings'
 
-function getStockStatus(currentStock: number, minStock = 10): 'ok' | 'low' | 'out' {
+// Seuil configurable (shop_settings.low_stock_threshold) — paramètre REQUIS
+// pour interdire un littéral silencieux. Sémantique : low = 0 < stock ≤ seuil.
+function getStockStatus(currentStock: number, minStock: number): 'ok' | 'low' | 'out' {
   if (currentStock === 0) return 'out'
   if (currentStock <= minStock) return 'low'
   return 'ok'
@@ -50,7 +53,10 @@ export async function GET(req: NextRequest) {
     const ascending = sortOrder === 'asc'
     query = query.order(sortColumn, { ascending })
 
-    const { data: products, error } = await query
+    const [{ data: products, error }, { low_stock_threshold: threshold }] = await Promise.all([
+      query,
+      getShopSettings(),
+    ])
     if (error) throw error
 
     const stockItems = (products || []).map((product) => {
@@ -58,7 +64,7 @@ export async function GET(req: NextRequest) {
         | { id: string; name: string; brand_id: string; brand: { id: string; name: string } | null }
         | null
       const brand = range?.brand || null
-      const itemStatus = getStockStatus(product.stock ?? 0)
+      const itemStatus = getStockStatus(product.stock ?? 0, threshold)
 
       return {
         id: product.id,
@@ -90,6 +96,7 @@ export async function GET(req: NextRequest) {
       items: filteredItems,
       stats,
       totalCount: filteredItems.length,
+      threshold,
     })
   } catch (error) {
     return apiError('Erreur lors de la récupération du stock', error, 500)

@@ -990,7 +990,10 @@
       "assureVerifiedTitle": "Verified reservation",
       "assureVerifiedBody": "Before any order preparation.",
       "assureHoldTitle": "Held for you",
-      "assureHoldBody": "While we confirm together."
+      "assureHoldBody": "While we confirm together.",
+      "restockCta": "Ask on WhatsApp about availability",
+      "restockCtaShort": "Ask on WhatsApp",
+      "restockHint": "Out of stock — message us on WhatsApp and we'll tell you when it's back."
     },
     "trust": {
       "deliveryTitle": "Free shipping · 1500 DOP+",
@@ -2488,7 +2491,11 @@
       "saveSuccess": "Settings saved",
       "saveError": "Save error",
       "networkError": "Network error",
-      "loadError": "Could not load shop settings."
+      "loadError": "Could not load shop settings.",
+      "inventoryTitle": "Inventory",
+      "inventoryHint": "Stock management rules applied across the panel (Stock page, dashboard, badges).",
+      "lowStockThreshold": "Low-stock threshold",
+      "lowStockThresholdHint": "At or below this number of units, a product is flagged as “low stock” (minimum 2). Out of stock remains 0."
     },
     "setup": {
       "title": "Admin system configuration",

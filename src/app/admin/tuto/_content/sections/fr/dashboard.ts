@@ -78,7 +78,7 @@ export const sections: TutoSection[] = [
       {
         n: 3,
         label: "Anneau d'alerte",
-        desc: "Quand quelque chose demande une action, le contour de la tuile prend une couleur d'alerte rougeâtre. Deux tuiles peuvent s'allumer : « Stock critique » (au moins un produit actif sous 5 unités, épuisés compris) et « Messages non lus » (au moins un message ouvert).",
+        desc: "Quand quelque chose demande une action, le contour de la tuile prend une couleur d'alerte rougeâtre. Deux tuiles peuvent s'allumer : « Stock critique » (au moins un produit actif au seuil de stock faible ou moins, épuisés compris) et « Messages non lus » (au moins un message ouvert).",
       },
       {
         n: 4,
@@ -103,7 +103,7 @@ export const sections: TutoSection[] = [
       {
         n: 8,
         label: "Inventaire",
-        desc: "Unités totales en stock, valeur du stock au prix de vente, et répartition des produits : en stock (5 unités ou plus), stock bas (1 à 4) et épuisé (0). Un avertissement orange signale les produits encore au prix provisoire de 100 DOP, jamais configuré.",
+        desc: "Unités totales en stock, valeur du stock au prix de vente, et répartition des produits : en stock (au-dessus du seuil de stock faible), stock bas (au seuil ou moins) et épuisé (0) — seuil réglable dans Boutique & réservation → Inventaire. Un avertissement orange signale les produits encore au prix provisoire de 100 DOP, jamais configuré.",
       },
       {
         n: 9,

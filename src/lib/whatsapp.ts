@@ -83,3 +83,26 @@ export function buildReservationWhatsappLink(
   if (!digits) return `/contact?ref=${encodeURIComponent(p.reference)}`
   return `https://wa.me/${digits}?text=${message}`
 }
+
+/**
+ * Message « réassort » d'un produit épuisé — Spanish first, même convention
+ * que la coordination de réservation (le client demande quand le produit
+ * sera réapprovisionné).
+ */
+export function buildRestockMessage(productName: string): string {
+  return `Hola FARMAU 👋, el producto *${productName}* aparece agotado en la web. ¿Me pueden decir cuándo estará disponible de nuevo?`
+}
+
+/**
+ * Lien wa.me pré-rempli pour demander le réassort d'un produit épuisé
+ * (`shop_settings.whatsapp_number`, threadé depuis le Server Component).
+ * Sans numéro configuré, on retombe sur la page contact.
+ */
+export function buildRestockWhatsappLink(
+  productName: string,
+  whatsappNumber: string | null | undefined,
+): string {
+  const digits = (whatsappNumber ?? '').replace(/\D/g, '')
+  if (!digits) return '/contact'
+  return `https://wa.me/${digits}?text=${encodeURIComponent(buildRestockMessage(productName))}`
+}

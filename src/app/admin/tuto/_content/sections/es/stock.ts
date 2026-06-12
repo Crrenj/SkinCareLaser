@@ -63,7 +63,7 @@ export const sections: TutoSection[] = [
       {
         n: 4,
         label: "Las 4 tarjetas de estado",
-        desc: "El resumen en cifras: número total de productos, con stock normal (más de 10 unidades), con stock bajo (10 unidades o menos) y sin stock (0 unidades). Estos umbrales son fijos.",
+        desc: "El resumen en cifras: número total de productos, con stock normal (por encima del umbral de stock bajo), con stock bajo (en el umbral o menos, sin contar agotados) y sin stock (0 unidades). El umbral se ajusta en Tienda y reservas → Inventario (10 por defecto).",
       },
       {
         n: 5,
@@ -230,12 +230,12 @@ export const sections: TutoSection[] = [
             {
               label: "Normal",
               tone: "ok",
-              note: "Más de 10 unidades.",
+              note: "Por encima del umbral de stock bajo.",
             },
             {
               label: "Stock bajo",
               tone: "warn",
-              note: "10 unidades o menos — la fila se sombrea en amarillo. Piense en reabastecer.",
+              note: "En el umbral de stock bajo o menos — la fila se sombrea en amarillo. Piense en reabastecer.",
             },
             {
               label: "Sin stock",
@@ -295,7 +295,7 @@ export const sections: TutoSection[] = [
       "La cifra de stock no se mueve cuando un cliente reserva: solo baja cuando la reserva se marca como « Entregada » en farmacia (pantalla Reservas).",
       "El costo ingresado en la entrada es el precio pagado al proveedor POR UNIDAD, con impuestos incluidos por defecto (casilla « Precios con ITBIS incluido ») — no el precio de venta.",
       "Las columnas Costo y Margen solo se ven en el panel de administración, nunca en el sitio público. Un margen en rojo significa que el producto se vende más barato que su costo de compra.",
-      "La búsqueda de la lista es sensible a las tildes (« proteccion » no encuentra « protección ») y el umbral de « Stock bajo » está fijado en 10 unidades, sin ajuste posible.",
+      "La búsqueda de la lista es sensible a las tildes (« proteccion » no encuentra « protección ») y el umbral de « Stock bajo » se ajusta en Tienda y reservas → Inventario (10 por defecto, mínimo 2).",
     ],
   },
 ]

@@ -12,6 +12,7 @@ import {
   MessageCircle,
   MapPin,
   Clock,
+  Warehouse,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -37,6 +38,7 @@ const EDITABLE_FIELDS = [
   'pickup_address',
   'pickup_hours',
   'pickup_phone',
+  'low_stock_threshold',
 ] as const
 
 const inputCls =
@@ -251,6 +253,28 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
+            </Section>
+
+            {/* 4 — Inventaire : seuil de stock faible (demande propriétaire :
+                les pharmaciens définissent le seuil eux-mêmes, > 1) */}
+            <Section icon={Warehouse} title={t('inventoryTitle')} hint={t('inventoryHint')}>
+              <Field
+                id="low_stock_threshold"
+                label={t('lowStockThreshold')}
+                hint={t('lowStockThresholdHint')}
+              >
+                <input
+                  id="low_stock_threshold"
+                  type="number"
+                  min={2}
+                  max={9999}
+                  step={1}
+                  required
+                  value={Number.isFinite(form.low_stock_threshold) ? form.low_stock_threshold : ''}
+                  onChange={(e) => update('low_stock_threshold', e.target.valueAsNumber)}
+                  className={`${inputCls} max-w-[180px]`}
+                />
+              </Field>
             </Section>
 
             <p className="font-serif italic text-[13px] text-ink-500 px-1">

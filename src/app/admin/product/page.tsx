@@ -22,7 +22,7 @@ export default function ProductPage() {
   const tCommon = useTranslations('Admin.common')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const { products, brands, tags, tagTypes, loading, totalPages, refreshProducts } =
+  const { products, brands, tags, tagTypes, loading, totalPages, lowStockThreshold, refreshProducts } =
     useProductsData({ page: currentPage, search: searchTerm })
 
   // Filet : si la page courante dépasse (ex. suppression du dernier produit
@@ -157,6 +157,7 @@ export default function ProductPage() {
           page={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
+          lowStockThreshold={lowStockThreshold}
         />
       </div>
 

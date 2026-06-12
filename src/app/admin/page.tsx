@@ -108,7 +108,7 @@ export default async function AdminDashboardPage() {
             <StatCard
               label="Stock crítico"
               value={String(lowCritical)}
-              sub={`${d.inventory.distribution.oos} agotados · < 5 uds`}
+              sub={`${d.inventory.distribution.oos} agotados · ≤ ${d.inventory.lowThreshold} uds`}
               icon={AlertTriangle}
               accent={lowCritical > 0 ? 'brick' : 'olive'}
               alert={lowCritical > 0}
@@ -173,7 +173,11 @@ export default async function AdminDashboardPage() {
               <InventoryWidget data={d.inventory} className="col-span-12 lg:col-span-5" />
               <BrandBreakdownWidget bars={d.brandBars} className="col-span-12" />
               <TopProductsWidget rows={d.topProducts} className="col-span-12 md:col-span-6" />
-              <LowStockWidget items={d.lowStock} className="col-span-12 md:col-span-6" />
+              <LowStockWidget
+                items={d.lowStock}
+                threshold={d.inventory.lowThreshold}
+                className="col-span-12 md:col-span-6"
+              />
             </div>
           </section>
 

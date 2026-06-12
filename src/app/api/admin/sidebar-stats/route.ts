@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/requireAdmin'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { getShopSettings } from '@/lib/getShopSettings'
 
 /**
  * GET /api/admin/sidebar-stats
  *
  * Retourne les compteurs affichés en badges dans la sidebar admin :
  *   - products  : total produits actifs
- *   - low_stock : produits actifs avec stock < 5
+ *   - low_stock : produits actifs nécessitant attention — stock ≤ seuil
+ *     configuré (shop_settings.low_stock_threshold), rupture (0) incluse
  *   - reservations : réservations en attente d'action (pending|confirmed)
  *   - messages  : tickets de support ouverts (status = open)
  *
@@ -20,6 +22,8 @@ export async function GET() {
     return NextResponse.json({ error: 'Configuration manquante' }, { status: 500 })
   }
 
+  const { low_stock_threshold: threshold } = await getShopSettings()
+
   const [products, lowStock, reservations, messages] = await Promise.all([
     supabaseAdmin
       .from('products')
@@ -29,7 +33,7 @@ export async function GET() {
       .from('products')
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true)
-      .lt('stock', 5),
+      .lte('stock', threshold),
     supabaseAdmin
       .from('reservations')
       .select('*', { count: 'exact', head: true })

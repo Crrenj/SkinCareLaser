@@ -78,7 +78,7 @@ export const sections: TutoSection[] = [
       {
         n: 3,
         label: "Alert ring",
-        desc: "When something needs action, the tile's outline turns a reddish alert colour. Two tiles can light up: “Critical stock” (at least one active product under 5 units, sold-out included) and “Unread messages” (at least one open message).",
+        desc: "When something needs action, the tile's outline turns a reddish alert colour. Two tiles can light up: “Critical stock” (at least one active product at or below the low-stock threshold, sold-out included) and “Unread messages” (at least one open message).",
       },
       {
         n: 4,
@@ -103,7 +103,7 @@ export const sections: TutoSection[] = [
       {
         n: 8,
         label: "Inventory",
-        desc: "Total units in stock, stock value at selling price, and the product breakdown: in stock (5 units or more), low stock (1 to 4) and sold out (0). An orange warning flags products still at the provisional 100 DOP price, never configured.",
+        desc: "Total units in stock, stock value at selling price, and the product breakdown: in stock (above the low-stock threshold), low stock (at or below it) and sold out (0) — threshold adjustable in Shop & reservations → Inventory. An orange warning flags products still at the provisional 100 DOP price, never configured.",
       },
       {
         n: 9,

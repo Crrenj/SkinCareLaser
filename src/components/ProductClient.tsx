@@ -2,7 +2,7 @@
 
 import { logger } from '@/lib/logger'
 import { useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { useCart } from '@/hooks/useCart'
 import Breadcrumb from '@/components/Breadcrumb'
 import ProductCard from '@/components/ProductCard'
@@ -13,6 +13,7 @@ import { PdpAccordions, type PdpAccordionData } from '@/components/pdp/PdpAccord
 import { PdpReservationPanel } from '@/components/pdp/PdpReservationPanel'
 import { PdpReviews, type ReviewItem } from '@/components/pdp/PdpReviews'
 import { PdpStickyBar } from '@/components/pdp/PdpStickyBar'
+import { buildRestockWhatsappLink } from '@/lib/whatsapp'
 
 export type MappedProduct = {
   id: string
@@ -43,6 +44,8 @@ interface ProductClientProps {
   reviews: ReviewItem[]
   reviewAverage: number
   reviewCount: number
+  /** Numéro WhatsApp boutique (shop_settings) — CTA réassort quand épuisé. */
+  whatsappNumber?: string | null
 }
 
 export default function ProductClient({
@@ -51,9 +54,11 @@ export default function ProductClient({
   reviews,
   reviewAverage,
   reviewCount,
+  whatsappNumber,
 }: ProductClientProps) {
   const t = useTranslations('Product')
   const tCat = useTranslations('Catalogue')
+  const locale = useLocale()
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
   const buyRowRef = useRef<HTMLDivElement | null>(null)
@@ -75,6 +80,13 @@ export default function ProductClient({
   }
 
   const outOfStock = product.stock === 0
+  // Produit épuisé → lien WhatsApp pré-rempli « quand sera-t-il réapprovisionné ? »
+  // (même mécanique que le lien de coordination des réservations). Le fallback
+  // /contact (numéro non configuré) est préfixé par la locale courante —
+  // localePrefix 'always' redirigerait sinon vers la locale du cookie.
+  const rawRestockLink = outOfStock ? buildRestockWhatsappLink(product.name, whatsappNumber) : null
+  const restockLink =
+    rawRestockLink && !rawRestockLink.startsWith('http') ? `/${locale}${rawRestockLink}` : rawRestockLink
   const isPromo = product.oldPrice != null && product.oldPrice > product.price
   const promoPct = isPromo ? Math.round((1 - product.price / product.oldPrice!) * 100) : 0
 
@@ -185,6 +197,7 @@ export default function ProductClient({
               onReserve={handleAddToCart}
               maxQuantity={product.stock ?? undefined}
               outOfStock={outOfStock}
+              restockLink={restockLink}
             />
           </div>
         </div>
@@ -248,6 +261,7 @@ export default function ProductClient({
         currency={product.currency}
         disabled={outOfStock}
         onAdd={handleAddToCart}
+        restockLink={restockLink}
       />
     </div>
   )
