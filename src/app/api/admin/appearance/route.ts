@@ -64,7 +64,10 @@ export async function PATCH(req: NextRequest) {
     if (error) throw error
 
     // Le thème public est lu via getThemeConfig (unstable_cache) : on invalide.
-    revalidateTag(THEME_CONFIG_TAG)
+    // Next 16 : revalidateTag exige un 2e arg (profil de cache-life).
+    // { expire: 0 } reproduit l'ancienne semantique mono-argument (expiration
+    // immediate) pour que le theme public soit a jour des le prochain rendu.
+    revalidateTag(THEME_CONFIG_TAG, { expire: 0 })
 
     recordAuditLog({
       actorId: auth.userId,
