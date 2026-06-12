@@ -650,7 +650,8 @@
     "redirecting": "Redirection en cours…"
   },
   "Contact": {
-    "headerTitle": "Contactez-nous",
+    "eyebrow": "Contact",
+    "titleHtml": "Une question ? <em>Écrivez-nous.</em>",
     "headerSubtitle": "Notre équipe répond à vos questions sur les produits et les commandes",
     "contactInfoHeading": "Nos coordonnées",
     "addressHeading": "Adresse",
