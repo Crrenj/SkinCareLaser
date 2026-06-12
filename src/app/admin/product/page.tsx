@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@/lib/logger'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -24,6 +24,13 @@ export default function ProductPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const { products, brands, tags, tagTypes, loading, totalPages, refreshProducts } =
     useProductsData({ page: currentPage, search: searchTerm })
+
+  // Filet : si la page courante dépasse (ex. suppression du dernier produit
+  // de la dernière page), on redescend sur la dernière page valide — sinon
+  // écran « aucun produit » sans pagination pour revenir.
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages)
+  }, [currentPage, totalPages])
 
   const [showModal, setShowModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)

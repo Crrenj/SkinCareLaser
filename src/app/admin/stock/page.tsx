@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ClipboardCheck, Pencil, Plus, PackagePlus, PackageMinus, Search, AlertTriangle, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { PageHeader } from '@/components/admin/dashboard/PageHeader'
+import { AdminPagination } from '@/components/admin/dashboard/AdminPagination'
 import { formatPrice } from '@/lib/formatPrice'
 import { toLocaleTag } from '@/lib/constants'
 import { useStockData } from './_hooks/useStockData'
@@ -22,7 +23,8 @@ export default function StockPage() {
 
   const locale = useLocale()
   const {
-    stockItems, stats, loading,
+    stockItems, pagedItems, stats, loading,
+    page, totalPages, setPage,
     searchTerm, setSearchTerm,
     filterStatus, setFilterStatus,
     sortColumn, sortOrder, handleSort,
@@ -133,7 +135,7 @@ export default function StockPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {stockItems.map((item) => {
+                  {pagedItems.map((item) => {
                     const tint = item.status === 'low' ? 'bg-[rgba(181,133,43,0.04)]' : item.status === 'out' ? 'bg-[rgba(139,58,46,0.04)]' : ''
                     return (
                       <tr key={item.id} className={`border-b border-sand-200 last:border-b-0 transition-colors hover:bg-sand-100 ${tint}`}>
@@ -218,6 +220,7 @@ export default function StockPage() {
                 </tbody>
               </table>
             </div>
+            <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
       </div>

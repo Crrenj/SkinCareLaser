@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { buildPageRange } from '@/lib/pagination'
 
 type Props = {
   currentPage: number
@@ -10,26 +11,6 @@ type Props = {
   onPageChange: (page: number) => void
   onPrevious: () => void
   onNext: () => void
-}
-
-function buildPageRange(
-  current: number,
-  total: number,
-  siblings = 1,
-): Array<number | 'ellipsis'> {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const first = 1
-  const last = total
-  const start = Math.max(first + 1, current - siblings)
-  const end = Math.min(last - 1, current + siblings)
-  const out: Array<number | 'ellipsis'> = [first]
-  if (start > first + 1) out.push('ellipsis')
-  else if (start === first + 1) out.push(first + 1)
-  for (let i = Math.max(start, first + 2); i <= end; i++) out.push(i)
-  if (end < last - 1) out.push('ellipsis')
-  else if (end === last - 1) out.push(last - 1)
-  out.push(last)
-  return out
 }
 
 export function CataloguePagination({

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { Pencil, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { AdminPagination } from '@/components/admin/dashboard/AdminPagination'
 import type { Product, Tag, TagType } from '../_lib/types'
 
 type ProductsTableProps = {
@@ -190,33 +191,7 @@ export function ProductsTable({
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-5 py-3.5 bg-sand-50 border-t border-sand-200 text-[12.5px] text-ink-700">
-          <span>
-            {tCommon.rich('pageOf', {
-              page,
-              total: totalPages,
-            })}
-          </span>
-          <nav aria-label={tCommon('pagination')} className="flex flex-wrap gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => onPageChange(p)}
-                aria-current={page === p ? 'page' : undefined}
-                className={`min-w-[32px] px-2.5 py-1 border rounded-md font-sans transition-colors ${
-                  page === p
-                    ? 'bg-ink-900 text-sand-50 border-ink-900 font-medium'
-                    : 'bg-sand-50 text-ink-700 border-sand-300 hover:bg-sand-100'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </nav>
-        </div>
-      )}
+      <AdminPagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
     </div>
   )
 }

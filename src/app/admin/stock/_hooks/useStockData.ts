@@ -14,6 +14,11 @@ import type {
   StockStats,
 } from '../_lib/types'
 
+/** Lignes par page de la table stock (pagination côté client : l'API renvoie
+ *  tout le référentiel, on ne pagine que le RENDU — les KPIs et les onglets
+ *  de statut continuent de compter l'ensemble). */
+const STOCK_PAGE_SIZE = 20
+
 export function useStockData() {
   const tCommon = useTranslations('Admin.common')
   const tStock = useTranslations('Admin.stock')
@@ -24,6 +29,12 @@ export function useStockData() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [sortColumn, setSortColumn] = useState<SortColumn>('product_name')
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+  const [page, setPage] = useState(1)
+
+  // Tout changement de recherche/filtre/tri ramène à la première page.
+  useEffect(() => {
+    setPage(1)
+  }, [searchTerm, filterStatus, sortColumn, sortOrder])
 
   const fetchStockData = useCallback(async () => {
     try {
@@ -180,8 +191,22 @@ export function useStockData() {
     }
   }
 
+  // Pagination dérivée — `safePage` se clampe tout seul si la liste rétrécit
+  // (filtre plus strict, re-fetch) pour ne jamais pointer une page vide.
+  const totalPages = Math.max(1, Math.ceil(stockItems.length / STOCK_PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const pagedItems = stockItems.slice((safePage - 1) * STOCK_PAGE_SIZE, safePage * STOCK_PAGE_SIZE)
+
+  // Resynchronise l'état brut après clampage : sans ça, une page périmée
+  // (ex. 3 alors qu'il n'en reste 2 après une mutation) « ressusciterait »
+  // silencieusement si la liste regrossit ensuite.
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages)
+  }, [page, totalPages])
+
   return {
-    stockItems, stats, loading,
+    stockItems, pagedItems, stats, loading,
+    page: safePage, totalPages, setPage,
     searchTerm, setSearchTerm,
     filterStatus, setFilterStatus,
     sortColumn, sortOrder, handleSort,
