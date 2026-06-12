@@ -11,6 +11,9 @@ export const sections: TutoSection[] = [
     mockup: {
       rows: [
         {
+          blocks: [{ w: 12, kind: "text", label: "Admin / General / Contabilidad" }],
+        },
+        {
           blocks: [
             { w: 4, kind: "text", label: "junio de 2026", hotspot: 1 },
             { w: 8, kind: "toolbar", label: "◀  mes ▼  ▶" },

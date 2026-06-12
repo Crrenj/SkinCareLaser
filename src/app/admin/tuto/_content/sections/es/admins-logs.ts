@@ -37,6 +37,12 @@ export const sections: TutoSection[] = [
         {
           blocks: [
             { w: 8, kind: "input", label: "🔍 Añadir un administrador — buscar email, nombre…", hotspot: 6 },
+            { w: 4, kind: "button", label: "Buscar" },
+          ],
+        },
+        {
+          blocks: [
+            { w: 8, kind: "panel", label: "Resultados: cuentas encontradas" },
             { w: 4, kind: "button", label: "Hacer admin", hotspot: 7 },
           ],
         },

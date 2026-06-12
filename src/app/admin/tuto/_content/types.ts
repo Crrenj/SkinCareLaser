@@ -16,6 +16,39 @@
  */
 export type TutoSeverity = 'safe' | 'caution' | 'danger'
 
+/**
+ * Identifiants des 21 sections — stables entre les locales (ancres d'URL).
+ * Le compilateur impose qu'un résumé existe pour chacune (`summaries`).
+ */
+export type TutoSectionId =
+  | 'chrome'
+  | 'concepts'
+  | 'dashboard'
+  | 'contabilidad'
+  | 'products'
+  | 'brands'
+  | 'stock'
+  | 'tags'
+  | 'promotions'
+  | 'reservations'
+  | 'ventas'
+  | 'messages'
+  | 'home'
+  | 'blog'
+  | 'users'
+  | 'reviews'
+  | 'newsletter'
+  | 'settings'
+  | 'appearance'
+  | 'admins'
+  | 'logs'
+
+/** Groupe thématique du sommaire (libellé localisé, ids stables). */
+export type TutoGroup = {
+  label: string
+  ids: TutoSectionId[]
+}
+
 /** Type de bloc dans un wireframe schématique d'écran. */
 export type TutoBlockKind =
   | 'kpi' // tuile chiffre-clé
@@ -99,7 +132,7 @@ export type TutoFlow = {
 
 export type TutoSection = {
   /** Ancre URL (#id) — stable entre les locales. */
-  id: string
+  id: TutoSectionId
   /** Libellé court pour le sommaire. */
   navLabel: string
   title: string
@@ -124,5 +157,12 @@ export type TutoContent = {
     /** Légende des trois niveaux de gravité. */
     severityLegend: { safe: string; caution: string; danger: string }
   }
+  /** Groupes thématiques du sommaire, dans l'ordre d'affichage. */
+  groups: TutoGroup[]
+  /**
+   * Résumé d'une phrase par section — la seule chose visible carte repliée.
+   * `Record<TutoSectionId, …>` garantit la couverture des 21 sections.
+   */
+  summaries: Record<TutoSectionId, string>
   sections: TutoSection[]
 }

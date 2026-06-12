@@ -44,10 +44,20 @@ export const sections: TutoSection[] = [
         },
         {
           blocks: [
+            { w: 4, kind: "panel", label: "Desglose por marca" },
+            { w: 4, kind: "panel", label: "Top productos" },
+            { w: 4, kind: "panel", label: "Stock crítico" },
+          ],
+        },
+        {
+          blocks: [
             { w: 4, kind: "panel", label: "03 · Clientes", hotspot: 9 },
             { w: 4, kind: "panel", label: "Actividad" },
             { w: 4, kind: "panel", label: "Contenido" },
           ],
+        },
+        {
+          blocks: [{ w: 12, kind: "table", label: "Mensajes recientes" }],
         },
         {
           blocks: [{ w: 12, kind: "table", label: "Accesos rápidos (13 atajos)", hotspot: 10 }],
