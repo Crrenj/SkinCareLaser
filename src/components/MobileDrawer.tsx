@@ -58,11 +58,11 @@ export function MobileDrawer({
         className="absolute inset-0 bg-[--pop-backdrop] backdrop-blur-[14px] backdrop-saturate-[120%]"
       />
 
-      {/* Drawer — rounded on right side */}
+      {/* Drawer — ancré à droite (côté du bouton hamburger), rounded on left side */}
       <aside
         ref={dialogRef}
-        className="absolute top-0 left-0 h-full w-[320px] max-w-[85vw] bg-sand-50 flex flex-col overflow-hidden rounded-tr-[20px] rounded-br-[20px]"
-        style={{ boxShadow: 'var(--pop-shadow-drawer-l)' }}
+        className="absolute top-0 right-0 h-full w-[320px] max-w-[85vw] bg-sand-50 flex flex-col overflow-hidden rounded-tl-[20px] rounded-bl-[20px]"
+        style={{ boxShadow: 'var(--pop-shadow-drawer-r)' }}
         role="dialog"
         aria-modal="true"
         aria-label={t('drawer.menuHeading')}
