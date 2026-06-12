@@ -160,7 +160,7 @@ export function TutoGuideClient({ content }: { content: TutoContent }) {
       />
 
       <div className="min-h-[calc(100vh-90px)] bg-sand-100 px-5 py-6 lg:px-7 lg:py-7">
-        <div className="mx-auto grid max-w-[1320px] items-start gap-5 lg:grid-cols-[252px_minmax(0,1fr)] lg:gap-9">
+        <div className="grid items-start gap-5 lg:grid-cols-[252px_minmax(0,1fr)] lg:gap-9">
           {/* Sommaire */}
           <nav
             aria-label={t('tocTitle')}
@@ -241,7 +241,7 @@ export function TutoGuideClient({ content }: { content: TutoContent }) {
           </nav>
 
           {/* Colonne principale (le landmark <main> est posé par _AdminShell) */}
-          <div className="grid max-w-[920px] gap-[18px]">
+          <div className="grid gap-[18px]">
             {!searching && (
               <div className="rounded-xl border border-sand-300 bg-sand-50 px-[26px] py-[22px]">
                 <h2 className="mb-2 font-serif text-[23px] font-normal text-ink-900">{content.intro.title}</h2>

@@ -86,7 +86,7 @@ export default async function AdminDashboardPage() {
       />
 
       <div className="bg-sand-100 px-5 lg:px-8 py-6 lg:py-7">
-        <div className="max-w-[1240px] mx-auto flex flex-col gap-7 lg:gap-9">
+        <div className="flex flex-col gap-7 lg:gap-9">
           {/* ───────── Pulse : tout d'un coup d'œil ───────── */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
             <StatCard

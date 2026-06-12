@@ -85,7 +85,7 @@ export default function PromotionsPage() {
       />
 
       <div className="bg-sand-100 px-5 lg:px-8 py-6 lg:py-7 min-h-[calc(100vh-90px)]">
-        <div className="max-w-[1240px] mx-auto flex flex-col gap-5">
+        <div className="flex flex-col gap-5">
           <p className="text-[13px] text-ink-500 max-w-prose">{t('intro')}</p>
           {loading ? (
             <div className="bg-sand-50 border border-sand-300 rounded-xl py-12 text-center text-ink-500 text-[13.5px]">

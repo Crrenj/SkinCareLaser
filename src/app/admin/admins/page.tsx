@@ -20,9 +20,7 @@ export default async function AdminAdminsPage() {
         title={t('title')}
       />
       <div className="bg-sand-100 px-5 lg:px-8 py-6 lg:py-7 min-h-[calc(100vh-90px)]">
-        <div className="max-w-[1100px] mx-auto">
-          <AdminsClient />
-        </div>
+        <AdminsClient />
       </div>
     </>
   )

@@ -23,9 +23,7 @@ export default async function AdminUsersPage() {
         title={t('title')}
       />
       <div className="bg-sand-100 px-5 lg:px-8 py-6 lg:py-7 min-h-[calc(100vh-90px)]">
-        <div className="max-w-[1240px] mx-auto">
-          <UsersClient />
-        </div>
+        <UsersClient />
       </div>
     </>
   )
