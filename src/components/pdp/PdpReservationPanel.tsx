@@ -6,7 +6,6 @@ import {
   Check,
   Banknote,
   Landmark,
-  CreditCard,
   Store,
   ShieldCheck,
   Clock,
@@ -48,7 +47,6 @@ export function PdpReservationPanel({
   const chips = [
     { icon: Banknote, label: t('chipCash') },
     { icon: Landmark, label: t('chipTransfer') },
-    { icon: CreditCard, label: t('chipAzul') },
     { icon: Store, label: t('chipPickup') },
   ]
 

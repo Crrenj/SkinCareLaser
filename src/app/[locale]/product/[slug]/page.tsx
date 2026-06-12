@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { createSupabasePublicClient } from '@/lib/supabasePublic'
 import { getTranslations } from 'next-intl/server'
 import NavBar from '@/components/NavBar'
-import Footer from '@/components/Footer'
 import dynamic from 'next/dynamic'
 
 const ProductClient = dynamic(() => import('@/components/ProductClient'), {
@@ -302,7 +301,6 @@ export default async function ProductPage({
           reviewCount={reviewCount}
         />
       </main>
-      <Footer />
     </div>
   )
 }
