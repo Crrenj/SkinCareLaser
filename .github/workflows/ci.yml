@@ -50,7 +50,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Scan for committed secrets
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         # Informationnel : ne bloque pas le merge (license requise pour les orgs
         # GitHub ; gratuit sur un compte perso). Durcir en retirant ce flag.
         continue-on-error: true
