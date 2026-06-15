@@ -1,7 +1,7 @@
 'use client'
 
 import { logger } from '@/lib/logger'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -77,6 +77,9 @@ export default function ProductPage() {
       if (res.ok) {
         refreshProducts()
         setShowModal(false)
+        // Flow de lancement : un produit créé naît HORS LIGNE — on le dit
+        // explicitement pour que l'admin sache qu'il reste une étape.
+        if (!editingProduct) toast.success(t('createdInactive'))
       } else {
         const error = await res.json()
         toast.error(`${tCommon('saveError')}: ${error.error}`)
@@ -84,6 +87,38 @@ export default function ProductPage() {
     } catch (error) {
       logger.error('Erreur sauvegarde:', error)
       toast.error(tCommon('saveError'))
+    }
+  }
+
+  // Garde anti-double-clic : un re-clic rapide enverrait un 2e PATCH avant le
+  // refresh (product.is_active périmé → bascule en boucle). On ignore tant
+  // qu'une bascule est en vol pour ce produit.
+  const togglingIds = useRef<Set<string>>(new Set())
+
+  /** Publier/masquer du site — route dédiée auditée (barrière L-3), jamais
+   *  le PATCH produit générique (is_active y est strippé, invariant testé). */
+  const handleToggleActive = async (product: Product) => {
+    if (togglingIds.current.has(product.id)) return
+    togglingIds.current.add(product.id)
+    const next = !product.is_active
+    try {
+      const res = await fetch(`/api/admin/products/${product.id}/active`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: next }),
+      })
+      if (!res.ok) {
+        const error = await res.json()
+        toast.error(`${tCommon('saveError')}: ${error.error ?? res.status}`)
+        return
+      }
+      toast.success(t(next ? 'activatedToast' : 'deactivatedToast', { name: product.name }))
+      refreshProducts()
+    } catch (error) {
+      logger.error('Erreur activation produit:', error)
+      toast.error(tCommon('saveError'))
+    } finally {
+      togglingIds.current.delete(product.id)
     }
   }
 
@@ -154,6 +189,7 @@ export default function ProductPage() {
           tagTypes={tagTypes}
           onEdit={openModal}
           onDelete={handleDelete}
+          onToggleActive={handleToggleActive}
           page={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}

@@ -55,7 +55,7 @@ export const sections: TutoSection[] = [
       {
         n: 3,
         label: "La liste des produits",
-        desc: "Chaque ligne montre la photo, le nom et l'adresse de la page, la marque, jusqu'à 3 étiquettes (puis un compteur « +n »), le prix en pesos, le stock en unités et une pastille d'état du stock : Normal, Stock bas (ligne teintée en jaune) ou Rupture (ligne teintée en rouge). 10 produits par page, les plus récents d'abord. Attention : les produits cachés du public figurent aussi dans cette liste, sans signe distinctif.",
+        desc: "Chaque ligne montre la photo, le nom et l'adresse de la page, la marque, jusqu'à 3 étiquettes (puis un compteur « +n »), le prix en pesos, le stock en unités et une pastille d'état du stock : Normal, Stock bas (ligne teintée en jaune) ou Rupture (ligne teintée en rouge). 10 produits par page, les plus récents d'abord. Attention : les produits hors ligne (cachés du public) figurent aussi dans cette liste — repérés par une pastille « Hors ligne » et une ligne estompée.",
       },
       {
         n: 4,
@@ -99,7 +99,7 @@ export const sections: TutoSection[] = [
           },
           {
             title: "Créez et vérifiez",
-            body: "Cliquez « Créer le produit ». Si un autre produit a déjà la même adresse de page, l'enregistrement est refusé : modifiez-la et réessayez. La fiche apparaît sur le site public en une minute environ.",
+            body: "Cliquez « Créer le produit ». Si un autre produit a déjà la même adresse de page, l'enregistrement est refusé : modifiez-la et réessayez. La fiche est créée HORS LIGNE : elle n'apparaît pas encore sur le site — initialisez son stock (écran Stock) ou publiez-la avec l'icône œil de la liste.",
           },
         ],
       },
@@ -156,7 +156,7 @@ export const sections: TutoSection[] = [
         where: "Bouton en haut à droite de l'écran, puis bouton de validation en bas du tiroir",
         does: "Crée une nouvelle fiche produit dans le catalogue.",
         effects: [
-          "La fiche est enregistrée dans la base de données et le produit est EN LIGNE immédiatement : il apparaît au catalogue public, dans la recherche et sur sa propre page en une minute environ.",
+          "La fiche est enregistrée dans la base de données mais le produit naît HORS LIGNE : il n'apparaît au catalogue public, dans la recherche et sur sa propre page qu'une fois publié (icône œil de la liste ou initialisation du stock).",
           "Le nom, le prix (en pesos) et le stock sont obligatoires ; l'adresse de la page se déduit du nom mais reste modifiable avant validation.",
           "Si un autre produit a déjà la même adresse de page, l'enregistrement est refusé — changez-la et réessayez.",
           "Marque sans gamme choisie : la première gamme de la marque est attribuée automatiquement.",
@@ -166,7 +166,7 @@ export const sections: TutoSection[] = [
         severity: "caution",
         undo: "Supprimez la fiche avec l'icône corbeille de la liste (suppression définitive — sans gravité juste après une création).",
         audited: true,
-        publicImpact: "Le produit apparaît sur le site public dès l'enregistrement (une minute environ).",
+        publicImpact: "Aucun impact immédiat : le produit est créé hors ligne et reste invisible du public tant qu'il n'est pas publié (icône œil ou initialisation du stock).",
         accountingImpact: "Aucune écriture comptable : le stock saisi ici n'a ni coût d'achat ni facture — les marges et le registre 606 ne voient pas ces unités.",
       },
       {
@@ -207,13 +207,13 @@ export const sections: TutoSection[] = [
       },
       {
         label: "« Activer le produit » (mise en ligne)",
-        where: "Écran Stock → action « Initialiser ce produit » sur la ligne → case « Activer le produit » dans le tiroir",
+        where: "Écran Stock → tiroir « Initialiser ce produit » (case « Activer ») — ou l'icône œil sur la ligne de l'écran Produits",
         does: "Rend un produit caché visible et réservable sur le site public.",
         effects: [
           "Le produit apparaît au catalogue public, dans la recherche et sur sa propre page en une minute environ.",
           "C'est une action volontaire et séparée : le formulaire de modification de l'écran Produits ne peut pas changer la visibilité d'un produit.",
           "Le tiroir regroupe tout ce qu'il faut faire avant : stock compté, coût d'achat éventuel, vrai prix de vente. Attention : la case « Activer le produit » est cochée d'office à l'ouverture du tiroir — décochez-la si ces points ne sont pas encore réglés.",
-          "Il n'existe pas de case inverse : une fois en ligne, aucun bouton ne permet de re-cacher le produit (seule la suppression le retire du site).",
+          "L'inverse existe aussi : l'icône œil de l'écran Produits masque un produit en ligne à tout moment (et le republie) — chaque bascule est consignée au journal d'audit.",
         ],
         severity: "caution",
         audited: true,
@@ -263,9 +263,9 @@ export const sections: TutoSection[] = [
     ],
     gotchas: [
       "Beaucoup de fiches importées affichent un prix provisoire de 100 pesos posé lors du chargement du catalogue. Remplacez-le par le vrai prix de vente avant de mettre le produit en avant ou en ligne.",
-      "Un produit créé depuis cet écran est en ligne immédiatement : préparez le vrai prix et le bon stock AVANT de cliquer « Créer le produit ».",
-      "La colonne « Statut » indique l'état du stock (Normal / Stock bas / Rupture), pas la visibilité du produit : un produit caché du public apparaît dans la liste sans aucun signe distinctif.",
-      "Il n'existe aucun bouton pour re-cacher un produit en ligne : seule la suppression (définitive) le retire du site. La mise en ligne, elle, se fait depuis l'écran Stock (tiroir « Initialiser ce produit »).",
+      "Un produit créé depuis cet écran naît HORS LIGNE : il reste invisible du public tant qu'il n'est pas publié (icône œil de la liste ou initialisation du stock). Préparez quand même le vrai prix et le bon stock avant de le publier.",
+      "La colonne « Statut » indique l'état du stock (Normal / Stock bas / Rupture). La visibilité se lit à part : un produit hors ligne porte une pastille « Hors ligne » et sa ligne est estompée.",
+      "L'icône œil de chaque ligne publie ou re-cache le produit à tout moment (chaque bascule est consignée au journal d'audit). La mise en ligne peut aussi se faire depuis l'écran Stock (tiroir « Initialiser ce produit »).",
       "Le formulaire n'accepte qu'UNE photo, au format PNG. En téléverser une nouvelle efface toutes les photos existantes de la fiche — y compris les fiches importées qui en avaient plusieurs.",
       "Modifier le stock depuis la fiche n'enregistre ni coût d'achat ni facture : la comptabilité (marges, registre 606) reste aveugle sur ces unités. Pour une vraie livraison, utilisez « Réception » dans l'écran Stock.",
       "La recherche de la liste est sensible aux accents et porte sur le nom et la description (pas sur une référence interne, malgré la mention « SKU » du champ).",

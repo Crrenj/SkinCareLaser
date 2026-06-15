@@ -1791,7 +1791,14 @@
       "deleteAria": "Delete {name}",
       "deleteTitle": "Delete",
       "deleteConfirmTitle": "Delete product",
-      "deleteConfirmBody": "This product will be removed from the catalogue. You can recreate it manually."
+      "deleteConfirmBody": "This product will be removed from the catalogue. You can recreate it manually.",
+      "offlinePill": "Offline",
+      "toggleShowTitle": "Publish on the site",
+      "toggleHideTitle": "Hide from the site",
+      "toggleActiveAria": "Toggle visibility of {name}",
+      "activatedToast": "“{name}” is now visible on the site.",
+      "deactivatedToast": "“{name}” is hidden from the site.",
+      "createdInactive": "Product created offline — initialize its stock (Stock page) or publish it with the eye icon."
     },
     "marques": {
       "title": "Brands",

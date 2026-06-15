@@ -55,7 +55,7 @@ export const sections: TutoSection[] = [
       {
         n: 3,
         label: "La lista de productos",
-        desc: "Cada fila muestra la foto, el nombre y la dirección de la página, la marca, hasta 3 etiquetas (luego un contador « +n »), el precio en pesos, el stock en unidades y un indicador del estado del stock: Normal, Stock bajo (fila sombreada en amarillo) o Sin stock (fila sombreada en rojo). 10 productos por página, los más recientes primero. Atención: los productos ocultos al público también figuran en esta lista, sin ninguna señal distintiva.",
+        desc: "Cada fila muestra la foto, el nombre y la dirección de la página, la marca, hasta 3 etiquetas (luego un contador « +n »), el precio en pesos, el stock en unidades y un indicador del estado del stock: Normal, Stock bajo (fila sombreada en amarillo) o Sin stock (fila sombreada en rojo). 10 productos por página, los más recientes primero. Atención: los productos fuera de línea (ocultos al público) también figuran en esta lista — marcados con una etiqueta « Fuera de línea » y una fila atenuada.",
       },
       {
         n: 4,
@@ -99,7 +99,7 @@ export const sections: TutoSection[] = [
           },
           {
             title: "Cree y verifique",
-            body: "Pulse « Crear producto ». Si otro producto ya tiene la misma dirección de página, el guardado se rechaza: modifíquela y vuelva a intentarlo. La ficha aparece en el sitio público en aproximadamente un minuto.",
+            body: "Pulse « Crear producto ». Si otro producto ya tiene la misma dirección de página, el guardado se rechaza: modifíquela y vuelva a intentarlo. La ficha se crea FUERA DE LÍNEA: aún no aparece en el sitio — inicialice su stock (pantalla Stock) o publíquela con el icono del ojo de la lista.",
           },
         ],
       },
@@ -156,7 +156,7 @@ export const sections: TutoSection[] = [
         where: "Botón arriba a la derecha de la pantalla, luego botón de validación al final del panel",
         does: "Crea una nueva ficha de producto en el catálogo.",
         effects: [
-          "La ficha se guarda en la base de datos y el producto queda EN LÍNEA de inmediato: aparece en el catálogo público, en la búsqueda y en su propia página en aproximadamente un minuto.",
+          "La ficha se guarda en la base de datos pero el producto nace FUERA DE LÍNEA: solo aparece en el catálogo público, en la búsqueda y en su propia página una vez publicado (icono del ojo de la lista o inicialización del stock).",
           "El nombre, el precio (en pesos) y el stock son obligatorios; la dirección de la página se deduce del nombre pero puede modificarse antes de validar.",
           "Si otro producto ya tiene la misma dirección de página, el guardado se rechaza — cámbiela y vuelva a intentarlo.",
           "Marca sin gama elegida: se asigna automáticamente la primera gama de la marca.",
@@ -166,7 +166,7 @@ export const sections: TutoSection[] = [
         severity: "caution",
         undo: "Elimine la ficha con el icono de papelera de la lista (eliminación definitiva — sin consecuencias justo después de una creación).",
         audited: true,
-        publicImpact: "El producto aparece en el sitio público desde que se guarda (aproximadamente un minuto).",
+        publicImpact: "Ningún impacto inmediato: el producto se crea fuera de línea y permanece invisible para el público hasta que se publique (icono del ojo o inicialización del stock).",
         accountingImpact: "Ningún asiento contable: el stock ingresado aquí no tiene costo de compra ni factura — los márgenes y el registro 606 no ven esas unidades.",
       },
       {
@@ -207,13 +207,13 @@ export const sections: TutoSection[] = [
       },
       {
         label: "« Activar producto » (puesta en línea)",
-        where: "Pantalla Stock → acción « Inicializar este producto » en la fila → casilla « Activar producto » en el panel",
+        where: "Pantalla Stock → panel « Inicializar este producto » (casilla « Activar ») — o el icono del ojo en la fila de la pantalla Productos",
         does: "Hace que un producto oculto sea visible y reservable en el sitio público.",
         effects: [
           "El producto aparece en el catálogo público, en la búsqueda y en su propia página en aproximadamente un minuto.",
           "Es una acción voluntaria y separada: el formulario de modificación de la pantalla Productos no puede cambiar la visibilidad de un producto.",
           "El panel agrupa todo lo que hay que hacer antes: stock contado, costo de compra si lo tiene, precio de venta real. Atención: la casilla « Activar producto » viene marcada por defecto al abrir el panel — desmárquela si esos puntos aún no están resueltos.",
-          "No existe una casilla inversa: una vez en línea, ningún botón permite volver a ocultar el producto (solo la eliminación lo retira del sitio).",
+          "Lo inverso también existe: el icono del ojo de la pantalla Productos oculta un producto en línea en cualquier momento (y lo vuelve a publicar) — cada cambio queda en el registro de auditoría.",
         ],
         severity: "caution",
         audited: true,
@@ -263,9 +263,9 @@ export const sections: TutoSection[] = [
     ],
     gotchas: [
       "Muchas fichas importadas muestran un precio provisional de 100 pesos puesto al cargar el catálogo. Reemplácelo por el precio de venta real antes de destacar el producto o ponerlo en línea.",
-      "Un producto creado desde esta pantalla queda en línea de inmediato: prepare el precio real y el stock correcto ANTES de pulsar « Crear producto ».",
-      "La columna « Estado » indica el estado del stock (Normal / Stock bajo / Sin stock), no la visibilidad del producto: un producto oculto al público aparece en la lista sin ninguna señal distintiva.",
-      "No existe ningún botón para volver a ocultar un producto en línea: solo la eliminación (definitiva) lo retira del sitio. La puesta en línea, en cambio, se hace desde la pantalla Stock (panel « Inicializar este producto »).",
+      "Un producto creado desde esta pantalla nace FUERA DE LÍNEA: permanece invisible para el público hasta que se publique (icono del ojo de la lista o inicialización del stock). Aun así, prepare el precio real y el stock correcto antes de publicarlo.",
+      "La columna « Estado » indica el estado del stock (Normal / Stock bajo / Sin stock). La visibilidad se lee aparte: un producto fuera de línea lleva una etiqueta « Fuera de línea » y su fila aparece atenuada.",
+      "El icono del ojo de cada fila publica o vuelve a ocultar el producto en cualquier momento (cada cambio queda en el registro de auditoría). La puesta en línea también puede hacerse desde la pantalla Stock (panel « Inicializar este producto »).",
       "El formulario solo acepta UNA foto, en formato PNG. Subir una nueva borra todas las fotos existentes de la ficha — incluidas las fichas importadas que tenían varias.",
       "Modificar el stock desde la ficha no registra ni costo de compra ni factura: la contabilidad (márgenes, registro 606) queda ciega ante esas unidades. Para una entrega real, use « Entrada de stock » en la pantalla Stock.",
       "La búsqueda de la lista es sensible a las tildes y se aplica al nombre y a la descripción (no a una referencia interna, a pesar de la mención « SKU » del campo).",

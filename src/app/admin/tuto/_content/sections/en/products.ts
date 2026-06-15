@@ -55,7 +55,7 @@ export const sections: TutoSection[] = [
       {
         n: 3,
         label: "The product list",
-        desc: "Each row shows the photo, the name and page address, the brand, up to 3 tags (then a “+n” counter), the price in pesos, the stock in units and a stock status pill: Normal, Low stock (row tinted yellow) or Out of stock (row tinted red). 10 products per page, newest first. Careful: products hidden from the public also appear in this list, with no distinguishing mark.",
+        desc: "Each row shows the photo, the name and page address, the brand, up to 3 tags (then a “+n” counter), the price in pesos, the stock in units and a stock status pill: Normal, Low stock (row tinted yellow) or Out of stock (row tinted red). 10 products per page, newest first. Careful: offline products (hidden from the public) also appear in this list — marked with an “Offline” pill and a dimmed row.",
       },
       {
         n: 4,
@@ -99,7 +99,7 @@ export const sections: TutoSection[] = [
           },
           {
             title: "Create and check",
-            body: "Click “Create product”. If another product already has the same page address, the save is refused: change it and try again. The sheet appears on the public site within about a minute.",
+            body: "Click “Create product”. If another product already has the same page address, the save is refused: change it and try again. The sheet is created OFFLINE: it does not appear on the site yet — initialize its stock (Stock screen) or publish it with the eye icon in the list.",
           },
         ],
       },
@@ -156,7 +156,7 @@ export const sections: TutoSection[] = [
         where: "Button at the top right of the screen, then the confirm button at the bottom of the drawer",
         does: "Creates a new product sheet in the catalogue.",
         effects: [
-          "The sheet is saved to the database and the product is ONLINE immediately: it appears in the public catalogue, in search and on its own page within about a minute.",
+          "The sheet is saved to the database but the product is born OFFLINE: it appears in the public catalogue, in search and on its own page only once published (eye icon in the list or stock initialization).",
           "Name, price (in pesos) and stock are required; the page address is derived from the name but can still be edited before you confirm.",
           "If another product already has the same page address, the save is refused — change it and try again.",
           "Brand with no range picked: the brand's first range is assigned automatically.",
@@ -166,7 +166,7 @@ export const sections: TutoSection[] = [
         severity: "caution",
         undo: "Delete the sheet with the trash icon in the list (permanent deletion — harmless right after a creation).",
         audited: true,
-        publicImpact: "The product appears on the public site as soon as it is saved (about a minute).",
+        publicImpact: "No immediate impact: the product is created offline and stays invisible to the public until it is published (eye icon or stock initialization).",
         accountingImpact: "No accounting entry: the stock entered here has no purchase cost or invoice — margins and the 606 register never see those units.",
       },
       {
@@ -207,13 +207,13 @@ export const sections: TutoSection[] = [
       },
       {
         label: "“Activate product” (going online)",
-        where: "Stock screen → “Initialize this product” action on the row → “Activate product” box in the drawer",
+        where: "Stock screen → “Initialize this product” drawer (“Activate” box) — or the eye icon on the row of the Products screen",
         does: "Makes a hidden product visible and reservable on the public site.",
         effects: [
           "The product appears in the public catalogue, in search and on its own page within about a minute.",
           "It is a deliberate, separate action: the edit form in the Products screen cannot change a product's visibility.",
           "The drawer gathers everything that needs doing beforehand: counted stock, purchase cost if any, real selling price. Careful: the “Activate product” box is ticked by default when the drawer opens — untick it if those points are not settled yet.",
-          "There is no reverse box: once online, no button can hide the product again (only deletion removes it from the site).",
+          "The reverse also exists: the eye icon on the Products screen hides an online product at any time (and republishes it) — each switch is recorded in the audit log.",
         ],
         severity: "caution",
         audited: true,
@@ -263,9 +263,9 @@ export const sections: TutoSection[] = [
     ],
     gotchas: [
       "Many imported sheets show a temporary price of 100 pesos set when the catalogue was loaded. Replace it with the real selling price before featuring the product or putting it online.",
-      "A product created from this screen is online immediately: have the real price and the right stock ready BEFORE clicking “Create product”.",
-      "The “Status” column shows the stock state (Normal / Low stock / Out of stock), not the product's visibility: a product hidden from the public appears in the list with no distinguishing mark.",
-      "There is no button to hide a product that is online: only (permanent) deletion removes it from the site. Going online, on the other hand, happens from the Stock screen (“Initialize this product” drawer).",
+      "A product created from this screen is born OFFLINE: it stays invisible to the public until it is published (eye icon in the list or stock initialization). Still, have the real price and the right stock ready before publishing it.",
+      "The “Status” column shows the stock state (Normal / Low stock / Out of stock). Visibility is shown separately: an offline product carries an “Offline” pill and its row is dimmed.",
+      "The eye icon on each row publishes or re-hides the product at any time (each switch is recorded in the audit log). Going online can also be done from the Stock screen (“Initialize this product” drawer).",
       "The form accepts only ONE photo, in PNG format. Uploading a new one erases all the sheet's existing photos — including imported sheets that had several.",
       "Editing the stock from the sheet records neither purchase cost nor invoice: the accounting (margins, 606 register) stays blind to those units. For a real delivery, use “Stock entry” in the Stock screen.",
       "The list search is accent-sensitive and looks at the name and description (not an internal reference, despite the “SKU” mention in the field).",

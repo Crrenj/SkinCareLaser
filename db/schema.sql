@@ -1972,7 +1972,7 @@ CREATE TABLE IF NOT EXISTS "public"."products" (
     "price" numeric(10,2) NOT NULL,
     "currency" character(3) DEFAULT 'DOP'::"bpchar",
     "stock" integer DEFAULT 0,
-    "is_active" boolean DEFAULT true,
+    "is_active" boolean DEFAULT false,
     "created_at" timestamp with time zone DEFAULT "now"(),
     "updated_at" timestamp with time zone DEFAULT "now"(),
     "volume" "text",

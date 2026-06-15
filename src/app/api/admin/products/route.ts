@@ -136,6 +136,12 @@ export async function POST(req: NextRequest) {
         ...productData,
         currency: DEFAULT_CURRENCY,
         range_id: effectiveRangeId,
+        // Flow de lancement (2026-06-12) : un produit naît HORS LIGNE. La
+        // publication est une action explicite auditée (toggle œil de
+        // /admin/product → route /active, ou drawer init inventaire) — jamais
+        // un effet de bord de la création. Doublonne le défaut DB (défense
+        // en profondeur).
+        is_active: false,
       })
       .select()
       .single()

@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Pencil, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Pencil, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { AdminPagination } from '@/components/admin/dashboard/AdminPagination'
 import type { Product, Tag, TagType } from '../_lib/types'
@@ -12,6 +12,8 @@ type ProductsTableProps = {
   tagTypes: TagType[]
   onEdit: (product: Product) => void
   onDelete: (id: string) => void
+  /** Publier/masquer du site (route dédiée auditée /active — barrière L-3). */
+  onToggleActive: (product: Product) => void
   page: number
   totalPages: number
   onPageChange: (page: number) => void
@@ -25,6 +27,7 @@ export function ProductsTable({
   tagTypes,
   onEdit,
   onDelete,
+  onToggleActive,
   page,
   totalPages,
   onPageChange,
@@ -85,7 +88,7 @@ export function ProductsTable({
                       : stockState === 'out'
                         ? 'bg-[rgba(139,58,46,0.04)]'
                         : ''
-                  }`}
+                  } ${product.is_active ? '' : 'opacity-60'}`}
                 >
                   <td className="px-4 py-3 align-middle">
                     <div className="flex items-center gap-3 min-w-0">
@@ -166,10 +169,37 @@ export function ProductsTable({
                     </span>
                   </td>
                   <td className="px-4 py-3 align-middle text-right">
-                    <StockPill state={stockState} tStock={tStock} />
+                    <span className="inline-flex flex-col items-end gap-1">
+                      <StockPill state={stockState} tStock={tStock} />
+                      {!product.is_active && (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-ink-500/12 text-ink-700">
+                          <EyeOff className="w-3 h-3" aria-hidden />
+                          {t('offlinePill')}
+                        </span>
+                      )}
+                    </span>
                   </td>
                   <td className="px-4 py-3 align-middle">
-                    <div className="flex gap-1 justify-end opacity-60 group-hover:opacity-100 transition-opacity">
+                    {/* Sur une ligne hors ligne, le <tr> est déjà opacity-60 :
+                        on NE recompose PAS l'opacité ici (0.6×0.6=0.36 → icônes
+                        illisibles). Actions à pleine opacité, la ligne porte la
+                        teinte. Lignes actives : ghost-au-repos habituel. */}
+                    <div
+                      className={`flex gap-1 justify-end transition-opacity ${
+                        product.is_active ? 'opacity-60 group-hover:opacity-100' : 'opacity-100'
+                      }`}
+                    >
+                      <RowAction
+                        label={t('toggleActiveAria', { name: product.name })}
+                        title={product.is_active ? t('toggleHideTitle') : t('toggleShowTitle')}
+                        onClick={() => onToggleActive(product)}
+                      >
+                        {product.is_active ? (
+                          <Eye className="w-3.5 h-3.5" />
+                        ) : (
+                          <EyeOff className="w-3.5 h-3.5" />
+                        )}
+                      </RowAction>
                       <RowAction
                         label={t('editAria', { name: product.name })}
                         title={t('editTitle')}

@@ -1791,7 +1791,14 @@
       "deleteAria": "Supprimer {name}",
       "deleteTitle": "Supprimer",
       "deleteConfirmTitle": "Supprimer le produit",
-      "deleteConfirmBody": "Ce produit sera supprimé du catalogue. Vous pourrez le recréer manuellement."
+      "deleteConfirmBody": "Ce produit sera supprimé du catalogue. Vous pourrez le recréer manuellement.",
+      "offlinePill": "Hors ligne",
+      "toggleShowTitle": "Publier sur le site",
+      "toggleHideTitle": "Masquer du site",
+      "toggleActiveAria": "Changer la visibilité de {name}",
+      "activatedToast": "« {name} » est maintenant visible sur le site.",
+      "deactivatedToast": "« {name} » est masqué du site.",
+      "createdInactive": "Produit créé hors ligne — initialisez son stock (page Stock) ou publiez-le avec l’icône œil."
     },
     "marques": {
       "title": "Marques",
