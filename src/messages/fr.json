@@ -1649,7 +1649,7 @@
         "slugLabel": "Slug",
         "imageLabel": "Image (PNG)",
         "descriptionLabel": "Description courte",
-        "sectionInventory": "Inventaire",
+        "sectionInventory": "Prix",
         "priceLabel": "PVP (DOP)",
         "stockLabel": "Stock",
         "sectionBrandRange": "Marque et gamme",
@@ -1658,7 +1658,8 @@
         "rangeLabel": "Gamme",
         "rangePlaceholder": "Sélectionner une gamme",
         "submitCreate": "Créer le produit",
-        "tagsHeading": "Tags du produit"
+        "tagsHeading": "Tags du produit",
+        "stockManagedNote": "Le stock se gère sur l'écran Stock (réception, ajustement, initialisation). Un nouveau produit démarre à 0."
       },
       "brand": {
         "eyebrowNew": "Marques · nouvelle",

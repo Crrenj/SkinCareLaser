@@ -87,5 +87,17 @@ export function useProductsData({ page, search }: Args) {
     refreshProducts()
   }, [refreshProducts])
 
-  return { products, brands, tags, tagTypes, loading, totalPages, lowStockThreshold, refreshProducts }
+  /**
+   * Patch LOCAL d'un produit déjà chargé (mise à jour optimiste) — sans
+   * re-fetch ni spinner. Utilisé par le toggle de visibilité : seule la ligne
+   * concernée bascule, la table ne « se réinitialise » plus.
+   */
+  const patchProductLocal = useCallback((id: string, patch: Partial<Product>) => {
+    setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)))
+  }, [])
+
+  return {
+    products, brands, tags, tagTypes, loading, totalPages, lowStockThreshold,
+    refreshProducts, patchProductLocal,
+  }
 }

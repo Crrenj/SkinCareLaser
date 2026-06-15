@@ -8,17 +8,18 @@ import { productCreate, productUpdate, cartItemBody } from '@/lib/schemas'
  *  - C-13 / C-28 : cap quantité panier 1..99.
  */
 describe('productCreate (mass-assignment — C-09)', () => {
-  const valid = { name: 'Crème', slug: 'creme', price: 100, stock: 5 }
+  const valid = { name: 'Crème', slug: 'creme', price: 100 }
 
   it('accepte une charge légitime', () => {
     const r = productCreate.safeParse(valid)
     expect(r.success).toBe(true)
   })
 
-  it('retire les clés hors-schéma (is_active, is_featured, old_price, currency, id, created_at)', () => {
+  it('retire les clés hors-schéma (is_active, stock, is_featured, old_price, currency, id, created_at)', () => {
     const r = productCreate.safeParse({
       ...valid,
       is_active: true,
+      stock: 5, // géré uniquement sur l'écran Stock — strippé ici
       is_featured: true,
       old_price: 1,
       currency: 'USD',
@@ -29,20 +30,20 @@ describe('productCreate (mass-assignment — C-09)', () => {
     if (!r.success) return
     // Les champs injectés ne survivent PAS dans data → la route les ignore.
     expect(r.data).not.toHaveProperty('is_active')
+    expect(r.data).not.toHaveProperty('stock')
     expect(r.data).not.toHaveProperty('is_featured')
     expect(r.data).not.toHaveProperty('old_price')
     expect(r.data).not.toHaveProperty('currency')
     expect(r.data).not.toHaveProperty('id')
     expect(r.data).not.toHaveProperty('created_at')
-    expect(Object.keys(r.data).sort()).toEqual(['name', 'price', 'slug', 'stock'])
+    expect(Object.keys(r.data).sort()).toEqual(['name', 'price', 'slug'])
   })
 
   it('rejette les champs requis manquants ou invalides', () => {
-    expect(productCreate.safeParse({ slug: 'x', price: 1, stock: 1 }).success).toBe(false) // name
-    expect(productCreate.safeParse({ name: 'x', price: 1, stock: 1 }).success).toBe(false) // slug
-    expect(productCreate.safeParse({ name: 'x', slug: '', price: 1, stock: 1 }).success).toBe(false) // slug vide
+    expect(productCreate.safeParse({ slug: 'x', price: 1 }).success).toBe(false) // name
+    expect(productCreate.safeParse({ name: 'x', price: 1 }).success).toBe(false) // slug
+    expect(productCreate.safeParse({ name: 'x', slug: '', price: 1 }).success).toBe(false) // slug vide
     expect(productCreate.safeParse({ ...valid, price: -1 }).success).toBe(false) // prix négatif
-    expect(productCreate.safeParse({ ...valid, stock: 1.5 }).success).toBe(false) // stock non-entier
   })
 })
 

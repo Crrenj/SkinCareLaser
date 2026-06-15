@@ -153,7 +153,7 @@ export function ProductFormModal({
               </div>
             </div>
 
-            {/* Prix & stock */}
+            {/* Prix (le stock se gère sur l'écran Stock — voir la note) */}
             <div className="bg-sand-50 border border-sand-200 rounded-xl p-[18px] pb-[6px] mb-[14px]">
               <div className="font-serif text-[17px] text-ink-900 mb-3">{t('sectionInventory')}</div>
               <div className="grid grid-cols-2 gap-3 mb-[14px]">
@@ -172,21 +172,8 @@ export function ProductFormModal({
                     className={inputCls}
                   />
                 </div>
-                <div className="flex flex-col gap-[6px]">
-                  <label htmlFor="product-stock" className={labelCls}>
-                    {t('stockLabel')} <span className="text-brick-600 ml-1">{tc('required')}</span>
-                  </label>
-                  <input
-                    id="product-stock"
-                    type="number"
-                    required
-                    min="0"
-                    value={form.stock}
-                    onChange={(e) => onFormChange({ ...form, stock: parseInt(e.target.value, 10) })}
-                    className={inputCls}
-                  />
-                </div>
               </div>
+              <p className="text-[11.5px] leading-[1.5] text-ink-500 mb-[14px]">{t('stockManagedNote')}</p>
             </div>
 
             {/* Marque et gamme */}

@@ -22,8 +22,10 @@ export default function ProductPage() {
   const tCommon = useTranslations('Admin.common')
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const { products, brands, tags, tagTypes, loading, totalPages, lowStockThreshold, refreshProducts } =
-    useProductsData({ page: currentPage, search: searchTerm })
+  const {
+    products, brands, tags, tagTypes, loading, totalPages, lowStockThreshold,
+    refreshProducts, patchProductLocal,
+  } = useProductsData({ page: currentPage, search: searchTerm })
 
   // Filet : si la page courante dépasse (ex. suppression du dernier produit
   // de la dernière page), on redescend sur la dernière page valide — sinon
@@ -49,7 +51,6 @@ export default function ProductPage() {
         slug: product.slug,
         description: product.description || '',
         price: product.price,
-        stock: product.stock,
         brand_id: product.brand?.id || '',
         range_id: product.range_id || '',
         imageFile: null,
@@ -101,6 +102,10 @@ export default function ProductPage() {
     if (togglingIds.current.has(product.id)) return
     togglingIds.current.add(product.id)
     const next = !product.is_active
+    // Mise à jour OPTIMISTE : la ligne bascule immédiatement, aucun re-fetch
+    // ni spinner (fini la « réinitialisation » de toute la table). Rollback
+    // si l'API échoue.
+    patchProductLocal(product.id, { is_active: next })
     try {
       const res = await fetch(`/api/admin/products/${product.id}/active`, {
         method: 'PATCH',
@@ -108,13 +113,14 @@ export default function ProductPage() {
         body: JSON.stringify({ is_active: next }),
       })
       if (!res.ok) {
+        patchProductLocal(product.id, { is_active: product.is_active })
         const error = await res.json()
         toast.error(`${tCommon('saveError')}: ${error.error ?? res.status}`)
         return
       }
       toast.success(t(next ? 'activatedToast' : 'deactivatedToast', { name: product.name }))
-      refreshProducts()
     } catch (error) {
+      patchProductLocal(product.id, { is_active: product.is_active })
       logger.error('Erreur activation produit:', error)
       toast.error(tCommon('saveError'))
     } finally {

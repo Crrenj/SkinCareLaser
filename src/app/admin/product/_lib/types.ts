@@ -46,12 +46,14 @@ export interface Product {
   tags?: Tag[]
 }
 
+// `stock` ABSENT du form : le stock se gère exclusivement sur l'écran Stock
+// (réception/ajustement/init/perte, avec coût). Le formulaire produit ne le
+// touche jamais — cf. productCreate/productUpdate (strip Zod, invariant testé).
 export interface ProductFormState {
   name: string
   slug: string
   description: string
   price: number
-  stock: number
   brand_id: string
   range_id: string
   imageFile: string | null
@@ -63,7 +65,6 @@ export const INITIAL_PRODUCT_FORM: ProductFormState = {
   slug: '',
   description: '',
   price: 0,
-  stock: 0,
   brand_id: '',
   range_id: '',
   imageFile: null,

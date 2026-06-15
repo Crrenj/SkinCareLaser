@@ -1649,7 +1649,7 @@
         "slugLabel": "Slug",
         "imageLabel": "Image (PNG)",
         "descriptionLabel": "Short description",
-        "sectionInventory": "Inventory",
+        "sectionInventory": "Price",
         "priceLabel": "Price (DOP)",
         "stockLabel": "Stock",
         "sectionBrandRange": "Brand & range",
@@ -1658,7 +1658,8 @@
         "rangeLabel": "Range",
         "rangePlaceholder": "Select range",
         "submitCreate": "Create product",
-        "tagsHeading": "Product tags"
+        "tagsHeading": "Product tags",
+        "stockManagedNote": "Stock is managed on the Stock screen (reception, adjustment, initialization). A new product starts at 0."
       },
       "brand": {
         "eyebrowNew": "Brands · new",

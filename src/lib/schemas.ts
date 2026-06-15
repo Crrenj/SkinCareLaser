@@ -319,25 +319,30 @@ export const reservationCreate = z.object({
 // mass-assignment (is_active/is_featured/old_price/currency/id/created_at…). [C-09]
 // brand_id/range_id restent `string` (le form envoie '' quand non sélectionné ;
 // la route normalise '' → null, et la FK DB valide l'UUID).
+// NB : `stock` est VOLONTAIREMENT absent (comme `is_active`). Le stock se gère
+// uniquement sur l'écran Stock (réception → CMP, ajustement, initialisation,
+// perte) — le strip Zod garantit que le formulaire produit ne peut pas
+// l'écraser (ce qui désynchroniserait le coût moyen pondéré). Un produit créé
+// démarre à stock 0 (défaut DB) + hors ligne. Invariant testé (schemas.test).
 export const productCreate = z.object({
   name: z.string().trim().min(1, 'name requis').max(300),
   slug: z.string().trim().min(1, 'slug requis').max(300),
   description: z.string().max(5000).optional(),
   price: z.number().nonnegative('Prix invalide'),
-  stock: z.number().int().min(0, 'Stock invalide'),
   brand_id: z.string().optional(),
   range_id: z.string().nullish(),
   imageFile: z.string().optional(),
   selectedTags: z.array(z.string().uuid()).optional(),
 })
 
-// PATCH : mêmes champs, tous optionnels (mise à jour partielle).
+// PATCH : mêmes champs, tous optionnels (mise à jour partielle). `stock` exclu
+// au même titre que `is_active` — le stock ne se modifie QUE via l'écran Stock
+// (route /api/admin/stock + RPC qui tracent le coût). Invariant testé.
 export const productUpdate = z.object({
   name: z.string().trim().min(1).max(300).optional(),
   slug: z.string().trim().min(1).max(300).optional(),
   description: z.string().max(5000).optional(),
   price: z.number().nonnegative().optional(),
-  stock: z.number().int().min(0).optional(),
   brand_id: z.string().optional(),
   range_id: z.string().nullish(),
   imageFile: z.string().optional(),
