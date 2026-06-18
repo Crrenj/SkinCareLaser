@@ -83,7 +83,7 @@ export const sections: TutoSection[] = [
       {
         n: 7,
         label: "El panel de detalle",
-        desc: "Datos de contacto del cliente, lista de productos con sus precios (bloqueados: la venta ya está contabilizada), total, nota interna con guardado automático, botón de WhatsApp y enlace de anulación abajo.",
+        desc: "Datos de contacto del cliente, lista de productos con sus precios (bloqueados: la venta ya está contabilizada), total, nota interna con guardado automático, botón de WhatsApp, botón « Imprimir recibo » (venta entregada) y enlace de anulación abajo.",
       },
     ],
     workflows: [
@@ -101,6 +101,10 @@ export const sections: TutoSection[] = [
           {
             title: "Añada los productos",
             body: "Escriba al menos dos letras y haga clic en el producto: se añade al precio actual (promociones incluidas). Ajuste precio y cantidad línea por línea si hace falta, o añada una « Línea libre » para un artículo fuera de catálogo.",
+          },
+          {
+            title: "Aplique la tarifa de empleado si hace falta (opcional)",
+            body: "Si hay un descuento de empleado configurado en Configuración, aparece una casilla « Aplicar tarifa de empleado (−X %) » al pie del panel. Márquela para una compra del personal: la vista previa del total se actualiza, y el precio realmente facturado se recalcula del lado del servidor al validar.",
           },
           {
             title: "Valide con « Registrar venta »",
@@ -163,12 +167,27 @@ export const sections: TutoSection[] = [
           "Los precios ingresados en el panel se guardan tal cual y se vuelven definitivos: ningún ajuste de precio es posible después de validar.",
           "Si eligió « Cuenta existente » o « Crear cuenta », la venta queda vinculada a la cuenta del cliente y entra en su historial en el sitio.",
           "El botón permanece en gris mientras no haya al menos un producto válido; en modo venta, la identidad « Anónimo » es suficiente.",
+          "Si la casilla « tarifa de empleado » está marcada (venta mostrador, tasa configurada en Configuración), se aplica el descuento: el precio de cada línea y el total se recalculan del lado del servidor según la tasa registrada (nunca según el navegador).",
         ],
         severity: "caution",
         undo: "Anule la venta desde el registro: el stock se vuelve a acreditar y la venta sale de los ingresos (la línea anulada sigue visible en Reservas › Canceladas).",
         audited: true,
         publicImpact: "La disponibilidad mostrada de los productos baja en el sitio; si la venta está ligada a una cuenta, el cliente la ve en su historial de compras (pestaña « Compras » de su cuenta).",
         accountingImpact: "Entra de inmediato en los ingresos del día y del mes (tarjetas de arriba y pantalla Contabilidad), con el margen calculado sobre el costo fijado.",
+      },
+      {
+        label: "« Imprimir recibo »",
+        where: "Panel de detalle de una venta — botón visible únicamente para una venta con estado « Entregada »",
+        does: "Abre en una pestaña nueva un recibo de retiro imprimible (o que se puede guardar en PDF desde el navegador).",
+        effects: [
+          "El recibo retoma el encabezado de la farmacia (nombre, dirección de retiro, contacto), la referencia FAR-…, la fecha de retiro, el cliente, los productos con cantidades y precios, y el total.",
+          "Es un documento NO FISCAL: no lleva NCF y no sustituye una factura fiscal (FARMAU todavía no emite comprobante fiscal).",
+          "Ningún costo de compra ni ningún margen aparece nunca en el recibo — es un documento destinado al cliente.",
+          "El botón solo existe para una venta ya entregada: una reserva no entregada no tiene recibo.",
+          "El recibo se regenera en cada clic, refleja los precios fijados de la venta y se muestra en el idioma actual del panel.",
+        ],
+        severity: "safe",
+        audited: true,
       },
       {
         label: "« Crear cuenta » (sección Cliente del panel de venta)",
@@ -299,6 +318,8 @@ export const sections: TutoSection[] = [
       "Las tarjetas de ingresos se basan en la fecha de retiro: una venta entregada el mes pasado no cuenta en « Ingresos del mes », aunque siga listada más abajo.",
       "Una venta anónima no tiene ni nombre ni teléfono: no hay botón de WhatsApp y solo se identifica por su referencia FAR-…. Anote la referencia si el cliente quiere un seguimiento.",
       "El enlace de anulación al pie del panel se titula « Cancelar reserva » (etiqueta compartida con la pantalla Reservas), pero la confirmación habla claramente de « Anular venta »: es la misma acción.",
+      "El botón « Imprimir recibo » solo aparece en una venta entregada. El recibo es NO FISCAL (sin NCF) y nunca muestra el costo de compra ni el margen: es un documento para el cliente.",
+      "La casilla « tarifa de empleado » del panel de venta solo aparece si hay una tasa configurada en Configuración, y únicamente para una venta en mostrador. El precio facturado se recalcula en el servidor según la tasa registrada — la vista previa del panel es solo indicativa.",
     ],
   },
 ]

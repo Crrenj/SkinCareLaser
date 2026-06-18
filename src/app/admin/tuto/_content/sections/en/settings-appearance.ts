@@ -7,7 +7,7 @@ export const sections: TutoSection[] = [
     title: "Shop & reservations — contact details and pickup point",
     route: "/admin/settings",
     intro:
-      "This screen gathers the shop's official information: the name and tagline (saved, but with no visible effect on the site for now), the contact details (email, phone, WhatsApp number) and the pickup point for reservations (name, address, hours, phone). These values feed the footer, the Contact page, the Pharmacy page, the About page, the confirmation page, the confirmation email sent to the customer and the pre-filled WhatsApp links. Important: the shop works with free pharmacy pickup only — there is no paid delivery, so there are no delivery rates to set here.",
+      "This screen gathers the shop's official information: the name and tagline (saved, but with no visible effect on the site for now), the contact details (email, phone, WhatsApp number) and the pickup point for reservations (name, address, hours, phone). These values feed the footer, the Contact page, the Pharmacy page, the About page, the confirmation page, the confirmation email sent to the customer and the pre-filled WhatsApp links. Important: the shop works with free pharmacy pickup only — there is no paid delivery, so there are no delivery rates to set here. An employee discount (in %) is set here too: applied by hand during a counter sale and shown to the whole team in the admin banner.",
     mockup: {
       rows: [
         {
@@ -33,6 +33,11 @@ export const sections: TutoSection[] = [
         {
           blocks: [
             { w: 12, kind: "input", label: "Pickup point: name · full address · hours · pharmacy phone", hotspot: 4 },
+          ],
+        },
+        {
+          blocks: [
+            { w: 12, kind: "input", label: "Staff: employee discount (%) applied at the counter", hotspot: 7 },
           ],
         },
         {
@@ -75,6 +80,11 @@ export const sections: TutoSection[] = [
         label: "“Save” button",
         desc: "Saves all the fields on the screen at once. The shop name must be filled in and the contact email must be a valid address, otherwise an error message appears and nothing is saved.",
       },
+      {
+        n: 7,
+        label: "“Employee discount” field",
+        desc: "“Staff” section: a percentage (0 to 100) reserved for staff. As soon as it goes above 0, a “Staff promo · −X%” band appears at the top of every admin page, and an “employee discount” box becomes available at the counter sale. At 0, no discount and the band disappears. This discount never touches the public catalogue prices.",
+      },
     ],
     workflows: [
       {
@@ -111,12 +121,29 @@ export const sections: TutoSection[] = [
           },
         ],
       },
+      {
+        title: "Set a discount for staff",
+        steps: [
+          {
+            title: "Enter the rate",
+            body: "In the “Staff” section, enter the employee discount percentage (for example 15). Set it to 0 to disable it.",
+          },
+          {
+            title: "Save",
+            body: "Click “Save” in the bottom bar.",
+          },
+          {
+            title: "Check",
+            body: "A “Staff promo · −X%” band appears at the top of the admin (visible to the whole team), and on the Sales screen an “employee discount” box is now offered during a counter sale.",
+          },
+        ],
+      },
     ],
     actions: [
       {
         label: "Save",
         where: "Dark bar at the bottom of the screen (it only appears if a field has been changed)",
-        does: "Saves the screen's ten fields at once: name, tagline, email, phone, WhatsApp number, the four pickup point details and the low-stock threshold.",
+        does: "Saves the screen's eleven fields at once: name, tagline, email, phone, WhatsApp number, the four pickup point details, the low-stock threshold and the employee discount.",
         effects: [
           "All values are saved together in the database (there is only one shop record).",
           "The public site picks up the new values within a few minutes at most: footer, Contact page, Pharmacy page, About page, confirmation page.",
@@ -128,6 +155,21 @@ export const sections: TutoSection[] = [
         undo: "Re-enter the old values and save again. They are not kept anywhere else: write them down before a big change.",
         audited: true,
         publicImpact: "The contact details and the pickup point change for all site visitors, within a few minutes at most.",
+      },
+      {
+        label: "Employee discount (%)",
+        where: "“Staff” section — numeric field (0 to 100), saved with the “Save” button",
+        does: "Sets the discount rate reserved for staff, applied manually during a counter sale.",
+        effects: [
+          "The rate (0 to 100) is saved in the shop record along with the other settings.",
+          "As soon as it goes above 0, a “Staff promo · −X%” band shows at the top of ALL admin pages, visible to the whole team, with a link to this setting.",
+          "On the Sales screen, an “employee discount” box becomes available: ticked during a counter sale, it applies this rate (price recomputed on the server).",
+          "At 0, no discount is possible and the band disappears.",
+          "This rate NEVER applies automatically to the public catalogue prices: it is an internal counter tool.",
+        ],
+        severity: "caution",
+        audited: true,
+        accountingImpact: "A counter sale with the employee discount enters revenue at its discounted amount — the margin is reduced accordingly.",
       },
       {
         label: "Cancel",
@@ -150,6 +192,8 @@ export const sections: TutoSection[] = [
       "Nothing is saved while the dark “Unsaved changes” bar is visible: if you leave the page before clicking “Save”, everything is lost.",
       "The old values are not kept: the activity log records what was changed and by whom, but not the previous values. Write them down before an important change.",
       "Allow a few minutes before seeing the changes on the public site: pages refresh automatically, but not instantly.",
+      "The employee discount is an INTERNAL tool: it never lowers the public catalogue prices and only applies at the counter, by ticking a box, by hand.",
+      "The “Staff promo · −X%” band is visible to all administrators (it lives in the admin banner); it disappears as soon as the rate goes back to 0.",
     ],
   },
   {

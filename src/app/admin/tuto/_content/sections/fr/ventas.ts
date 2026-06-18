@@ -83,7 +83,7 @@ export const sections: TutoSection[] = [
       {
         n: 7,
         label: "Le tiroir de détail",
-        desc: "Coordonnées du client, liste des produits avec leurs prix (verrouillés : la vente est déjà comptabilisée), total, note interne à enregistrement automatique, bouton WhatsApp et lien d'annulation en bas.",
+        desc: "Coordonnées du client, liste des produits avec leurs prix (verrouillés : la vente est déjà comptabilisée), total, note interne à enregistrement automatique, bouton WhatsApp, bouton « Imprimer le reçu » (vente remise) et lien d'annulation en bas.",
       },
     ],
     workflows: [
@@ -101,6 +101,10 @@ export const sections: TutoSection[] = [
           {
             title: "Ajoutez les produits",
             body: "Tapez au moins deux lettres et cliquez le produit : il s'ajoute au prix actuel (promotions comprises). Ajustez prix et quantité ligne par ligne si besoin, ou ajoutez une « Ligne libre » pour un article hors catalogue.",
+          },
+          {
+            title: "Appliquez le tarif employé si besoin (facultatif)",
+            body: "Si une remise employé est configurée dans Paramètres, une case « Appliquer le tarif employé (−X %) » apparaît en bas du tiroir. Cochez-la pour un achat du personnel : l'aperçu du total se met à jour, et le prix réellement facturé est recalculé côté serveur à la validation.",
           },
           {
             title: "Validez avec « Enregistrer la vente »",
@@ -163,12 +167,27 @@ export const sections: TutoSection[] = [
           "Les prix saisis dans le tiroir sont enregistrés tels quels et deviennent définitifs : aucun ajustement de prix possible après validation.",
           "Si vous avez choisi « Compte existant » ou « Créer un compte », la vente est rattachée au compte du client et entre dans son historique sur le site.",
           "Le bouton reste grisé tant qu'il n'y a pas au moins un produit valide ; en mode vente, l'identité « Anonyme » suffit.",
+          "Si la case « tarif employé » est cochée (vente comptoir, taux réglé dans Paramètres), la remise est appliquée : le prix de chaque ligne et le total sont recalculés côté serveur d'après le taux enregistré (jamais d'après le navigateur).",
         ],
         severity: "caution",
         undo: "Annulez la vente depuis le journal : le stock est re-crédité et elle sort du chiffre d'affaires (la ligne annulée reste visible dans Réservations › Annulées).",
         audited: true,
         publicImpact: "La disponibilité affichée des produits baisse sur le site ; si la vente est liée à un compte, le client la voit dans son historique d'achats (onglet « Achats » de son compte).",
         accountingImpact: "Entre immédiatement dans le chiffre d'affaires du jour et du mois (cartes du haut et écran Comptabilité), avec la marge calculée sur le coût figé.",
+      },
+      {
+        label: "« Imprimer le reçu »",
+        where: "Tiroir de détail d'une vente — bouton visible uniquement pour une vente au statut « Remise »",
+        does: "Ouvre dans un nouvel onglet un reçu de retrait imprimable (ou à enregistrer en PDF depuis le navigateur).",
+        effects: [
+          "Le reçu reprend l'en-tête de la pharmacie (nom, adresse de retrait, contact), la référence FAR-…, la date de retrait, le client, les produits avec quantités et prix, et le total.",
+          "C'est un document NON FISCAL : il ne porte pas de NCF et ne remplace pas une facture fiscale (FARMAU n'émet pas encore de comprobante fiscal).",
+          "Aucun coût d'achat ni aucune marge n'apparaît jamais sur le reçu — c'est un document destiné au client.",
+          "Le bouton n'existe que pour une vente déjà remise : une réservation non remise n'a pas de reçu.",
+          "Le reçu est régénéré à chaque clic, reflète les prix figés de la vente, et s'affiche dans la langue en cours du panneau.",
+        ],
+        severity: "safe",
+        audited: true,
       },
       {
         label: "« Créer un compte » (volet Client du tiroir de vente)",
@@ -299,6 +318,8 @@ export const sections: TutoSection[] = [
       "Les cartes de chiffre d'affaires se basent sur la date de retrait : une vente remise le mois dernier ne compte pas dans « CA ce mois », même si elle est encore listée plus bas.",
       "Une vente anonyme n'a ni nom ni téléphone : pas de bouton WhatsApp, et elle n'est identifiable que par sa référence FAR-…. Notez la référence si le client veut un suivi.",
       "Le lien d'annulation en bas du tiroir s'intitule « Annuler la réservation » (libellé partagé avec l'écran Réservations), mais la confirmation parle bien d'« Annuler la vente » : c'est la même action.",
+      "Le bouton « Imprimer le reçu » n'apparaît que sur une vente remise. Le reçu est NON FISCAL (sans NCF) et ne montre jamais le coût d'achat ni la marge : c'est un document client.",
+      "La case « tarif employé » du tiroir de vente n'apparaît que si un taux est réglé dans Paramètres, et seulement pour une vente comptoir. Le prix facturé est recalculé sur le serveur d'après le taux enregistré — l'aperçu du tiroir est seulement indicatif.",
     ],
   },
 ]

@@ -7,7 +7,7 @@ export const sections: TutoSection[] = [
     title: "Tienda y reservas — datos de contacto y punto de retiro",
     route: "/admin/settings",
     intro:
-      "Esta pantalla reúne la información oficial de la tienda: el nombre y el lema (se guardan, pero por ahora no tienen efecto visible en el sitio), los datos de contacto (email, teléfono, número de WhatsApp) y el punto de retiro de las reservas (nombre, dirección, horarios, teléfono). Estos valores alimentan el pie de página, la página Contacto, la página Farmacia, la página « Acerca de », la página de confirmación, el email de confirmación enviado al cliente y los enlaces de WhatsApp prellenados. Importante: la tienda funciona únicamente con retiro en farmacia, gratuito — no existe ninguna entrega pagada, así que aquí no hay ninguna tarifa de envío que configurar.",
+      "Esta pantalla reúne la información oficial de la tienda: el nombre y el lema (se guardan, pero por ahora no tienen efecto visible en el sitio), los datos de contacto (email, teléfono, número de WhatsApp) y el punto de retiro de las reservas (nombre, dirección, horarios, teléfono). Estos valores alimentan el pie de página, la página Contacto, la página Farmacia, la página « Acerca de », la página de confirmación, el email de confirmación enviado al cliente y los enlaces de WhatsApp prellenados. Importante: la tienda funciona únicamente con retiro en farmacia, gratuito — no existe ninguna entrega pagada, así que aquí no hay ninguna tarifa de envío que configurar. También se configura aquí un descuento de empleado (en %): aplicado a mano durante una venta en mostrador y mostrado a todo el equipo en la banda de la administración.",
     mockup: {
       rows: [
         {
@@ -33,6 +33,11 @@ export const sections: TutoSection[] = [
         {
           blocks: [
             { w: 12, kind: "input", label: "Punto de retiro: nombre · dirección completa · horarios · teléfono farmacia", hotspot: 4 },
+          ],
+        },
+        {
+          blocks: [
+            { w: 12, kind: "input", label: "Personal: descuento de empleado (%) aplicado en el mostrador", hotspot: 7 },
           ],
         },
         {
@@ -75,6 +80,11 @@ export const sections: TutoSection[] = [
         label: "Botón « Guardar »",
         desc: "Guarda de una vez todos los campos de la pantalla. El nombre de la tienda debe estar lleno y el email de contacto debe ser una dirección válida; de lo contrario aparece un mensaje de error y no se guarda nada.",
       },
+      {
+        n: 7,
+        label: "Campo « Descuento de empleado »",
+        desc: "Sección « Personal »: un porcentaje (de 0 a 100) reservado al personal. En cuanto pasa de 0, aparece una banda « Promo empleados · −X % » en la parte superior de todas las páginas de la administración, y una casilla « tarifa de empleado » queda disponible en la venta de mostrador. A 0, ningún descuento y la banda desaparece. Este descuento nunca toca los precios del catálogo público.",
+      },
     ],
     workflows: [
       {
@@ -111,12 +121,29 @@ export const sections: TutoSection[] = [
           },
         ],
       },
+      {
+        title: "Configurar un descuento para el personal",
+        steps: [
+          {
+            title: "Ingresar la tasa",
+            body: "En la sección « Personal », escriba el porcentaje de descuento de empleado (por ejemplo 15). Ponga 0 para desactivarlo.",
+          },
+          {
+            title: "Guardar",
+            body: "Pulse « Guardar » en la barra inferior.",
+          },
+          {
+            title: "Verificar",
+            body: "Aparece una banda « Promo empleados · −X % » en la parte superior de la administración (visible para todo el equipo), y en la pantalla Ventas ahora se ofrece una casilla « tarifa de empleado » durante una venta en mostrador.",
+          },
+        ],
+      },
     ],
     actions: [
       {
         label: "Guardar",
         where: "Barra oscura en la parte inferior de la pantalla (solo aparece si un campo fue modificado)",
-        does: "Guarda de una vez los diez campos de la pantalla: nombre, lema, email, teléfono, número de WhatsApp, los cuatro datos del punto de retiro y el umbral de stock bajo.",
+        does: "Guarda de una vez los once campos de la pantalla: nombre, lema, email, teléfono, número de WhatsApp, los cuatro datos del punto de retiro, el umbral de stock bajo y el descuento de empleado.",
         effects: [
           "Todos los valores se guardan juntos en la base de datos (solo existe una ficha de tienda).",
           "El sitio público adopta los nuevos valores en unos minutos como máximo: pie de página, página Contacto, página Farmacia, página « Acerca de », página de confirmación.",
@@ -128,6 +155,21 @@ export const sections: TutoSection[] = [
         undo: "Vuelva a escribir los valores anteriores y guarde de nuevo. No se conservan en ningún otro lugar: anótelos antes de un cambio grande.",
         audited: true,
         publicImpact: "Los datos de contacto y el punto de retiro cambian para todos los visitantes del sitio, en unos minutos como máximo.",
+      },
+      {
+        label: "Descuento de empleado (%)",
+        where: "Sección « Personal » — campo numérico (de 0 a 100), guardado con el botón « Guardar »",
+        does: "Define la tasa de descuento reservada al personal, aplicada manualmente durante una venta en mostrador.",
+        effects: [
+          "La tasa (de 0 a 100) se guarda en la ficha de la tienda junto con los demás ajustes.",
+          "En cuanto pasa de 0, una banda « Promo empleados · −X % » se muestra en la parte superior de TODAS las páginas de la administración, visible para todo el equipo, con un enlace hacia este ajuste.",
+          "En la pantalla Ventas, una casilla « tarifa de empleado » queda disponible: marcada durante una venta en mostrador, aplica esta tasa (precio recalculado del lado del servidor).",
+          "A 0, ningún descuento es posible y la banda desaparece.",
+          "Esta tasa NUNCA se aplica automáticamente a los precios del catálogo público: es una herramienta interna de mostrador.",
+        ],
+        severity: "caution",
+        audited: true,
+        accountingImpact: "Una venta en mostrador con tarifa de empleado entra en los ingresos por su monto con descuento — el margen se reduce en consecuencia.",
       },
       {
         label: "Cancelar",
@@ -150,6 +192,8 @@ export const sections: TutoSection[] = [
       "Nada queda guardado mientras la barra oscura « Cambios sin guardar » esté visible: si cambia de página antes de pulsar « Guardar », todo se pierde.",
       "Los valores anteriores no se conservan: el registro de actividad anota qué se cambió y quién lo hizo, pero no los valores previos. Anótelos antes de un cambio importante.",
       "Cuente con unos minutos antes de ver los cambios en el sitio público: las páginas se actualizan automáticamente, pero no al instante.",
+      "El descuento de empleado es una herramienta INTERNA: nunca baja los precios del catálogo público y solo se aplica en el mostrador, marcando una casilla, a mano.",
+      "La banda « Promo empleados · −X % » es visible para todos los administradores (vive en la banda de la administración); desaparece en cuanto la tasa vuelve a 0.",
     ],
   },
   {

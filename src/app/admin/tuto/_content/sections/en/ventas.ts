@@ -83,7 +83,7 @@ export const sections: TutoSection[] = [
       {
         n: 7,
         label: "The detail drawer",
-        desc: "Customer contact details, list of products with their prices (locked: the sale is already recorded), total, internal note with auto-save, WhatsApp button and the void link at the bottom.",
+        desc: "Customer contact details, list of products with their prices (locked: the sale is already recorded), total, internal note with auto-save, WhatsApp button, a “Print receipt” button (collected sale) and the void link at the bottom.",
       },
     ],
     workflows: [
@@ -101,6 +101,10 @@ export const sections: TutoSection[] = [
           {
             title: "Add the products",
             body: "Type at least two letters and click the product: it is added at the current price (promotions included). Adjust price and quantity line by line if needed, or add a “Free line” for an off-catalogue item.",
+          },
+          {
+            title: "Apply the employee discount if needed (optional)",
+            body: "If an employee discount is configured in Settings, an “Apply employee discount (−X%)” checkbox appears at the bottom of the drawer. Tick it for a staff purchase: the total preview updates, and the price actually charged is recomputed on the server at confirmation.",
           },
           {
             title: "Confirm with “Record sale”",
@@ -163,12 +167,27 @@ export const sections: TutoSection[] = [
           "The prices entered in the drawer are saved as-is and become final: no price adjustment is possible after confirmation.",
           "If you chose “Existing account” or “Create account”, the sale is attached to the customer's account and enters their history on the site.",
           "The button stays greyed out until there is at least one valid product; in sale mode, the “Anonymous” identity is enough.",
+          "If the “employee discount” box is ticked (counter sale, rate set in Settings), the discount is applied: each line's price and the total are recomputed on the server from the saved rate (never from the browser).",
         ],
         severity: "caution",
         undo: "Void the sale from the journal: stock is credited back and it leaves revenue (the voided row remains visible in Reservations › Cancelled).",
         audited: true,
         publicImpact: "The displayed availability of the products drops on the site; if the sale is linked to an account, the customer sees it in their purchase history (the “Purchases” tab of their account).",
         accountingImpact: "Enters today's and this month's revenue immediately (top cards and the Accounting screen), with the margin computed on the frozen cost.",
+      },
+      {
+        label: "“Print receipt”",
+        where: "Sale detail drawer — button shown only for a sale with the “Collected” status",
+        does: "Opens a printable pickup receipt in a new tab (or one you can save as PDF from the browser).",
+        effects: [
+          "The receipt carries the pharmacy's header (name, pickup address, contact), the FAR-… reference, the pickup date, the customer, the products with quantities and prices, and the total.",
+          "It is a NON-FISCAL document: it carries no NCF and does not replace a tax invoice (FARMAU does not yet issue a comprobante fiscal).",
+          "No purchase cost and no margin ever appears on the receipt — it is a document meant for the customer.",
+          "The button only exists for a sale that is already collected: a sale that has not been collected has no receipt.",
+          "The receipt is regenerated on every click, reflects the sale's frozen prices, and shows in the panel's current language.",
+        ],
+        severity: "safe",
+        audited: true,
       },
       {
         label: "“Create account” (Customer pane of the sale drawer)",
@@ -299,6 +318,8 @@ export const sections: TutoSection[] = [
       "The revenue cards are based on the pickup date: a sale collected last month does not count towards “Revenue this month”, even if it is still listed below.",
       "An anonymous sale has no name and no phone: no WhatsApp button, and it can only be identified by its FAR-… reference. Write down the reference if the customer wants a follow-up.",
       "The void link at the bottom of the drawer is labelled “Cancel reservation” (a label shared with the Reservations screen), but the confirmation clearly says “Void sale”: it is the same action.",
+      "The “Print receipt” button only appears on a collected sale. The receipt is NON-FISCAL (no NCF) and never shows the purchase cost or the margin: it is a customer document.",
+      "The “employee discount” box in the sale drawer only appears if a rate is set in Settings, and only for a counter sale. The charged price is recomputed on the server from the saved rate — the drawer preview is only indicative.",
     ],
   },
 ]

@@ -7,7 +7,7 @@ export const sections: TutoSection[] = [
     title: "Boutique & réservation — coordonnées et point de retrait",
     route: "/admin/settings",
     intro:
-      "Cet écran regroupe les informations officielles de la boutique : le nom et l'accroche (enregistrés, mais sans effet visible sur le site pour l'instant), les coordonnées de contact (email, téléphone, numéro WhatsApp) et le point de retrait des réservations (nom, adresse, horaires, téléphone). Ces valeurs alimentent le pied de page, la page Contact, la page Pharmacie, la page À propos, la page de confirmation, l'email de confirmation envoyé au client et les liens WhatsApp pré-remplis. Important : la boutique fonctionne en retrait en pharmacie uniquement, gratuit — il n'existe aucune livraison payante, donc aucun tarif de livraison à régler ici.",
+      "Cet écran regroupe les informations officielles de la boutique : le nom et l'accroche (enregistrés, mais sans effet visible sur le site pour l'instant), les coordonnées de contact (email, téléphone, numéro WhatsApp) et le point de retrait des réservations (nom, adresse, horaires, téléphone). Ces valeurs alimentent le pied de page, la page Contact, la page Pharmacie, la page À propos, la page de confirmation, l'email de confirmation envoyé au client et les liens WhatsApp pré-remplis. Important : la boutique fonctionne en retrait en pharmacie uniquement, gratuit — il n'existe aucune livraison payante, donc aucun tarif de livraison à régler ici. Une remise employé (en %) s'y règle aussi : appliquée à la main lors d'une vente au comptoir et affichée à toute l'équipe dans le bandeau de l'admin.",
     mockup: {
       rows: [
         {
@@ -33,6 +33,11 @@ export const sections: TutoSection[] = [
         {
           blocks: [
             { w: 12, kind: "input", label: "Point de retrait : nom · adresse complète · horaires · téléphone pharmacie", hotspot: 4 },
+          ],
+        },
+        {
+          blocks: [
+            { w: 12, kind: "input", label: "Personnel : remise employé (%) appliquée au comptoir", hotspot: 7 },
           ],
         },
         {
@@ -75,6 +80,11 @@ export const sections: TutoSection[] = [
         label: "Bouton « Enregistrer »",
         desc: "Enregistre d'un coup tous les champs de l'écran. Le nom de la boutique doit être rempli et l'email de contact doit être une adresse valide, sinon un message d'erreur s'affiche et rien n'est enregistré.",
       },
+      {
+        n: 7,
+        label: "Champ « Remise employé »",
+        desc: "Section « Personnel » : un pourcentage (0 à 100) réservé au personnel. Dès qu'il dépasse 0, une bande « Promo employés · −X % » apparaît en haut de toutes les pages de l'admin, et une case « tarif employé » devient disponible à la vente comptoir. À 0, aucune remise et la bande disparaît. Cette remise ne touche jamais les prix du catalogue public.",
+      },
     ],
     workflows: [
       {
@@ -111,12 +121,29 @@ export const sections: TutoSection[] = [
           },
         ],
       },
+      {
+        title: "Régler une remise pour le personnel",
+        steps: [
+          {
+            title: "Saisir le taux",
+            body: "Dans la section « Personnel », entrez le pourcentage de remise employé (par exemple 15). Mettez 0 pour la désactiver.",
+          },
+          {
+            title: "Enregistrer",
+            body: "Cliquez « Enregistrer » dans la barre du bas.",
+          },
+          {
+            title: "Vérifier",
+            body: "Une bande « Promo employés · −X % » apparaît en haut de l'admin (visible par toute l'équipe), et à l'écran Ventes une case « tarif employé » est désormais proposée lors d'une vente comptoir.",
+          },
+        ],
+      },
     ],
     actions: [
       {
         label: "Enregistrer",
         where: "Barre sombre en bas de l'écran (elle n'apparaît que si un champ a été modifié)",
-        does: "Enregistre d'un coup les dix champs de l'écran : nom, accroche, email, téléphone, numéro WhatsApp, les quatre informations du point de retrait et le seuil de stock faible.",
+        does: "Enregistre d'un coup les onze champs de l'écran : nom, accroche, email, téléphone, numéro WhatsApp, les quatre informations du point de retrait, le seuil de stock faible et la remise employé.",
         effects: [
           "Toutes les valeurs sont enregistrées ensemble dans la base de données (il n'existe qu'une seule fiche boutique).",
           "Le site public reprend les nouvelles valeurs en quelques minutes au plus : pied de page, page Contact, page Pharmacie, page À propos, page de confirmation.",
@@ -128,6 +155,21 @@ export const sections: TutoSection[] = [
         undo: "Resaisissez les anciennes valeurs et enregistrez à nouveau. Elles ne sont pas conservées ailleurs : notez-les avant un gros changement.",
         audited: true,
         publicImpact: "Les coordonnées et le point de retrait changent pour tous les visiteurs du site, en quelques minutes au plus.",
+      },
+      {
+        label: "Remise employé (%)",
+        where: "Section « Personnel » — champ numérique (0 à 100), enregistré avec le bouton « Enregistrer »",
+        does: "Définit le taux de remise réservé au personnel, appliqué manuellement lors d'une vente au comptoir.",
+        effects: [
+          "Le taux (0 à 100) est enregistré dans la fiche boutique avec les autres réglages.",
+          "Dès qu'il dépasse 0, une bande « Promo employés · −X % » s'affiche en haut de TOUTES les pages de l'admin, visible par toute l'équipe, avec un lien vers ce réglage.",
+          "À l'écran Ventes, une case « tarif employé » devient disponible : cochée lors d'une vente comptoir, elle applique ce taux (prix recalculé côté serveur).",
+          "À 0, aucune remise n'est possible et la bande disparaît.",
+          "Ce taux ne s'applique JAMAIS automatiquement aux prix du catalogue public : c'est un outil interne de comptoir.",
+        ],
+        severity: "caution",
+        audited: true,
+        accountingImpact: "Une vente comptoir avec tarif employé entre dans le chiffre d'affaires à son montant remisé — la marge est réduite d'autant.",
       },
       {
         label: "Annuler",
@@ -150,6 +192,8 @@ export const sections: TutoSection[] = [
       "Rien n'est enregistré tant que la barre sombre « Modifications non enregistrées » est visible : si vous changez de page avant de cliquer « Enregistrer », tout est perdu.",
       "Les anciennes valeurs ne sont pas conservées : le journal d'audit enregistre ce qui a été changé et par qui, mais pas les valeurs précédentes. Notez-les avant un changement important.",
       "Comptez quelques minutes avant de voir les changements sur le site public : les pages se rafraîchissent automatiquement, mais pas instantanément.",
+      "La remise employé est un outil INTERNE : elle ne baisse jamais les prix du catalogue public et ne s'applique qu'au comptoir, en cochant une case, à la main.",
+      "La bande « Promo employés · −X % » est visible par tous les administrateurs (elle vit dans le bandeau de l'admin) ; elle disparaît dès que le taux repasse à 0.",
     ],
   },
   {
