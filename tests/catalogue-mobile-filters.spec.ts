@@ -60,6 +60,34 @@ test.describe('catalogue — pilule de filtres mobile', () => {
     expect(await topmostAtPillCenter(page)).toBe(true)
   })
 
+  test('sheet lisible (≥ 50% écran) avec catégories visibles, non effondré', async ({ page }) => {
+    await seedConsent(page)
+    await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
+    await page.getByRole('button', { name: 'Filtres', exact: true }).click()
+    await page.locator('dialog.farmau-sheet').waitFor({ state: 'visible' })
+
+    const m = await page.evaluate(() => {
+      const dlg = document.querySelector('dialog.farmau-sheet') as HTMLDialogElement
+      const content = dlg.querySelector('.flex-1') as HTMLElement | null
+      return {
+        vh: window.innerHeight,
+        dialogH: dlg.offsetHeight,
+        contentH: content?.offsetHeight ?? 0,
+        sectionCount: dlg.querySelectorAll('[data-section]').length,
+      }
+    })
+    // ≥ moitié d'écran pour la lisibilité (demande explicite).
+    expect(m.dialogH).toBeGreaterThanOrEqual(m.vh * 0.5)
+    // La zone de filtres scrollable ne s'effondre PAS à 0 (régression catégories).
+    expect(m.contentH).toBeGreaterThan(100)
+    // Tri + Marques + au moins une catégorie de tags rendus.
+    expect(m.sectionCount).toBeGreaterThanOrEqual(3)
+    // Une catégorie de tags concrète est présente dans le DOM du sheet.
+    await expect(
+      page.locator('dialog.farmau-sheet [data-section="besoins"]'),
+    ).toBeVisible()
+  })
+
   test('reste masquée tant que le bandeau cookies couvre le bas', async ({ page }) => {
     await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
     // Le bandeau monte côté client après hydratation : on l'attend explicitement.

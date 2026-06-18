@@ -368,7 +368,16 @@ dialog.farmau-sheet {
   margin: 0;
   width: 100%;
   max-width: 100%;
-  max-height: 86%;
+  /* Hauteur DÉFINIE (pas fit-content) : indispensable pour que l'enfant
+     `flex-1 overflow-y-auto` ait une hauteur à remplir. Sans elle le dialog se
+     dimensionne sur son contenu non-scrollable (poignée + header + footer) et
+     la zone de filtres scrollable s'effondre à 0 → catégories invisibles.
+     Plancher de lisibilité large : ~86% de l'écran VISIBLE (dvh = hors barre
+     Safari), fallback vh pour les navigateurs sans dvh. */
+  height: 86vh;
+  height: 86dvh;
+  max-height: 86vh;
+  max-height: 86dvh;
   border: 0;
   border-radius: var(--pop-radius-sheet) var(--pop-radius-sheet) 0 0;
   padding: 0;
