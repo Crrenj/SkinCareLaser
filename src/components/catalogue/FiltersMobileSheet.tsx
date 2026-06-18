@@ -104,6 +104,11 @@ export function FiltersMobileSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  // Cible de défilement après fermeture : null = restaurer la position d'avant
+  // l'ouverture (dismiss/coup d'œil) ; 0 = HAUT de page (après « Appliquer » →
+  // on veut voir les résultats filtrés depuis le début).
+  const scrollTargetRef = useRef<number | null>(null)
+
   // Verrou de défilement du body pendant l'ouverture : sinon iOS Safari laisse la
   // page catalogue défiler DERRIÈRE le sheet (le modal natif ne suffit pas).
   // Astuce position:fixed → fige la page + restaure la position au close.
@@ -126,7 +131,12 @@ export function FiltersMobileSheet({
       body.style.top = prev.top
       body.style.width = prev.width
       body.style.overflow = prev.overflow
-      window.scrollTo(0, scrollY)
+      const target = scrollTargetRef.current ?? scrollY
+      scrollTargetRef.current = null
+      // `behavior:'instant'` impératif : `html{scroll-behavior:smooth}` (globals)
+      // animerait sinon la restauration → effet « on remonte en haut puis on
+      // redescend ». On veut un saut sec (ou rester en haut après Appliquer).
+      window.scrollTo({ top: target, left: 0, behavior: 'instant' as ScrollBehavior })
     }
   }, [open])
 
@@ -139,7 +149,10 @@ export function FiltersMobileSheet({
     onClose()
   }
   const handleApply = () => {
-    // Les filtres sont déjà appliqués live ; il suffit de fermer
+    // Les filtres sont déjà appliqués live → on ferme. « Appliquer » = nouvelle
+    // recherche : on revient en HAUT des résultats filtrés (instantané, via
+    // scrollTargetRef lu par le verrou de scroll au démontage).
+    scrollTargetRef.current = 0
     onClose()
   }
   // Dismiss (tap hors feuille / swipe vers le bas) : on FERME en gardant les

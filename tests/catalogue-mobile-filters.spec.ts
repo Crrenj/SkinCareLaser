@@ -135,6 +135,23 @@ test.describe('catalogue — pilule de filtres mobile', () => {
     await expect(sheet).toBeHidden()
   })
 
+  test('« Appliquer » ferme le sheet et remonte en haut (instantané)', async ({ page }) => {
+    await seedConsent(page)
+    await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
+    await page.evaluate(() => window.scrollTo({ top: 1800, behavior: 'instant' as ScrollBehavior }))
+    await page.waitForTimeout(120)
+
+    await page.getByRole('button', { name: 'Filtres', exact: true }).click()
+    const sheet = page.locator('dialog.farmau-sheet')
+    await expect(sheet).toBeVisible()
+
+    await page.getByRole('button', { name: /appliquer/i }).click()
+    await expect(sheet).toBeHidden() // Appliquer ferme bien le pop-up
+    await page.waitForTimeout(200)
+    // … et on atterrit en HAUT des résultats filtrés (pas de restauration mi-liste).
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(60)
+  })
+
   test('allègement mobile : barre sticky du haut + ligne « Affichage… » masquées', async ({ page }) => {
     await seedConsent(page)
     await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
