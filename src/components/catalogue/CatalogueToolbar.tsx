@@ -10,20 +10,24 @@ type Props = {
   onClearAll: () => void
   sort: SortKey
   onSortChange: (next: SortKey) => void
+  /** Classes additionnelles (ex. `hidden lg:block` pour la masquer sur mobile —
+   *  doit rester sur le <section> sticky lui-même, pas un wrapper court, sinon
+   *  le sticky casse). */
+  className?: string
 }
 
 /**
  * Sticky toolbar : chips de filtres actifs + dropdown de tri.
  * Le toggle grid/list n'est pas exposé tant qu'aucune vue liste n'est livrée.
  */
-export function CatalogueToolbar({ activeFilters, onClearAll, sort, onSortChange }: Props) {
+export function CatalogueToolbar({ activeFilters, onClearAll, sort, onSortChange, className = '' }: Props) {
   const t = useTranslations('Catalogue')
   const tSort = useTranslations('Filters.sortOptions')
 
   return (
     <section
       aria-label={t('activeFiltersLabel')}
-      className="sticky top-0 z-30 border-b border-sand-300 px-5 lg:px-10 py-4 bg-[rgba(251,248,244,0.94)] backdrop-blur-sm"
+      className={`sticky top-0 z-30 border-b border-sand-300 px-5 lg:px-10 py-4 bg-[rgba(251,248,244,0.94)] backdrop-blur-sm ${className}`}
     >
       <div className="max-w-[1480px] mx-auto flex items-center gap-3 flex-wrap">
         {activeFilters.length > 0 ? (

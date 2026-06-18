@@ -135,6 +135,24 @@ test.describe('catalogue — pilule de filtres mobile', () => {
     await expect(sheet).toBeHidden()
   })
 
+  test('allègement mobile : barre sticky du haut + ligne « Affichage… » masquées', async ({ page }) => {
+    await seedConsent(page)
+    await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
+    const disp = await page.evaluate(() => {
+      // La toolbar = la seule <section> contenant le <select> de tri.
+      const toolbar = document.querySelector('select')?.closest('section') ?? null
+      const countLine = Array.from(document.querySelectorAll('div')).find(
+        (d) => d.className.includes('mb-6') && d.className.includes('tracking-[0.12em]'),
+      ) ?? null
+      const d = (el: Element | null) => (el ? getComputedStyle(el as HTMLElement).display : 'absent')
+      return { toolbar: d(toolbar), countLine: d(countLine) }
+    })
+    expect(disp.toolbar).toBe('none') // tri + chips redondants masqués sur mobile
+    expect(disp.countLine).toBe('none') // compteur déjà dans le header
+    // Le bouton Filtres (accès unique) reste là.
+    await expect(page.getByRole('button', { name: 'Filtres', exact: true })).toBeVisible()
+  })
+
   test('reste masquée tant que le bandeau cookies couvre le bas', async ({ page }) => {
     await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
     // Le bandeau monte côté client après hydratation : on l'attend explicitement.

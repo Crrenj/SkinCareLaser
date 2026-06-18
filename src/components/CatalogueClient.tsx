@@ -250,7 +250,11 @@ export default function CatalogueClient({
   return (
     <div className={isPending ? 'opacity-70 transition-opacity duration-200' : ''}>
       <CatalogueHeader visible={visibleCount} total={totalCount} activeCount={activeFilters.length} />
+      {/* Barre sticky DESKTOP uniquement : sur mobile, le tri + les chips font
+          doublon avec la pilule « Filtres » du bas (qui ouvre le sheet incluant
+          le tri) et les chips flottants. → allègement mobile « Léger ». */}
       <CatalogueToolbar
+        className="hidden lg:block"
         activeFilters={activeFilters}
         onClearAll={clearAllFilters}
         sort={optimistic.sort}
@@ -273,8 +277,10 @@ export default function CatalogueClient({
         </div>
 
         <main>
+          {/* Ligne « Affichage de X à Y sur Z » : DESKTOP uniquement — le header
+              affiche déjà le compteur, redondant sur mobile (allègement « Léger »). */}
           {visibleCount > 0 && (
-            <div className="flex justify-between items-baseline mb-6 font-mono text-[11px] tracking-[0.12em] uppercase text-ink-500">
+            <div className="hidden lg:flex justify-between items-baseline mb-6 font-mono text-[11px] tracking-[0.12em] uppercase text-ink-500">
               <span>
                 {t.rich('gridShowing', {
                   from: startIndex + 1,
