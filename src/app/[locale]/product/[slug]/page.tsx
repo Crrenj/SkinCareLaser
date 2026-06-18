@@ -21,18 +21,27 @@ import { ProductJsonLd } from '@/components/pdp/ProductJsonLd'
 import { getShopSettings } from '@/lib/getShopSettings'
 import { fetchEffectivePrices, applyPromo, type EffectivePrice } from '@/lib/pricing'
 import { notFound, permanentRedirect } from 'next/navigation'
-import { JSX } from 'react'
+import { cache, JSX } from 'react'
 import { buildLanguageAlternates, localizedPath } from '@/lib/seo'
 
 export const revalidate = 60
 
 /**
- * Aucun slug prérendu au build (catalogue volumineux) : generateStaticParams
- * vide → la route reste statique-éligible, chaque slug est généré à la
- * demande puis mis en cache ISR (revalidate ci-dessus).
+ * Pré-rend au build une page par produit ACTIF (× 3 locales via le segment
+ * `[locale]` parent) → servies en statique/CDN, ouverture instantanée au clic
+ * (fini le rendu serveur à la demande à chaque produit). `dynamicParams` reste
+ * vrai par défaut : un slug absent de cette liste (produit ajouté après le
+ * build) est rendu à la demande puis mis en cache ISR. Le volume s'auto-ajuste
+ * au nombre de produits actifs (0 actif → 0 page, builds rapides).
  */
-export function generateStaticParams() {
-  return []
+export async function generateStaticParams() {
+  const supabase = createSupabasePublicClient()
+  const { data } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('is_active', true)
+    .not('slug', 'is', null)
+  return (data ?? []).map((p) => ({ slug: p.slug as string }))
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -62,11 +71,8 @@ export async function generateMetadata({
   const supabase = createSupabasePublicClient()
   await redirectIfUuid(supabase, locale, slug)
 
-  const { data: prod } = await supabase
-    .from('products')
-    .select('name, description, product_images(url), range:ranges(name, brand:brands(name))')
-    .eq('slug', slug)
-    .maybeSingle()
+  // Requête dédupliquée avec le composant page (cache()).
+  const prod = await getProductBySlug(slug)
 
   const t = await getTranslations({ locale, namespace: 'PageMeta.product' })
 
@@ -74,8 +80,7 @@ export async function generateMetadata({
     return { title: t('titleTemplate', { name: '', brand: '' }) }
   }
 
-  const range = prod.range as unknown as { name: string; brand: { name: string } | null } | null
-  const brandName = range?.brand?.name ?? ''
+  const brandName = prod.range?.brand?.name ?? ''
   const productName = prod.name
   const description = (prod.description ?? '').trim()
 
@@ -84,8 +89,7 @@ export async function generateMetadata({
     ? t('descriptionWithDesc', { name: productName, brand: brandName, description })
     : t('descriptionFallback', { name: productName, brand: brandName })
 
-  const imageUrl =
-    (Array.isArray(prod.product_images) && prod.product_images[0]?.url) ?? undefined
+  const imageUrl = prod.product_images?.[0]?.url ?? undefined
 
   return {
     title,
@@ -160,6 +164,23 @@ const PRODUCT_SELECT = `
   )
 `
 
+/**
+ * Lecture du produit par slug, DÉDUPLIQUÉE (React cache) : generateMetadata et
+ * le composant page partagent la MÊME requête Supabase par rendu (au lieu de
+ * deux fetches séparés du même produit). PRODUCT_SELECT est un sur-ensemble de
+ * ce dont les métadonnées ont besoin.
+ */
+const getProductBySlug = cache(async (slug: string): Promise<RawProduct | null> => {
+  const supabase = createSupabasePublicClient()
+  const { data, error } = await supabase
+    .from('products')
+    .select(PRODUCT_SELECT)
+    .eq('slug', slug)
+    .maybeSingle<RawProduct>()
+  if (error) logger.error('Product fetch error:', error)
+  return data
+})
+
 function buildTagMap(rawTags: TagJoin[] | null): Record<string, string[]> {
   return (rawTags ?? []).reduce<Record<string, string[]>>((acc, { tag }) => {
     if (!tag) return acc
@@ -197,17 +218,9 @@ export default async function ProductPage({
 
   await redirectIfUuid(supabase, locale, slug)
 
-  // 1. Fetch produit principal
-  const { data: prodRaw, error: pErr } = await supabase
-    .from('products')
-    .select(PRODUCT_SELECT)
-    .eq('slug', slug)
-    .single<RawProduct>()
-
-  if (pErr || !prodRaw) {
-    if (pErr) logger.error('Product fetch error:', pErr)
-    notFound()
-  }
+  // 1. Produit principal — requête dédupliquée avec generateMetadata (cache()).
+  const prodRaw = await getProductBySlug(slug)
+  if (!prodRaw) notFound()
 
   const rangeId = prodRaw.range?.id
 

@@ -13,7 +13,7 @@ const IFRAME_W = 1440
 
 /**
  * Aperçu fidèle de la PAGE D'ACCUEIL COMPLÈTE : on embarque la vraie home
- * (`/fr`) dans une iframe same-origin, mise à l'échelle de la largeur du
+ * (`/es`, locale par défaut) dans une iframe same-origin, mise à l'échelle de la largeur du
  * panneau admin (les unités `vw` des bannières se résolvent contre le viewport
  * de l'iframe → rendu identique au site). La hauteur exacte vient du
  * `IframeHeightReporter` monté sur la home (postMessage). L'iframe affiche les
@@ -80,7 +80,7 @@ export function BannersPreview({ banners }: BannersPreviewProps) {
       >
         <iframe
           key={reloadKey}
-          src="/fr"
+          src="/es"
           title={t('previewTitle')}
           loading="lazy"
           className="absolute top-0 left-0 border-0"

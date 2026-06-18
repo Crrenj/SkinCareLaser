@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'FARMAU',
     description:
       'Sélection dermo-cosmétique curatée par des pharmaciens. Click & collect en République Dominicaine.',
-    start_url: '/fr',
+    start_url: '/es',
     display: 'standalone',
     background_color: '#FAF6F0',
     theme_color: '#8A4B2D',

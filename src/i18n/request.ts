@@ -15,7 +15,7 @@ export const ADMIN_LOCALE_COOKIE = 'farmau_admin_locale'
  *      n'ont pas de segment locale dans l'URL. Permet à l'admin de
  *      basculer la langue sans changer d'URL.
  *
- * Fallback final : `routing.defaultLocale` (fr).
+ * Fallback final : `routing.defaultLocale` (es).
  */
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale

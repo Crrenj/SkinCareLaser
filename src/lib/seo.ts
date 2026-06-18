@@ -29,7 +29,7 @@ export function localizedPath(locale: string, path: string): string {
 
 /**
  * Renvoie la map `alternates.languages` pour toutes les locales du routing.
- * `x-default` pointe vers la locale par défaut (fr).
+ * `x-default` pointe vers la locale par défaut (es).
  */
 export function buildLanguageAlternates(path: string): Record<string, string> {
   const map: Record<string, string> = {}

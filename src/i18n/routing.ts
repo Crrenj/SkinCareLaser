@@ -4,16 +4,21 @@ import { defineRouting } from 'next-intl/routing'
  * Configuration i18n FARMAU.
  *
  * Locales :
- *   - fr (défaut, langue d'origine des strings)
- *   - es (marché principal République Dominicaine)
+ *   - es (DÉFAUT — marché principal République Dominicaine)
+ *   - fr (langue d'origine des strings)
  *   - en (international)
  *
- * URLs : toujours préfixées (`/fr/...`, `/es/...`, `/en/...`) pour des
- * raisons SEO (hreflang clean + canonicals distincts). Le middleware
- * redirige `/` vers la langue préférée du navigateur.
+ * URLs : toujours préfixées (`/es/...`, `/fr/...`, `/en/...`) pour des
+ * raisons SEO (hreflang clean + canonicals distincts).
+ *
+ * `localeDetection: false` : on N'utilise PAS la langue du navigateur. `/`
+ * redirige TOUJOURS vers `/es` (espagnol par défaut partout), quel que soit
+ * l'Accept-Language. Les visiteurs basculent ensuite via le LocaleSwitcher
+ * (une locale explicite dans l'URL est toujours respectée).
  */
 export const routing = defineRouting({
   locales: ['fr', 'es', 'en'],
-  defaultLocale: 'fr',
+  defaultLocale: 'es',
   localePrefix: 'always',
+  localeDetection: false,
 })

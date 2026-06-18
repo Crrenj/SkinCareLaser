@@ -108,7 +108,7 @@ export default function GlobalError({
                 le router client l'est potentiellement aussi — on force un
                 rechargement complet du document. */}
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a href="/fr" style={linkSecondary}>
+            <a href="/es" style={linkSecondary}>
               Accueil
             </a>
           </div>
