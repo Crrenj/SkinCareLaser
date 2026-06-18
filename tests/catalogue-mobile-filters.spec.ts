@@ -88,6 +88,53 @@ test.describe('catalogue — pilule de filtres mobile', () => {
     ).toBeVisible()
   })
 
+  test('dismiss (backdrop + swipe), scroll-lock du body, sélection optimiste', async ({ page }) => {
+    await seedConsent(page)
+    await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
+    const sheet = page.locator('dialog.farmau-sheet')
+    const openSheet = async () => {
+      await page.getByRole('button', { name: 'Filtres', exact: true }).click()
+      await expect(sheet).toBeVisible()
+    }
+    await openSheet()
+
+    // Anti scroll-bleed : le body est figé tant que le sheet est ouvert.
+    expect(await page.evaluate(() => getComputedStyle(document.body).position)).toBe('fixed')
+
+    // Sélection optimiste : la case se coche sans attendre le retour serveur.
+    const input = sheet.locator('[data-section="brands"] input[type="checkbox"]').first()
+    await sheet.locator('[data-section="brands"] label').first().click({ noWaitAfter: true })
+    await expect(input).toBeChecked({ timeout: 600 })
+
+    // Swipe vers le bas sur le header → ferme (drag-to-dismiss).
+    await page.evaluate(() => {
+      const dlg = document.querySelector('dialog.farmau-sheet') as HTMLDialogElement
+      const grab = dlg.querySelector('header')!.parentElement as HTMLElement
+      const r = grab.getBoundingClientRect()
+      const x = r.left + r.width / 2
+      const y0 = r.top + 10
+      const fire = (type: string, cy: number) => {
+        const ev = new Event(type, { bubbles: true, cancelable: true })
+        const pt = { clientX: x, clientY: cy, identifier: 1, target: grab }
+        Object.defineProperty(ev, 'touches', { value: type === 'touchend' ? [] : [pt] })
+        Object.defineProperty(ev, 'changedTouches', { value: [pt] })
+        grab.dispatchEvent(ev)
+      }
+      fire('touchstart', y0)
+      fire('touchmove', y0 + 70)
+      fire('touchmove', y0 + 170) // dy = 170 > seuil 80
+      fire('touchend', y0 + 170)
+    })
+    await expect(sheet).toBeHidden()
+    // Body déverrouillé après fermeture.
+    expect(await page.evaluate(() => getComputedStyle(document.body).position)).toBe('static')
+
+    // Tap sur le backdrop (au-dessus de la feuille) → ferme.
+    await openSheet()
+    await page.mouse.click(196, 14)
+    await expect(sheet).toBeHidden()
+  })
+
   test('reste masquée tant que le bandeau cookies couvre le bas', async ({ page }) => {
     await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
     // Le bandeau monte côté client après hydratation : on l'attend explicitement.

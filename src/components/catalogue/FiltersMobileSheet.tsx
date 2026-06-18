@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { FilterState } from '@/lib/catalogueFilters'
 
@@ -95,6 +95,7 @@ export function FiltersMobileSheet({
     const dialog = dialogRef.current
     if (!dialog) return
     if (open && !dialog.open) {
+      dialog.style.transform = '' // reset tout résidu de drag-to-dismiss
       setSnapshot(captureFilters())
       dialog.showModal()
     } else if (!open && dialog.open) {
@@ -103,11 +104,36 @@ export function FiltersMobileSheet({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
-  // Restaure le snapshot quand l'utilisateur fait Cancel ou ferme via Esc / clic backdrop
+  // Verrou de défilement du body pendant l'ouverture : sinon iOS Safari laisse la
+  // page catalogue défiler DERRIÈRE le sheet (le modal natif ne suffit pas).
+  // Astuce position:fixed → fige la page + restaure la position au close.
+  useEffect(() => {
+    if (!open) return
+    const body = document.body
+    const scrollY = window.scrollY
+    const prev = {
+      position: body.style.position,
+      top: body.style.top,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.width = '100%'
+    body.style.overflow = 'hidden'
+    return () => {
+      body.style.position = prev.position
+      body.style.top = prev.top
+      body.style.width = prev.width
+      body.style.overflow = prev.overflow
+      window.scrollTo(0, scrollY)
+    }
+  }, [open])
+
+  // Restaure le snapshot sur Esc (annulation explicite clavier — desktop)
   const revertToSnapshot = () => {
     if (snapshot) onRestoreFilters(snapshot)
   }
-
   const handleCancel = () => {
     revertToSnapshot()
     onClose()
@@ -116,9 +142,47 @@ export function FiltersMobileSheet({
     // Les filtres sont déjà appliqués live ; il suffit de fermer
     onClose()
   }
-  // Ferme sur ::backdrop / Esc — événement natif du <dialog>
+  // Dismiss (tap hors feuille / swipe vers le bas) : on FERME en gardant les
+  // filtres déjà appliqués live (un revert surprendrait — la grille reflète déjà
+  // le choix de l'utilisateur).
+  const handleDismiss = () => {
+    onClose()
+  }
   const handleNativeClose = () => {
     if (open) onClose()
+  }
+
+  // Tap sur le ::backdrop (au-dessus de la feuille) → fermer.
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const d = dialogRef.current
+    if (!d || e.target !== d) return // un enfant = clic à l'intérieur de la feuille
+    const r = d.getBoundingClientRect()
+    if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+      handleDismiss()
+    }
+  }
+
+  // Swipe vers le bas sur la poignée/header → fermer (drag-to-dismiss).
+  const dragStartY = useRef<number | null>(null)
+  const dragDelta = useRef(0)
+  const onGrabStart = (e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0]?.clientY ?? null
+    dragDelta.current = 0
+  }
+  const onGrabMove = (e: React.TouchEvent) => {
+    if (dragStartY.current === null) return
+    const dy = (e.touches[0]?.clientY ?? 0) - dragStartY.current
+    dragDelta.current = dy
+    const d = dialogRef.current
+    if (d && dy > 0) d.style.transform = `translateY(${dy}px)`
+  }
+  const onGrabEnd = () => {
+    const shouldClose = dragDelta.current > 80
+    const d = dialogRef.current
+    if (d && !shouldClose) d.style.transform = '' // snap back (le close reset au prochain open)
+    dragStartY.current = null
+    dragDelta.current = 0
+    if (shouldClose) handleDismiss()
   }
 
   return (
@@ -126,6 +190,7 @@ export function FiltersMobileSheet({
       ref={dialogRef}
       className="farmau-sheet w-full"
       onClose={handleNativeClose}
+      onClick={handleBackdropClick}
       onCancel={(e) => {
         // Esc → revert ET ne pas double-close
         e.preventDefault()
@@ -133,16 +198,24 @@ export function FiltersMobileSheet({
       }}
       aria-labelledby="filters-sheet-title"
     >
-      {/* Handle — wider, more visible */}
-      <div className="flex justify-center py-2.5">
-        <span
-          aria-hidden
-          className="w-12 h-[5px] rounded-full bg-sand-400 opacity-70"
-        />
-      </div>
+      {/* Zone d'empoignade (poignée + header) : drag vers le bas = fermer. */}
+      <div
+        className="shrink-0"
+        style={{ touchAction: 'none' }}
+        onTouchStart={onGrabStart}
+        onTouchMove={onGrabMove}
+        onTouchEnd={onGrabEnd}
+      >
+        {/* Handle — wider, more visible */}
+        <div className="flex justify-center py-2.5">
+          <span
+            aria-hidden
+            className="w-12 h-[5px] rounded-full bg-sand-400 opacity-70"
+          />
+        </div>
 
-      {/* Header — eyebrow count + title with active count */}
-      <header className="px-[22px] pb-4 flex justify-between items-start gap-3">
+        {/* Header — eyebrow count + title with active count */}
+        <header className="px-[22px] pb-4 flex justify-between items-start gap-3">
         <div>
           <span className="block font-mono text-[10px] tracking-[0.16em] uppercase text-ink-500 font-medium mb-0.5">
             {t('productCount', { count: matchedCount })}
@@ -161,9 +234,10 @@ export function FiltersMobileSheet({
         >
           {t('clearAll')}
         </button>
-      </header>
+        </header>
+      </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
         {/* Ordenar — radio */}
         <FilterSection
           id="sort"

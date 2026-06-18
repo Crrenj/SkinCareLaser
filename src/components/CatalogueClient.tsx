@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useCallback, useTransition } from 'react'
+import React, { useEffect, useMemo, useRef, useCallback, useTransition, useOptimistic } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import ProductCard from '@/components/ProductCard'
@@ -86,19 +86,32 @@ export default function CatalogueClient({
     pendingRef.current = filterState
   }, [filterState])
 
+  // État optimiste : un tap de filtre déclenche une navigation RSC (re-fetch
+  // catalogue), plusieurs centaines de ms sur mobile. Sans optimisme, la case
+  // ne se coche qu'au retour serveur → « les boutons mettent des secondes à se
+  // sélectionner ». useOptimistic reflète le patch immédiatement pendant la
+  // transition, puis se réaligne sur les props quand la navigation aboutit.
+  const [optimistic, addOptimistic] = useOptimistic(
+    filterState,
+    (current: FilterState, patch: Partial<FilterState>): FilterState => ({ ...current, ...patch }),
+  )
+
   const navigate = useCallback((overrides: Partial<FilterState>) => {
     const next = { ...pendingRef.current, page: 1, ...overrides }
     pendingRef.current = next
     const url = buildCatalogueUrl(pathname, next)
     startTransition(() => {
+      addOptimistic(overrides)
       router.push(url, { scroll: false })
     })
-  }, [pathname, router])
+  }, [pathname, router, addOptimistic])
 
   // Modèle de l'arbre Marque → Gammes (full | sous-ensemble par marque).
+  // Dérivé de l'état OPTIMISTE → l'arbre/les cases reflètent le tap sans attendre
+  // le serveur.
   const treeModel: BrandTreeModel = useMemo(
-    () => deriveBrandTreeModel(selectedBrands, selectedRanges, selectedPairs, rangesByBrand),
-    [selectedBrands, selectedRanges, selectedPairs, rangesByBrand],
+    () => deriveBrandTreeModel(optimistic.brands, optimistic.ranges, optimistic.pairs, rangesByBrand),
+    [optimistic.brands, optimistic.ranges, optimistic.pairs, rangesByBrand],
   )
 
   const pendingModel = useCallback(() => {
@@ -191,24 +204,24 @@ export default function CatalogueClient({
   const selectedBrandsSet = useMemo(() => new Set(Object.keys(treeModel)), [treeModel])
   const selectedTagsSets = useMemo(() => {
     const out: Record<string, Set<string>> = {}
-    for (const [k, v] of Object.entries(selectedTags)) out[k] = new Set(v)
+    for (const [k, v] of Object.entries(optimistic.tags)) out[k] = new Set(v)
     for (const k of Object.keys(itemsByType)) out[k] ??= new Set()
     return out
-  }, [selectedTags, itemsByType])
+  }, [optimistic.tags, itemsByType])
 
   const groupCount = useMemo(() => {
     // L'arbre Marque · Gamme compte pour UN groupe de filtres.
     let count = Object.keys(treeModel).length > 0 ? 1 : 0
-    for (const arr of Object.values(selectedTags)) {
+    for (const arr of Object.values(optimistic.tags)) {
       if (arr.length > 0) count += 1
     }
     return count
-  }, [treeModel, selectedTags])
+  }, [treeModel, optimistic.tags])
 
   const activeFilters = useMemo<ActiveFilterPill[]>(() => {
     const pills: ActiveFilterPill[] = []
-    if (searchTerm) {
-      pills.push({ id: 'search', label: `« ${searchTerm} »`, onRemove: clearSearchQuery })
+    if (optimistic.q) {
+      pills.push({ id: 'search', label: `« ${optimistic.q} »`, onRemove: clearSearchQuery })
     }
     for (const [brand, value] of Object.entries(treeModel)) {
       if (value === 'full') {
@@ -223,13 +236,13 @@ export default function CatalogueClient({
         )
       }
     }
-    for (const [tagType, names] of Object.entries(selectedTags)) {
+    for (const [tagType, names] of Object.entries(optimistic.tags)) {
       names.forEach((name) =>
         pills.push({ id: `${tagType}:${name}`, label: name, onRemove: () => handleTagToggle(tagType, name) }),
       )
     }
     return pills
-  }, [searchTerm, treeModel, selectedTags, handleBrandToggle, handleRangeToggle, handleTagToggle, clearSearchQuery])
+  }, [optimistic.q, treeModel, optimistic.tags, handleBrandToggle, handleRangeToggle, handleTagToggle, clearSearchQuery])
 
   const startIndex = (currentPage - 1) * 24
   const endIndex = startIndex + products.length
@@ -240,7 +253,7 @@ export default function CatalogueClient({
       <CatalogueToolbar
         activeFilters={activeFilters}
         onClearAll={clearAllFilters}
-        sort={sortBy}
+        sort={optimistic.sort}
         onSortChange={handleSortChange}
       />
 
@@ -318,7 +331,7 @@ export default function CatalogueClient({
         matchedCount={visibleCount}
         availableBrands={availableBrands}
         itemsByType={itemsByType}
-        sort={sortBy}
+        sort={optimistic.sort}
         selectedBrands={selectedBrandsSet}
         selectedTags={selectedTagsSets}
         onSortChange={(v) => handleSortChange(v as SortKey)}
