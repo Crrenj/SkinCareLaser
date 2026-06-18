@@ -133,9 +133,9 @@ export function FiltersMobileSheet({
       body.style.overflow = prev.overflow
       const target = scrollTargetRef.current ?? scrollY
       scrollTargetRef.current = null
-      // `behavior:'instant'` impératif : `html{scroll-behavior:smooth}` (globals)
-      // animerait sinon la restauration → effet « on remonte en haut puis on
-      // redescend ». On veut un saut sec (ou rester en haut après Appliquer).
+      // `behavior:'instant'` par robustesse : un saut sec (ou rester en haut
+      // après Appliquer), jamais d'animation — même si un `scroll-behavior:smooth`
+      // global réapparaissait un jour (retiré de globals.css le 2026-06-18).
       window.scrollTo({ top: target, left: 0, behavior: 'instant' as ScrollBehavior })
     }
   }, [open])

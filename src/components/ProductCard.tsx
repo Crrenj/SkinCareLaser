@@ -97,7 +97,10 @@ export default function ProductCard({ product }: Props) {
           <AddToCartButton
             productId={product.id}
             variant="card-cta-quick"
-            className="absolute left-3 right-3 bottom-3 z-20 opacity-0 translate-y-3.5 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+            // Mobile (< lg) : TOUJOURS visible — pas de hover sur tactile, sinon
+            // le bouton resterait invisible et inajoutable. Desktop : révélé au
+            // survol (reveal slide-up) comme avant.
+            className="absolute left-3 right-3 bottom-3 z-20 opacity-100 translate-y-0 lg:opacity-0 lg:translate-y-3.5 lg:group-hover:opacity-100 lg:group-hover:translate-y-0 transition-all duration-200"
             label={`+ ${t('addToCart')}`}
           />
         )}

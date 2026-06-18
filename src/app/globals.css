@@ -279,7 +279,11 @@
 /* ─── Base ─── */
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+/* PAS de `scroll-behavior: smooth` global : il anime le scroll-to-top des
+   navigations Next (taper un produit → remontée animée parasite) et la
+   restauration du verrou de scroll du sheet. Les scrolls qui DOIVENT être
+   lisses passent un `behavior:'smooth'` EXPLICITE (ScrollToTop, guide admin). */
+html { scroll-behavior: auto; }
 
 body {
   background: var(--color-sand-200);

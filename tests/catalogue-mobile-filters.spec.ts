@@ -170,6 +170,22 @@ test.describe('catalogue — pilule de filtres mobile', () => {
     await expect(page.getByRole('button', { name: 'Filtres', exact: true })).toBeVisible()
   })
 
+  test('CTA panier visible sur mobile (pas de hover) + scroll non animé', async ({ page }) => {
+    await seedConsent(page)
+    await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
+    const m = await page.evaluate(() => {
+      const btn = document.querySelector('[data-testid="add-to-cart-button"]') as HTMLElement | null
+      return {
+        scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
+        btnOpacity: btn ? getComputedStyle(btn).opacity : 'no-btn',
+      }
+    })
+    // Plus de scroll-to-top animé (taper un produit / appliquer un filtre).
+    expect(m.scrollBehavior).toBe('auto')
+    // Le CTA « + Ajouter » est visible sans survol (tactile) → ajoutable au panier.
+    expect(m.btnOpacity).toBe('1')
+  })
+
   test('reste masquée tant que le bandeau cookies couvre le bas', async ({ page }) => {
     await page.goto('/fr/catalogue', { waitUntil: 'networkidle' })
     // Le bandeau monte côté client après hydratation : on l'attend explicitement.
