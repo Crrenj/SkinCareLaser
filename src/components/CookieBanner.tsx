@@ -29,6 +29,30 @@ export function CookieBanner() {
     }
   }, [])
 
+  // Tant que le bandeau est affiché EN PLEINE LARGEUR (mobile < md), il recouvre
+  // les surfaces flottantes ancrées en bas (la pilule de filtres du catalogue,
+  // z-26 < z-60) et intercepte les taps dessus. On signale sa présence via un
+  // attribut sur <html> → la pilule se masque le temps que l'utilisateur fasse
+  // son choix (une interaction, le bandeau disparaît, la pilule revient).
+  useEffect(() => {
+    const root = document.documentElement
+    const ATTR = 'data-cookie-banner-open'
+    if (!visible) {
+      root.removeAttribute(ATTR)
+      return
+    }
+    const apply = () => {
+      if (window.innerWidth < 768) root.setAttribute(ATTR, '')
+      else root.removeAttribute(ATTR)
+    }
+    apply()
+    window.addEventListener('resize', apply)
+    return () => {
+      window.removeEventListener('resize', apply)
+      root.removeAttribute(ATTR)
+    }
+  }, [visible])
+
   const persist = (value: 'accepted' | 'rejected') => {
     try {
       window.localStorage.setItem(STORAGE_KEY, value)

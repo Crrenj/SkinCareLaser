@@ -10,6 +10,7 @@ import { CatalogueSidebar } from '@/components/catalogue/CatalogueSidebar'
 import { CataloguePagination } from '@/components/catalogue/CataloguePagination'
 import { FiltersMobileSheet } from '@/components/catalogue/FiltersMobileSheet'
 import { FiltersPill, type ActiveFilterPill } from '@/components/catalogue/FiltersPill'
+import { useBrowserBottomInset } from '@/hooks/useBrowserBottomInset'
 import {
   buildCatalogueUrl,
   deriveBrandTreeModel,
@@ -61,6 +62,10 @@ export default function CatalogueClient({
   const router = useRouter()
   const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
+
+  // Expose la hauteur de la barre Safari basse en CSS pour caler la pilule de
+  // filtres + le CTA du sheet au-dessus d'elle (sinon à moitié cachés/inertes).
+  useBrowserBottomInset()
 
   const filterState: FilterState = useMemo(() => ({
     brands: selectedBrands,

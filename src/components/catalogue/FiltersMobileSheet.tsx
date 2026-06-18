@@ -284,8 +284,12 @@ export function FiltersMobileSheet({
         })}
       </div>
 
-      {/* Footer — single CTA with scroll-fade + safe-area */}
-      <footer className="px-[22px] pt-3 pb-[max(18px,env(safe-area-inset-bottom,18px))] bg-sand-50 relative">
+      {/* Footer — single CTA with scroll-fade + safe-area (home-indicator ET
+          barre Safari basse, sinon le CTA Appliquer passe derrière elle). */}
+      <footer
+        className="px-[22px] pt-3 bg-sand-50 relative"
+        style={{ paddingBottom: 'max(18px, env(safe-area-inset-bottom, 18px), var(--browser-bottom-inset, 0px))' }}
+      >
         <div className="absolute -top-4 left-0 right-0 h-4 bg-gradient-to-b from-transparent to-sand-50 pointer-events-none" />
         <button
           type="button"

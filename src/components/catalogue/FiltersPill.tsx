@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -24,23 +23,37 @@ type Props = {
 }
 
 /**
+ * Décalage bas qui tient compte de DEUX obstacles au bas de l'écran :
+ *  1. le home-indicator iOS — `env(safe-area-inset-bottom)` ;
+ *  2. la barre d'outils basse du navigateur (Safari iOS bottom URL bar), mesurée
+ *     par `useBrowserBottomInset` → `--browser-bottom-inset` (env() ne la couvre
+ *     PAS → sans ça la pilule est à moitié derrière elle et inerte).
+ *
+ * Le 3ᵉ obstacle — le bandeau cookies pleine largeur (z-60 > pilule z-26) qui
+ * l'intercepterait au premier passage — est géré en MASQUANT la pilule tant que
+ * le bandeau est ouvert (cf. `.farmau-mobile-filter-pill` + `CookieBanner`),
+ * plutôt qu'en la propulsant au-dessus (elle finirait en plein milieu d'écran).
+ */
+const safeBottom = (base: number) =>
+  `calc(${base}px + max(env(safe-area-inset-bottom, 0px), var(--browser-bottom-inset, 0px)))`
+
+/**
  * Pilule sticky "Filtros (n)" + row pills actives juste au-dessus, mobile only.
- * Auto-hide quand l'utilisateur scrolle vers le bas (useScrollDirection),
- * réapparaît au scroll-up.
+ * Toujours visible (plus d'auto-hide au scroll : sur un catalogue on scrolle
+ * vers le bas en permanence, masquer l'unique accès aux filtres est hostile et
+ * rendait le bouton difficile à atteindre).
  */
 export function FiltersPill({ groupCount, activeFilters, onOpen, hidden }: Props) {
   const t = useTranslations('MobileFilters')
-  const direction = useScrollDirection()
-  const dismissed = direction === 'down' && groupCount === 0
 
   if (hidden) return null
 
   return (
-    <div className="lg:hidden pointer-events-none">
+    <div className="farmau-mobile-filter-pill lg:hidden pointer-events-none">
       {activeFilters.length > 0 && (
         <div
           className="fixed left-3 right-3 z-[25] flex gap-1.5 overflow-x-auto pointer-events-auto px-1 py-0.5"
-          style={{ bottom: 'calc(80px + env(safe-area-inset-bottom))', scrollSnapType: 'x mandatory' }}
+          style={{ bottom: safeBottom(80), scrollSnapType: 'x mandatory' }}
         >
           {activeFilters.map((f) => (
             <span
@@ -66,10 +79,8 @@ export function FiltersPill({ groupCount, activeFilters, onOpen, hidden }: Props
         type="button"
         onClick={onOpen}
         aria-label={t('pillLabel')}
-        className={`fixed left-1/2 -translate-x-1/2 inline-flex items-center gap-2 bg-ink-900 text-sand-50 px-5 py-2.5 rounded-full text-[13.5px] font-medium shadow-[0_10px_24px_-8px_rgba(31,27,22,0.45)] z-[26] transition-transform duration-200 pointer-events-auto ${
-          dismissed ? 'translate-y-[120%]' : 'translate-y-0'
-        }`}
-        style={{ bottom: 'calc(24px + env(safe-area-inset-bottom))' }}
+        className="fixed left-1/2 -translate-x-1/2 inline-flex items-center gap-2 bg-ink-900 text-sand-50 px-5 py-2.5 rounded-full text-[13.5px] font-medium shadow-[0_10px_24px_-8px_rgba(31,27,22,0.45)] z-[26] pointer-events-auto"
+        style={{ bottom: safeBottom(24) }}
       >
         <SlidersHorizontal className="w-3.5 h-3.5" />
         <span>{t('pillLabel')}</span>
@@ -81,34 +92,4 @@ export function FiltersPill({ groupCount, activeFilters, onOpen, hidden }: Props
       </button>
     </div>
   )
-}
-
-/**
- * Détecte la direction de scroll (`up` ou `down`). Utilisé pour masquer
- * la pilule pendant un scroll-down passif et la réafficher au scroll-up.
- */
-function useScrollDirection(): 'up' | 'down' {
-  const [direction, setDirection] = useState<'up' | 'down'>('up')
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    let lastY = window.scrollY
-    let ticking = false
-    const onScroll = () => {
-      if (ticking) return
-      ticking = true
-      window.requestAnimationFrame(() => {
-        const y = window.scrollY
-        if (Math.abs(y - lastY) > 6) {
-          setDirection(y > lastY ? 'down' : 'up')
-          lastY = y
-        }
-        ticking = false
-      })
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  return direction
 }

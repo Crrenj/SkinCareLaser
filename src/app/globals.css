@@ -356,6 +356,13 @@ img { max-width: 100%; height: auto; display: block; }
   --pop-ease-spring: cubic-bezier(.34,1.32,.64,1);
 }
 
+/* La pilule de filtres flottante (mobile) se masque tant que le bandeau cookies
+   pleine largeur est ouvert : il la recouvre (z-60 > z-26) et intercepterait les
+   taps. `data-cookie-banner-open` est posé par CookieBanner (mobile < md). */
+html[data-cookie-banner-open] .farmau-mobile-filter-pill {
+  display: none;
+}
+
 /* ═══════ Native <dialog> bottom sheet — Filtres mobile ═══════ */
 dialog.farmau-sheet {
   margin: 0;
