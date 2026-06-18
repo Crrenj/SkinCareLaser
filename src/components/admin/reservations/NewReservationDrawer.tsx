@@ -25,6 +25,8 @@ export type NewReservationPayload = {
   items: NewReservationItem[]
   /** Identité client (mode `sale`) — le parent la résout en user_id / création. */
   customer?: CustomerSelection
+  /** Vente comptoir : appliquer le tarif employé (le % est résolu côté serveur). */
+  apply_employee_discount?: boolean
 }
 
 type SearchHit = {
@@ -46,6 +48,11 @@ type NewReservationDrawerProps = {
    * Le flag `sold` est dérivé du mode — plus de case à cocher.
    */
   mode?: 'reservation' | 'sale'
+  /**
+   * Taux de remise employé (%) lu dans les réglages : alimente la case
+   * « tarif employé » + l'aperçu du total en mode vente. 0/absent → pas de case.
+   */
+  employeeDiscountPct?: number
 }
 
 const inputCls =
@@ -56,6 +63,7 @@ export function NewReservationDrawer({
   onClose,
   onCreate,
   mode = 'reservation',
+  employeeDiscountPct = 0,
 }: NewReservationDrawerProps) {
   const t = useTranslations('Admin.reservations.create')
   const tc = useTranslations('Admin.common')
@@ -71,6 +79,9 @@ export function NewReservationDrawer({
   const [hits, setHits] = useState<SearchHit[]>([])
   const [searching, setSearching] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  // Vente comptoir : appliquer le tarif employé (le % vient des réglages, le
+  // prix facturé est recalculé côté serveur — la case est juste un aperçu/flag).
+  const [applyDiscount, setApplyDiscount] = useState(false)
 
   // Reset complet à chaque ouverture. Vente → anonyme par défaut ;
   // réservation → invité (téléphone requis, pas d'anonyme).
@@ -83,6 +94,7 @@ export function NewReservationDrawer({
     setHits([])
     setSearching(false)
     setSubmitting(false)
+    setApplyDiscount(false)
   }, [open, isSale])
 
   // Recherche produits debounced (réutilise /api/search)
@@ -154,6 +166,18 @@ export function NewReservationDrawer({
   )
   const totalItems = useMemo(() => items.reduce((sum, it) => sum + it.quantity, 0), [items])
 
+  // Aperçu remisé — le prix réellement facturé est recalculé serveur. On
+  // arrondit PAR LIGNE comme le serveur (round2 puis somme) pour que l'aperçu
+  // colle au centime près au total facturé / au reçu.
+  const discountActive = isSale && applyDiscount && employeeDiscountPct > 0
+  const effectiveTotal = discountActive
+    ? items.reduce((sum, it) => {
+        const net =
+          Math.round((Number(it.unit_price) || 0) * (1 - employeeDiscountPct / 100) * 100) / 100
+        return sum + net * it.quantity
+      }, 0)
+    : totalPrice
+
   // Produits requis ; l'identité client doit être valide selon la voie choisie.
   // L'anonyme n'est permis qu'en vente ; la réservation exige au moins un tél.
   const itemsOk =
@@ -199,6 +223,7 @@ export function NewReservationDrawer({
           contact_email: '',
           admin_notes: note.trim(),
           sold: isSale,
+          apply_employee_discount: isSale ? applyDiscount : false,
           items: items.map((it) => ({
             product_id: it.product_id,
             product_name: it.product_name.trim(),
@@ -214,7 +239,7 @@ export function NewReservationDrawer({
         setSubmitting(false)
       }
     },
-    [canSubmit, onCreate, note, isSale, items, customer],
+    [canSubmit, onCreate, note, isSale, items, customer, applyDiscount],
   )
 
   if (!open) return null
@@ -431,13 +456,29 @@ export function NewReservationDrawer({
             <p className="text-[11.5px] text-ink-500 leading-snug mb-3">
               {isSale ? t('saleHint') : t('reservationHint')}
             </p>
+            {isSale && employeeDiscountPct > 0 && (
+              <label className="flex items-center gap-2 mb-3 text-[12.5px] text-ink-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={applyDiscount}
+                  onChange={(e) => setApplyDiscount(e.target.checked)}
+                  className="w-4 h-4 accent-clay-700"
+                />
+                {t('employeeDiscount', { pct: employeeDiscountPct })}
+              </label>
+            )}
             <div className="flex justify-between items-center">
               <span className="text-[12px] text-ink-700 inline-flex items-baseline gap-2">
                 <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-500">
                   {t('total')}
                 </span>
+                {discountActive && (
+                  <span className="font-mono text-[12px] text-ink-500 line-through">
+                    {fmtDOP(totalPrice)}
+                  </span>
+                )}
                 <span className="font-mono text-[15px] text-ink-900 font-semibold">
-                  {fmtDOP(totalPrice)} {DEFAULT_CURRENCY}
+                  {fmtDOP(effectiveTotal)} {DEFAULT_CURRENCY}
                 </span>
                 {totalItems > 0 && (
                   <span className="text-[11px] text-ink-500">· {totalItems}</span>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import useSWR from 'swr'
 import { useTranslations, useLocale } from 'next-intl'
 import { Plus, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -44,6 +45,19 @@ export default function SalesAdminPage() {
   const t = useTranslations('Admin.sales')
   const tr = useTranslations('Admin.reservations')
   const locale = useLocale()
+
+  // Taux de remise employé (single-row shop_settings) — sert l'aperçu du drawer
+  // de vente ; le prix facturé est TOUJOURS recalculé côté serveur.
+  const { data: shopSettings } = useSWR<{ employee_discount_pct?: number }>(
+    '/api/admin/settings',
+    (url: string) =>
+      fetch(url, { credentials: 'same-origin' }).then((r) => {
+        if (!r.ok) throw new Error('settings_fetch_failed')
+        return r.json()
+      }),
+    { revalidateOnFocus: false },
+  )
+  const employeeDiscountPct = Number(shopSettings?.employee_discount_pct ?? 0)
 
   const [rows, setRows] = useState<Reservation[]>([])
   const [loading, setLoading] = useState(true)
@@ -222,6 +236,7 @@ export default function SalesAdminPage() {
           sold: true,
           items: payload.items,
           user_id: resolved.userId,
+          apply_employee_discount: payload.apply_employee_discount ?? false,
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -399,6 +414,13 @@ export default function SalesAdminPage() {
           onAdvance={() => {}}
           onCancel={cancelSale}
           onUpdateNote={updateNote}
+          onInvoice={(r) =>
+            window.open(
+              `/api/admin/reservations/${r.id}/invoice?lang=${locale}`,
+              '_blank',
+              'noopener,noreferrer',
+            )
+          }
           busy={busyId === expandedReservation.id}
         />
       )}
@@ -408,6 +430,7 @@ export default function SalesAdminPage() {
         onClose={() => setShowNew(false)}
         onCreate={createSale}
         mode="sale"
+        employeeDiscountPct={employeeDiscountPct}
       />
       <AccountSetupDialog info={setupInfo} onClose={() => setSetupInfo(null)} />
       {confirmDialog}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { Toaster } from 'sonner'
@@ -23,7 +24,13 @@ const themeFetcher = (url: string) => fetch(url).then((r) => r.json() as Promise
  * Shell client qui héberge auth-gate + sidebar + barre mobile.
  * Le AdminLayout serveur l'enveloppe avec NextIntlClientProvider.
  */
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({
+  children,
+  employeeDiscountPct = 0,
+}: {
+  children: React.ReactNode
+  employeeDiscountPct?: number
+}) {
   const pathname = usePathname()
   const { user, isAdmin, loading } = useIsAdmin()
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -136,6 +143,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         />
 
         <div className="flex-1 flex flex-col min-w-0">
+          <StaffPromoBar pct={employeeDiscountPct} />
           <div className="lg:hidden sticky top-0 z-20 bg-sand-100 border-b border-sand-300 px-4 py-3 flex items-center gap-3">
             <button
               type="button"
@@ -157,5 +165,26 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <Toaster richColors position="top-right" closeButton />
       </div>
     </AdminModeProvider>
+  )
+}
+
+/**
+ * Bande « promo employé » visible par TOUS les admins (sur toutes les pages
+ * admin) : rappelle le taux de remise staff actif + lien d'édition. Masquée si
+ * le taux est nul. Le taux est passé en prop SSR (getShopSettings côté layout).
+ */
+function StaffPromoBar({ pct }: { pct: number }) {
+  const t = useTranslations('Admin.chrome')
+  if (!pct || pct <= 0) return null
+  return (
+    <div className="bg-clay-50 border-b border-clay-200 px-4 py-1.5 flex items-center justify-center gap-3 text-[12px] text-clay-800">
+      <span className="font-medium">{t('staffPromo', { pct })}</span>
+      <Link
+        href="/admin/settings"
+        className="underline underline-offset-2 hover:text-clay-900 transition-colors"
+      >
+        {t('staffPromoEdit')}
+      </Link>
+    </div>
   )
 }

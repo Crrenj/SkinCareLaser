@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ArrowRight, Check, Loader2, Pencil, X } from 'lucide-react'
+import { ArrowRight, Check, FileText, Loader2, Pencil, X } from 'lucide-react'
 import { PopClose } from '@/components/ui/PopClose'
 import type { Reservation } from './types'
 import {
@@ -27,6 +27,12 @@ type ReservationDrawerProps = {
    * l'édition y est interdite par design (vente déjà comptabilisée).
    */
   onUpdateItemPrice?: (id: string, itemId: string, unitPrice: number) => Promise<void>
+  /**
+   * Génère/ouvre le reçu (comprobante de retiro) — fourni uniquement par le
+   * journal des ventes (/admin/ventas). Le bouton n'apparaît que pour une vente
+   * `collected` (la facture suit la bonne réception). Optionnelle.
+   */
+  onInvoice?: (r: Reservation) => void
   busy?: boolean
 }
 
@@ -38,6 +44,7 @@ export function ReservationDrawer({
   onCancel,
   onUpdateNote,
   onUpdateItemPrice,
+  onInvoice,
   busy = false,
 }: ReservationDrawerProps) {
   const t = useTranslations('Admin.reservations')
@@ -60,6 +67,9 @@ export function ReservationDrawer({
   // collected/expired/cancelled (la RPC le re-vérifie côté serveur).
   const canEditPrice =
     !!onUpdateItemPrice && (r.status === 'pending' || r.status === 'confirmed')
+  // Reçu : disponible une fois la vente retirée (collected) et seulement si le
+  // parent fournit le handler (journal des ventes).
+  const canInvoice = !!onInvoice && r.status === 'collected'
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [priceDraft, setPriceDraft] = useState('')
   const [priceSaving, setPriceSaving] = useState(false)
@@ -336,6 +346,17 @@ export function ReservationDrawer({
               </button>
             )}
           </div>
+
+          {canInvoice && (
+            <button
+              type="button"
+              onClick={() => onInvoice?.(r)}
+              className="h-11 rounded-[10px] border border-ink-900 text-ink-900 hover:bg-ink-900 hover:text-sand-50 text-[13px] font-medium inline-flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              {t('drawer.receipt')}
+            </button>
+          )}
 
           {r.status !== 'cancelled' && (
             <button

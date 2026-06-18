@@ -1532,7 +1532,9 @@
       "logout": "Se déconnecter",
       "themeGroupLabel": "Apparence",
       "themeToLight": "Passer en mode clair",
-      "themeToDark": "Passer en mode sombre"
+      "themeToDark": "Passer en mode sombre",
+      "staffPromo": "Promo employés · −{pct} %",
+      "staffPromoEdit": "Modifier"
     },
     "sidebar": {
       "sectionGeneral": "Général",
@@ -2225,7 +2227,8 @@
         "eyebrowSale": "Vente comptoir · manuelle",
         "titleSale": "Nouvelle vente comptoir",
         "saleHint": "Le client repart avec la marchandise : enregistrée comme vendue, le stock est décrémenté immédiatement.",
-        "reservationHint": "Réservation à honorer plus tard : le stock n'est décrémenté qu'au moment du retrait."
+        "reservationHint": "Réservation à honorer plus tard : le stock n'est décrémenté qu'au moment du retrait.",
+        "employeeDiscount": "Appliquer le tarif employé (−{pct} %)"
       },
       "status": {
         "pending": "Réservée",
@@ -2314,7 +2317,8 @@
         "cancelReservation": "Annuler la réservation",
         "editPrice": "Ajuster le prix",
         "priceUpdated": "Prix ajusté — total recalculé",
-        "priceLocked": "Prix verrouillé : la réservation est déjà comptabilisée ou clôturée"
+        "priceLocked": "Prix verrouillé : la réservation est déjà comptabilisée ou clôturée",
+        "receipt": "Imprimer le reçu"
       }
     },
     "users": {
@@ -2503,7 +2507,11 @@
       "inventoryTitle": "Inventaire",
       "inventoryHint": "Règles de gestion du stock appliquées à tout le panneau (page Stock, tableau de bord, badges).",
       "lowStockThreshold": "Seuil de stock faible",
-      "lowStockThresholdHint": "En dessous ou égal à ce nombre d’unités, un produit est signalé « stock faible » (minimum 2). La rupture reste à 0."
+      "lowStockThresholdHint": "En dessous ou égal à ce nombre d’unités, un produit est signalé « stock faible » (minimum 2). La rupture reste à 0.",
+      "staffTitle": "Personnel",
+      "staffHint": "Remise réservée aux employés, appliquée manuellement lors d’une vente au comptoir.",
+      "employeeDiscount": "Remise employé (%)",
+      "employeeDiscountHint": "De 0 à 100. À 0, aucune remise. Affichée à toute l’équipe admin ; appliquée au comptoir d’un clic."
     },
     "setup": {
       "title": "Configuration du système admin",

@@ -30,6 +30,11 @@ const eslintConfig = defineConfig([
     // un cache déplacé DANS le repo serait sinon scanné par `eslint .`,
     // contrairement à l'ancien `next lint` limité à src/).
     ".next*/**",
+    // Artefacts Playwright générés (gitignorés) : rapports HTML + bundles
+    // minifiés + traces. `eslint .` les scannerait sinon (159 faux positifs sur
+    // du JS minifié). Même classe de piège que .next*.
+    "playwright-report/**",
+    "test-results/**",
   ]),
   ...nextVitals,
   ...nextTs,

@@ -1532,7 +1532,9 @@
       "logout": "Cerrar sesión",
       "themeGroupLabel": "Apariencia",
       "themeToLight": "Cambiar a modo claro",
-      "themeToDark": "Cambiar a modo oscuro"
+      "themeToDark": "Cambiar a modo oscuro",
+      "staffPromo": "Promo empleados · −{pct} %",
+      "staffPromoEdit": "Editar"
     },
     "sidebar": {
       "sectionGeneral": "General",
@@ -2225,7 +2227,8 @@
         "eyebrowSale": "Venta mostrador · manual",
         "titleSale": "Nueva venta en mostrador",
         "saleHint": "El cliente se lleva la mercancía: se registra como vendida y el stock se descuenta de inmediato.",
-        "reservationHint": "Reserva para retirar más tarde: el stock solo se descuenta al momento de la retirada."
+        "reservationHint": "Reserva para retirar más tarde: el stock solo se descuenta al momento de la retirada.",
+        "employeeDiscount": "Aplicar tarifa de empleado (−{pct} %)"
       },
       "status": {
         "pending": "Reservada",
@@ -2314,7 +2317,8 @@
         "cancelReservation": "Cancelar reserva",
         "editPrice": "Ajustar el precio",
         "priceUpdated": "Precio ajustado — total recalculado",
-        "priceLocked": "Precio bloqueado: la reserva ya está contabilizada o cerrada"
+        "priceLocked": "Precio bloqueado: la reserva ya está contabilizada o cerrada",
+        "receipt": "Imprimir recibo"
       }
     },
     "users": {
@@ -2503,7 +2507,11 @@
       "inventoryTitle": "Inventario",
       "inventoryHint": "Reglas de gestión de stock aplicadas a todo el panel (página Stock, tablero, insignias).",
       "lowStockThreshold": "Umbral de stock bajo",
-      "lowStockThresholdHint": "Con esta cantidad de unidades o menos, un producto se marca como « stock bajo » (mínimo 2). El agotado sigue siendo 0."
+      "lowStockThresholdHint": "Con esta cantidad de unidades o menos, un producto se marca como « stock bajo » (mínimo 2). El agotado sigue siendo 0.",
+      "staffTitle": "Personal",
+      "staffHint": "Descuento reservado a empleados, aplicado manualmente en una venta de mostrador.",
+      "employeeDiscount": "Descuento de empleado (%)",
+      "employeeDiscountHint": "De 0 a 100. A 0, sin descuento. Visible para todo el equipo admin; se aplica en el mostrador con un clic."
     },
     "setup": {
       "title": "Configuración del sistema admin",

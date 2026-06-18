@@ -962,6 +962,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           default_mode: string
+          employee_discount_pct: number
           home_layout: Json | null
           id: number
           low_stock_threshold: number
@@ -983,6 +984,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           default_mode?: string
+          employee_discount_pct?: number
           home_layout?: Json | null
           id?: number
           low_stock_threshold?: number
@@ -1004,6 +1006,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           default_mode?: string
+          employee_discount_pct?: number
           home_layout?: Json | null
           id?: number
           low_stock_threshold?: number

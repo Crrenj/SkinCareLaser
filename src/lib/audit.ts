@@ -39,6 +39,7 @@ export type AuditEntity =
   | 'range'
   | 'newsletter'
   | 'upload'
+  | 'invoice'
 
 // (entity:action) considérés à fort impact → alimente le filtre « Solo alto impacto »
 // et la colonne stockée `is_high_impact`. Typé en template-literal : un typo de clé
@@ -63,6 +64,7 @@ const HIGH_IMPACT = new Set<`${AuditEntity}:${AuditAction}`>([
   'setting:update',
   'appearance:update',
   'home_layout:update',
+  'invoice:create', // émission d'un reçu de vente (acte argent → traçable)
 ])
 
 // Clés jamais persistées dans `diff` : blobs base64 (≤ ~5 Mo → bloat + rendu) et secrets.

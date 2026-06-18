@@ -301,6 +301,10 @@ export const reservationCreate = z.object({
   // la réservation naît directement en statut collected + décrément du stock.
   // Sinon = pending. status/source ne sont PAS exposés (dérivés serveur).
   sold: z.boolean().optional().default(false),
+  // Remise employé sur une vente comptoir : le client demande seulement de
+  // l'APPLIQUER (booléen) ; le TAUX est lu en base côté serveur (jamais le prix
+  // remisé), et l'effet est ignoré si sold=false (réservation en attente).
+  apply_employee_discount: z.boolean().optional().default(false),
   items: z
     .array(
       z.object({

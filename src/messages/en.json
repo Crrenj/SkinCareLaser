@@ -1532,7 +1532,9 @@
       "logout": "Sign out",
       "themeGroupLabel": "Appearance",
       "themeToLight": "Switch to light mode",
-      "themeToDark": "Switch to dark mode"
+      "themeToDark": "Switch to dark mode",
+      "staffPromo": "Staff promo · −{pct}%",
+      "staffPromoEdit": "Edit"
     },
     "sidebar": {
       "sectionGeneral": "General",
@@ -2225,7 +2227,8 @@
         "eyebrowSale": "Counter sale · manual",
         "titleSale": "New counter sale",
         "saleHint": "The customer leaves with the goods: recorded as sold, stock is decremented right away.",
-        "reservationHint": "Reservation to fulfil later: stock is only decremented at pickup."
+        "reservationHint": "Reservation to fulfil later: stock is only decremented at pickup.",
+        "employeeDiscount": "Apply employee discount (−{pct}%)"
       },
       "status": {
         "pending": "Reserved",
@@ -2314,7 +2317,8 @@
         "cancelReservation": "Cancel reservation",
         "editPrice": "Adjust price",
         "priceUpdated": "Price adjusted — total recalculated",
-        "priceLocked": "Price locked: the reservation is already recorded or closed"
+        "priceLocked": "Price locked: the reservation is already recorded or closed",
+        "receipt": "Print receipt"
       }
     },
     "users": {
@@ -2503,7 +2507,11 @@
       "inventoryTitle": "Inventory",
       "inventoryHint": "Stock management rules applied across the panel (Stock page, dashboard, badges).",
       "lowStockThreshold": "Low-stock threshold",
-      "lowStockThresholdHint": "At or below this number of units, a product is flagged as “low stock” (minimum 2). Out of stock remains 0."
+      "lowStockThresholdHint": "At or below this number of units, a product is flagged as “low stock” (minimum 2). Out of stock remains 0.",
+      "staffTitle": "Staff",
+      "staffHint": "Discount reserved for staff, applied manually during a counter sale.",
+      "employeeDiscount": "Employee discount (%)",
+      "employeeDiscountHint": "From 0 to 100. At 0, no discount. Shown to the whole admin team; applied at the counter in one click."
     },
     "setup": {
       "title": "Admin system configuration",

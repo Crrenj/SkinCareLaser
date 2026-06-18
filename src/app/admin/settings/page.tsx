@@ -13,6 +13,7 @@ import {
   MapPin,
   Clock,
   Warehouse,
+  BadgePercent,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
@@ -39,6 +40,7 @@ const EDITABLE_FIELDS = [
   'pickup_hours',
   'pickup_phone',
   'low_stock_threshold',
+  'employee_discount_pct',
 ] as const
 
 const inputCls =
@@ -272,6 +274,35 @@ export default function SettingsPage() {
                   required
                   value={Number.isFinite(form.low_stock_threshold) ? form.low_stock_threshold : ''}
                   onChange={(e) => update('low_stock_threshold', e.target.valueAsNumber)}
+                  className={`${inputCls} max-w-[180px]`}
+                />
+              </Field>
+            </Section>
+
+            {/* 5 — Personnel : remise employé appliquée manuellement au comptoir.
+                Affichée à tous les admins dans la bande du shell. */}
+            <Section icon={BadgePercent} title={t('staffTitle')} hint={t('staffHint')}>
+              <Field
+                id="employee_discount_pct"
+                label={t('employeeDiscount')}
+                hint={t('employeeDiscountHint')}
+              >
+                <input
+                  id="employee_discount_pct"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={1}
+                  required
+                  // numeric(5,2) revient en STRING via PostgREST ("12.50") malgré
+                  // le type `number` des types générés → coercer avant le garde,
+                  // sinon Number.isFinite("12.50") = false et l'input s'affiche vide.
+                  value={
+                    Number.isFinite(Number(form.employee_discount_pct))
+                      ? Number(form.employee_discount_pct)
+                      : ''
+                  }
+                  onChange={(e) => update('employee_discount_pct', e.target.valueAsNumber)}
                   className={`${inputCls} max-w-[180px]`}
                 />
               </Field>

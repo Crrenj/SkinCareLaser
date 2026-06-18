@@ -125,12 +125,36 @@ export async function POST(request: NextRequest) {
 
   const parsed = parseBody(reservationCreate, raw)
   if (!parsed.ok) return parsed.response
-  const { contact_name, contact_phone, contact_email, admin_notes, items, sold, user_id } = parsed.data
+  const { contact_name, contact_phone, contact_email, admin_notes, items, sold, user_id, apply_employee_discount } = parsed.data
 
   const round2 = (n: number) => Math.round(n * 100) / 100
-  const totalItems = items.reduce((sum, it) => sum + it.quantity, 0)
+
+  // Remise employé : applicable UNIQUEMENT à une vente comptoir finalisée
+  // (sold). Le taux est lu EN BASE (single-row shop_settings) — jamais transmis
+  // ni recalculé par le client (anti-manipulation de prix ; le prix facturé est
+  // recomputé serveur et snapshotté sur reservation_items.unit_price).
+  let employeeDiscountPct = 0
+  if (sold && apply_employee_discount) {
+    const { data: cfg, error: cfgError } = await supabaseAdmin
+      .from('shop_settings')
+      .select('employee_discount_pct')
+      .eq('id', 1)
+      .single()
+    if (cfgError) {
+      // Fail-safe : on facture plein tarif plutôt qu'une remise hasardeuse, mais
+      // on TRACE la dégradation (RLS/ligne id=1 absente) — sinon invisible.
+      logger.warn('[admin/reservations] employee_discount_pct read failed, charging full price', cfgError)
+    }
+    const rawPct = Number(cfg?.employee_discount_pct ?? 0)
+    employeeDiscountPct = Number.isFinite(rawPct) ? Math.min(Math.max(rawPct, 0), 100) : 0
+  }
+  const applyDiscount = (price: number) =>
+    employeeDiscountPct > 0 ? round2(price * (1 - employeeDiscountPct / 100)) : round2(price)
+
+  const pricedItems = items.map((it) => ({ ...it, unit_price: applyDiscount(it.unit_price) }))
+  const totalItems = pricedItems.reduce((sum, it) => sum + it.quantity, 0)
   const totalPrice = round2(
-    items.reduce((sum, it) => sum + it.unit_price * it.quantity, 0),
+    pricedItems.reduce((sum, it) => sum + it.unit_price * it.quantity, 0),
   )
 
   const nowIso = new Date().toISOString()
@@ -174,7 +198,7 @@ export async function POST(request: NextRequest) {
   const { error: itemsError } = await supabaseAdmin
     .from('reservation_items')
     .insert(
-      items.map((it) => ({
+      pricedItems.map((it) => ({
         reservation_id: reservation.id,
         product_id: it.product_id ?? null,
         product_name: it.product_name.trim(),
@@ -205,8 +229,8 @@ export async function POST(request: NextRequest) {
     action: 'create',
     entity: 'reservation',
     entityId: reservation.id,
-    summary: `${sold ? 'Venta mostrador' : 'Reserva creada'}: ${totalItems} art. · ${totalPrice}`,
-    diff: { sold: !!sold, totalItems, totalPrice, user_id: user_id ?? null },
+    summary: `${sold ? 'Venta mostrador' : 'Reserva creada'}: ${totalItems} art. · ${totalPrice}${employeeDiscountPct > 0 ? ` (−${employeeDiscountPct}% empleado)` : ''}`,
+    diff: { sold: !!sold, totalItems, totalPrice, user_id: user_id ?? null, employee_discount_pct: employeeDiscountPct },
   })
 
   return NextResponse.json({ id: reservation.id }, { status: 201 })

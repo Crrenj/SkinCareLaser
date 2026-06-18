@@ -116,6 +116,20 @@ export async function PATCH(req: NextRequest) {
       patch.low_stock_threshold = value
     }
 
+    // Champ numérique : remise employé (% 0..100, décimales autorisées — la
+    // CHECK DB borne aussi). Appliquée manuellement au comptoir.
+    if (Object.prototype.hasOwnProperty.call(body, 'employee_discount_pct')) {
+      const raw = body.employee_discount_pct
+      const value = typeof raw === 'number' ? raw : Number(raw)
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        return NextResponse.json(
+          { error: 'employee_discount_pct doit être un nombre entre 0 et 100' },
+          { status: 400 },
+        )
+      }
+      patch.employee_discount_pct = value
+    }
+
     if (Object.keys(patch).length === 0) {
       return NextResponse.json({ error: 'Aucun champ à mettre à jour' }, { status: 400 })
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { productCreate, productUpdate, cartItemBody } from '@/lib/schemas'
+import { productCreate, productUpdate, cartItemBody, reservationCreate } from '@/lib/schemas'
 
 /**
  * Garde-fous de validation côté API. Couvre :
@@ -74,5 +74,39 @@ describe('cartItemBody (cap quantité — C-13 / C-28)', () => {
 
   it('rejette un productId non-UUID', () => {
     expect(cartItemBody.safeParse({ productId: 'not-a-uuid', quantity: 1 }).success).toBe(false)
+  })
+})
+
+describe('reservationCreate (anti-manipulation remise employé — vente comptoir)', () => {
+  const item = { product_name: 'Crème', unit_price: 100, quantity: 2 }
+
+  it('strippe les champs de prix/remise injectés par le client (top-level + items)', () => {
+    const r = reservationCreate.safeParse({
+      items: [{ ...item, discounted_price: 0, discount_pct: 99, unit_cost: 0 }],
+      employee_discount_pct: 50,
+      discount_pct: 99,
+      total_price: 1,
+      status: 'collected',
+    })
+    expect(r.success).toBe(true)
+    if (!r.success) return
+    // Le client ne peut imposer ni un taux, ni un prix remisé, ni un total, ni un statut.
+    expect(r.data).not.toHaveProperty('employee_discount_pct')
+    expect(r.data).not.toHaveProperty('discount_pct')
+    expect(r.data).not.toHaveProperty('total_price')
+    expect(r.data).not.toHaveProperty('status')
+    // L'item ne garde que les champs légitimes (pas de prix remisé / coût injecté).
+    expect(r.data.items[0]).toEqual({ product_name: 'Crème', unit_price: 100, quantity: 2 })
+  })
+
+  it('apply_employee_discount défaut false (omis) et n’accepte qu’un booléen', () => {
+    const r = reservationCreate.safeParse({ items: [item] })
+    expect(r.success).toBe(true)
+    if (!r.success) return
+    expect(r.data.apply_employee_discount).toBe(false)
+    expect(r.data.sold).toBe(false)
+    // Pas de coercion implicite : seul un vrai booléen est accepté.
+    expect(reservationCreate.safeParse({ items: [item], apply_employee_discount: '1' }).success).toBe(false)
+    expect(reservationCreate.safeParse({ items: [item], apply_employee_discount: 1 }).success).toBe(false)
   })
 })

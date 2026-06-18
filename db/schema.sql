@@ -2209,7 +2209,9 @@ CREATE TABLE IF NOT EXISTS "public"."shop_settings" (
     "allow_visitor_mode" boolean DEFAULT true NOT NULL,
     "home_layout" "jsonb",
     "low_stock_threshold" integer DEFAULT 10 NOT NULL,
+    "employee_discount_pct" numeric(5,2) DEFAULT 0 NOT NULL,
     CONSTRAINT "shop_settings_default_mode_check" CHECK (("default_mode" = ANY (ARRAY['light'::"text", 'dark'::"text", 'system'::"text"]))),
+    CONSTRAINT "shop_settings_employee_discount_pct_check" CHECK ((("employee_discount_pct" >= (0)::numeric) AND ("employee_discount_pct" <= (100)::numeric))),
     CONSTRAINT "shop_settings_id_check" CHECK (("id" = 1)),
     CONSTRAINT "shop_settings_low_stock_threshold_check" CHECK (("low_stock_threshold" > 1)),
     CONSTRAINT "shop_settings_theme_check" CHECK (("theme" = ANY (ARRAY['terra'::"text", 'noir'::"text", 'botanico'::"text", 'coral'::"text", 'marino'::"text", 'ambar'::"text"])))

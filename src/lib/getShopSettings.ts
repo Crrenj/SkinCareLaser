@@ -33,6 +33,7 @@ const FALLBACK: ShopSettings = {
   allow_visitor_mode: true,
   home_layout: null,
   low_stock_threshold: LOW_STOCK_THRESHOLD,
+  employee_discount_pct: 0,
   updated_at: new Date(0).toISOString(),
   updated_by: null,
 }

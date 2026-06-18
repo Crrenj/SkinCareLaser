@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { AdminShell } from './_AdminShell'
 import { AppHtmlShell } from '@/components/AppHtmlShell'
+import { getShopSettings } from '@/lib/getShopSettings'
 
 /**
  * ROOT layout de la branche `/admin/*` (plus de layout racine commun — cf.
@@ -34,11 +35,14 @@ export default async function AdminLayout({
 }) {
   const locale = await getLocale()
   const messages = await getMessages()
+  // Taux de remise employé affiché à tous les admins (bande du shell). Lu via
+  // getShopSettings (cookieless + unstable_cache) → pas de fetch client.
+  const shop = await getShopSettings()
 
   return (
     <AppHtmlShell lang={locale}>
       <NextIntlClientProvider locale={locale} messages={messages}>
-        <AdminShell>{children}</AdminShell>
+        <AdminShell employeeDiscountPct={Number(shop.employee_discount_pct) || 0}>{children}</AdminShell>
       </NextIntlClientProvider>
     </AppHtmlShell>
   )
